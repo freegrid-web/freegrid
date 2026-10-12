@@ -12,6 +12,20 @@ describe('AutoColumnSize', () => {
     }
   });
 
+  it('should report that recalculation is needed after part of the width cache is cleared', () => {
+    const hot = handsontable({
+      data: Handsontable.helper.createSpreadsheetData(5, 10),
+      autoColumnSize: true,
+    });
+    const plugin = hot.getPlugin('autoColumnSize');
+
+    expect(plugin.isNeedRecalculate()).toBe(false);
+
+    plugin.clearCache([2, 3]);
+
+    expect(plugin.isNeedRecalculate()).toBe(true);
+  });
+
   const arrayOfObjects = function() {
     return [
       { id: 'Short', name: 'Somewhat long', lastName: 'The very very very longest one', nestedData: [{ id: 1000 }] }
