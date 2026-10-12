@@ -1,0 +1,51 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm --filter freegrid test:unit
+      - run: pnpm --filter freegrid test:types
+      - run: pnpm --filter freegrid build
+      - run: pnpm --filter freegrid test:dist
+
+  browser:
+    needs: checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: e2e-chromium-dev, script: 'test:e2e', required: true }
+          - { name: e2e-chromium-min, script: 'test:e2e:min', required: true }
+          - { name: walkontable-chromium, script: 'test:walkontable', required: true }
+          - { name: e2e-firefox, script: 'test:e2e:firefox', required: false }
+          - { name: e2e-webkit, script: 'test:e2e:webkit', required: false }
+    name: ${{ matrix.name }}
+    continue-on-error: ${{ !matrix.required }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with: { node-version-file: .nvmrc, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter freegrid exec playwright install --with-deps
+      # The baseline resolved `sans-serif` to DejaVu Sans; layout specs depend on it.
+      - run: sudo apt-get install -y --no-install-recommends fonts-dejavu-core
+      - run: pnpm --filter freegrid build
+      - run: pnpm --filter freegrid ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-${{ matrix.name }}
+          path: packages/freegrid/test-results
