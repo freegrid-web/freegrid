@@ -434,21 +434,12 @@ export function fastInnerHTML(element, content) {
  * @return {void}
  */
 
-const textContextSupport = !!document.createTextNode('test').textContent;
-
 export function fastInnerText(element, content) {
   const child = element.firstChild;
 
   if (child && child.nodeType === 3 && child.nextSibling === null) {
     // fast lane - replace existing text node
-
-    if (textContextSupport) {
-      // http://jsperf.com/replace-text-vs-reuse
-      child.textContent = content;
-    } else {
-      // http://jsperf.com/replace-text-vs-reuse
-      child.data = content;
-    }
+    child.textContent = content;
   } else {
     // slow lane - empty element and insert a text node
     empty(element);
@@ -714,10 +705,10 @@ export function getStyle(element, prop) {
  * Returns a computed style object for the provided element. (Needed if style is declared in external stylesheet).
  *
  * @param element
- * @returns {IEElementStyle|CssStyle} Elements computed style object
+ * @returns {CSSStyleDeclaration} Elements computed style object
  */
 export function getComputedStyle(element) {
-  return element.currentStyle || document.defaultView.getComputedStyle(element);
+  return document.defaultView.getComputedStyle(element);
 }
 
 /**
@@ -761,19 +752,11 @@ export function innerWidth(element) {
 }
 
 export function addEvent(element, event, callback) {
-  if (window.addEventListener) {
-    element.addEventListener(event, callback, false);
-  } else {
-    element.attachEvent('on' + event, callback);
-  }
+  element.addEventListener(event, callback, false);
 }
 
 export function removeEvent(element, event, callback) {
-  if (window.removeEventListener) {
-    element.removeEventListener(event, callback, false);
-  } else {
-    element.detachEvent('on' + event, callback);
-  }
+  element.removeEventListener(event, callback, false);
 }
 
 /**
@@ -785,22 +768,6 @@ export function removeEvent(element, event, callback) {
 export function getCaretPosition(el) {
   if (el.selectionStart) {
     return el.selectionStart;
-
-  } else if (document.selection) { // IE8
-    el.focus();
-
-    let r = document.selection.createRange();
-
-    if (r == null) {
-      return 0;
-    }
-    let re = el.createTextRange();
-    let rc = re.duplicate();
-
-    re.moveToBookmark(r.getBookmark());
-    rc.setEndPoint('EndToStart', re);
-
-    return rc.text.length;
   }
 
   return 0;
@@ -814,16 +781,6 @@ export function getCaretPosition(el) {
 export function getSelectionEndPosition(el) {
   if (el.selectionEnd) {
     return el.selectionEnd;
-
-  } else if (document.selection) { // IE8
-    let r = document.selection.createRange();
-
-    if (r == null) {
-      return 0;
-    }
-    let re = el.createTextRange();
-
-    return re.text.indexOf(r.text) + r.text.length;
   }
 
   return 0;
@@ -835,15 +792,7 @@ export function getSelectionEndPosition(el) {
  * @returns {String}
  */
 export function getSelectionText() {
-  let text = '';
-
-  if (window.getSelection) {
-    text = window.getSelection().toString();
-  } else if (document.selection && document.selection.type !== 'Control') {
-    text = document.selection.createRange().text;
-  }
-
-  return text;
+  return window.getSelection().toString();
 }
 
 /**
@@ -870,12 +819,6 @@ export function setCaretPosition(element, pos, endPos) {
       element.setSelectionRange(pos, endPos);
       elementParent.style.display = parentDisplayValue;
     }
-  } else if (element.createTextRange) { // IE8
-    const range = element.createTextRange();
-    range.collapse(true);
-    range.moveEnd('character', endPos);
-    range.moveStart('character', pos);
-    range.select();
   }
 }
 

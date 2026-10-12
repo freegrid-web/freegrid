@@ -145,25 +145,15 @@ class EventManager {
       button: 0,
       relatedTarget: undefined,
     };
-    let event;
+    const event = document.createEvent('MouseEvents');
 
-    if (document.createEvent) {
-      event = document.createEvent('MouseEvents');
-      event.initMouseEvent(eventName, options.bubbles, options.cancelable,
-        options.view, options.detail,
-        options.screenX, options.screenY, options.clientX, options.clientY,
-        options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
-        options.button, options.relatedTarget || document.body.parentNode);
+    event.initMouseEvent(eventName, options.bubbles, options.cancelable,
+      options.view, options.detail,
+      options.screenX, options.screenY, options.clientX, options.clientY,
+      options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
+      options.button, options.relatedTarget || document.body.parentNode);
 
-    } else {
-      event = document.createEventObject();
-    }
-
-    if (element.dispatchEvent) {
-      element.dispatchEvent(event);
-    } else {
-      element.fireEvent(`on${eventName}`, event);
-    }
+    element.dispatchEvent(event);
   }
 }
 
@@ -218,7 +208,7 @@ function extendEvent(context, event) {
   }
   event.isTargetWebComponent = true;
 
-  // Shadow DOM v0 (`createShadowRoot`) is gone from browsers, so the target is always resolved here.
+  // Native Shadow DOM v0 is gone from browsers, so the target is always resolved here.
   if (hasOwnProperty(context, 'hot') || context.isHotTableEnv || context.wtTable) {
     // Polymer doesn't support `event.target` property properly we must emulate it ourselves
     if (hasOwnProperty(context, 'hot')) {
