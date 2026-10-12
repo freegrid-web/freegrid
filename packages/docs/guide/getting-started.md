@@ -1,0 +1,72 @@
+# Getting started
+
+## Install
+
+::: code-group
+
+```sh [npm]
+npm install freegrid
+```
+
+```sh [pnpm]
+pnpm add freegrid
+```
+
+```sh [yarn]
+yarn add freegrid
+```
+
+:::
+
+::: warning Not on npm yet
+FreeGrid's first release (`0.1.0`) is being prepared. Until then, build it from the
+[repository](https://github.com/freegrid-web/freegrid): `pnpm install && pnpm build`, then use the files in
+`packages/freegrid/dist`.
+:::
+
+## Your first grid
+
+Add an element for the grid, import FreeGrid and its styles, and create an instance:
+
+```html
+<div id="grid"></div>
+```
+
+<<< @/examples/getting-started.js
+
+The result:
+
+<LiveExample name="getting-started" />
+
+## Without a bundler
+
+Load the "full" build, which already includes its dependencies (moment, numbro and Pikaday), from a
+`<script>` tag. It defines a global `FreeGrid`:
+
+```html
+<link rel="stylesheet" href="freegrid/dist/freegrid.full.min.css">
+<script src="freegrid/dist/freegrid.full.min.js"></script>
+
+<div id="grid"></div>
+<script>
+  new FreeGrid(document.getElementById('grid'), {
+    data: [['A1', 'B1'], ['A2', 'B2']],
+    rowHeaders: true,
+    colHeaders: true,
+  });
+</script>
+```
+
+If your page already loads moment, numbro and Pikaday, use `freegrid.min.js` and `freegrid.min.css`
+instead. Those builds expect the three libraries as globals.
+
+## Sizing
+
+Without `width` and `height`, the grid grows with its data. For large data, give the grid a fixed `height`
+(in pixels), or give its container a height and `overflow: hidden`. Only the visible rows are then
+rendered. `stretchH: 'all'` makes the columns fill the available width.
+
+## Next steps
+
+- [Configuration](./configuration) explains how settings work.
+- [Examples](../examples/basics) show the main features in action.
