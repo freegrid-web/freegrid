@@ -1,0 +1,50 @@
+name: Release
+
+# Publishes @freegrid/core to npm when a version tag (v0.1.0, v0.2.0, …) is pushed.
+# npm trusted publishing: npmjs.com → @freegrid/core → Settings → Trusted Publisher must name this repository
+# (freegrid-web/freegrid) and this workflow file (release.yml). No npm token is stored in the repository.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # npm trusted publishing (OIDC) and provenance
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with: { node-version-file: .nvmrc, cache: pnpm, registry-url: 'https://registry.npmjs.org' }
+      # Trusted publishing needs npm 11.5.1 or newer.
+      - run: npm install -g npm@^11.5.1
+      - name: Tag matches the package version
+        run: |
+          version=$(node -p "require('./packages/freegrid/package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+            exit 1
+          fi
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm --filter @freegrid/core test:unit
+      - run: pnpm --filter @freegrid/core test:types
+      - run: pnpm --filter @freegrid/core build
+      - run: pnpm --filter @freegrid/core test:dist
+      - name: Publish to npm
+        working-directory: packages/freegrid
+        run: npm publish --provenance --access public
+      - name: GitHub release with the changelog section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          awk -v v="$version" '
+            $0 ~ "^## " v "( |$)" { found = 1; next }
+            found && /^(## |---)/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md

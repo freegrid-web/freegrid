@@ -1,7 +1,7 @@
 # FreeGrid
 
-> **Preview release.** This version reserves the package name. FreeGrid works and is tested, but its API is
-> being reworked (TypeScript rewrite) before the first real release, `0.1.0`. Do not use it in production yet.
+> **0.x release.** FreeGrid works and is tested in Chrome, Edge, Firefox and Safari. Until `1.0.0` its API may
+> still change between minor versions; every change is listed in the changelog.
 
 A free, MIT-licensed, spreadsheet-like data grid for the web: editing, copy and paste with Excel, fill handle,
 undo and redo, sorting, merged cells, comments, validation, frozen rows and columns, and more.

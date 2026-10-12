@@ -1,6 +1,9 @@
 # FreeGrid changelog
 
-## Unreleased (Stage 0)
+## 0.1.0 (2026-10-12)
+
+First release on npm, as `@freegrid/core`.
+
 - The npm package is `@freegrid/core` (npm blocks the unscoped `freegrid` as too similar to an existing package).
 - FreeGrid is an independent project; versions start at `0.1.0`. The Handsontable compatibility layer is
   a migration aid during `0.x` and will be removed in `1.0.0`.

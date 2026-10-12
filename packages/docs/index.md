@@ -56,10 +56,6 @@ bun add @freegrid/core
 
 :::
 
-::: warning Not on npm yet
-The first release, `0.1.0`, is being prepared. Until then, build FreeGrid from the
-[repository](https://github.com/freegrid-web/freegrid) (`pnpm install && pnpm build`).
-:::
 
 ## Quick start
 

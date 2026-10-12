@@ -14,10 +14,16 @@ modernized step by step (TypeScript, signals-based reactivity, CSS-variable them
 
 ## Status
 
-Stage 0 — repository, modern toolchain, upstream test suite passing. Not yet published to npm.
-See the [roadmap](docs/specs/2026-10-12-stage-0-fork-design.md#10-roadmap).
+`0.1.0` is the first release on npm: [`@freegrid/core`](https://www.npmjs.com/package/@freegrid/core). Until
+`1.0.0` the API may still change between minor versions (see the [changelog](CHANGELOG.md)). What comes next:
+the [roadmap](https://freegrid-web.github.io/freegrid/project/roadmap).
 
-## Usage (after the first release)
+## Usage
+
+```bash
+npm install @freegrid/core
+```
+
 
 ```js
 import FreeGrid from '@freegrid/core';

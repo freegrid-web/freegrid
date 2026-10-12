@@ -1,7 +1,7 @@
 {
   "name": "@freegrid/core",
-  "version": "0.0.1",
-  "description": "Free, MIT-licensed, spreadsheet-like data grid for the web. Preview release.",
+  "version": "0.1.0",
+  "description": "Free, MIT-licensed, spreadsheet-like data grid for the web.",
   "license": "MIT",
   "keywords": [
     "data grid",
@@ -44,7 +44,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "provenance": false
+    "provenance": true
   },
   "scripts": {
     "build": "node build/build.js",
