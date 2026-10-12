@@ -1,3 +1,4 @@
+import { withCounterpartClassNames } from './../helpers/classNames';
 /**
  * Adds appropriate CSS class to table cell, based on cellProperties
  */
@@ -8,10 +9,14 @@ function cellDecorator(instance, TD, row, col, prop, value, cellProperties) {
   const classesToRemove = [];
 
   if (cellProperties.className) {
+    // Written directly (not via addClass), so add FreeGrid/legacy counterparts here.
+    const classNames = Array.isArray(cellProperties.className) ? cellProperties.className : String(cellProperties.className).split(' ');
+    const cellClassName = withCounterpartClassNames(classNames.filter(name => name)).join(' ');
+
     if (TD.className) {
-      TD.className = `${TD.className} ${cellProperties.className}`;
+      TD.className = `${TD.className} ${cellClassName}`;
     } else {
-      TD.className = cellProperties.className;
+      TD.className = cellClassName;
     }
   }
 

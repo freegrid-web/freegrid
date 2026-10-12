@@ -2,30 +2,30 @@
  * Handsontable ContextMenu
  */
 
-.htContextMenu:not(.htGhostTable) {
+.fg-context-menu:not(.fg-ghost-table) {
   display: none;
   position: absolute;
   z-index: 1060; /* needs to be higher than 1050 - z-index for Twitter Bootstrap modal (#1569) */
 }
 
-.htContextMenu .ht_clone_top,
-.htContextMenu .ht_clone_left,
-.htContextMenu .ht_clone_corner,
-.htContextMenu .ht_clone_debug {
+.fg-context-menu .fg-clone-top,
+.fg-context-menu .fg-clone-left,
+.fg-context-menu .fg-clone-corner,
+.fg-context-menu .fg-clone-debug {
   display: none;
 }
 
-.htContextMenu table.htCore {
+.fg-context-menu table.fg-core {
   border: 1px solid #ccc;
   border-bottom-width: 2px;
   border-right-width: 2px;
 }
 
-.htContextMenu .wtBorder {
+.fg-context-menu .fg-selection-border {
   visibility: hidden;
 }
 
-.htContextMenu table tbody tr td {
+.fg-context-menu table tbody tr td {
   background: white;
   border-width: 0;
   padding: 4px 6px 0 6px;
@@ -35,53 +35,53 @@
   text-overflow: ellipsis;
 }
 
-.htContextMenu table tbody tr td:first-child {
+.fg-context-menu table tbody tr td:first-child {
   border: 0;
 }
 
-.htContextMenu table tbody tr td.htDimmed {
+.fg-context-menu table tbody tr td.fg-dimmed {
   font-style: normal;
   color: #323232;
 }
 
-.htContextMenu table tbody tr td.current,
-.htContextMenu table tbody tr td.zeroclipboard-is-hover {
+.fg-context-menu table tbody tr td.current,
+.fg-context-menu table tbody tr td.zeroclipboard-is-hover {
   background: #f3f3f3;
 }
 
-.htContextMenu table tbody tr td.htSeparator {
+.fg-context-menu table tbody tr td.fg-separator {
   border-top: 1px solid #e6e6e6;
   height: 0;
   padding: 0;
   cursor: default;
 }
 
-.htContextMenu table tbody tr td.htDisabled {
+.fg-context-menu table tbody tr td.fg-disabled {
   color: #999;
   cursor: default;
 }
 
-.htContextMenu table tbody tr td.htDisabled:hover {
+.fg-context-menu table tbody tr td.fg-disabled:hover {
   background: #fff;
   color: #999;
   cursor: default;
 }
 
-.htContextMenu table tbody tr.htHidden {
+.fg-context-menu table tbody tr.fg-hidden {
   display: none;
 }
 
-.htContextMenu table tbody tr td .htItemWrapper {
+.fg-context-menu table tbody tr td .fg-item-wrapper {
   margin-left: 10px;
   margin-right: 6px;
 }
 
-.htContextMenu table tbody tr td div span.selected {
+.fg-context-menu table tbody tr td div span.selected {
   margin-top: -2px;
   position: absolute;
   left: 4px;
 }
 
-.htContextMenu .ht_master .wtHolder {
+.fg-context-menu .fg-master .fg-holder {
   overflow: hidden;
 }

@@ -72,8 +72,9 @@ describe('Core.setCellMeta', () => {
       ]
     });
 
-    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual(classNames[0]);
-    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual(classNames[1]);
+    // FreeGrid adds the fg- counterpart of each legacy class name (0.x transition).
+    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual('htCenter fg-center htTop fg-top');
+    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual('htRight fg-right htBottom fg-bottom');
   });
 
   it('should change cell meta data with updateSettings when the cell option is defined', () => {
@@ -89,8 +90,9 @@ describe('Core.setCellMeta', () => {
       ]
     });
 
-    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual(classNames[0]);
-    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual(classNames[1]);
+    // FreeGrid adds the fg- counterpart of each legacy class name (0.x transition).
+    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual('htCenter fg-center htTop fg-top');
+    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual('htRight fg-right htBottom fg-bottom');
 
     updateSettings({
       cell: []
@@ -106,8 +108,8 @@ describe('Core.setCellMeta', () => {
       ]
     });
 
-    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual(classNames[1]);
-    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual(classNames[0]);
+    expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual('htRight fg-right htBottom fg-bottom');
+    expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual('htCenter fg-center htTop fg-top');
   });
 
   it('should call `afterSetCellMeta` plugin hook with visual indexes as parameters', () => {

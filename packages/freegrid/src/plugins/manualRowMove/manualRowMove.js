@@ -16,7 +16,7 @@ Hooks.getSingleton().register('afterRowMove');
 Hooks.getSingleton().register('unmodifyRow');
 
 const privatePool = new WeakMap();
-const CSS_PLUGIN = 'ht__manualRowMove';
+const CSS_PLUGIN = 'fg-manual-row-move';
 const CSS_SHOW_UI = 'show-ui';
 const CSS_ON_MOVING = 'on-moving--rows';
 const CSS_AFTER_SELECTION = 'after-selection--rows';

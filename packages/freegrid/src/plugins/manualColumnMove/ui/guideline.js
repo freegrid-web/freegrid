@@ -1,7 +1,7 @@
 import BaseUI from './_base';
 import { addClass } from './../../../helpers/dom/element';
 
-const CSS_CLASSNAME = 'ht__manualColumnMove--guideline';
+const CSS_CLASSNAME = 'fg-manual-column-move--guideline';
 
 /**
  * @class GuidelineUI

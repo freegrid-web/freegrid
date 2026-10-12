@@ -56,7 +56,7 @@ class DateEditor extends TextEditor {
     this.datePickerStyle.left = 0;
     this.datePickerStyle.zIndex = 9999;
 
-    addClass(this.datePicker, 'htDatepickerHolder');
+    addClass(this.datePicker, 'fg-datepicker-holder');
     document.body.appendChild(this.datePicker);
 
     this.$datePicker = new Pikaday(this.getDatePickerConfig());

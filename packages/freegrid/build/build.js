@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConstants, banner } from './constants.js';
 import { commonjsOptions, ignorePikadayCss, localeRegistration } from './plugins.js';
+import { legacyClassNames } from './legacyClassNames.js';
 
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const buildDate = new Date();
@@ -16,7 +17,7 @@ const isDep = id => !id.startsWith('pikaday/css') && deps.some(d => id === d || 
 // CSS output must not use properties newer than the JS browser target (e.g. `inset` needs Chrome 87).
 const cssTarget = ['chrome80', 'edge80', 'firefox74', 'safari14'];
 
-const base = { configFile: false, logLevel: 'warn', define };
+const base = { configFile: false, logLevel: 'warn', define, css: { postcss: { plugins: [legacyClassNames()] } } };
 
 async function esm() {
   await build({

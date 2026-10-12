@@ -1,7 +1,7 @@
 import BaseUI from './_base';
 import { addClass } from './../../../helpers/dom/element';
 
-const CSS_CLASSNAME = 'ht__manualColumnMove--backlight';
+const CSS_CLASSNAME = 'fg-manual-column-move--backlight';
 
 /**
  * @class BacklightUI

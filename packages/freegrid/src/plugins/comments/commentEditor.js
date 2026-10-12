@@ -8,19 +8,19 @@ import { addClass } from './../../helpers/dom/element';
  */
 class CommentEditor {
   static get CLASS_EDITOR_CONTAINER() {
-    return 'htCommentsContainer';
+    return 'fg-comments-container';
   }
 
   static get CLASS_EDITOR() {
-    return 'htComments';
+    return 'fg-comments';
   }
 
   static get CLASS_INPUT() {
-    return 'htCommentTextArea';
+    return 'fg-comment-text-area';
   }
 
   static get CLASS_CELL() {
-    return 'htCommentCell';
+    return 'fg-comment-cell';
   }
 
   constructor() {

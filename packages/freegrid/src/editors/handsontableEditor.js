@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../helpers/classNames';
 import { KEY_CODES } from './../helpers/unicode';
 import { extend } from './../helpers/object';
 import { setCaretPosition } from './../helpers/dom/element';
@@ -16,7 +17,7 @@ HandsontableEditor.prototype.createElements = function(...args) {
   TextEditor.prototype.createElements.apply(this, args);
 
   const DIV = document.createElement('DIV');
-  DIV.className = 'handsontableEditor';
+  DIV.className = withLegacyClassNames('fg-editor-grid');
   this.TEXTAREA_PARENT.appendChild(DIV);
 
   this.htContainer = DIV;

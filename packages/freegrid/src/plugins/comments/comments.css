@@ -1,8 +1,8 @@
-.htCommentCell {
+.fg-comment-cell {
     position: relative;
 }
 
-.htCommentCell:after {
+.fg-comment-cell:after {
     content: '';
     position: absolute;
     top: 0;
@@ -11,13 +11,13 @@
     border-top: 6px solid black;
 }
 
-.htComments {
+.fg-comments {
     display: none;
     z-index: 1059;
     position: absolute;
 }
 
-.htCommentTextArea {
+.fg-comment-text-area {
     box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -33,7 +33,7 @@
     -webkit-appearance: none;
 }
 
-.htCommentTextArea:focus {
+.fg-comment-text-area:focus {
     box-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px, inset 0 0 0 1px #5292f7;
     border-left: 3px solid #5292f7;
 }

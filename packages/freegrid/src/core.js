@@ -198,18 +198,18 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     // rows/columns in the MergedCells plugin (via border.js#L520 in the walkontable module). After fixing
     // the Border class this should be removed.
     if (isSelectedByRowHeader && isSelectedByColumnHeader) {
-      addClass(this.rootElement, ['ht__selection--rows', 'ht__selection--columns']);
+      addClass(this.rootElement, ['fg-selection--rows', 'fg-selection--columns']);
 
     } else if (isSelectedByRowHeader) {
-      removeClass(this.rootElement, 'ht__selection--columns');
-      addClass(this.rootElement, 'ht__selection--rows');
+      removeClass(this.rootElement, 'fg-selection--columns');
+      addClass(this.rootElement, 'fg-selection--rows');
 
     } else if (isSelectedByColumnHeader) {
-      removeClass(this.rootElement, 'ht__selection--rows');
-      addClass(this.rootElement, 'ht__selection--columns');
+      removeClass(this.rootElement, 'fg-selection--rows');
+      addClass(this.rootElement, 'fg-selection--columns');
 
     } else {
-      removeClass(this.rootElement, ['ht__selection--rows', 'ht__selection--columns']);
+      removeClass(this.rootElement, ['fg-selection--rows', 'fg-selection--columns']);
     }
 
     this._refreshBorders(null);
@@ -249,7 +249,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     editorManager.destroyEditor();
 
     this._refreshBorders();
-    removeClass(this.rootElement, ['ht__selection--rows', 'ht__selection--columns']);
+    removeClass(this.rootElement, ['fg-selection--rows', 'fg-selection--columns']);
 
     this.runHooks('afterDeselect');
   });

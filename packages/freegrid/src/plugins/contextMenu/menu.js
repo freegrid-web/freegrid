@@ -1,3 +1,4 @@
+import { toLegacyClassName } from './../../helpers/classNames';
 import Core from './../../core';
 import {
   addClass,
@@ -471,29 +472,29 @@ class Menu {
       itemValue = itemValue.call(this.hot);
     }
     empty(TD);
-    addClass(wrapper, 'htItemWrapper');
+    addClass(wrapper, 'fg-item-wrapper');
     TD.appendChild(wrapper);
 
     if (itemIsSeparator(item)) {
-      addClass(TD, 'htSeparator');
+      addClass(TD, 'fg-separator');
 
     } else if (typeof item.renderer === 'function') {
-      addClass(TD, 'htCustomMenuRenderer');
+      addClass(TD, 'fg-custom-menu-renderer');
       TD.appendChild(item.renderer(hot, wrapper, row, col, prop, itemValue));
 
     } else {
       fastInnerHTML(wrapper, itemValue);
     }
     if (itemIsDisabled(item)) {
-      addClass(TD, 'htDisabled');
+      addClass(TD, 'fg-disabled');
       this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
 
     } else if (itemIsSelectionDisabled(item)) {
-      addClass(TD, 'htSelectionDisabled');
+      addClass(TD, 'fg-selection-disabled');
       this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
 
     } else if (isSubMenu(item)) {
-      addClass(TD, 'htSubmenu');
+      addClass(TD, 'fg-submenu');
 
       if (itemIsSelectionDisabled(item)) {
         this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
@@ -501,8 +502,8 @@ class Menu {
         this.eventManager.addEventListener(TD, 'mouseenter', () => hot.selectCell(row, col, void 0, void 0, false, false));
       }
     } else {
-      removeClass(TD, 'htSubmenu');
-      removeClass(TD, 'htDisabled');
+      removeClass(TD, 'fg-submenu');
+      removeClass(TD, 'fg-disabled');
 
       if (itemIsSelectionDisabled(item)) {
         this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
@@ -535,10 +536,17 @@ class Menu {
         }
       }
 
-      className = className.replace(/[^A-z0-9]/g, '_');
-      className = `${this.options.className}Sub_${className}`;
+      const name = className.replace(/[^A-z0-9]/g, '_');
+      const baseClassName = this.options.className;
+      const legacyBaseClassName = toLegacyClassName(baseClassName);
 
-      container = document.querySelector(`.${this.options.className}.${className}`);
+      // e.g. fg-context-menu-sub_Alignment, plus the legacy htContextMenuSub_Alignment during 0.x
+      className = `${baseClassName}-sub_${name}`;
+      if (legacyBaseClassName !== baseClassName) {
+        className += ` ${legacyBaseClassName}Sub_${name}`;
+      }
+
+      container = document.querySelector(`.${baseClassName}.${className.split(' ')[0]}`);
 
     } else {
       container = document.querySelector(`.${this.options.className}`);
@@ -547,7 +555,7 @@ class Menu {
     if (!container) {
       container = document.createElement('div');
 
-      addClass(container, `htMenu ${this.options.className}`);
+      addClass(container, `fg-menu ${this.options.className}`);
 
       if (className) {
         addClass(container, className);
@@ -710,7 +718,7 @@ class Menu {
 
     // Automatically close menu when clicked element is not belongs to menu or submenu (not necessarily to itself)
     } else if ((this.isAllSubMenusClosed() || this.isSubMenu()) &&
-        (!isChildOf(event.target, '.htMenu') && isChildOf(event.target, document))) {
+        (!isChildOf(event.target, '.fg-menu') && isChildOf(event.target, document))) {
       this.close(true);
     }
   }

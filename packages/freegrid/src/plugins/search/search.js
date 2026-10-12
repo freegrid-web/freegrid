@@ -4,7 +4,7 @@ import { isObject } from './../../helpers/object';
 import { rangeEach } from './../../helpers/number';
 import { isUndefined } from './../../helpers/mixed';
 
-const DEFAULT_SEARCH_RESULT_CLASS = 'htSearchResult';
+const DEFAULT_SEARCH_RESULT_CLASS = 'fg-search-result';
 
 const DEFAULT_CALLBACK = function(instance, row, col, data, testResult) {
   instance.getCellMeta(row, col).isSearchResult = testResult;

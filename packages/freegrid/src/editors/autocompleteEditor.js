@@ -48,7 +48,7 @@ AutocompleteEditor.prototype.createElements = function(...args) {
   HandsontableEditor.prototype.createElements.apply(this, args);
 
   addClass(this.htContainer, 'autocompleteEditor');
-  addClass(this.htContainer, window.navigator.platform.indexOf('Mac') === -1 ? '' : 'htMacScroll');
+  addClass(this.htContainer, window.navigator.platform.indexOf('Mac') === -1 ? '' : 'fg-mac-scroll');
 };
 
 let skipOne = false;

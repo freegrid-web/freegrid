@@ -77,7 +77,7 @@ describe('NumericRenderer', () => {
     const TD = document.createElement('TD');
     TD.className = 'someClass';
     Handsontable.renderers.NumericRenderer(instance, TD, 0, 0, 0, 123, {});
-    expect(TD.className).toEqual('someClass htRight htNumeric');
+    expect(TD.className).toEqual('someClass fg-right htRight fg-numeric htNumeric');
     instance.destroy();
   });
 
@@ -87,7 +87,7 @@ describe('NumericRenderer', () => {
     const TD = document.createElement('TD');
     TD.className = 'someClass';
     Handsontable.renderers.NumericRenderer(instance, TD, 0, 0, 0, '123', {});
-    expect(TD.className).toEqual('someClass htRight htNumeric');
+    expect(TD.className).toEqual('someClass fg-right htRight fg-numeric htNumeric');
     instance.destroy();
   });
 

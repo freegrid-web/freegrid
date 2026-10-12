@@ -16,7 +16,7 @@ Hooks.getSingleton().register('afterColumnMove');
 Hooks.getSingleton().register('unmodifyCol');
 
 const privatePool = new WeakMap();
-const CSS_PLUGIN = 'ht__manualColumnMove';
+const CSS_PLUGIN = 'fg-manual-column-move';
 const CSS_SHOW_UI = 'show-ui';
 const CSS_ON_MOVING = 'on-moving--columns';
 const CSS_AFTER_SELECTION = 'after-selection--columns';

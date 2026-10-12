@@ -160,7 +160,7 @@ class ContextMenu extends BasePlugin {
       const menuItems = this.itemsFactory.getItems(settings);
 
       this.menu = new Menu(this.hot, {
-        className: 'htContextMenu',
+        className: 'fg-context-menu',
         keepInViewport: true
       });
       this.hot.runHooks('beforeContextMenuSetItems', menuItems);
@@ -292,7 +292,7 @@ class ContextMenu extends BasePlugin {
     const element = event.realTarget;
     this.close();
 
-    if (hasClass(element, 'handsontableInput')) {
+    if (hasClass(element, 'fg-editor-input')) {
       return;
     }
 
@@ -300,7 +300,7 @@ class ContextMenu extends BasePlugin {
     stopPropagation(event);
 
     if (!(showRowHeaders || showColHeaders)) {
-      if (!isValidElement(element) && !(hasClass(element, 'current') && hasClass(element, 'wtBorder'))) {
+      if (!isValidElement(element) && !(hasClass(element, 'current') && hasClass(element, 'fg-selection-border'))) {
         return;
       }
     }

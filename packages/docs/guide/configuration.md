@@ -40,7 +40,7 @@ new FreeGrid(container, {
   ],
   cells(row, col) {
     // called for every cell; return settings for it
-    return row === 2 ? { className: 'htCenter' } : {};
+    return row === 2 ? { className: 'fg-center' } : {};
   },
 });
 ```

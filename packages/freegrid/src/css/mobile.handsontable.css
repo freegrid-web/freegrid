@@ -4,8 +4,8 @@
 
  */
 
-.handsontable.mobile,
-.handsontable.mobile .wtHolder {
+.freegrid.mobile,
+.freegrid.mobile .fg-holder {
   -webkit-touch-callout:none;
   -webkit-user-select:none;
   -khtml-user-select:none;
@@ -16,7 +16,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.htMobileEditorContainer {
+.fg-mobile-editor-container {
   display: none;
   position: absolute;
   top: 0;
@@ -31,8 +31,8 @@
   -webkit-text-size-adjust: none;
 }
 
-.topLeftSelectionHandle:not(.ht_master .topLeftSelectionHandle),
-.topLeftSelectionHandle-HitArea:not(.ht_master .topLeftSelectionHandle-HitArea) {
+.topLeftSelectionHandle:not(.fg-master .topLeftSelectionHandle),
+.topLeftSelectionHandle-HitArea:not(.fg-master .topLeftSelectionHandle-HitArea) {
   z-index: 9999;
 }
 
@@ -45,11 +45,11 @@
   top: -10000px;
 }
 
-.htMobileEditorContainer.active {
+.fg-mobile-editor-container.active {
   display: block;
 }
 
-.htMobileEditorContainer .inputs {
+.fg-mobile-editor-container .inputs {
   position: absolute;
   right: 210pt;
   bottom: 10pt;
@@ -58,7 +58,7 @@
   height: 34pt;
 }
 
-.htMobileEditorContainer .inputs textarea {
+.fg-mobile-editor-container .inputs textarea {
   font-size: 13pt;
   border: 1px solid #a1a1a1;
   -webkit-appearance: none;
@@ -73,7 +73,7 @@
   padding: 7pt;
 }
 
-.htMobileEditorContainer .cellPointer {
+.fg-mobile-editor-container .cellPointer {
   position: absolute;
   top: -13pt;
   height: 0;
@@ -85,11 +85,11 @@
   border-bottom: 13pt solid #ebebeb;
 }
 
-.htMobileEditorContainer .cellPointer.hidden {
+.fg-mobile-editor-container .cellPointer.hidden {
   display: none;
 }
 
-.htMobileEditorContainer .cellPointer:before {
+.fg-mobile-editor-container .cellPointer:before {
   content: '';
   display: block;
   position: absolute;
@@ -103,7 +103,7 @@
   border-bottom: 13pt solid #f8f8f8;
 }
 
-.htMobileEditorContainer .moveHandle {
+.fg-mobile-editor-container .moveHandle {
   position: absolute;
   top: 10pt;
   left: 5px;
@@ -113,7 +113,7 @@
   z-index: 9999;
 }
 
-.htMobileEditorContainer .moveHandle:after {
+.fg-mobile-editor-container .moveHandle:after {
   content: "..\a..\a..\a..";
   white-space: pre;
   line-height: 10px;
@@ -123,7 +123,7 @@
   color: #ebebeb;
 }
 
-.htMobileEditorContainer .positionControls {
+.fg-mobile-editor-container .positionControls {
   width: 205pt;
   position: absolute;
   right: 5pt;
@@ -131,13 +131,13 @@
   bottom: 0;
 }
 
-.htMobileEditorContainer .positionControls > div {
+.fg-mobile-editor-container .positionControls > div {
   width: 50pt;
   height: 100%;
   float: left;
 }
 
-.htMobileEditorContainer .positionControls > div:after {
+.fg-mobile-editor-container .positionControls > div:after {
   content: " ";
   display: block;
   width: 15pt;
@@ -146,38 +146,38 @@
   line-height: 50pt;
 }
 
-.htMobileEditorContainer .leftButton:after,
-.htMobileEditorContainer .rightButton:after,
-.htMobileEditorContainer .upButton:after,
-.htMobileEditorContainer .downButton:after {
+.fg-mobile-editor-container .leftButton:after,
+.fg-mobile-editor-container .rightButton:after,
+.fg-mobile-editor-container .upButton:after,
+.fg-mobile-editor-container .downButton:after {
   transform-origin: 5pt 5pt;
   -webkit-transform-origin: 5pt 5pt;
   margin: 21pt 0 0 21pt;
 }
 
-.htMobileEditorContainer .leftButton:after {
+.fg-mobile-editor-container .leftButton:after {
   border-top: 2px solid #288ffe;
   border-left: 2px solid #288ffe;
   -webkit-transform: rotate(-45deg);
   /*margin-top: 17pt;*/
   /*margin-left: 20pt;*/
 }
-.htMobileEditorContainer .leftButton:active:after {
+.fg-mobile-editor-container .leftButton:active:after {
   border-color: #cfcfcf;
 }
 
-.htMobileEditorContainer .rightButton:after {
+.fg-mobile-editor-container .rightButton:after {
   border-top: 2px solid #288ffe;
   border-left: 2px solid #288ffe;
   -webkit-transform: rotate(135deg);
   /*margin-top: 17pt;*/
   /*margin-left: 10pt;*/
 }
-.htMobileEditorContainer .rightButton:active:after {
+.fg-mobile-editor-container .rightButton:active:after {
   border-color: #cfcfcf;
 }
 
-.htMobileEditorContainer .upButton:after {
+.fg-mobile-editor-container .upButton:after {
   /*border-top: 2px solid #cfcfcf;*/
   border-top: 2px solid #288ffe;
   border-left: 2px solid #288ffe;
@@ -185,29 +185,29 @@
   /*margin-top: 22pt;*/
   /*margin-left: 15pt;*/
 }
-.htMobileEditorContainer .upButton:active:after {
+.fg-mobile-editor-container .upButton:active:after {
   border-color: #cfcfcf;
 }
 
-.htMobileEditorContainer .downButton:after {
+.fg-mobile-editor-container .downButton:after {
   border-top: 2px solid #288ffe;
   border-left: 2px solid #288ffe;
   -webkit-transform: rotate(225deg);
   /*margin-top: 15pt;*/
   /*margin-left: 15pt;*/
 }
-.htMobileEditorContainer .downButton:active:after {
+.fg-mobile-editor-container .downButton:active:after {
   border-color: #cfcfcf;
 }
 
-.handsontable.hide-tween {
+.freegrid.hide-tween {
   -webkit-animation: opacity-hide 0.3s;
   animation: opacity-hide 0.3s;
   animation-fill-mode: forwards;
   -webkit-animation-fill-mode: forwards;
 }
 
-.handsontable.show-tween {
+.freegrid.show-tween {
   -webkit-animation: opacity-show 0.3s;
   animation: opacity-show 0.3s;
   animation-fill-mode: forwards;

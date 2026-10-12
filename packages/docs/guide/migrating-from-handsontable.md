@@ -48,7 +48,9 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 - **jQuery:** the plugin is `$(el).freegrid(...)`. `$(el).handsontable(...)` still works during `0.x`.
 - **Dates:** FreeGrid uses a current moment release. Use real moment formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Malformed formats may be parsed differently than in Handsontable 6.
-- **CSS class names** (`.handsontable`, `.htCore`, …) are unchanged for now. FreeGrid will introduce its
-  own names with a transition period in which both work.
+- **CSS class names** are now FreeGrid's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
+  old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
+  switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now
+  writes `fg-` alignment classes into `getCellMeta(...).className`.
 - **Pro features** (filters, dropdown menu, hidden rows and columns, nested headers, export, formulas)
   were never part of the MIT release. They are on the [roadmap](../project/roadmap), written from scratch.

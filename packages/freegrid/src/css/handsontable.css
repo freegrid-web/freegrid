@@ -1,51 +1,51 @@
-.handsontable {
+.freegrid {
   position: relative;
 }
 
-.handsontable .hide{
+.freegrid .hide{
   display: none;
 }
 
-.handsontable .relative {
+.freegrid .relative {
   position: relative;
 }
 
-.handsontable.htAutoSize {
+.freegrid.fg-auto-size {
   visibility: hidden;
   left: -99000px;
   position: absolute;
   top: -99000px;
 }
 
-.handsontable .wtHider {
+.freegrid .fg-hider {
   width: 0;
 }
 
-.handsontable .wtSpreader {
+.freegrid .fg-spreader {
   position: relative;
   width: 0; /*must be 0, otherwise blank space appears in scroll demo after scrolling max to the right */
   height: auto;
 }
 
-.handsontable table,
-.handsontable tbody,
-.handsontable thead,
-.handsontable td,
-.handsontable th,
-.handsontable input,
-.handsontable textarea,
-.handsontable div {
+.freegrid table,
+.freegrid tbody,
+.freegrid thead,
+.freegrid td,
+.freegrid th,
+.freegrid input,
+.freegrid textarea,
+.freegrid div {
   box-sizing: content-box;
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
 }
 
-.handsontable input,
-.handsontable textarea {
+.freegrid input,
+.freegrid textarea {
   min-height: initial;
 }
 
-.handsontable table.htCore {
+.freegrid table.fg-core {
   border-collapse: separate;
   /* it must be separate, otherwise there are offset miscalculations in WebKit: http://stackoverflow.com/questions/2655987/border-collapse-differences-in-ff-and-webkit */
   /* this actually only changes appearance of user selection - does not make text unselectable */
@@ -67,16 +67,16 @@
   max-height: none;
 }
 
-.handsontable col {
+.freegrid col {
   width: 50px;
 }
 
-.handsontable col.rowHeader {
+.freegrid col.rowHeader {
   width: 50px;
 }
 
-.handsontable th,
-.handsontable td {
+.freegrid th,
+.freegrid td {
   border-top-width: 0;
   border-left-width: 0;
   border-right: 1px solid #CCC;
@@ -95,58 +95,58 @@
   background-clip: padding-box;
 }
 
-.handsontable td.htInvalid {
+.freegrid td.fg-invalid {
   background-color: #ff4c42 !important; /*gives priority over td.area selection background*/
 }
 
-.handsontable td.htNoWrap {
+.freegrid td.fg-no-wrap {
   white-space: nowrap;
 }
 
-.handsontable th:last-child {
+.freegrid th:last-child {
   /*Foundation framework fix*/
   border-right: 1px solid #CCC;
   border-bottom: 1px solid #CCC;
 }
 
-.handsontable tr:first-child th.htNoFrame,
-.handsontable th:first-child.htNoFrame,
-.handsontable th.htNoFrame {
+.freegrid tr:first-child th.fg-no-frame,
+.freegrid th:first-child.fg-no-frame,
+.freegrid th.fg-no-frame {
   border-left-width: 0;
   background-color: white;
   border-color: #FFF;
 }
 
-.handsontable th:first-child,
-.handsontable th:nth-child(2),
-.handsontable td:first-of-type,
-.handsontable .htNoFrame + th,
-.handsontable .htNoFrame + td {
+.freegrid th:first-child,
+.freegrid th:nth-child(2),
+.freegrid td:first-of-type,
+.freegrid .fg-no-frame + th,
+.freegrid .fg-no-frame + td {
   border-left: 1px solid #CCC;
 }
 
-.handsontable.htRowHeaders thead tr th:nth-child(2) {
+.freegrid.fg-row-headers thead tr th:nth-child(2) {
   border-left: 1px solid #CCC;
 }
 
-.handsontable tr:first-child th,
-.handsontable tr:first-child td {
+.freegrid tr:first-child th,
+.freegrid tr:first-child td {
   border-top: 1px solid #CCC;
 }
 
-.ht_master:not(.innerBorderLeft):not(.emptyColumns) ~ .handsontable tbody tr th,
-.ht_master:not(.innerBorderLeft):not(.emptyColumns) ~ .handsontable:not(.ht_clone_top) thead tr th:first-child {
+.fg-master:not(.innerBorderLeft):not(.emptyColumns) ~ .freegrid tbody tr th,
+.fg-master:not(.innerBorderLeft):not(.emptyColumns) ~ .freegrid:not(.fg-clone-top) thead tr th:first-child {
   border-right-width: 0;
 }
 
-.ht_master:not(.innerBorderTop) thead tr:last-child th,
-.ht_master:not(.innerBorderTop) ~ .handsontable thead tr:last-child th,
-.ht_master:not(.innerBorderTop) thead tr.lastChild th,
-.ht_master:not(.innerBorderTop) ~ .handsontable thead tr.lastChild th {
+.fg-master:not(.innerBorderTop) thead tr:last-child th,
+.fg-master:not(.innerBorderTop) ~ .freegrid thead tr:last-child th,
+.fg-master:not(.innerBorderTop) thead tr.lastChild th,
+.fg-master:not(.innerBorderTop) ~ .freegrid thead tr.lastChild th {
   border-bottom-width: 0;
 }
 
-.handsontable th {
+.freegrid th {
   background-color: #f0f0f0;
   color: #222;
   text-align: center;
@@ -154,14 +154,14 @@
   white-space: nowrap;
 }
 
-.handsontable thead th {
+.freegrid thead th {
   padding: 0;
 }
 
-.handsontable th.active {
+.freegrid th.active {
   background-color: #CCC;
 }
-.handsontable thead th .relative {
+.freegrid thead th .relative {
   padding: 2px 4px;
 }
 
@@ -176,7 +176,7 @@
 /* plugins */
 
 /* row + column resizer*/
-.handsontable .manualColumnResizer {
+.freegrid .manualColumnResizer {
   position: fixed;
   top: 0;
   cursor: col-resize;
@@ -185,7 +185,7 @@
   height: 25px;
 }
 
-.handsontable .manualRowResizer {
+.freegrid .manualRowResizer {
   position: fixed;
   left: 0;
   cursor: row-resize;
@@ -194,14 +194,14 @@
   width: 50px;
 }
 
-.handsontable .manualColumnResizer:hover,
-.handsontable .manualColumnResizer.active,
-.handsontable .manualRowResizer:hover,
-.handsontable .manualRowResizer.active {
+.freegrid .manualColumnResizer:hover,
+.freegrid .manualColumnResizer.active,
+.freegrid .manualRowResizer:hover,
+.freegrid .manualRowResizer.active {
   background-color: #34a9db;
 }
 
-.handsontable .manualColumnResizerGuide {
+.freegrid .manualColumnResizerGuide {
   position: fixed;
   right: 0;
   top: 0;
@@ -212,7 +212,7 @@
   margin-left: 5px;
 }
 
-.handsontable .manualRowResizerGuide {
+.freegrid .manualRowResizerGuide {
   position: fixed;
   left: 0;
   bottom: 0;
@@ -223,28 +223,28 @@
   margin-top: 5px;
 }
 
-.handsontable .manualColumnResizerGuide.active,
-.handsontable .manualRowResizerGuide.active {
+.freegrid .manualColumnResizerGuide.active,
+.freegrid .manualRowResizerGuide.active {
   display: block;
   z-index: 199;
 }
 
-.handsontable .columnSorting {
+.freegrid .columnSorting {
   position: relative;
 }
 
-.handsontable .columnSorting.sortAction:hover {
+.freegrid .columnSorting.sortAction:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
-.handsontable span.colHeader {
+.freegrid span.colHeader {
   display: inline-block;
   line-height: 1.1;
 }
 
 /* Arrow position */
-.handsontable span.colHeader.columnSorting::before {
+.freegrid span.colHeader.columnSorting::before {
   /* Centering start */
   top: 50%;
   margin-top: -6px; /* One extra pixel for purpose of proper positioning of sorting arrow, when `font-size` set to default */
@@ -262,17 +262,17 @@
   background-position-x: right;
 }
 
-.handsontable span.colHeader.columnSorting.ascending::before {
+.freegrid span.colHeader.columnSorting.ascending::before {
   /* arrow up; 20 x 40 px, scaled to 5 x 10 px; base64 size: 0.3kB */
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAoCAMAAADJ7yrpAAAAKlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKE86IAAAADXRSTlMABBEmRGprlJW72e77tTkTKwAAAFNJREFUeAHtzjkSgCAUBNHPgsoy97+ulGXRqJE5L+xkxoYt2UdsLb5bqFINz+aLuuLn5rIu2RkO3fZpWENimNgiw6iBYRTPMLJjGFxQZ1hxxb/xBI1qC8k39CdKAAAAAElFTkSuQmCC");
 }
 
-.handsontable span.colHeader.columnSorting.descending::before {
+.freegrid span.colHeader.columnSorting.descending::before {
   /* arrow down; 20 x 40 px, scaled to 5 x 10 px; base64 size: 0.3kB */
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAoCAMAAADJ7yrpAAAAKlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKE86IAAAADXRSTlMABBEmRGprlJW72e77tTkTKwAAAFJJREFUeAHtzjkSgCAQRNFmQYUZ7n9dKUvru0TmvPAn3br0QfgdZ5xx6x+rQn23GqTYnq1FDcnuzZIO2WmedVqIRVxgGKEyjNgYRjKGkZ1hFIZ3I70LyM0VtU8AAAAASUVORK5CYII=");
 }
 
-.htGhostTable .htCore span.colHeader.columnSorting:not(.indicatorDisabled)::after {
+.fg-ghost-table .fg-core span.colHeader.columnSorting:not(.indicatorDisabled)::after {
   content: '*';
   display: inline-block;
   position: relative;
@@ -282,44 +282,44 @@
 }
 
 /* Selection */
-.handsontable .wtBorder {
+.freegrid .fg-selection-border {
   position: absolute;
   font-size: 0;
 }
-.handsontable .wtBorder.hidden{
+.freegrid .fg-selection-border.hidden{
   display:none !important;
 }
 
 /* A layer order of the selection types */
-.handsontable .wtBorder.current {
+.freegrid .fg-selection-border.current {
   z-index: 10;
 }
-.handsontable .wtBorder.area {
+.freegrid .fg-selection-border.area {
   z-index: 8;
 }
-.handsontable .wtBorder.fill {
+.freegrid .fg-selection-border.fill {
   z-index: 6;
 }
 
-.handsontable td.area,
-.handsontable td.area-1,
-.handsontable td.area-2,
-.handsontable td.area-3,
-.handsontable td.area-4,
-.handsontable td.area-5,
-.handsontable td.area-6,
-.handsontable td.area-7 {
+.freegrid td.area,
+.freegrid td.area-1,
+.freegrid td.area-2,
+.freegrid td.area-3,
+.freegrid td.area-4,
+.freegrid td.area-5,
+.freegrid td.area-6,
+.freegrid td.area-7 {
   position: relative;
 }
 
-.handsontable td.area:before,
-.handsontable td.area-1:before,
-.handsontable td.area-2:before,
-.handsontable td.area-3:before,
-.handsontable td.area-4:before,
-.handsontable td.area-5:before,
-.handsontable td.area-6:before,
-.handsontable td.area-7:before {
+.freegrid td.area:before,
+.freegrid td.area-1:before,
+.freegrid td.area-2:before,
+.freegrid td.area-3:before,
+.freegrid td.area-4:before,
+.freegrid td.area-5:before,
+.freegrid td.area-6:before,
+.freegrid td.area-7:before {
   content: '';
   position: absolute;
   top: 0;
@@ -332,68 +332,68 @@
 
 /* Fix for IE10 and IE11 to spread the ":before" pseudo element to 100% height of the parent element */
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  .handsontable td.area:before,
-  .handsontable td.area-1:before,
-  .handsontable td.area-2:before,
-  .handsontable td.area-3:before,
-  .handsontable td.area-4:before,
-  .handsontable td.area-5:before,
-  .handsontable td.area-6:before,
-  .handsontable td.area-7:before {
+  .freegrid td.area:before,
+  .freegrid td.area-1:before,
+  .freegrid td.area-2:before,
+  .freegrid td.area-3:before,
+  .freegrid td.area-4:before,
+  .freegrid td.area-5:before,
+  .freegrid td.area-6:before,
+  .freegrid td.area-7:before {
     bottom: -100%;
   }
 }
 
-.handsontable td.area:before {
+.freegrid td.area:before {
   opacity: 0.1;
 }
-.handsontable td.area-1:before {
+.freegrid td.area-1:before {
   opacity: 0.2;
 }
-.handsontable td.area-2:before {
+.freegrid td.area-2:before {
   opacity: 0.27;
 }
-.handsontable td.area-3:before {
+.freegrid td.area-3:before {
   opacity: 0.35;
 }
-.handsontable td.area-4:before {
+.freegrid td.area-4:before {
   opacity: 0.41;
 }
-.handsontable td.area-5:before {
+.freegrid td.area-5:before {
   opacity: 0.47;
 }
-.handsontable td.area-6:before {
+.freegrid td.area-6:before {
   opacity: 0.54;
 }
-.handsontable td.area-7:before {
+.freegrid td.area-7:before {
   opacity: 0.58;
 }
 
-.handsontable tbody th.ht__highlight,
-.handsontable thead th.ht__highlight {
+.freegrid tbody th.fg-highlight,
+.freegrid thead th.fg-highlight {
   background-color: #dcdcdc;
 }
 
-.handsontable tbody th.ht__active_highlight,
-.handsontable thead th.ht__active_highlight {
+.freegrid tbody th.fg-active-highlight,
+.freegrid thead th.fg-active-highlight {
   background-color: #8eb0e7;
   color: #000;
 }
 
 /* fill handle */
 
-.handsontable .wtBorder.corner {
+.freegrid .fg-selection-border.corner {
   font-size: 0;
   cursor: crosshair;
 }
 
-.handsontable .htBorder.htFillBorder {
+.freegrid .fg-border.fg-fill-border {
   background: red;
   width: 1px;
   height: 1px;
 }
 
-.handsontableInput {
+.fg-editor-input {
   border: none;
   outline-width: 0;
   margin: 0;
@@ -411,14 +411,14 @@
   /*overwrite styles potentionally made by a framework*/
 }
 
-.handsontableInputHolder {
+.fg-editor-holder {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 104;
 }
 
-.htSelectEditor {
+.fg-select-editor {
   -webkit-appearance: menulist-button !important;
   position: absolute;
   width: auto;
@@ -428,15 +428,15 @@
 TextRenderer readOnly cell
 */
 
-.handsontable .htDimmed {
+.freegrid .fg-dimmed {
   color: #777;
 }
 
-.handsontable .htSubmenu {
+.freegrid .fg-submenu {
   position: relative;
 }
 
-.handsontable .htSubmenu :after{
+.freegrid .fg-submenu :after{
   content: '▶';
   color: #777;
   position: absolute;
@@ -448,28 +448,28 @@ TextRenderer readOnly cell
 /*
 TextRenderer horizontal alignment
 */
-.handsontable .htLeft{
+.freegrid .fg-left{
   text-align: left;
 }
-.handsontable .htCenter{
+.freegrid .fg-center{
   text-align: center;
 }
-.handsontable .htRight{
+.freegrid .fg-right{
   text-align: right;
 }
-.handsontable .htJustify{
+.freegrid .fg-justify{
   text-align: justify;
 }
 /*
 TextRenderer vertical alignment
 */
-.handsontable .htTop{
+.freegrid .fg-top{
   vertical-align: top;
 }
-.handsontable .htMiddle{
+.freegrid .fg-middle{
   vertical-align: middle;
 }
-.handsontable .htBottom{
+.freegrid .fg-bottom{
   vertical-align: bottom;
 }
 
@@ -477,7 +477,7 @@ TextRenderer vertical alignment
 TextRenderer placeholder value
 */
 
-.handsontable .htPlaceholder {
+.freegrid .fg-placeholder {
   color: #999;
 }
 
@@ -485,7 +485,7 @@ TextRenderer placeholder value
 AutocompleteRenderer down arrow
 */
 
-.handsontable .htAutocompleteArrow {
+.freegrid .fg-autocomplete-arrow {
   float: right;
   font-size: 10px;
   color: #EEE;
@@ -494,25 +494,25 @@ AutocompleteRenderer down arrow
   text-align: center;
 }
 
-.handsontable td .htAutocompleteArrow:hover {
+.freegrid td .fg-autocomplete-arrow:hover {
   color: #777;
 }
 
-.handsontable td.area .htAutocompleteArrow {
+.freegrid td.area .fg-autocomplete-arrow {
   color: #d3d3d3;
 }
 
 /*
 CheckboxRenderer
 */
-.handsontable .htCheckboxRendererInput {
+.freegrid .fg-checkbox-renderer-input {
   display: inline-block;
   vertical-align: middle;
 }
-.handsontable .htCheckboxRendererInput.noValue {
+.freegrid .fg-checkbox-renderer-input.noValue {
   opacity: 0.5;
 }
-.handsontable .htCheckboxRendererLabel {
+.freegrid .fg-checkbox-renderer-label {
   cursor: pointer;
   display: inline-block;
   width: 100%;
@@ -522,17 +522,17 @@ CheckboxRenderer
  * Handsontable in Handsontable
  */
 
-.handsontable .handsontable.ht_clone_top .wtHider {
+.freegrid .freegrid.fg-clone-top .fg-hider {
   padding: 0 0 5px 0;
 }
 
 /**
 * Autocomplete Editor
 */
-.handsontable .autocompleteEditor.handsontable {
+.freegrid .autocompleteEditor.freegrid {
   padding-right: 17px;
 }
-.handsontable .autocompleteEditor.handsontable.htMacScroll {
+.freegrid .autocompleteEditor.freegrid.fg-mac-scroll {
   padding-right: 15px;
 }
 
@@ -541,63 +541,63 @@ CheckboxRenderer
  * Handsontable listbox theme
  */
 
-.handsontable.listbox {
+.freegrid.listbox {
   margin: 0;
 }
 
-.handsontable.listbox .ht_master table {
+.freegrid.listbox .fg-master table {
   border: 1px solid #ccc;
   border-collapse: separate;
   background: white;
 }
 
-.handsontable.listbox th,
-.handsontable.listbox tr:first-child th,
-.handsontable.listbox tr:last-child th,
-.handsontable.listbox tr:first-child td,
-.handsontable.listbox td {
+.freegrid.listbox th,
+.freegrid.listbox tr:first-child th,
+.freegrid.listbox tr:last-child th,
+.freegrid.listbox tr:first-child td,
+.freegrid.listbox td {
   border-color: transparent;
 }
 
-.handsontable.listbox th,
-.handsontable.listbox td {
+.freegrid.listbox th,
+.freegrid.listbox td {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.handsontable.listbox td.htDimmed {
+.freegrid.listbox td.fg-dimmed {
   cursor: default;
   color: inherit;
   font-style: inherit;
 }
 
-.handsontable.listbox .wtBorder {
+.freegrid.listbox .fg-selection-border {
   visibility: hidden;
 }
 
-.handsontable.listbox tr td.current,
-.handsontable.listbox tr:hover td {
+.freegrid.listbox tr td.current,
+.freegrid.listbox tr:hover td {
   background: #eee;
 }
 
-.ht_clone_top {
+.fg-clone-top {
   z-index: 101;
 }
 
-.ht_clone_left {
+.fg-clone-left {
   z-index: 102;
 }
 
-.ht_clone_top_left_corner,
-.ht_clone_bottom_left_corner {
+.fg-clone-top-left-corner,
+.fg-clone-bottom-left-corner {
   z-index: 103;
 }
 
-.ht_clone_debug {
+.fg-clone-debug {
   z-index: 103;
 }
 
-.handsontable td.htSearchResult {
+.freegrid td.fg-search-result {
   background: #fcedd9;
   color: #583707;
 }
@@ -605,42 +605,42 @@ CheckboxRenderer
 /*
 Cell borders
 */
-.htBordered{
+.fg-bordered{
   /*box-sizing: border-box !important;*/
   border-width: 1px;
 }
-.htBordered.htTopBorderSolid {
+.fg-bordered.fg-top-border-solid {
   border-top-style: solid;
   border-top-color: #000;
 }
-.htBordered.htRightBorderSolid {
+.fg-bordered.fg-right-border-solid {
   border-right-style: solid;
   border-right-color: #000;
 }
-.htBordered.htBottomBorderSolid {
+.fg-bordered.fg-bottom-border-solid {
   border-bottom-style: solid;
   border-bottom-color: #000;
 }
-.htBordered.htLeftBorderSolid {
+.fg-bordered.fg-left-border-solid {
   border-left-style: solid;
   border-left-color: #000;
 }
 
-.handsontable tbody tr th:nth-last-child(2) {
+.freegrid tbody tr th:nth-last-child(2) {
   border-right: 1px solid #CCC;
 }
 
-.handsontable thead tr:nth-last-child(2) th.htGroupIndicatorContainer {
+.freegrid thead tr:nth-last-child(2) th.fg-group-indicator-container {
   border-bottom: 1px solid #CCC;
   padding-bottom: 5px;
 }
 
 
-.ht_clone_top_left_corner thead tr th:nth-last-child(2) {
+.fg-clone-top-left-corner thead tr th:nth-last-child(2) {
   border-right: 1px solid #CCC;
 }
 
-.htCollapseButton {
+.fg-collapse-button {
   width: 10px;
   height: 10px;
   line-height: 10px;
@@ -654,7 +654,7 @@ Cell borders
   position: relative;
 }
 
-.htCollapseButton:after {
+.fg-collapse-button:after {
   content: "";
   height: 300%;
   width: 1px;
@@ -667,21 +667,21 @@ Cell borders
 }
 
 
-thead .htCollapseButton {
+thead .fg-collapse-button {
   right: 5px;
   position: absolute;
   top: 5px;
   background: #fff;
 }
 
-thead .htCollapseButton:after {
+thead .fg-collapse-button:after {
   height: 1px;
   width: 700%;
   right: 10px;
   top: 4px;
 }
 
-.handsontable tr th .htExpandButton {
+.freegrid tr th .fg-expand-button {
   position: absolute;
   width: 10px;
   height: 10px;
@@ -696,12 +696,12 @@ thead .htCollapseButton:after {
   display: none;
 }
 
-.handsontable thead tr th .htExpandButton {
+.freegrid thead tr th .fg-expand-button {
   /*left: 5px;*/
   top: 5px;
 }
 
-.handsontable tr th .htExpandButton.clickable {
+.freegrid tr th .fg-expand-button.clickable {
   display: block;
 }
 
@@ -724,39 +724,39 @@ thead .htCollapseButton:after {
   background: #eee;
 }
 
-.handsontable col.hidden {
+.freegrid col.hidden {
   width: 0 !important;
 }
 
-.handsontable table tr th.lightRightBorder {
+.freegrid table tr th.lightRightBorder {
   border-right: 1px solid #E6E6E6;
 }
 
-.handsontable tr.hidden,
-.handsontable tr.hidden td,
-.handsontable tr.hidden th {
+.freegrid tr.hidden,
+.freegrid tr.hidden td,
+.freegrid tr.hidden th {
   display: none;
 }
 
-.ht_master,
-.ht_clone_left,
-.ht_clone_top,
-.ht_clone_bottom {
+.fg-master,
+.fg-clone-left,
+.fg-clone-top,
+.fg-clone-bottom {
   overflow: hidden;
 }
 
-.ht_master .wtHolder {
+.fg-master .fg-holder {
   overflow: auto;
 }
 
-.handsontable .ht_master thead,
-.handsontable .ht_master tr th,
-.handsontable .ht_clone_left thead {
+.freegrid .fg-master thead,
+.freegrid .fg-master tr th,
+.freegrid .fg-clone-left thead {
   visibility: hidden;
 }
 
-.ht_clone_top .wtHolder,
-.ht_clone_left .wtHolder,
-.ht_clone_bottom .wtHolder {
+.fg-clone-top .fg-holder,
+.fg-clone-left .fg-holder,
+.fg-clone-bottom .fg-holder {
   overflow: hidden;
 }

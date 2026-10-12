@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../../../helpers/classNames';
 import {
   addClass,
   hasClass,
@@ -151,7 +152,7 @@ class Border {
       const position = borderDivs[i];
       const div = document.createElement('div');
 
-      div.className = `wtBorder ${this.settings.className || ''}`; // + borderDivs[i];
+      div.className = `${withLegacyClassNames('fg-selection-border')} ${this.settings.className || ''}`; // + borderDivs[i];
 
       if (this.settings[position] && this.settings[position].hide) {
         div.className += ' hidden';
@@ -193,7 +194,7 @@ class Border {
 
     if (!bordersHolder) {
       bordersHolder = document.createElement('div');
-      bordersHolder.className = 'htBorders';
+      bordersHolder.className = withLegacyClassNames('fg-borders');
       this.wot.wtTable.bordersHolder = bordersHolder;
       this.wot.wtTable.spreader.appendChild(bordersHolder);
     }
@@ -551,7 +552,7 @@ class Border {
       case 'rows':
         getHeaderFn = (...args) => this.wot.wtTable.getRowHeader(...args);
         dimensionFn = (...args) => outerHeight(...args);
-        entireSelectionClassname = 'ht__selection--rows';
+        entireSelectionClassname = 'fg-selection--rows';
         dimensionProperty = 'top';
 
         break;
@@ -559,7 +560,7 @@ class Border {
       case 'columns':
         getHeaderFn = (...args) => this.wot.wtTable.getColumnHeader(...args);
         dimensionFn = (...args) => outerWidth(...args);
-        entireSelectionClassname = 'ht__selection--columns';
+        entireSelectionClassname = 'fg-selection--columns';
         dimensionProperty = 'left';
         break;
       default:

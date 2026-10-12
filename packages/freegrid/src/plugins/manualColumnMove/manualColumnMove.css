@@ -1,43 +1,43 @@
-.handsontable .wtHider {
+.freegrid .fg-hider {
   position: relative;
 }
-.handsontable.ht__manualColumnMove.after-selection--columns thead th.ht__highlight {
+.freegrid.fg-manual-column-move.after-selection--columns thead th.fg-highlight {
   cursor: move;
   cursor: -moz-grab;
   cursor: -webkit-grab;
   cursor: grab;
 }
-.handsontable.ht__manualColumnMove.on-moving--columns,
-.handsontable.ht__manualColumnMove.on-moving--columns thead th.ht__highlight {
+.freegrid.fg-manual-column-move.on-moving--columns,
+.freegrid.fg-manual-column-move.on-moving--columns thead th.fg-highlight {
   cursor: move;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
-.handsontable.ht__manualColumnMove.on-moving--columns .manualColumnResizer {
+.freegrid.fg-manual-column-move.on-moving--columns .manualColumnResizer {
   display: none;
 }
-.handsontable .ht__manualColumnMove--guideline,
-.handsontable .ht__manualColumnMove--backlight {
+.freegrid .fg-manual-column-move--guideline,
+.freegrid .fg-manual-column-move--backlight {
   position: absolute;
   height: 100%;
   display: none;
 }
-.handsontable .ht__manualColumnMove--guideline {
+.freegrid .fg-manual-column-move--guideline {
   background: #757575;
   width: 2px;
   top: 0;
   margin-left: -1px;
   z-index: 105;
 }
-.handsontable .ht__manualColumnMove--backlight {
+.freegrid .fg-manual-column-move--backlight {
   background: #343434;
   background: rgba(52, 52, 52, 0.25);
   display: none;
   z-index: 105;
   pointer-events: none;
 }
-.handsontable.on-moving--columns.show-ui .ht__manualColumnMove--guideline,
-.handsontable.on-moving--columns .ht__manualColumnMove--backlight {
+.freegrid.on-moving--columns.show-ui .fg-manual-column-move--guideline,
+.freegrid.on-moving--columns .fg-manual-column-move--backlight {
   display: block;
 }

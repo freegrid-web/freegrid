@@ -15,7 +15,7 @@ class CheckboxEditor extends BaseEditor {
     if (event && event.type === 'mouseup') {
       const checkbox = this.TD.querySelector('input[type="checkbox"]');
 
-      if (!hasClass(checkbox, 'htBadValue')) {
+      if (!hasClass(checkbox, 'fg-bad-value')) {
         checkbox.click();
       }
     }

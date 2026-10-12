@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../helpers/classNames';
 import { empty } from './../helpers/dom/element';
 import TextEditor from './textEditor';
 
@@ -13,7 +14,7 @@ class PasswordEditor extends TextEditor {
 
     this.TEXTAREA = document.createElement('input');
     this.TEXTAREA.setAttribute('type', 'password');
-    this.TEXTAREA.className = 'handsontableInput';
+    this.TEXTAREA.className = withLegacyClassNames('fg-editor-input');
     this.textareaStyle = this.TEXTAREA.style;
     this.textareaStyle.width = 0;
     this.textareaStyle.height = 0;
