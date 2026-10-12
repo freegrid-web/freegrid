@@ -56,7 +56,7 @@ const failures = [];
 
 for (const { path, grids } of PAGES) {
   // Dark mode is the harder case: the grid is light-only, so it must not inherit the theme's light text.
-  const page = await browser.newPage({ colorScheme: 'dark' });
+  const page = await browser.newPage({ colorScheme: 'dark', viewport: { width: 1600, height: 900 } });
   const errors = [];
 
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
@@ -86,6 +86,12 @@ for (const { path, grids } of PAGES) {
     return problems;
   }));
 
+  // The isolation of theme styles must not break the theme itself, e.g. the home page content width.
+  if (path === '') {
+    const contentWidth = await page.evaluate(() => document.querySelector('.VPHomeContent .vp-doc')?.getBoundingClientRect().width);
+
+    if (!contentWidth || contentWidth > 1152) failures.push(`/: home content is ${contentWidth}px wide (theme max is 1152px)`);
+  }
   if (rendered < grids) failures.push(`${path || '/'}: expected ${grids} live grid(s), found ${rendered}`);
   layoutProblems.forEach(p => failures.push(`${path || '/'}: ${p}`));
   errors.forEach(e => failures.push(`${path || '/'}: ${e}`));
