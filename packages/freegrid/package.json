@@ -19,6 +19,7 @@
       "types": "./types/compat.d.ts",
       "import": "./dist/esm/compat.js"
     },
+    "./languages/*": "./dist/esm/languages/*.js",
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },

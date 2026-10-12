@@ -34,7 +34,8 @@ import Handsontable from 'freegrid/compat'; // the rest of your code stays the s
 ```
 
 With a `<script>` tag: load `dist/freegrid.full.js`, then optionally `dist/compat.js` to get
-`window.Handsontable`. Locales: `dist/languages/<code>.js` (or `all.js`) after the grid script.
+`window.Handsontable`. Locales: `dist/languages/<code>.js` (or `all.js`) after the grid script; with a
+bundler, `import 'freegrid/languages/de-DE';` (or `freegrid/languages/all`).
 
 ## Development
 

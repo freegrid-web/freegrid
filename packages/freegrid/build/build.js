@@ -10,7 +10,11 @@ const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const buildDate = new Date();
 const define = defineConstants({ buildDate });
 const deps = ['moment', 'numbro', 'pikaday'];
-const isDep = id => deps.some(d => id === d || id.startsWith(`${d}/`));
+// Pikaday's CSS is not a dependency to keep external: ignorePikadayCss() drops it (upstream used an
+// empty module), and an external CSS import would break Node/SSR and AMD/CommonJS consumers.
+const isDep = id => !id.startsWith('pikaday/css') && deps.some(d => id === d || id.startsWith(`${d}/`));
+// CSS output must not use properties newer than the JS browser target (e.g. `inset` needs Chrome 87).
+const cssTarget = ['chrome80', 'edge80', 'firefox74', 'safari14'];
 
 const base = { configFile: false, logLevel: 'warn', define };
 
@@ -19,7 +23,7 @@ async function esm() {
     ...base,
     plugins: [ignorePikadayCss()],
     build: {
-      target: 'es2020', commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
+      target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
       lib: { entry: { index: r('src/index.js'), compat: r('src/compat.js') }, formats: ['es'], cssFileName: 'freegrid' },
       rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
     },
@@ -33,7 +37,7 @@ async function umd({ full, minify }) {
     ...base,
     plugins: full ? [] : [ignorePikadayCss()],
     build: {
-      target: 'es2020', commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+      target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
       cssMinify: minify, sourcemap: true,
       lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
@@ -63,7 +67,7 @@ async function locales({ minify }) {
         ...base,
         plugins: [localeRegistration()],
         build: {
-          target: 'es2020', commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+          target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
           lib: { entry, name: 'FreeGridLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
           rollupOptions: { external: ['freegrid'], output: { globals: { freegrid: 'FreeGrid' } } },
         },
@@ -74,12 +78,41 @@ async function locales({ minify }) {
   }
 }
 
+/** ESM locale modules for bundlers: `import 'freegrid/languages/de-DE'` registers on the imported FreeGrid. */
+async function esmLocales() {
+  const dir = r('src/i18n/languages');
+  const files = readdirSync(dir).filter(f => /^[a-z]{2}-[A-Z]{2}\.js$/.test(f));
+  const entryDir = mkdtempSync(join(tmpdir(), 'freegrid-esm-locales-'));
+  const allEntry = join(entryDir, 'all.js');
+
+  writeFileSync(allEntry, `${files.map(f => `import './${f}';`).join('\n')}\n`);
+  try {
+    await build({
+      ...base,
+      plugins: [localeRegistration(), {
+        name: 'fg-esm-locale-all',
+        resolveId: (id, importer) => (importer === allEntry && id.startsWith('./') ? join(dir, id) : null),
+      }],
+      build: {
+        target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/esm/languages'), emptyOutDir: false, minify: false,
+        lib: {
+          entry: Object.fromEntries([['all', allEntry], ...files.map(f => [f.replace(/\.js$/, ''), join(dir, f)])]),
+          formats: ['es'],
+        },
+        rollupOptions: { external: ['freegrid'], output: { chunkFileNames: '[name].js' } },
+      },
+    });
+  } finally {
+    rmSync(entryDir, { recursive: true, force: true });
+  }
+}
+
 /** Test-only bundle used by the walkontable browser suite (global `Walkontable`). */
 async function walkontable() {
   await build({
     ...base,
     build: {
-      target: 'es2020', commonjsOptions, outDir: r('src/3rdparty/walkontable/dist'), emptyOutDir: true, minify: false, sourcemap: true,
+      target: 'es2020', cssTarget, commonjsOptions, outDir: r('src/3rdparty/walkontable/dist'), emptyOutDir: true, minify: false, sourcemap: true,
       lib: { entry: r('src/3rdparty/walkontable/src/index.js'), name: 'Walkontable', formats: ['iife'], fileName: () => 'walkontable.js' },
       rollupOptions: { output: { exports: 'named' } },
     },
@@ -92,6 +125,7 @@ await esm();
 for (const full of [false, true]) for (const minify of [false, true]) await umd({ full, minify });
 await locales({ minify: false });
 await locales({ minify: true });
+await esmLocales();
 await walkontable();
 copyFileSync(r('build/compat-global.js'), r('dist/compat.js'));
 console.log('FreeGrid build complete.');

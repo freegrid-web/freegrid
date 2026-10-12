@@ -80,4 +80,36 @@ describe('dist outputs', () => {
     expect(ran).toBe(true);
     expect(() => hot.destroy()).not.toThrow();
   });
+
+  it('no build keeps an import of the Pikaday CSS (upstream replaced it with an empty module)', () => {
+    ['freegrid.js', 'freegrid.min.js', 'esm/index.js'].forEach(f => expect(read(f), f).not.toMatch(/pikaday\/css/));
+  });
+
+  it('minified CSS avoids properties newer than the browser target (e.g. `inset`)', () => {
+    ['freegrid.min.css', 'freegrid.full.min.css'].forEach(f => expect(read(f), f).not.toMatch(/[{;]inset:/));
+  });
+
+  it('plugins are registered in the plugin registry, not just exported', () => {
+    const w = windowWith(read('freegrid.full.js'));
+    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1]] });
+
+    ['autoColumnSize', 'autoRowSize', 'autofill', 'columnSorting', 'comments', 'contextMenu', 'copyPaste',
+      'customBorders', 'dragToScroll', 'manualColumnFreeze', 'manualColumnMove', 'manualColumnResize',
+      'manualRowMove', 'manualRowResize', 'mergeCells', 'multipleSelectionHandles', 'observeChanges',
+      'persistentState', 'search', 'touchScroll']
+      .forEach(name => expect(typeof hot.getPlugin(name), name).toBe('object'));
+    // UndoRedo is hook-based in 6.2.2: it adds undo()/redo() to every instance.
+    expect(typeof hot.undo).toBe('function');
+    hot.destroy();
+  });
+
+  it('ships ESM locale modules for bundlers, registering on the imported FreeGrid', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+    const code = read('esm/languages/de-DE.js');
+
+    expect(pkg.exports['./languages/*']).toBeDefined();
+    expect(code).toMatch(/from ["']freegrid["']/);
+    expect(code).toMatch(/registerLanguageDictionary/);
+    expect(existsSync(dist('esm/languages/all.js'))).toBe(true);
+  });
 });
