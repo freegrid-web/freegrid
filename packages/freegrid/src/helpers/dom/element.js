@@ -1,5 +1,5 @@
 import { toFreeGridClassName, toLegacyClassName, withCounterpartClassNames } from '../classNames';
-import { isIE8, isIE9, isSafari } from '../browser';
+import { isSafari } from '../browser';
 import { hasCaptionProblem } from '../feature';
 
 /**
@@ -971,10 +971,7 @@ export function hasHorizontalScrollbar(element) {
  * Sets overlay position depending on it's type and used browser
  */
 export function setOverlayPosition(overlayElem, left, top) {
-  if (isIE8() || isIE9()) {
-    overlayElem.style.top = top;
-    overlayElem.style.left = left;
-  } else if (isSafari()) {
+  if (isSafari()) {
     overlayElem.style['-webkit-transform'] = 'translate3d(' + left + ',' + top + ',0)';
   } else {
     overlayElem.style.transform = 'translate3d(' + left + ',' + top + ',0)';
