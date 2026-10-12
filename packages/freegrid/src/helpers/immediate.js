@@ -6,7 +6,7 @@
  * does), so a `setTimeout(fn, 0)` scheduled after them cannot interleave between them. As with
  * separate tasks, `clearImmediate` still cancels a sibling from inside the batch, and an exception in
  * one callback does not stop the others (it is re-thrown asynchronously). The task is
- * posted through MessageChannel, falling back to `setTimeout` where MessageChannel is unavailable.
+ * triggered by both MessageChannel and `setTimeout(0)`, whichever comes first.
  */
 let nextId = 1;
 const pending = new Map();
@@ -14,6 +14,9 @@ let flushScheduled = false;
 let channel = null;
 
 function flush() {
+  if (!flushScheduled) {
+    return; // Already flushed by the other trigger (see scheduleFlush).
+  }
   // Run only what was queued before this flush; callbacks queued meanwhile go to the next one.
   const ids = Array.from(pending.keys());
 
@@ -51,9 +54,11 @@ function scheduleFlush() {
 
   if (channel) {
     channel.port2.postMessage(null);
-  } else {
-    setTimeout(flush, 0);
   }
+  // Also schedule a timer: Firefox and WebKit may deliver the message after timers that are already
+  // due, and callers expect immediates to run before any timer scheduled after them. Whichever
+  // trigger fires first flushes; the other finds nothing scheduled.
+  setTimeout(flush, 0);
 }
 
 /**
