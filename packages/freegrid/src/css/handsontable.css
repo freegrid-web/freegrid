@@ -53,7 +53,6 @@
   -khtml-user-select: none;
   -moz-user-select: none;
   -o-user-select: none;
-  -ms-user-select: none;
   user-select: none; */ /* no browser supports unprefixed version */
   border-spacing: 0;
   margin: 0;
@@ -326,22 +325,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  bottom: -100%\9; /* Fix for IE9 to spread the ":before" pseudo element to 100% height of the parent element */
   background: #005eff;
-}
-
-/* Fix for IE10 and IE11 to spread the ":before" pseudo element to 100% height of the parent element */
-@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
-  .freegrid td.area:before,
-  .freegrid td.area-1:before,
-  .freegrid td.area-2:before,
-  .freegrid td.area-3:before,
-  .freegrid td.area-4:before,
-  .freegrid td.area-5:before,
-  .freegrid td.area-6:before,
-  .freegrid td.area-7:before {
-    bottom: -100%;
-  }
 }
 
 .freegrid td.area:before {

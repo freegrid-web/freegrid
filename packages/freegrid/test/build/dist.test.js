@@ -73,6 +73,15 @@ describe('dist outputs', () => {
     expect(helper.getComparisonFunction()('a', 'b')).toBe(-1);
   });
 
+  it('CSS has no IE hacks', () => {
+    ['freegrid.css', 'freegrid.full.css'].forEach((file) => {
+      const css = read(file);
+
+      expect(css, file).not.toMatch(/-ms-/);
+      expect(css, file).not.toMatch(/\\9\s*;/);
+    });
+  });
+
   it('compat.js aliases Handsontable and fails loudly without FreeGrid', () => {
     const w = windowWith(read('freegrid.full.js'), read('compat.js'));
     expect(w.Handsontable).toBe(w.FreeGrid);
