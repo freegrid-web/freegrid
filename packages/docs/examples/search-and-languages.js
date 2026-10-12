@@ -1,6 +1,6 @@
-import FreeGrid from 'freegrid';
-import 'freegrid/languages/all';
-import 'freegrid/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/core';
+import '@freegrid/core/languages/all';
+import '@freegrid/core/dist/freegrid.full.css';
 
 export default function createGrid(container) {
   const toolbar = document.createElement('div');

@@ -8,7 +8,7 @@ throughout FreeGrid `0.x` and is removed in `1.0`.
 
 ```sh
 npm uninstall handsontable
-npm install freegrid
+npm install @freegrid/core
 ```
 
 ## 2. Update imports
@@ -16,14 +16,14 @@ npm install freegrid
 The quickest switch keeps the `Handsontable` name through the compatibility entry:
 
 ```js
-import Handsontable from 'freegrid/compat';
-import 'freegrid/dist/freegrid.full.css';
+import Handsontable from '@freegrid/core/compat';
+import '@freegrid/core/dist/freegrid.full.css';
 ```
 
 When you have time, move to the FreeGrid name. The API is the same:
 
 ```js
-import FreeGrid from 'freegrid';
+import FreeGrid from '@freegrid/core';
 ```
 
 With `<script>` tags, load `dist/freegrid.full.js` and then `dist/compat.js`, which defines
@@ -35,7 +35,7 @@ With `<script>` tags, load `dist/freegrid.full.js` and then `dist/compat.js`, wh
 // before
 import 'handsontable/languages/de-DE';
 // after
-import 'freegrid/languages/de-DE';
+import '@freegrid/core/languages/de-DE';
 ```
 
 With `<script>` tags, use `dist/languages/de-DE.js`.

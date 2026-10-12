@@ -1,5 +1,5 @@
 {
-  "name": "freegrid",
+  "name": "@freegrid/core",
   "version": "0.0.1",
   "description": "Free, MIT-licensed, spreadsheet-like data grid for the web. Preview release.",
   "license": "MIT",

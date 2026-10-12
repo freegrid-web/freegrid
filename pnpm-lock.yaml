@@ -178,7 +178,7 @@ importers:
 
   packages/docs:
     dependencies:
-      freegrid:
+      '@freegrid/core':
         specifier: workspace:*
         version: link:../freegrid
     devDependencies:

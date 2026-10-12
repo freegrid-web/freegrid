@@ -5,15 +5,15 @@
 ::: code-group
 
 ```sh [npm]
-npm install freegrid
+npm install @freegrid/core
 ```
 
 ```sh [pnpm]
-pnpm add freegrid
+pnpm add @freegrid/core
 ```
 
 ```sh [yarn]
-yarn add freegrid
+yarn add @freegrid/core
 ```
 
 :::
@@ -44,8 +44,8 @@ Load the "full" build, which already includes its dependencies (moment, numbro a
 `<script>` tag. It defines a global `FreeGrid`:
 
 ```html
-<link rel="stylesheet" href="freegrid/dist/freegrid.full.min.css">
-<script src="freegrid/dist/freegrid.full.min.js"></script>
+<link rel="stylesheet" href="@freegrid/core/dist/freegrid.full.min.css">
+<script src="@freegrid/core/dist/freegrid.full.min.js"></script>
 
 <div id="grid"></div>
 <script>

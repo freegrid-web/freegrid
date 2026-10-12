@@ -70,7 +70,7 @@ async function locales({ minify }) {
         build: {
           target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
           lib: { entry, name: 'FreeGridLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
-          rollupOptions: { external: ['freegrid'], output: { globals: { freegrid: 'FreeGrid' } } },
+          rollupOptions: { external: ['@freegrid/core'], output: { globals: { '@freegrid/core': 'FreeGrid' } } },
         },
       });
     }
@@ -79,7 +79,7 @@ async function locales({ minify }) {
   }
 }
 
-/** ESM locale modules for bundlers: `import 'freegrid/languages/de-DE'` registers on the imported FreeGrid. */
+/** ESM locale modules for bundlers: `import '@freegrid/core/languages/de-DE'` registers on the imported FreeGrid. */
 async function esmLocales() {
   const dir = r('src/i18n/languages');
   const files = readdirSync(dir).filter(f => /^[a-z]{2}-[A-Z]{2}\.js$/.test(f));
@@ -100,7 +100,7 @@ async function esmLocales() {
           entry: Object.fromEntries([['all', allEntry], ...files.map(f => [f.replace(/\.js$/, ''), join(dir, f)])]),
           formats: ['es'],
         },
-        rollupOptions: { external: ['freegrid'], output: { chunkFileNames: '[name].js' } },
+        rollupOptions: { external: ['@freegrid/core'], output: { chunkFileNames: '[name].js' } },
       },
     });
   } finally {

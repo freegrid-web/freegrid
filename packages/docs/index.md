@@ -39,19 +39,19 @@ features:
 ::: code-group
 
 ```sh [npm]
-npm install freegrid
+npm install @freegrid/core
 ```
 
 ```sh [pnpm]
-pnpm add freegrid
+pnpm add @freegrid/core
 ```
 
 ```sh [yarn]
-yarn add freegrid
+yarn add @freegrid/core
 ```
 
 ```sh [bun]
-bun add freegrid
+bun add @freegrid/core
 ```
 
 :::
