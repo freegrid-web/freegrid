@@ -1,7 +1,12 @@
 import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-const license = readFileSync(new URL('../../../LICENSE', import.meta.url), 'utf8');
+// Paths from a string (not a URL object): under jsdom the global URL is not Node's.
+const here = dirname(fileURLToPath(import.meta.url));
+
+export const pkg = JSON.parse(readFileSync(resolve(here, '../package.json'), 'utf8'));
+const license = readFileSync(resolve(here, '../../../LICENSE'), 'utf8');
 
 const pad = n => String(n).padStart(2, '0');
 

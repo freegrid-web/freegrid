@@ -19,6 +19,7 @@ export default defineConfig({
     testTimeout: 15000,
     include: [
       'test/unit/**/*.spec.js',
+      'test/unit/**/*.unit.js',
       'src/plugins/**/*.unit.js',
       'test/setup/*.unit.js',
     ],

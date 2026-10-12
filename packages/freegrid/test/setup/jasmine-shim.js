@@ -69,7 +69,57 @@ const jasmineShim = {
 };
 
 globalThis.jasmine = jasmineShim;
-globalThis.jest = vi;
+/*
+ * `jest` → `vi`, except useFakeTimers, which mimics Jest 23 legacy timers in jsdom: the timer
+ * functions become mock functions (`setTimeout.mock.calls`) and return numeric ids.
+ */
+const TIMER_FNS = [['setTimeout', 'clearTimeout'], ['setInterval', 'clearInterval']];
+
+// Like Jest's jsdom environment (and browsers), timers return numeric ids. Node's clearTimeout and
+// clearInterval accept the number returned by a Timeout's Symbol.toPrimitive.
+TIMER_FNS.forEach(([set]) => {
+  const nodeSet = globalThis[set];
+
+  globalThis[set] = (...args) => Number(nodeSet(...args));
+});
+let restoreTimers = null;
+
+function useLegacyFakeTimers() {
+  if (restoreTimers) restoreTimers();
+  const real = Object.fromEntries(TIMER_FNS.flat().map(n => [n, globalThis[n]]));
+
+  vi.useFakeTimers();
+  const handles = new Map();
+  let nextId = 1;
+
+  TIMER_FNS.forEach(([set, clear]) => {
+    const fakeSet = globalThis[set];
+    const fakeClear = globalThis[clear];
+
+    globalThis[set] = vi.fn((...args) => {
+      const id = nextId++;
+
+      handles.set(id, fakeSet(...args));
+      return id;
+    });
+    globalThis[clear] = vi.fn((id) => {
+      fakeClear(handles.has(id) ? handles.get(id) : id);
+      handles.delete(id);
+    });
+  });
+  restoreTimers = () => {
+    restoreTimers = null;
+    vi.useRealTimers();
+    Object.assign(globalThis, real);
+  };
+  return jestCompat;
+}
+
+const jestCompat = new Proxy(vi, {
+  get: (target, prop) => (prop === 'useFakeTimers' ? useLegacyFakeTimers : target[prop]),
+});
+
+globalThis.jest = jestCompat;
 const activeSpies = [];
 
 globalThis.spyOn = (obj, method) => {
@@ -83,6 +133,7 @@ globalThis.spyOn = (obj, method) => {
 // Jasmine removes spyOn() spies after every spec.
 globalThis.afterEach(() => {
   while (activeSpies.length) activeSpies.pop().mockRestore();
+  if (restoreTimers) restoreTimers();
 });
 
 /*

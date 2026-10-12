@@ -2,7 +2,7 @@ import { addClass, empty, isChildOfWebComponentTable, removeClass } from './help
 import { columnFactory } from './helpers/setting';
 import { isFunction } from './helpers/function';
 import { warn } from './helpers/console';
-import { isDefined, isUndefined, isRegExp, _injectProductInfo, isEmpty } from './helpers/mixed';
+import { isDefined, isUndefined, isRegExp, isEmpty } from './helpers/mixed';
 import { isMobileBrowser } from './helpers/browser';
 import DataMap from './dataMap';
 import EditorManager from './editorManager';
@@ -28,7 +28,7 @@ import TableView from './tableView';
 import DataSource from './dataSource';
 import { translateRowsToColumns, cellMethodLookupFactory, spreadsheetColumnLabel } from './helpers/data';
 import { getTranslator } from './utils/recordTranslator';
-import { registerAsRootInstance, hasValidParameter, isRootInstance } from './utils/rootInstance';
+import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
 import Hooks from './pluginHooks';
 import DefaultSettings from './defaultSettings';
@@ -101,10 +101,6 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   this.renderCall = false;
 
   rootElement.insertBefore(this.container, rootElement.firstChild);
-
-  if (process.env.HOT_PACKAGE_TYPE !== '\x63\x65' && isRootInstance(this)) {
-    _injectProductInfo(userSettings.licenseKey, rootElement);
-  }
 
   this.guid = `ht_${randomString()}`; // this is the namespace for global events
 
@@ -3317,13 +3313,6 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
     keyStateStopObserving();
 
-    if (process.env.HOT_PACKAGE_TYPE !== '\x63\x65' && isRootInstance(instance)) {
-      const licenseInfo = document.querySelector('#hot-display-license-info');
-
-      if (licenseInfo) {
-        licenseInfo.parentNode.removeChild(licenseInfo);
-      }
-    }
     empty(instance.rootElement);
     eventManager.destroy();
 

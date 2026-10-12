@@ -71,4 +71,31 @@ describe('jasmine shim', () => {
       false, false, false, false, 0, document.body.parentNode)).not.toThrow();
     expect(event.view).toBe(globalThis.jsdom.window);
   });
+
+  it('jest.useFakeTimers mimics Jest legacy timers (mocked setTimeout, numeric ids)', () => {
+    jest.useFakeTimers();
+    const cb = jasmine.createSpy();
+    const id = setTimeout(cb, 100);
+
+    expect(typeof id).toBe('number');
+    expect(setTimeout.mock.calls.length).toBe(1);
+    expect(setTimeout.mock.calls[0][1]).toBe(100);
+    clearTimeout(id);
+    jest.runAllTimers();
+    expect(cb).not.toHaveBeenCalled();
+    setTimeout(cb, 5);
+    jest.runAllTimers();
+    expect(cb).toHaveBeenCalledTimes(1);
+  });
+
+  it('timers are real again in the next spec', () => {
+    expect(setTimeout.mock).toBeUndefined();
+  });
+
+  it('real timers return numeric ids like a browser', () => {
+    const id = setTimeout(() => {}, 0);
+
+    expect(typeof id).toBe('number');
+    clearTimeout(id);
+  });
 });
