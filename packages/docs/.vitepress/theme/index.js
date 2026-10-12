@@ -1,9 +1,9 @@
-import DefaultTheme from 'vitepress/theme';
+import { VPCarbon } from 'vitepress-carbon';
 import LiveExample from './LiveExample.vue';
 import './custom.css';
 
 export default {
-  extends: DefaultTheme,
+  extends: VPCarbon,
   enhanceApp({ app }) {
     app.component('LiveExample', LiveExample);
   },

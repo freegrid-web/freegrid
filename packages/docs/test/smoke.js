@@ -10,7 +10,7 @@ import { chromium } from 'playwright';
 const BASE = '/freegrid/';
 const dist = fileURLToPath(new URL('../.vitepress/dist', import.meta.url));
 const PAGES = [
-  { path: '', grids: 0 },
+  { path: '', grids: 1 },
   { path: 'guide/getting-started.html', grids: 1 },
   { path: 'examples/basics.html', grids: 1 },
   { path: 'examples/cell-types.html', grids: 1 },

@@ -11,8 +11,11 @@ only and written from scratch: nothing is copied from Handsontable documentation
 
 ## Decisions
 
-- **VitePress 1.6.x** (latest stable) with the default theme, a green brand color and a simple logo.
-  Light and dark mode are built in. Local search is built in.
+- **VitePress 1.6.x** (latest stable) with the **VitePress Carbon** theme (`vitepress-carbon`, MIT,
+  GitHub-style; chosen 2026-10-12 instead of the default theme), a green brand color and a simple logo.
+  Light and dark mode and local search are built in.
+- **Home page:** hero, install commands, a quick start with code and a live grid, "Why FreeGrid" and
+  links into the guide.
 - **Workspace package `packages/docs`** (`@freegrid/docs`, private) depends on `freegrid: workspace:*`. The
   root `docs/` folder stays for internal design documents and is not part of the site.
 - **Base path:** `/freegrid/`.
