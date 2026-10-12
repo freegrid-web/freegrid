@@ -36,6 +36,8 @@ Handsontable.helper.equalsIgnoreCase('foo', 'bar');
 Handsontable.helper.extend({key: 'foo'}, {key2: 'foo'});
 Handsontable.helper.extendArray([1, 'foo'], [true]);
 Handsontable.helper.getComparisonFunction('en', {});
+// The collator compares any values (numbers too), as the runtime does.
+Handsontable.helper.getComparisonFunction()(1, 10);
 Handsontable.helper.getNormalizedDate('YYYY-mm-dd');
 Handsontable.helper.getProperty({key: 'foo'}, 'key');
 Handsontable.helper.getPrototypeOf({key: 'foo'});

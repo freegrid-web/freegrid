@@ -208,7 +208,7 @@ function extendEvent(context, event) {
   }
   event.isTargetWebComponent = true;
 
-  // Native Shadow DOM v0 is gone from browsers, so the target is always resolved here.
+  // Native Shadow DOM v0 no longer exists, so FreeGrid resolves the real target itself.
   if (hasOwnProperty(context, 'hot') || context.isHotTableEnv || context.wtTable) {
     // Polymer doesn't support `event.target` property properly we must emulate it ourselves
     if (hasOwnProperty(context, 'hot')) {
