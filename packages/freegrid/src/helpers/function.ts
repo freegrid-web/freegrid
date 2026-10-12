@@ -1,30 +1,27 @@
-import { arrayReduce } from './array';
+// The wrappers below are `function`s, not arrows, on purpose: they pass their own `this` on to `func`, because
+// FreeGrid calls them as methods. `Fn` accepts any function: callers pass arbitrary methods and callbacks.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- any function signature, as in `Function`
+type Fn = (...args: any[]) => unknown;
 
 /**
- * Checks if given variable is function.
- *
- * @param {*} func Variable to check.
- * @returns {Boolean}
+ * Checks if the value is a function.
  */
-export function isFunction(func) {
-  return typeof func === 'function';
-}
+export const isFunction = (func: unknown): func is Fn => typeof func === 'function';
+
+export type ThrottleResult = { lastCallThrottled: boolean };
 
 /**
- * Creates throttle function that enforces a maximum number of times a function (`func`) can be called over time (`wait`).
- *
- * @param {Function} func Function to invoke.
- * @param {Number} wait Delay in miliseconds.
- * @returns {Function}
+ * Creates a throttled function that calls `func` at most once per `wait` ms: the first call runs at once, later
+ * calls within `wait` collapse into one call at the end of the interval.
  */
-export function throttle(func, wait = 200) {
+export const throttle = (func: Fn, wait = 200) => {
   let lastCalled = 0;
-  const result = {
-    lastCallThrottled: true
+  const result: ThrottleResult = {
+    lastCallThrottled: true,
   };
-  let lastTimer = null;
+  let lastTimer: ReturnType<typeof setTimeout> | null | undefined = null;
 
-  function _throttle(...args) {
+  return function _throttle(this: unknown, ...args: unknown[]): ThrottleResult {
     const stamp = Date.now();
     let needCall = false;
 
@@ -52,28 +49,17 @@ export function throttle(func, wait = 200) {
     }
 
     return result;
-  }
-
-  return _throttle;
-}
+  };
+};
 
 /**
- * Creates throttle function that enforces a maximum number of times a function (`func`) can be called over
- * time (`wait`) after specified hits.
- *
- * @param {Function} func Function to invoke.
- * @param {Number} wait Delay in miliseconds.
- * @param {Number} hits Number of hits after throttling will be applied.
- * @returns {Function}
+ * Like `throttle`, but the first `hits` calls go straight to `func`. `clearHits()` restores the free calls.
  */
-export function throttleAfterHits(func, wait = 200, hits = 10) {
+export const throttleAfterHits = (func: Fn, wait = 200, hits = 10) => {
   const funcThrottle = throttle(func, wait);
   let remainHits = hits;
 
-  function _clearHits() {
-    remainHits = hits;
-  }
-  function _throttleAfterHits(...args) {
+  const _throttleAfterHits = function(this: unknown, ...args: unknown[]): unknown {
     if (remainHits) {
       remainHits -= 1;
 
@@ -81,25 +67,23 @@ export function throttleAfterHits(func, wait = 200, hits = 10) {
     }
 
     return funcThrottle.apply(this, args);
-  }
-  _throttleAfterHits.clearHits = _clearHits;
+  };
 
-  return _throttleAfterHits;
-}
+  return Object.assign(_throttleAfterHits, {
+    clearHits: (): void => {
+      remainHits = hits;
+    },
+  });
+};
 
 /**
- * Creates debounce function that enforces a function (`func`) not be called again until a certain amount of time (`wait`)
- * has passed without it being called.
- *
- * @param {Function} func Function to invoke.
- * @param {Number} wait Delay in milliseconds.
- * @returns {Function}
+ * Creates a debounced function: `func` runs `wait` ms after the last call. Returns the result of the previous run.
  */
-export function debounce(func, wait = 200) {
-  let lastTimer = null;
-  let result;
+export const debounce = (func: Fn, wait = 200) => {
+  let lastTimer: ReturnType<typeof setTimeout> | null = null;
+  let result: unknown;
 
-  function _debounce(...args) {
+  return function _debounce(this: unknown, ...args: unknown[]): unknown {
     if (lastTimer) {
       clearTimeout(lastTimer);
     }
@@ -108,121 +92,67 @@ export function debounce(func, wait = 200) {
     }, wait);
 
     return result;
-  }
-
-  return _debounce;
-}
+  };
+};
 
 /**
- * Creates the function that returns the result of calling the given functions. Result of the first function is passed to
- * the second as an argument and so on. Only first function in the chain can handle multiple arguments.
- *
- * @param {Function} functions Functions to compose.
- * @returns {Function}
+ * Composes functions left to right: the first gets all arguments, each next one gets the previous result.
  */
-export function pipe(...functions) {
+export const pipe = (...functions: Fn[]) => {
   const [firstFunc, ...restFunc] = functions;
 
-  return function _pipe(...args) {
-    return arrayReduce(restFunc, (acc, fn) => fn(acc), firstFunc.apply(this, args));
+  return function _pipe(this: unknown, ...args: unknown[]): unknown {
+    return restFunc.reduce((acc: unknown, fn) => fn(acc), firstFunc.apply(this, args));
   };
-}
+};
 
 /**
- * Creates the function that returns the function with cached arguments.
- *
- * @param {Function} func Function to partialization.
- * @param {Array} params Function arguments to cache.
- * @returns {Function}
+ * Creates a function with the first arguments bound to `params`.
  */
-export function partial(func, ...params) {
-  return function _partial(...restParams) {
-    return func.apply(this, params.concat(restParams));
-  };
-}
+export const partial = (func: Fn, ...params: unknown[]) => function _partial(this: unknown, ...restParams: unknown[]): unknown {
+  return func.apply(this, params.concat(restParams));
+};
 
 /**
- * Creates the functions that returns the function with cached arguments. If count if passed arguments will be matched
- * to the arguments defined in `func` then function will be invoked.
- * Arguments are added to the stack in direction from the left to the right.
+ * Curries `func`: it runs once `func.length` arguments have been collected, left to right.
  *
  * @example
  * ```
- * var replace = curry(function(find, replace, string) {
- *   return string.replace(find, replace);
- * });
+ * const replace = curry((find, replacement, string) => string.replace(find, replacement));
  *
- * // returns function with bounded first argument
- * var replace = replace('foo')
- *
- * // returns replaced string - all arguments was passed so function was invoked
- * replace('bar', 'Some test with foo...');
- *
+ * replace('foo')('bar', 'Some test with foo...'); // 'Some test with bar...'
  * ```
- *
- * @param {Function} func Function to currying.
- * @returns {Function}
  */
-export function curry(func) {
+export const curry = (func: Fn) => {
   const argsLength = func.length;
 
-  function given(argsSoFar) {
-    return function _curry(...params) {
-      const passedArgsSoFar = argsSoFar.concat(params);
-      let result;
+  const given = (argsSoFar: unknown[]) => function _curry(this: unknown, ...params: unknown[]): unknown {
+    const passedArgsSoFar = argsSoFar.concat(params);
 
-      if (passedArgsSoFar.length >= argsLength) {
-        result = func.apply(this, passedArgsSoFar);
-      } else {
-        result = given(passedArgsSoFar);
-      }
-
-      return result;
-    };
-  }
+    return passedArgsSoFar.length >= argsLength ? func.apply(this, passedArgsSoFar) : given(passedArgsSoFar);
+  };
 
   return given([]);
-}
+};
 
 /**
- * Creates the functions that returns the function with cached arguments. If count if passed arguments will be matched
- * to the arguments defined in `func` then function will be invoked.
- * Arguments are added to the stack in direction from the right to the left.
+ * Like `curry`, but the collected arguments are applied right to left.
  *
  * @example
  * ```
- * var replace = curry(function(find, replace, string) {
- *   return string.replace(find, replace);
- * });
+ * const replace = curryRight((find, replacement, string) => string.replace(find, replacement));
  *
- * // returns function with bounded first argument
- * var replace = replace('Some test with foo...')
- *
- * // returns replaced string - all arguments was passed so function was invoked
- * replace('bar', 'foo');
- *
+ * replace('Some test with foo...')('bar', 'foo'); // 'Some test with bar...'
  * ```
- *
- * @param {Function} func Function to currying.
- * @returns {Function}
  */
-export function curryRight(func) {
+export const curryRight = (func: Fn) => {
   const argsLength = func.length;
 
-  function given(argsSoFar) {
-    return function _curry(...params) {
-      const passedArgsSoFar = argsSoFar.concat(params.reverse());
-      let result;
+  const given = (argsSoFar: unknown[]) => function _curry(this: unknown, ...params: unknown[]): unknown {
+    const passedArgsSoFar = argsSoFar.concat(params.reverse());
 
-      if (passedArgsSoFar.length >= argsLength) {
-        result = func.apply(this, passedArgsSoFar);
-      } else {
-        result = given(passedArgsSoFar);
-      }
-
-      return result;
-    };
-  }
+    return passedArgsSoFar.length >= argsLength ? func.apply(this, passedArgsSoFar) : given(passedArgsSoFar);
+  };
 
   return given([]);
-}
+};

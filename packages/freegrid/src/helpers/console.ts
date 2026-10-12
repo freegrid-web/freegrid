@@ -6,45 +6,37 @@
 import { isDefined } from './mixed';
 
 /**
- * Logs message to the console if the `console` object is exposed.
- *
- * @param {...*} args Values which will be logged.
+ * Logs a message to the console.
  */
-export function log(...args) {
+export const log = (...args: unknown[]): void => {
   if (isDefined(console)) {
     console.log(...args);
   }
-}
+};
 
 /**
- * Logs warn to the console if the `console` object is exposed.
- *
- * @param {...*} args Values which will be logged.
+ * Logs a warning to the console.
  */
-export function warn(...args) {
+export const warn = (...args: unknown[]): void => {
   if (isDefined(console)) {
     console.warn(...args);
   }
-}
+};
 
 /**
- * Logs info to the console if the `console` object is exposed.
- *
- * @param {...*} args Values which will be logged.
+ * Logs information to the console.
  */
-export function info(...args) {
+export const info = (...args: unknown[]): void => {
   if (isDefined(console)) {
     console.info(...args);
   }
-}
+};
 
 /**
- * Logs error to the console if the `console` object is exposed.
- *
- * @param {...*} args Values which will be logged.
+ * Logs an error to the console.
  */
-export function error(...args) {
+export const error = (...args: unknown[]): void => {
   if (isDefined(console)) {
     console.error(...args);
   }
-}
+};

@@ -1,23 +1,15 @@
 import { stringify } from './mixed';
 
 /**
- * Convert string to upper case first letter.
- *
- * @param {String} string String to convert.
- * @returns {String}
+ * Upper-cases the first character.
  */
-export function toUpperCaseFirst(string) {
-  return string[0].toUpperCase() + string.substr(1);
-}
+export const toUpperCaseFirst = (string: string): string => string[0].toUpperCase() + string.slice(1);
 
 /**
- * Compare strings case insensitively.
- *
- * @param {...String} strings Strings to compare.
- * @returns {Boolean}
+ * Checks if all values are the same string, ignoring case (values are stringified first).
  */
-export function equalsIgnoreCase(...strings) {
-  const unique = [];
+export const equalsIgnoreCase = (...strings: unknown[]): boolean => {
+  const unique: string[] = [];
   let length = strings.length;
 
   while (length) {
@@ -30,59 +22,36 @@ export function equalsIgnoreCase(...strings) {
   }
 
   return unique.length === 1;
-}
+};
+
+const s4 = (): string => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 
 /**
- * Generates a random hex string. Used as namespace for FreeGrid instance events.
- *
- * @return {String} Returns 16-long character random string (eq. `'92b1bfc74ec4'`).
+ * Returns a random 16-character hexadecimal string.
  */
-export function randomString() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-
-  return s4() + s4() + s4() + s4();
-}
+export const randomString = (): string => s4() + s4() + s4() + s4();
 
 /**
- * Checks if value is valid percent.
- *
- * @param {String} value
- * @returns {Boolean}
+ * Checks if the value is a percentage from `0%` to `100%`.
  */
-export function isPercentValue(value) {
-  return /^([0-9][0-9]?%$)|(^100%$)/.test(value);
-}
+export const isPercentValue = (value: unknown): boolean => /^([0-9][0-9]?%$)|(^100%$)/.test(`${value}`);
 
 /**
- * Substitute strings placed beetwen square brackets into value defined in `variables` object. String names defined in
- * square brackets must be the same as property name of `variables` object.
- *
- * @param {String} template Template string.
- * @param {Object} variables Object which contains all available values which can be injected into template.
- * @returns {String}
+ * Replaces `[name]` in `template` with `variables[name]` (`''` when it is undefined). `\[name]` is kept literally,
+ * without the backslash.
  */
-export function substitute(template, variables = {}) {
-  return (`${template}`).replace(/(?:\\)?\[([^[\]]+)]/g, (match, name) => {
+export const substitute = (template: unknown, variables: Record<string, unknown> = {}): string =>
+  `${template}`.replace(/(?:\\)?\[([^[\]]+)]/g, (match: string, name: string) => {
     if (match.charAt(0) === '\\') {
-      return match.substr(1, match.length - 1);
+      return match.slice(1);
     }
 
-    return variables[name] === void 0 ? '' : variables[name];
+    return variables[name] === void 0 ? '' : `${variables[name]}`;
   });
-}
 
 const STRIP_TAGS_REGEX = /<\/?\w+\/?>|<\w+[\s|/][^>]*>/gi;
 
 /**
- * Strip any HTML tag from the string.
- *
- * @param  {String} string String to cut HTML from.
- * @return {String}
+ * Removes HTML tags from a string.
  */
-export function stripTags(string) {
-  return `${string}`.replace(STRIP_TAGS_REGEX, '');
-}
+export const stripTags = (string: unknown): string => `${string}`.replace(STRIP_TAGS_REGEX, '');
