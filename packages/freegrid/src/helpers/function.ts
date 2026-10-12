@@ -136,11 +136,12 @@ export const curry = (func: Fn) => {
 };
 
 /**
- * Like `curry`, but the collected arguments are applied right to left.
+ * Like `curry`, but each call's arguments are added in reverse order, so later calls fill the leading parameters
+ * last: below, `func` gets `('Some test with foo...', 'foo', 'bar')`.
  *
  * @example
  * ```
- * const replace = curryRight((find, replacement, string) => string.replace(find, replacement));
+ * const replace = curryRight((string, find, replacement) => string.replace(find, replacement));
  *
  * replace('Some test with foo...')('bar', 'foo'); // 'Some test with bar...'
  * ```
