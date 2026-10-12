@@ -14,6 +14,9 @@ export function formatBuildDate(d) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
+// Supported browsers: Vite 7's default "Baseline Widely Available" set. Used for both JS and CSS output.
+export const browserTarget = ['chrome107', 'edge107', 'firefox104', 'safari16'];
+
 export function defineConstants({ buildDate = new Date() } = {}) {
   return {
     __FG_VERSION__: JSON.stringify(pkg.version),

@@ -1,6 +1,6 @@
 /**
  * `setImmediate`/`clearImmediate` for browsers. FreeGrid 6.2.2 used the globals that
- * `@babel/polyfill` installed; FreeGrid targets ES2020 without polyfills, so it ships this helper.
+ * `@babel/polyfill` installed; FreeGrid has no polyfills, so it provides this helper.
  *
  * Callbacks queued during the same turn run together in one later macrotask (as Node's setImmediate
  * does), so a `setTimeout(fn, 0)` scheduled after them cannot interleave between them. As with

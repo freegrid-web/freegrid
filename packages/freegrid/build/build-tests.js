@@ -1,7 +1,7 @@
 // Usage: node build/build-tests.js <e2e|walkontable|selftest>
 import { build } from 'vite';
 import { fileURLToPath } from 'node:url';
-import { defineConstants } from './constants.js';
+import { browserTarget, defineConstants } from './constants.js';
 import { commonjsOptions, ignorePikadayCss, windowModule } from './plugins.js';
 
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
@@ -24,7 +24,7 @@ async function bundle(entry, name) {
     plugins: [windowModule(), ignorePikadayCss()],
     resolve: { alias: [{ find: /^handsontable(.*)$/, replacement: `${r('src')}$1` }] },
     build: {
-      target: 'es2020', commonjsOptions, outDir: r(cfg.out), emptyOutDir: false, minify: false, sourcemap: 'inline',
+      target: browserTarget, commonjsOptions, outDir: r(cfg.out), emptyOutDir: false, minify: false, sourcemap: 'inline',
       lib: { entry: r(entry), name: `fg_${name}`, formats: ['iife'], fileName: () => `${name}.entry.js` },
     },
   });

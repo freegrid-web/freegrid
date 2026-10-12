@@ -27,8 +27,8 @@ While FreeGrid is in `0.x`, a small compatibility layer helps projects move over
 
 ## Browser support
 
-The latest two versions of Chrome, Edge, Firefox and Safari, and any browser that supports ES2020
-(Chrome/Edge 80+, Firefox 74+, Safari 14+).
+Chrome and Edge 107+, Firefox 104+ and Safari 16+ (the browsers that Vite calls "Baseline Widely
+Available"). On iPhone and iPad this means iOS 16 or later.
 
 ## Status
 
