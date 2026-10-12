@@ -1,12 +1,14 @@
 <script setup>
 // Renders packages/docs/examples/<name>.js in the browser only: FreeGrid needs `window` when imported.
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useData } from 'vitepress';
 
 const props = defineProps({
   name: { type: String, required: true },
   height: { type: String, default: '' },
 });
 
+const { isDark } = useData();
 const examples = import.meta.glob('../../examples/*.js');
 const container = ref(null);
 const error = ref('');
@@ -37,7 +39,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="live-example vp-raw">
+  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': isDark }">
     <div ref="container" class="live-example__grid" :style="height ? { height, overflow: 'hidden' } : null" />
     <p v-if="error" class="live-example__error">{{ error }}</p>
   </div>

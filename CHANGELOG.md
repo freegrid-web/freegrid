@@ -1,5 +1,15 @@
 # FreeGrid changelog
 
+## Unreleased
+
+- Theming: every color, the font and the shadows come from CSS variables (`--fg-*`, all defined in
+  `src/css/variables.css`). Override base variables such as `--fg-color-accent` on `:root`, or component variables on
+  `.freegrid`. The default look is unchanged.
+- Dark theme: class `fg-theme-dark` or `data-fg-theme="dark"` on the grid or any ancestor; `fg-theme-auto` /
+  `data-fg-theme="auto"` follows the system setting. The context menu, the comment editor and the date picker follow
+  the grid's theme.
+- The selection border, fill border and fill handle colors are CSS variables instead of fixed colors in JavaScript.
+
 ## 0.1.0 (2026-10-12)
 
 First release on npm, as `@freegrid/core`.

@@ -17,6 +17,7 @@ const PAGES = [
   { path: 'examples/merged-cells-and-comments.html', grids: 1 },
   { path: 'examples/large-data.html', grids: 1 },
   { path: 'examples/search-and-languages.html', grids: 1 },
+  { path: 'guide/theming.html', grids: 1 },
 ];
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 
@@ -65,10 +66,10 @@ for (const { path, grids } of PAGES) {
   if (grids > 0) {
     await page.waitForSelector('.live-example .handsontable .htCore', { timeout: 10000 }).catch(() => {});
   }
-  const rendered = await page.locator('.live-example').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
+  const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
   // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeGrid's height and
   // the grid's viewport shows more than a sliver.
-  const layoutProblems = await page.locator('.live-example').evaluateAll(els => els.flatMap((el) => {
+  const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {
     const table = el.querySelector('.ht_master table.htCore');
     const cell = el.querySelector('.ht_master td');
     const holder = el.querySelector('.ht_master .wtHolder');
@@ -79,13 +80,27 @@ for (const { path, grids } of PAGES) {
     if (getComputedStyle(table).display !== 'table') problems.push(`table display is ${getComputedStyle(table).display}`);
     if (cell.getBoundingClientRect().height > 30) problems.push(`row height is ${cell.getBoundingClientRect().height}px`);
     if (holder.getBoundingClientRect().height < 80) problems.push(`grid viewport is ${holder.getBoundingClientRect().height}px tall`);
-    const [r, g, b] = getComputedStyle(cell).color.match(/\d+/g).map(Number);
+    // Text must stay readable on the cell background in the light and the dark theme (WCAG AA: 4.5:1).
+    const luminance = (color) => {
+      const [r, g, b] = color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number)
+        .map((c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
 
-    if (r + g + b > 300) problems.push(`cell text color ${getComputedStyle(cell).color} is too light for the white grid`);
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const [lighter, darker] = [luminance(getComputedStyle(cell).color), luminance(getComputedStyle(cell).backgroundColor)]
+      .sort((a, b) => b - a);
+    const contrast = (lighter + 0.05) / (darker + 0.05);
+
+    if (contrast < 4.5) problems.push(`cell text ${getComputedStyle(cell).color} on ${getComputedStyle(cell).backgroundColor} has contrast ${contrast.toFixed(1)}`);
     if (holder.getBoundingClientRect().right > el.getBoundingClientRect().right + 1) problems.push('grid viewport overflows its frame');
     return problems;
   }));
 
+  if (path === 'guide/theming.html') {
+    const rows = await page.locator('table.theming-variables tbody tr').count();
+
+    if (rows < 50) failures.push(`${path}: the variable tables have ${rows} rows`);
+  }
   // The isolation of theme styles must not break the theme itself, e.g. the home page content width.
   if (path === '') {
     const contentWidth = await page.evaluate(() => document.querySelector('.VPHomeContent .vp-doc')?.getBoundingClientRect().width);
