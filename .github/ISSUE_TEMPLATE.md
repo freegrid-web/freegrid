@@ -1,18 +1,16 @@
 ### Description
-<!--- Tell us what happens and what should happen -->
+<!--- What happens, and what should happen instead? -->
 
 ### Steps to reproduce
-<!--- Provide steps to reproduce this issue -->
 1.
 2.
 3.
 
-### Demo
-<!--- Provide a link to a live example on JSFiddle or Codepen or fill the following demo with your settings -->
-https://jsfiddle.net/handsoncode/8ffpsqt6/
+### Expected
 
-### Your environment
-* Handsontable version:
-* Browser Name and version:
-* Operating System:
+### Actual
 
+### Environment
+* FreeGrid version:
+* Browser name and version:
+* Operating system:
