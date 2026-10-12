@@ -141,13 +141,13 @@ export const arraySum = (array: ArrayInput<number>): number => arrayReduce(array
 type Loose = number;
 
 /**
- * Returns the largest item (compared with `>`), or `undefined` when `array` is not a real array.
+ * Returns the largest item (compared with `>`); `undefined` for an empty input.
  */
 export const arrayMax = <T>(array: ArrayInput<T>): T | undefined =>
   arrayReduce<T, T | undefined>(array, (a, b) => ((a as Loose) > (b as Loose) ? a : b), Array.isArray(array) ? array[0] : undefined);
 
 /**
- * Returns the smallest item (compared with `<`), or `undefined` when `array` is not a real array.
+ * Returns the smallest item (compared with `<`); `undefined` for an empty input.
  */
 export const arrayMin = <T>(array: ArrayInput<T>): T | undefined =>
   arrayReduce<T, T | undefined>(array, (a, b) => ((a as Loose) < (b as Loose) ? a : b), Array.isArray(array) ? array[0] : undefined);

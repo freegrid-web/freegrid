@@ -51,12 +51,6 @@ export const KEY_CODES: Readonly<Record<string, number>> = {
 };
 
 /**
- * Returns true if keyCode represents a printable character.
- *
- * @param {Number} keyCode
- * @returns {Boolean}
- */
-/**
  * Checks if a key code produces a printable character.
  */
 export const isPrintableChar = (keyCode: number): boolean => ((keyCode === 32) || // space
