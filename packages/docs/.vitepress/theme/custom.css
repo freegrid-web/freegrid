@@ -51,6 +51,6 @@
 }
 
 /* Matches highlighted by the search plugin. */
-.live-example .handsontable td.htSearchResult {
+.live-example .freegrid td.fg-search-result {
   background: #fff3b0;
 }
