@@ -10,6 +10,7 @@
     "build": "pnpm --filter @freegrid/core build",
     "test": "pnpm --filter @freegrid/core test",
     "lint": "eslint .",
+    "typecheck": "pnpm --filter @freegrid/core typecheck",
     "docs:dev": "pnpm --filter @freegrid/docs dev",
     "docs:build": "pnpm --filter @freegrid/docs build"
   },
