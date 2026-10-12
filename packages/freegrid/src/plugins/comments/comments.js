@@ -353,7 +353,7 @@ class Comments extends BasePlugin {
     this.editor.setValue(meta[META_COMMENT] ? meta[META_COMMENT][META_COMMENT_VALUE] : null || '');
 
     if (this.editor.hidden) {
-      this.editor.show();
+      this.editor.show(this.hot.rootElement);
     }
 
     return true;

@@ -11,6 +11,7 @@ import {
 import { arrayEach } from './../../helpers/array';
 import Cursor from './cursor';
 import EventManager from './../../eventManager';
+import { applyTheme } from './../../helpers/dom/theme';
 import { mixin, hasOwnProperty } from './../../helpers/object';
 import { isUndefined, isDefined } from './../../helpers/mixed';
 import { debounce, isFunction } from './../../helpers/function';
@@ -105,6 +106,7 @@ class Menu {
 
     this.container.removeAttribute('style');
     this.container.style.display = 'block';
+    applyTheme(this.container, this.hot.rootElement);
 
     const delayedOpenSubMenu = debounce(row => this.openSubMenu(row), 300);
     const minWidthOfMenu = this.options.minWidth || MIN_WIDTH;

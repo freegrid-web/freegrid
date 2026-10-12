@@ -267,4 +267,69 @@ describe('Theme', () => {
 
     expect(collectThemeStyles()).toEqual(EXPECTED_LIGHT);
   });
+
+  describe('on floating elements', () => {
+    async function openFloatingParts(hot) {
+      contextMenu();
+      await sleep(50);
+      // This grid's own elements: earlier specs may leave other floating elements in <body>.
+      const menu = hot.getPlugin('contextMenu').menu.container;
+
+      closeContextMenu();
+      hot.getPlugin('comments').showAtCell(1, 1);
+      const comments = hot.getPlugin('comments').editor.editor.parentNode;
+
+      hot.getPlugin('comments').hide();
+      selectCell(0, 4);
+      keyDownUp('enter');
+      await sleep(100);
+      const datePicker = hot.getActiveEditor().datePicker;
+
+      return { menu, comments, datePicker };
+    }
+
+    afterEach(() => {
+      $('.theme-wrapper').remove();
+      document.body.removeAttribute('data-fg-theme');
+    });
+
+    it('gives the context menu, comment editor and date picker the dark theme of an ancestor', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-theme-dark"></div>');
+      const hot = await createThemeFixture();
+
+      expect(getComputedStyle(document.querySelector('.fg-master tbody td:not(.area):not(.current)'))['background-color'])
+        .toBe('rgb(30, 30, 30)');
+
+      closeContextMenu();
+      const { menu, comments, datePicker } = await openFloatingParts(hot);
+
+      expect(menu.classList.contains('fg-theme-dark')).toBe(true);
+      expect(comments.classList.contains('fg-theme-dark')).toBe(true);
+      expect(datePicker.classList.contains('fg-theme-dark')).toBe(true);
+    });
+
+    it('reads data-fg-theme on <body> too', async() => {
+      document.body.setAttribute('data-fg-theme', 'dark');
+      const hot = await createThemeFixture();
+
+      closeContextMenu();
+      const { menu } = await openFloatingParts(hot);
+
+      expect(menu.classList.contains('fg-theme-dark')).toBe(true);
+    });
+
+    it('follows a theme change between two openings of the menu', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-theme-dark"></div>');
+      const hot = await createThemeFixture();
+
+      expect(hot.getPlugin('contextMenu').menu.container.classList.contains('fg-theme-dark')).toBe(true);
+      closeContextMenu();
+
+      $('.theme-wrapper').removeClass('fg-theme-dark');
+      contextMenu();
+      await sleep(50);
+
+      expect(hot.getPlugin('contextMenu').menu.container.classList.contains('fg-theme-dark')).toBe(false);
+    });
+  });
 });

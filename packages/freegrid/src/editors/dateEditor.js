@@ -3,6 +3,7 @@ import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
 import './pikaday-theme.css';
 import { addClass, outerHeight } from './../helpers/dom/element';
+import { applyTheme } from './../helpers/dom/theme';
 import { deepExtend } from './../helpers/object';
 import EventManager from './../eventManager';
 import { isMetaKey } from './../helpers/unicode';
@@ -98,6 +99,8 @@ class DateEditor extends TextEditor {
    */
   open(event = null) {
     super.open();
+    // The date picker is in <body>, outside the grid: give it the grid's theme.
+    applyTheme(this.datePicker, this.instance.rootElement);
     this.showDatepicker(event);
   }
 
