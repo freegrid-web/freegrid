@@ -1,6 +1,8 @@
 import {
+  isNumeric,
   rangeEach,
   rangeEachReverse,
+  valueAccordingPercent,
 } from 'handsontable/helpers/number';
 
 describe('Number helper', () => {
@@ -107,6 +109,62 @@ describe('Number helper', () => {
       rangeEachReverse(1, 5, spy);
 
       expect(spy.calls.count()).toBe(0);
+    });
+  });
+
+  describe('isNumeric', () => {
+    it('accepts finite numbers only', () => {
+      expect(isNumeric(0)).toBe(true);
+      expect(isNumeric(-1.5)).toBe(true);
+      expect(isNumeric(1e3)).toBe(true);
+      expect(isNumeric(NaN)).toBe(false);
+      expect(isNumeric(Infinity)).toBe(false);
+      expect(isNumeric(-Infinity)).toBe(false);
+    });
+
+    it('accepts decimal, exponent and hex strings, with surrounding whitespace', () => {
+      ['7', '12', ' 12 ', '-1.5', '+3', '+ 3', '1e3', '1E-3', '0x1F', '0XFF'].forEach((value) => {
+        expect(isNumeric(value), JSON.stringify(value)).toBe(true);
+      });
+    });
+
+    it('rejects other strings', () => {
+      ['', ' ', 'a', '1.', '.5', '12px', '1,5', '0x', '--1', 'Infinity', 'NaN'].forEach((value) => {
+        expect(isNumeric(value), JSON.stringify(value)).toBe(false);
+      });
+    });
+
+    it('accepts Number objects (even NaN ones) but not dates or other objects', () => {
+      expect(isNumeric(new Number(5))).toBe(true); // eslint-disable-line no-new-wrappers
+      expect(isNumeric(new Number(NaN))).toBe(true); // eslint-disable-line no-new-wrappers
+      expect(isNumeric(new Date())).toBe(false);
+      expect(isNumeric({})).toBe(false);
+      expect(isNumeric([])).toBe(false);
+      expect(isNumeric([1])).toBe(false);
+      expect(isNumeric(null)).toBe(false);
+    });
+
+    it('rejects other types', () => {
+      expect(isNumeric(undefined)).toBe(false);
+      expect(isNumeric(true)).toBe(false);
+      expect(isNumeric(10n)).toBe(false);
+      expect(isNumeric(() => 1)).toBe(false);
+    });
+  });
+
+  describe('valueAccordingPercent', () => {
+    it('takes a percent given as a number or a "N%" string', () => {
+      expect(valueAccordingPercent(200, 50)).toBe(100);
+      expect(valueAccordingPercent(200, '50%')).toBe(100);
+      expect(valueAccordingPercent(200, '50')).toBe(100);
+    });
+
+    it('truncates the percent and the result to integers', () => {
+      expect(valueAccordingPercent(10, '33%')).toBe(3);
+      expect(valueAccordingPercent(10, '33.9%')).toBe(3);
+      expect(valueAccordingPercent(3, '50%')).toBe(1);
+      expect(valueAccordingPercent(-10, '50%')).toBe(-5);
+      expect(valueAccordingPercent(-3, '50%')).toBe(-1);
     });
   });
 });
