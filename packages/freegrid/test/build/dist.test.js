@@ -43,6 +43,20 @@ describe('dist outputs', () => {
     expect(typeof w.numbro).toBe('function');
   });
 
+  it('UMD builds expose the number helpers on FreeGrid.helper', () => {
+    ['freegrid.full.js', 'freegrid.full.min.js'].forEach((file) => {
+      const { helper } = windowWith(read(file)).FreeGrid;
+      const visited = [];
+
+      expect(helper.isNumeric('0x1F'), file).toBe(true);
+      expect(helper.isNumeric('.5'), file).toBe(false);
+      expect(helper.valueAccordingPercent(200, '50%'), file).toBe(100);
+      helper.rangeEach(1, 3, index => visited.push(index));
+      helper.rangeEachReverse(2, index => visited.push(index));
+      expect(visited, file).toEqual([1, 2, 3, 2, 1, 0]);
+    });
+  });
+
   it('compat.js aliases Handsontable and fails loudly without FreeGrid', () => {
     const w = windowWith(read('freegrid.full.js'), read('compat.js'));
     expect(w.Handsontable).toBe(w.FreeGrid);
