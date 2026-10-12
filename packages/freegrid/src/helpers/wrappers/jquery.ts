@@ -2,16 +2,33 @@
 // written against FreeGrid 6.x. Both names share one instance per element.
 const PLUGIN_NAMES = ['freegrid', 'handsontable'];
 
-export default function jQueryWrapper(FreeGrid) {
-  const jQuery = typeof window === 'undefined' ? false : window.jQuery;
+type Instance = Record<string, unknown> & {
+  updateSettings(settings: object): void;
+  init(): void;
+};
+type JQueryObject = {
+  first(): JQueryObject;
+  data(key?: string, value?: unknown): unknown;
+  removeData(): void;
+  [index: number]: Element;
+};
+type FreeGridLike = { Core: new (element: Element, settings: object) => Instance };
+type JQueryLike = { fn: Record<string, unknown> };
+
+/**
+ * Registers `$(element).freegrid(settings | action, ...args)` (and `.handsontable`) when jQuery is on the page.
+ */
+const jQueryWrapper = (FreeGrid: FreeGridLike): void => {
+  const jQuery = typeof window === 'undefined' ? false : (window as unknown as { jQuery?: JQueryLike }).jQuery;
 
   if (!jQuery) {
     return;
   }
 
-  function plugin(action, ...args) {
+  // A function, not an arrow: jQuery calls it with `this` set to the jQuery object.
+  function plugin(this: JQueryObject, action?: string | object, ...args: unknown[]): unknown {
     const $this = this.first(); // Use only first element from list
-    let instance = $this.data('freegrid') || $this.data('handsontable');
+    let instance = ($this.data('freegrid') || $this.data('handsontable')) as Instance | undefined;
 
     // Init case
     if (typeof action !== 'string') {
@@ -21,20 +38,24 @@ export default function jQueryWrapper(FreeGrid) {
         instance.updateSettings(userSettings);
 
       } else {
-        instance = new FreeGrid.Core($this[0], userSettings);
-        PLUGIN_NAMES.forEach(name => $this.data(name, instance));
-        instance.init();
+        const created = new FreeGrid.Core($this[0], userSettings);
+
+        PLUGIN_NAMES.forEach(name => $this.data(name, created));
+        created.init();
+        instance = created;
       }
 
       return $this;
     }
 
-    let output;
+    let output: unknown;
 
     // Action case
     if (instance) {
-      if (typeof instance[action] !== 'undefined') {
-        output = instance[action].call(instance, ...args);
+      const method = instance[action];
+
+      if (typeof method !== 'undefined') {
+        output = (method as (...methodArgs: unknown[]) => unknown).call(instance, ...args);
 
         if (action === 'destroy') {
           $this.removeData();
@@ -51,4 +72,6 @@ export default function jQueryWrapper(FreeGrid) {
   PLUGIN_NAMES.forEach((name) => {
     jQuery.fn[name] = plugin;
   });
-}
+};
+
+export default jQueryWrapper;

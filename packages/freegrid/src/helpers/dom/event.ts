@@ -1,84 +1,68 @@
-import { getWindowScrollTop, getWindowScrollLeft } from './element';
+/**
+ * Event helpers.
+ */
+import { getWindowScrollTop, getWindowScrollLeft } from './layout';
+
+type FreeGridEvent = {
+  isImmediatePropagationEnabled?: boolean;
+  cancelBubble?: boolean;
+  stopPropagation?: () => void;
+};
+
+type PointerLikeEvent = { pageX?: number; pageY?: number; clientX: number; clientY: number };
 
 /**
- * Prevent other listeners of the same event from being called.
- *
- * @param {Event} event
+ * Stops other FreeGrid listeners of the same event (see `isImmediatePropagationStopped`) and the event's bubbling.
  */
-export function stopImmediatePropagation(event) {
+export const stopImmediatePropagation = (event: FreeGridEvent): void => {
   event.isImmediatePropagationEnabled = false;
   event.cancelBubble = true;
-}
+};
 
 /**
- * Check if event was stopped by `stopImmediatePropagation`.
- *
- * @param event {Event}
- * @returns {Boolean}
+ * Checks if `stopImmediatePropagation` was called for the event.
  */
-export function isImmediatePropagationStopped(event) {
-  return event.isImmediatePropagationEnabled === false;
-}
+export const isImmediatePropagationStopped = (event: FreeGridEvent): boolean => event.isImmediatePropagationEnabled === false;
 
 /**
- * Prevent further propagation of the current event (prevent bubbling).
- *
- * @param event {Event}
+ * Stops the event's bubbling. Also accepts plain event-like objects without `stopPropagation()`.
  */
-export function stopPropagation(event) {
-  // ie8
-  // http://msdn.microsoft.com/en-us/library/ie/ff975462(v=vs.85).aspx
+export const stopPropagation = (event: FreeGridEvent): void => {
   if (typeof event.stopPropagation === 'function') {
     event.stopPropagation();
   } else {
     event.cancelBubble = true;
   }
-}
+};
 
 /**
- * Get horizontal coordinate of the event object relative to the whole document.
- *
- * @param {Event} event
- * @returns {Number}
+ * Returns the event's horizontal position relative to the whole document.
  */
-export function pageX(event) {
+export const pageX = (event: PointerLikeEvent): number => {
   if (event.pageX) {
     return event.pageX;
   }
 
   return event.clientX + getWindowScrollLeft();
-}
+};
 
 /**
- * Get vertical coordinate of the event object relative to the whole document.
- *
- * @param {Event} event
- * @returns {Number}
+ * Returns the event's vertical position relative to the whole document.
  */
-export function pageY(event) {
+export const pageY = (event: PointerLikeEvent): number => {
   if (event.pageY) {
     return event.pageY;
   }
 
   return event.clientY + getWindowScrollTop();
-}
+};
 
 /**
- * Check if provided event was triggered by clicking the right mouse button.
- *
- * @param {Event} event DOM Event.
- * @returns {Boolean}
+ * Checks if the right mouse button was pressed.
  */
-export function isRightClick(event) {
-  return event.button === 2;
-}
+export const isRightClick = (event: { button: number }): boolean => event.button === 2;
 
 /**
- * Check if provided event was triggered by clicking the left mouse button.
- *
- * @param {Event} event DOM Event.
- * @returns {Boolean}
+ * Checks if the left mouse button was pressed.
  */
-export function isLeftClick(event) {
-  return event.button === 0;
-}
+export const isLeftClick = (event: { button: number }): boolean => event.button === 0;
