@@ -82,7 +82,7 @@ export const getScrollTop = (element: Scrollable): number => (element === window
 export const getScrollLeft = (element: Scrollable): number => (element === window ? getWindowScrollLeft() : (element as HTMLElement).scrollLeft);
 
 /**
- * Returns the closest ancestor that scrolls (overflow `scroll`, or `auto` with content to scroll), or the window.
+ * Returns the closest ancestor with overflow `scroll` or `auto` (inline or computed), or the window.
  */
 export const getScrollableElement = (element: Node): Scrollable => {
   const props = ['auto', 'scroll'];
@@ -121,7 +121,8 @@ export const getScrollableElement = (element: Node): Scrollable => {
 };
 
 /**
- * Returns the closest ancestor that clips its content (overflow other than `visible`), or the window.
+ * Returns the closest ancestor that clips its content (inline overflow other than `visible`, or computed overflow
+ * `scroll`, `hidden` or `auto`), or the window.
  */
 export const getTrimmingContainer = (base: Node): Scrollable => {
   let el = base.parentNode as HTMLElement | null;
