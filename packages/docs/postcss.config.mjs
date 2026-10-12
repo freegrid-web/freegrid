@@ -1,7 +1,11 @@
 import { postcssIsolateStyles } from 'vitepress';
 
-// Keeps VitePress' content styles (.vp-doc) out of `.vp-raw` blocks, so live grids keep FreeGrid's styles.
+// Keeps the theme's content styles (.vp-doc) out of `.vp-raw` blocks, so live grids keep FreeGrid's styles.
+// Only plain stylesheets are isolated: Carbon bundles its component styles through dist/theme/styles/*.css.
+// Vue component styles (`*.vue?…lang.css`) must not be touched, or scoped selectors such as
+// `.VPHomeContent .vp-doc` get an extra descendant step and stop matching.
+const carbonStylesheet = /vitepress-carbon[\\/]dist[\\/]theme[\\/]styles[\\/][^?]*\.css$/;
+
 export default {
-  // Carbon bundles its component styles through its own index.css, so match every Carbon stylesheet.
-  plugins: [postcssIsolateStyles({ includeFiles: [/vp-doc\.css/, /base\.css/, /vitepress-carbon[\\/].*\.css$/] })],
+  plugins: [postcssIsolateStyles({ includeFiles: [/vp-doc\.css$/, /base\.css$/, carbonStylesheet] })],
 };
