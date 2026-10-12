@@ -1,3 +1,4 @@
+import { applyTheme } from './../../helpers/dom/theme';
 import { addClass } from './../../helpers/dom/element';
 
 /**
@@ -82,7 +83,9 @@ class CommentEditor {
   /**
    * Show the comments editor.
    */
-  show() {
+  show(themeSource = null) {
+    // The editor container is in <body>, outside the grid: give it the grid's theme.
+    applyTheme(this.editor.parentNode, themeSource);
     this.editorStyle.display = 'block';
     this.hidden = false;
   }
