@@ -22,6 +22,14 @@
 - jQuery plugin available as `$.fn.freegrid`; `$.fn.handsontable` remains as a compatibility name.
 - Source code is moving to TypeScript (strict). The first converted module is `helpers/number`; there is no change
   in behavior.
+- Removed IE and legacy-browser code. Removed helpers, with what to use instead:
+  - `FreeGrid.helper.isIE`, `isIE8`, `isIE9`, `isEdge`, `isMSBrowser`: no replacement; IE and EdgeHTML are not
+    supported.
+  - `FreeGrid.helper.requestAnimationFrame`, `cancelAnimationFrame`: use `window.requestAnimationFrame` and
+    `window.cancelAnimationFrame`.
+  - `FreeGrid.helper.isWebComponentSupportedNatively` (Shadow DOM v0), `FreeGrid.helper.hasCaptionProblem`: no
+    replacement; no supported browser needs them.
+  - IE-only CSS (`-ms-` properties, IE9–11 selection-area fixes) removed from `freegrid.css`.
 
 ---
 
