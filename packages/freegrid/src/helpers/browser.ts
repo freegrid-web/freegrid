@@ -1,11 +1,14 @@
-import { objectEach } from './object';
+type Tester = {
+  value: boolean;
+  test(ua: string, vendor: string): void;
+};
 
-const tester = (testerFunc) => {
-  const result = {
+const tester = (testerFunc: (ua: string, vendor: string) => boolean): Tester => {
+  const result: Tester = {
     value: false,
-  };
-  result.test = (ua, vendor) => {
-    result.value = testerFunc(ua, vendor);
+    test(ua, vendor) {
+      result.value = testerFunc(ua, vendor);
+    },
   };
 
   return result;
@@ -17,20 +20,27 @@ const browsers = {
   safari: tester((ua, vendor) => /Safari/.test(ua) && /Apple Computer/.test(vendor)),
 };
 
-export function setBrowserMeta({ userAgent = navigator.userAgent, vendor = navigator.vendor } = {}) {
-  objectEach(browsers, ({ test }) => void test(userAgent, vendor));
-}
+/**
+ * Detects the browser from a user agent and vendor (the current browser's by default). Tests call it with
+ * other values.
+ */
+export const setBrowserMeta = ({ userAgent = navigator.userAgent, vendor = navigator.vendor } = {}): void => {
+  Object.values(browsers).forEach(({ test }) => test(userAgent, vendor));
+};
 
 setBrowserMeta();
 
-export function isChrome() {
-  return browsers.chrome.value;
-}
+/**
+ * Checks if the browser is Chrome.
+ */
+export const isChrome = (): boolean => browsers.chrome.value;
 
-export function isMobileBrowser() {
-  return browsers.mobile.value;
-}
+/**
+ * Checks if the browser is a mobile browser.
+ */
+export const isMobileBrowser = (): boolean => browsers.mobile.value;
 
-export function isSafari() {
-  return browsers.safari.value;
-}
+/**
+ * Checks if the browser is Safari.
+ */
+export const isSafari = (): boolean => browsers.safari.value;

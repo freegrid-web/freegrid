@@ -1,6 +1,4 @@
-import { arrayEach } from './array';
-
-export const KEY_CODES = {
+export const KEY_CODES: Readonly<Record<string, number>> = {
   MOUSE_LEFT: 1,
   MOUSE_RIGHT: 3,
   MOUSE_MIDDLE: 2,
@@ -58,101 +56,71 @@ export const KEY_CODES = {
  * @param {Number} keyCode
  * @returns {Boolean}
  */
-export function isPrintableChar(keyCode) {
-  return ((keyCode === 32) || // space
-      (keyCode >= 48 && keyCode <= 57) || // 0-9
-      (keyCode >= 96 && keyCode <= 111) || // numpad
-      (keyCode >= 186 && keyCode <= 192) || // ;=,-./`
-      (keyCode >= 219 && keyCode <= 222) || // []{}\|"'
-      keyCode >= 226 || // special chars (229 for Asian chars)
-      (keyCode >= 65 && keyCode <= 90)); // a-z
-}
+/**
+ * Checks if a key code produces a printable character.
+ */
+export const isPrintableChar = (keyCode: number): boolean => ((keyCode === 32) || // space
+    (keyCode >= 48 && keyCode <= 57) || // 0-9
+    (keyCode >= 96 && keyCode <= 111) || // numpad
+    (keyCode >= 186 && keyCode <= 192) || // ;=,-./`
+    (keyCode >= 219 && keyCode <= 222) || // []{}\|"'
+    keyCode >= 226 || // special chars (229 for Asian chars)
+    (keyCode >= 65 && keyCode <= 90)); // a-z
+
+const META_KEYS = [
+  KEY_CODES.ARROW_DOWN,
+  KEY_CODES.ARROW_UP,
+  KEY_CODES.ARROW_LEFT,
+  KEY_CODES.ARROW_RIGHT,
+  KEY_CODES.HOME,
+  KEY_CODES.END,
+  KEY_CODES.DELETE,
+  KEY_CODES.BACKSPACE,
+  KEY_CODES.F1,
+  KEY_CODES.F2,
+  KEY_CODES.F3,
+  KEY_CODES.F4,
+  KEY_CODES.F5,
+  KEY_CODES.F6,
+  KEY_CODES.F7,
+  KEY_CODES.F8,
+  KEY_CODES.F9,
+  KEY_CODES.F10,
+  KEY_CODES.F11,
+  KEY_CODES.F12,
+  KEY_CODES.TAB,
+  KEY_CODES.PAGE_DOWN,
+  KEY_CODES.PAGE_UP,
+  KEY_CODES.ENTER,
+  KEY_CODES.ESCAPE,
+  KEY_CODES.SHIFT,
+  KEY_CODES.CAPS_LOCK,
+  KEY_CODES.ALT,
+];
 
 /**
- * @param {Number} keyCode
- * @returns {Boolean}
+ * Checks if a key code is a navigation, editing or function key (arrows, Home/End, F1–F12, Enter, Escape, …).
  */
-export function isMetaKey(keyCode) {
-  const metaKeys = [
-    KEY_CODES.ARROW_DOWN,
-    KEY_CODES.ARROW_UP,
-    KEY_CODES.ARROW_LEFT,
-    KEY_CODES.ARROW_RIGHT,
-    KEY_CODES.HOME,
-    KEY_CODES.END,
-    KEY_CODES.DELETE,
-    KEY_CODES.BACKSPACE,
-    KEY_CODES.F1,
-    KEY_CODES.F2,
-    KEY_CODES.F3,
-    KEY_CODES.F4,
-    KEY_CODES.F5,
-    KEY_CODES.F6,
-    KEY_CODES.F7,
-    KEY_CODES.F8,
-    KEY_CODES.F9,
-    KEY_CODES.F10,
-    KEY_CODES.F11,
-    KEY_CODES.F12,
-    KEY_CODES.TAB,
-    KEY_CODES.PAGE_DOWN,
-    KEY_CODES.PAGE_UP,
-    KEY_CODES.ENTER,
-    KEY_CODES.ESCAPE,
-    KEY_CODES.SHIFT,
-    KEY_CODES.CAPS_LOCK,
-    KEY_CODES.ALT
-  ];
-
-  return metaKeys.indexOf(keyCode) !== -1;
-}
+export const isMetaKey = (keyCode: number): boolean => META_KEYS.indexOf(keyCode) !== -1;
 
 /**
- * Checks if passed key code is ctrl or cmd key. Depends on what OS the code runs it check key code based on
- * different meta key codes.
- *
- * @param {Number} keyCode Key code to check.
- * @returns {Boolean}
+ * Checks if a key code is the platform's control key (Command on macOS, Control elsewhere).
  */
-export function isCtrlKey(keyCode) {
-  const keys = [];
-
-  if (window.navigator.platform.includes('Mac')) {
-    keys.push(KEY_CODES.COMMAND_LEFT, KEY_CODES.COMMAND_RIGHT, KEY_CODES.COMMAND_FIREFOX);
-  } else {
-    keys.push(KEY_CODES.CONTROL);
-  }
+export const isCtrlKey = (keyCode: number): boolean => {
+  const keys = window.navigator.platform.includes('Mac')
+    ? [KEY_CODES.COMMAND_LEFT, KEY_CODES.COMMAND_RIGHT, KEY_CODES.COMMAND_FIREFOX]
+    : [KEY_CODES.CONTROL];
 
   return keys.includes(keyCode);
-}
+};
 
 /**
- * Checks if passed key code is ctrl or cmd key. This helper checks if the key code matches to meta keys
- * regardless of the OS on which it is running.
- *
- * @param {Number} keyCode Key code to check.
- * @returns {Boolean}
+ * Checks if a key code is Control or Command, on any platform.
  */
-export function isCtrlMetaKey(keyCode) {
-  return [KEY_CODES.CONTROL, KEY_CODES.COMMAND_LEFT, KEY_CODES.COMMAND_RIGHT, KEY_CODES.COMMAND_FIREFOX].includes(keyCode);
-}
+export const isCtrlMetaKey = (keyCode: number): boolean =>
+  [KEY_CODES.CONTROL, KEY_CODES.COMMAND_LEFT, KEY_CODES.COMMAND_RIGHT, KEY_CODES.COMMAND_FIREFOX].includes(keyCode);
 
 /**
- * @param {Number} keyCode
- * @param {String} baseCode
- * @returns {Boolean}
+ * Checks if a key code matches one of the `KEY_CODES` names in `baseCode` (`'ARROW_UP|ENTER'`).
  */
-export function isKey(keyCode, baseCode) {
-  const keys = baseCode.split('|');
-  let result = false;
-
-  arrayEach(keys, (key) => {
-    if (keyCode === KEY_CODES[key]) {
-      result = true;
-
-      return false;
-    }
-  });
-
-  return result;
-}
+export const isKey = (keyCode: number, baseCode: string): boolean => baseCode.split('|').some(key => keyCode === KEY_CODES[key]);

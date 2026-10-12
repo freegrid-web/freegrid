@@ -1,21 +1,21 @@
 import { inherit } from './object';
-/* eslint-disable import/prefer-default-export */
+
+type SettingsConstructor = { new (): unknown; prototype: Record<PropertyKey, unknown> };
+
 /**
- * Factory for columns constructors.
- *
- * @param {Object} GridSettings
- * @param {Array} conflictList
- * @return {Object} ColumnSettings
+ * Creates the column settings constructor: it inherits from `GridSettings`, with the `conflictList` settings
+ * cleared so they do not leak from the grid level to columns.
  */
-export function columnFactory(GridSettings, conflictList) {
+export const columnFactory = (GridSettings: SettingsConstructor, conflictList: readonly string[]): SettingsConstructor => {
+  // A function, not an arrow: it is a constructor (`new ColumnSettings()`).
   function ColumnSettings() {}
 
-  inherit(ColumnSettings, GridSettings);
+  inherit(ColumnSettings as unknown as SettingsConstructor, GridSettings);
 
   // Clear conflict settings
-  for (let i = 0, len = conflictList.length; i < len; i++) {
-    ColumnSettings.prototype[conflictList[i]] = void 0;
-  }
+  conflictList.forEach((name) => {
+    ColumnSettings.prototype[name] = void 0;
+  });
 
-  return ColumnSettings;
-}
+  return ColumnSettings as unknown as SettingsConstructor;
+};

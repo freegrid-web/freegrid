@@ -1,81 +1,67 @@
 import { arrayEach } from './array';
 
+type AnyObject = Record<PropertyKey, unknown>;
+type Constructor = { new (...args: never[]): unknown; prototype: AnyObject };
+
 /**
- * Generate schema for passed object.
- *
- * @param {Array|Object} object
- * @returns {Array|Object}
+ * Builds an empty "schema" with the same shape as `object`: nested objects are recreated, arrays become `[]`
+ * (or `[schemaOfFirstItem]` for arrays of objects), other values become `null`. `__children` is skipped.
  */
-export function duckSchema(object) {
-  let schema;
-
+export const duckSchema = (object: unknown): AnyObject | unknown[] => {
   if (Array.isArray(object)) {
-    schema = [];
-  } else {
-    schema = {};
-
-    objectEach(object, (value, key) => {
-      if (key === '__children') {
-        return;
-      }
-
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        schema[key] = duckSchema(value);
-
-      } else if (Array.isArray(value)) {
-        if (value.length && typeof value[0] === 'object' && !Array.isArray(value[0])) {
-          schema[key] = [duckSchema(value[0])];
-        } else {
-          schema[key] = [];
-        }
-
-      } else {
-        schema[key] = null;
-      }
-    });
+    return [];
   }
+  const schema: AnyObject = {};
+
+  objectEach(object as AnyObject, (value, key) => {
+    if (key === '__children') {
+      return;
+    }
+
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      schema[key] = duckSchema(value);
+
+    } else if (Array.isArray(value)) {
+      if (value.length && typeof value[0] === 'object' && !Array.isArray(value[0])) {
+        schema[key] = [duckSchema(value[0])];
+      } else {
+        schema[key] = [];
+      }
+
+    } else {
+      schema[key] = null;
+    }
+  });
 
   return schema;
-}
+};
 
 /**
- * Inherit without without calling parent constructor, and setting `Child.prototype.constructor` to `Child` instead of `Parent`.
- * Creates temporary dummy function to call it as constructor.
- * Described in ticket: https://github.com/handsontable/handsontable/pull/516
- *
- * @param  {Object} Child  child class
- * @param  {Object} Parent parent class
- * @return {Object}        extended Child
+ * Makes `Child` inherit from `Parent` (prototype chain), for constructor functions.
  */
-export function inherit(Child, Parent) {
+export const inherit = <C extends Constructor>(Child: C, Parent: Constructor): C => {
   Parent.prototype.constructor = Parent;
-  Child.prototype = new Parent();
+  Child.prototype = new Parent() as AnyObject;
   Child.prototype.constructor = Child;
 
   return Child;
-}
+};
 
 /**
- * Perform shallow extend of a target object with extension's own properties.
- *
- * @param {Object} target An object that will receive the new properties.
- * @param {Object} extension An object containing additional properties to merge into the target.
+ * Copies the own enumerable properties of `extension` onto `target` (shallow). Returns `target`.
  */
-export function extend(target, extension) {
-  objectEach(extension, (value, key) => {
-    target[key] = value;
+export const extend = <T extends object>(target: T, extension: object): T => {
+  objectEach(extension as AnyObject, (value, key) => {
+    (target as AnyObject)[key] = value;
   });
 
   return target;
-}
+};
 
 /**
- * Perform deep extend of a target object with extension's own properties.
- *
- * @param {Object} target An object that will receive the new properties.
- * @param {Object} extension An object containing additional properties to merge into the target.
+ * Copies `extension` onto `target` recursively: nested objects and arrays are merged, dates are copied by reference.
  */
-export function deepExtend(target, extension) {
+export const deepExtend = (target: AnyObject, extension: AnyObject): void => {
   objectEach(extension, (value, key) => {
     if (extension[key] && typeof extension[key] === 'object') {
       if (!target[key]) {
@@ -87,58 +73,52 @@ export function deepExtend(target, extension) {
           target[key] = {};
         }
       }
-      deepExtend(target[key], extension[key]);
+      deepExtend(target[key] as AnyObject, extension[key] as AnyObject);
 
     } else {
       target[key] = extension[key];
     }
   });
-}
+};
 
 /**
- * Perform deep clone of an object.
- * WARNING! Only clones JSON properties. Will cause error when `obj` contains a function, Date, etc.
- *
- * @param {Object} obj An object that will be cloned
- * @return {Object}
+ * Deep-copies an object through JSON (functions, dates and `undefined` values do not survive). Other values are
+ * returned as they are.
  */
-export function deepClone(obj) {
+export const deepClone = <T>(obj: T): T => {
   if (typeof obj === 'object') {
     return JSON.parse(JSON.stringify(obj));
   }
 
   return obj;
-}
+};
 
 /**
- * Shallow clone object.
- *
- * @param {Object} object
- * @returns {Object}
+ * Shallow-copies the own enumerable properties of `object` into a new plain object.
  */
-export function clone(object) {
-  const result = {};
+export const clone = <T extends object>(object: T): T => {
+  const result: AnyObject = {};
 
-  objectEach(object, (value, key) => {
+  objectEach(object as AnyObject, (value, key) => {
     result[key] = value;
   });
 
-  return result;
-}
+  return result as T;
+};
 
 /**
- * Extend the Base object (usually prototype) of the functionality the `mixins` objects.
- *
- * @param {Object} Base Base object which will be extended.
- * @param {Object} mixins The object of the functionality will be "copied".
- * @returns {Object}
+ * Adds the members of mixin objects to `Base.prototype`. Functions are copied; other values become lazily
+ * initialized per-instance properties (arrays and objects are deep-cloned for each instance). Throws on a name
+ * that `Base.prototype` already has.
  */
-export function mixin(Base, ...mixins) {
-  if (!Base.MIXINS) {
-    Base.MIXINS = [];
+export const mixin = <B extends Constructor>(Base: B, ...mixins: AnyObject[]): B => {
+  const target = Base as B & { MIXINS?: unknown[] };
+
+  if (!target.MIXINS) {
+    target.MIXINS = [];
   }
-  arrayEach(mixins, (mixinItem) => {
-    Base.MIXINS.push(mixinItem.MIXIN_NAME);
+  arrayEach(mixins, (mixinItem: AnyObject) => {
+    target.MIXINS?.push(mixinItem.MIXIN_NAME);
 
     objectEach(mixinItem, (value, key) => {
       if (Base.prototype[key] !== void 0) {
@@ -148,10 +128,10 @@ export function mixin(Base, ...mixins) {
         Base.prototype[key] = value;
 
       } else {
-        const getter = function _getter(property, initialValue) {
+        const getter = (property: string, initialValue: unknown) => {
           const propertyName = `_${property}`;
 
-          const initValue = (newValue) => {
+          const initValue = (newValue: unknown): unknown => {
             let result = newValue;
 
             if (Array.isArray(result) || isObject(result)) {
@@ -161,7 +141,8 @@ export function mixin(Base, ...mixins) {
             return result;
           };
 
-          return function() {
+          // A function, not an arrow: `this` is the instance the property is read on.
+          return function(this: AnyObject): unknown {
             if (this[propertyName] === void 0) {
               this[propertyName] = initValue(initialValue);
             }
@@ -169,13 +150,14 @@ export function mixin(Base, ...mixins) {
             return this[propertyName];
           };
         };
-        const setter = function _setter(property) {
+        const setter = (property: string) => {
           const propertyName = `_${property}`;
 
-          return function(newValue) {
+          return function(this: AnyObject, newValue: unknown): void {
             this[propertyName] = newValue;
           };
         };
+
         Object.defineProperty(Base.prototype, key, {
           get: getter(key, value),
           set: setter(key),
@@ -186,49 +168,44 @@ export function mixin(Base, ...mixins) {
   });
 
   return Base;
-}
+};
 
 /**
- * Checks if two objects or arrays are (deep) equal
- *
- * @param {Object|Array} object1
- * @param {Object|Array} object2
- * @returns {Boolean}
+ * Compares two values by their JSON representation.
  */
-export function isObjectEqual(object1, object2) {
-  return JSON.stringify(object1) === JSON.stringify(object2);
-}
+export const isObjectEqual = (object1: unknown, object2: unknown): boolean => JSON.stringify(object1) === JSON.stringify(object2);
 
 /**
- * Determines whether given object is a plain Object.
- * Note: String and Array are not plain Objects
- * @param {*} obj
- * @returns {boolean}
+ * Checks if the value is a plain object (`[object Object]`).
  */
-export function isObject(obj) {
-  return Object.prototype.toString.call(obj) === '[object Object]';
-}
+export const isObject = (obj: unknown): obj is AnyObject => Object.prototype.toString.call(obj) === '[object Object]';
 
-export function defineGetter(object, property, value, options) {
+/**
+ * Defines `property` on `object` with `value`. Unless `options` says `false`, the property is writable,
+ * enumerable and configurable. `options` is modified.
+ */
+export const defineGetter = (object: object, property: PropertyKey, value: unknown, options: PropertyDescriptor): void => {
   options.value = value;
   options.writable = options.writable !== false;
   options.enumerable = options.enumerable !== false;
   options.configurable = options.configurable !== false;
 
   Object.defineProperty(object, property, options);
-}
+};
 
 /**
- * A specialized version of `.forEach` for objects.
- *
- * @param {Object} object The object to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Object} Returns `object`.
+ * Calls `iteratee` for each own enumerable property (all enumerable properties when the object has no
+ * `hasOwnProperty`, e.g. `Object.create(null)`); stops when it returns `false`. Returns `object`.
  */
-export function objectEach(object, iteratee) {
+export const objectEach = <T extends object>(
+  object: T,
+  iteratee: (value: T[keyof T], key: string, object: T) => unknown,
+): T => {
+  const record = object as T & { hasOwnProperty?: unknown };
+
   // eslint-disable-next-line no-restricted-syntax
   for (const key in object) {
-    if (!object.hasOwnProperty || (object.hasOwnProperty && Object.prototype.hasOwnProperty.call(object, key))) {
+    if (!record.hasOwnProperty || Object.prototype.hasOwnProperty.call(object, key)) {
       if (iteratee(object[key], key, object) === false) {
         break;
       }
@@ -236,48 +213,38 @@ export function objectEach(object, iteratee) {
   }
 
   return object;
-}
+};
 
 /**
- * Get object property by its name. Access to sub properties can be achieved by dot notation (e.q. `'foo.bar.baz'`).
- *
- * @param {Object} object Object which value will be exported.
- * @param {String} name Object property name.
- * @returns {*}
+ * Reads a nested property by a dot-separated path (`'a.b.c'`); `undefined` when a step is missing.
  */
-export function getProperty(object, name) {
-  const names = name.split('.');
+export const getProperty = (object: unknown, name: string): unknown => {
   let result = object;
 
-  objectEach(names, (nameItem) => {
-    result = result[nameItem];
+  for (const nameItem of name.split('.')) {
+    result = (result as AnyObject)[nameItem];
 
     if (result === void 0) {
-      result = void 0;
-
-      return false;
+      break;
     }
-  });
+  }
 
   return result;
-}
+};
 
 /**
- * Return object length (recursively).
- *
- * @param {*} object Object for which we want get length.
- * @returns {Number}
+ * Counts the leaf values of a plain object, recursively; 0 for anything that is not a plain object.
  */
-export function deepObjectSize(object) {
+export const deepObjectSize = (object: unknown): number => {
   if (!isObject(object)) {
     return 0;
   }
-  const recursObjLen = function(obj) {
+  const recursObjLen = (obj: unknown): number => {
     let result = 0;
 
     if (isObject(obj)) {
-      objectEach(obj, (key) => {
-        result += recursObjLen(key);
+      objectEach(obj, (value) => {
+        result += recursObjLen(value);
       });
     } else {
       result += 1;
@@ -287,46 +254,43 @@ export function deepObjectSize(object) {
   };
 
   return recursObjLen(object);
-}
+};
+
+export type ObjectPropListener<T> = {
+  _touched: boolean;
+  isTouched(): boolean;
+} & Record<string, T | boolean | (() => boolean)>;
 
 /**
- * Create object with property where its value change will be observed.
- *
- * @param {*} [defaultValue=undefined] Default value.
- * @param {String} [propertyToListen='value'] Property to listen.
- * @returns {Object}
+ * Creates an object with a `propertyToListen` property that remembers whether it was ever assigned
+ * (`isTouched()`).
  */
-export function createObjectPropListener(defaultValue, propertyToListen = 'value') {
+export const createObjectPropListener = <T>(defaultValue: T, propertyToListen = 'value'): ObjectPropListener<T> => {
   const privateProperty = `_${propertyToListen}`;
   const holder = {
     _touched: false,
     [privateProperty]: defaultValue,
     isTouched() {
       return this._touched;
-    }
-  };
+    },
+  } as ObjectPropListener<T>;
 
   Object.defineProperty(holder, propertyToListen, {
-    get() {
+    get(this: AnyObject) {
       return this[privateProperty];
     },
-    set(value) {
+    set(this: AnyObject, value: T) {
       this._touched = true;
       this[privateProperty] = value;
     },
     enumerable: true,
-    configurable: true
+    configurable: true,
   });
 
   return holder;
-}
+};
 
 /**
- * Check if at specified `key` there is any value for `object`.
- *
- * @param {Object} object Object to search value at specyfic key.
- * @param {String} key String key to check.
+ * `Object.prototype.hasOwnProperty`, safe for objects without a prototype.
  */
-export function hasOwnProperty(object, key) {
-  return Object.prototype.hasOwnProperty.call(object, key);
-}
+export const hasOwnProperty = (object: object, key: PropertyKey): boolean => Object.prototype.hasOwnProperty.call(object, key);
