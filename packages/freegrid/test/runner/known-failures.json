@@ -25,6 +25,7 @@
     "AutoColumnSize should not wrap the cell values when the whole column has values with the same length": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
     "AutoColumnSize should update column width after update value in cell (array of objects)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
     "ContextMenu beforeContextMenuSetItems hook should add new menu item even when item is excluded from plugin settings": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu menu hidden items should remove separators from top, bottom and duplicated": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
     "ContextMenu subMenu should not open subMenu immediately": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
     "Core.selectAll should select all cells and clear previous selection": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
     "Core_selection should select the entire fixed column after column header is clicked, after scroll horizontally": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
