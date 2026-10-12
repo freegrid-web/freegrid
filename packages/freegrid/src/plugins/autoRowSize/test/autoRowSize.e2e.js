@@ -12,6 +12,20 @@ describe('AutoRowSize', () => {
     }
   });
 
+  it('should report that recalculation is needed after part of the height cache is cleared', () => {
+    const hot = handsontable({
+      data: Handsontable.helper.createSpreadsheetData(10, 5),
+      autoRowSize: true,
+    });
+    const plugin = hot.getPlugin('autoRowSize');
+
+    expect(plugin.isNeedRecalculate()).toBe(false);
+
+    plugin.clearCacheByRange({ from: 2, to: 3 });
+
+    expect(plugin.isNeedRecalculate()).toBe(true);
+  });
+
   function arrayOfObjects() {
     return [
       { id: 'Short' },
