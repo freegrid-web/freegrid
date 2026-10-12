@@ -1,4 +1,4 @@
-import * as Handsontable from '../../handsontable';
+import * as Handsontable from '../../types/compat';
 
 const baseVersion = Handsontable.baseVersion;
 const buildDate = Handsontable.buildDate;

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": [
-      "es6",
+      "es2020",
       "dom"
     ],
     "module": "commonjs",
@@ -12,11 +12,12 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "",
     "paths": {
-      "handsontable": [ "../../" ]
+      "handsontable": [ "../../types/compat" ]
     }
   },
   "include": [
-    "../../handsontable.d.ts",
+    "../../types/compat.d.ts",
+    "legacy-dom.d.ts",
     "**/*.types.ts",
     "../../src/plugins/**/test/*.types.ts"
   ]

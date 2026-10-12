@@ -1,0 +1,97 @@
+import { build } from 'vite';
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConstants, banner } from './constants.js';
+import { commonjsOptions, ignorePikadayCss, localeRegistration } from './plugins.js';
+
+const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
+const buildDate = new Date();
+const define = defineConstants({ buildDate });
+const deps = ['moment', 'numbro', 'pikaday'];
+const isDep = id => deps.some(d => id === d || id.startsWith(`${d}/`));
+
+const base = { configFile: false, logLevel: 'warn', define };
+
+async function esm() {
+  await build({
+    ...base,
+    plugins: [ignorePikadayCss()],
+    build: {
+      target: 'es2020', commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
+      lib: { entry: { index: r('src/index.js'), compat: r('src/compat.js') }, formats: ['es'], cssFileName: 'freegrid' },
+      rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
+    },
+  });
+}
+
+async function umd({ full, minify }) {
+  const name = `freegrid${full ? '.full' : ''}${minify ? '.min' : ''}`;
+
+  await build({
+    ...base,
+    plugins: full ? [] : [ignorePikadayCss()],
+    build: {
+      target: 'es2020', commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+      cssMinify: minify, sourcemap: true,
+      lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
+      rollupOptions: {
+        external: full ? [] : isDep,
+        output: { exports: 'default', banner: banner(buildDate), globals: { moment: 'moment', numbro: 'numbro', pikaday: 'Pikaday' } },
+      },
+    },
+  });
+}
+
+async function locales({ minify }) {
+  const dir = r('src/i18n/languages');
+  const files = readdirSync(dir).filter(f => f.endsWith('.js'));
+  // Vite resolves lib entries as file paths, so each locale gets a tiny side-effect-only entry file.
+  const entryDir = mkdtempSync(join(tmpdir(), 'freegrid-locales-'));
+
+  try {
+    for (const file of files) {
+      const code = file === 'index.js' ? 'all' : file.replace(/\.js$/, '');
+      const entry = join(entryDir, `${code}.js`);
+      const imports = file === 'index.js'
+        ? files.filter(f => f !== 'index.js').map(f => `import '${dir}/${f}';`).join('\n')
+        : `import '${dir}/${file}';`;
+
+      writeFileSync(entry, `${imports}\n`);
+      await build({
+        ...base,
+        plugins: [localeRegistration()],
+        build: {
+          target: 'es2020', commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+          lib: { entry, name: 'FreeGridLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
+          rollupOptions: { external: ['freegrid'], output: { globals: { freegrid: 'FreeGrid' } } },
+        },
+      });
+    }
+  } finally {
+    rmSync(entryDir, { recursive: true, force: true });
+  }
+}
+
+/** Test-only bundle used by the walkontable browser suite (global `Walkontable`). */
+async function walkontable() {
+  await build({
+    ...base,
+    build: {
+      target: 'es2020', commonjsOptions, outDir: r('src/3rdparty/walkontable/dist'), emptyOutDir: true, minify: false, sourcemap: true,
+      lib: { entry: r('src/3rdparty/walkontable/src/index.js'), name: 'Walkontable', formats: ['iife'], fileName: () => 'walkontable.js' },
+      rollupOptions: { output: { exports: 'named' } },
+    },
+  });
+}
+
+rmSync(r('dist'), { recursive: true, force: true });
+mkdirSync(r('dist'), { recursive: true });
+await esm();
+for (const full of [false, true]) for (const minify of [false, true]) await umd({ full, minify });
+await locales({ minify: false });
+await locales({ minify: true });
+await walkontable();
+copyFileSync(r('build/compat-global.js'), r('dist/compat.js'));
+console.log('FreeGrid build complete.');

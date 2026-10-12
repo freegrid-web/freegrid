@@ -34,7 +34,7 @@ import { getTranslatedPhrase } from './i18n';
 import * as constants from './i18n/constants';
 import { registerLanguageDictionary, getLanguagesDictionaries, getLanguageDictionary } from './i18n/dictionariesManager';
 
-function Handsontable(rootElement, userSettings) {
+function FreeGrid(rootElement, userSettings) {
   const instance = new Core(rootElement, userSettings || {}, rootInstanceSymbol);
 
   instance.init();
@@ -42,25 +42,25 @@ function Handsontable(rootElement, userSettings) {
   return instance;
 }
 
-jQueryWrapper(Handsontable);
+jQueryWrapper(FreeGrid);
 
-Handsontable.Core = Core;
-Handsontable.DefaultSettings = DefaultSettings;
-Handsontable.EventManager = EventManager;
-Handsontable._getListenersCounter = getListenersCounter; // For MemoryLeak tests
+FreeGrid.Core = Core;
+FreeGrid.DefaultSettings = DefaultSettings;
+FreeGrid.EventManager = EventManager;
+FreeGrid._getListenersCounter = getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = __FG_BUILD_DATE__;
-Handsontable.packageName = __FG_PACKAGE_NAME__;
-Handsontable.version = __FG_VERSION__;
+FreeGrid.buildDate = __FG_BUILD_DATE__;
+FreeGrid.packageName = __FG_PACKAGE_NAME__;
+FreeGrid.version = __FG_VERSION__;
 
 // Export Hooks singleton
-Handsontable.hooks = Hooks.getSingleton();
+FreeGrid.hooks = Hooks.getSingleton();
 
 // TODO: Remove this exports after rewrite tests about this module
-Handsontable.__GhostTable = GhostTable;
+FreeGrid.__GhostTable = GhostTable;
 //
 
-// Export all helpers to the Handsontable object
+// Export all helpers to the FreeGrid object
 const HELPERS = [
   arrayHelpers,
   browserHelpers,
@@ -80,14 +80,14 @@ const DOM = [
   domEventHelpers,
 ];
 
-Handsontable.helper = {};
-Handsontable.dom = {};
+FreeGrid.helper = {};
+FreeGrid.dom = {};
 
 // Fill general helpers.
 arrayHelpers.arrayEach(HELPERS, (helper) => {
   arrayHelpers.arrayEach(Object.getOwnPropertyNames(helper), (key) => {
     if (key.charAt(0) !== '_') {
-      Handsontable.helper[key] = helper[key];
+      FreeGrid.helper[key] = helper[key];
     }
   });
 });
@@ -96,78 +96,78 @@ arrayHelpers.arrayEach(HELPERS, (helper) => {
 arrayHelpers.arrayEach(DOM, (helper) => {
   arrayHelpers.arrayEach(Object.getOwnPropertyNames(helper), (key) => {
     if (key.charAt(0) !== '_') {
-      Handsontable.dom[key] = helper[key];
+      FreeGrid.dom[key] = helper[key];
     }
   });
 });
 
 // Export cell types.
-Handsontable.cellTypes = {};
+FreeGrid.cellTypes = {};
 
 arrayHelpers.arrayEach(getRegisteredCellTypeNames(), (cellTypeName) => {
-  Handsontable.cellTypes[cellTypeName] = getCellType(cellTypeName);
+  FreeGrid.cellTypes[cellTypeName] = getCellType(cellTypeName);
 });
 
-Handsontable.cellTypes.registerCellType = registerCellType;
-Handsontable.cellTypes.getCellType = getCellType;
+FreeGrid.cellTypes.registerCellType = registerCellType;
+FreeGrid.cellTypes.getCellType = getCellType;
 
-// Export all registered editors from the Handsontable.
-Handsontable.editors = {};
+// Export all registered editors from the FreeGrid.
+FreeGrid.editors = {};
 
 arrayHelpers.arrayEach(getRegisteredEditorNames(), (editorName) => {
-  Handsontable.editors[`${stringHelpers.toUpperCaseFirst(editorName)}Editor`] = getEditor(editorName);
+  FreeGrid.editors[`${stringHelpers.toUpperCaseFirst(editorName)}Editor`] = getEditor(editorName);
 });
 
-Handsontable.editors.registerEditor = registerEditor;
-Handsontable.editors.getEditor = getEditor;
+FreeGrid.editors.registerEditor = registerEditor;
+FreeGrid.editors.getEditor = getEditor;
 
-// Export all registered renderers from the Handsontable.
-Handsontable.renderers = {};
+// Export all registered renderers from the FreeGrid.
+FreeGrid.renderers = {};
 
 arrayHelpers.arrayEach(getRegisteredRendererNames(), (rendererName) => {
   const renderer = getRenderer(rendererName);
 
   if (rendererName === 'base') {
-    Handsontable.renderers.cellDecorator = renderer;
+    FreeGrid.renderers.cellDecorator = renderer;
   }
-  Handsontable.renderers[`${stringHelpers.toUpperCaseFirst(rendererName)}Renderer`] = renderer;
+  FreeGrid.renderers[`${stringHelpers.toUpperCaseFirst(rendererName)}Renderer`] = renderer;
 });
 
-Handsontable.renderers.registerRenderer = registerRenderer;
-Handsontable.renderers.getRenderer = getRenderer;
+FreeGrid.renderers.registerRenderer = registerRenderer;
+FreeGrid.renderers.getRenderer = getRenderer;
 
-// Export all registered validators from the Handsontable.
-Handsontable.validators = {};
+// Export all registered validators from the FreeGrid.
+FreeGrid.validators = {};
 
 arrayHelpers.arrayEach(getRegisteredValidatorNames(), (validatorName) => {
-  Handsontable.validators[`${stringHelpers.toUpperCaseFirst(validatorName)}Validator`] = getValidator(validatorName);
+  FreeGrid.validators[`${stringHelpers.toUpperCaseFirst(validatorName)}Validator`] = getValidator(validatorName);
 });
 
-Handsontable.validators.registerValidator = registerValidator;
-Handsontable.validators.getValidator = getValidator;
+FreeGrid.validators.registerValidator = registerValidator;
+FreeGrid.validators.getValidator = getValidator;
 
-// Export all registered plugins from the Handsontable.
-Handsontable.plugins = {};
+// Export all registered plugins from the FreeGrid.
+FreeGrid.plugins = {};
 
 arrayHelpers.arrayEach(Object.getOwnPropertyNames(plugins), (pluginName) => {
   const plugin = plugins[pluginName];
 
   if (pluginName === 'Base') {
-    Handsontable.plugins[`${pluginName}Plugin`] = plugin;
+    FreeGrid.plugins[`${pluginName}Plugin`] = plugin;
   } else {
-    Handsontable.plugins[pluginName] = plugin;
+    FreeGrid.plugins[pluginName] = plugin;
   }
 });
 
-Handsontable.plugins.registerPlugin = registerPlugin;
+FreeGrid.plugins.registerPlugin = registerPlugin;
 
-Handsontable.languages = {};
-Handsontable.languages.dictionaryKeys = constants;
-Handsontable.languages.getLanguageDictionary = getLanguageDictionary;
-Handsontable.languages.getLanguagesDictionaries = getLanguagesDictionaries;
-Handsontable.languages.registerLanguageDictionary = registerLanguageDictionary;
+FreeGrid.languages = {};
+FreeGrid.languages.dictionaryKeys = constants;
+FreeGrid.languages.getLanguageDictionary = getLanguageDictionary;
+FreeGrid.languages.getLanguagesDictionaries = getLanguagesDictionaries;
+FreeGrid.languages.registerLanguageDictionary = registerLanguageDictionary;
 
 // Alias to `getTranslatedPhrase` function, for more information check it API.
-Handsontable.languages.getTranslatedPhrase = (...args) => getTranslatedPhrase(...args);
+FreeGrid.languages.getTranslatedPhrase = (...args) => getTranslatedPhrase(...args);
 
-export default Handsontable;
+export default FreeGrid;

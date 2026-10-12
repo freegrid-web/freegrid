@@ -1,7 +1,7 @@
-declare namespace _Handsontable {
+declare namespace _FreeGrid {
 
   class Core {
-    constructor(element: Element, options: Handsontable.DefaultSettings);
+    constructor(element: Element, options: FreeGrid.DefaultSettings);
     addHook(key: string, callback: (() => void) | (() => void)[]): void;
     addHookOnce(key: string, callback: (() => void) | (() => void)[]): void;
     alter(action: 'insert_row' | 'insert_col' | 'remove_row' | 'remove_col', index?: number | Array<[number, number]>, amount?: number, source?: string, keepEmptyRows?: boolean): void;
@@ -24,10 +24,10 @@ declare namespace _Handsontable {
     emptySelectedCells(): void;
     getActiveEditor(): object;
     getCell(row: number, col: number, topmost?: boolean): Element;
-    getCellEditor<T extends Handsontable._editors.Base>(row: number, col: number): T;
-    getCellMeta(row: number, col: number): Handsontable.GridSettings;
-    getCellMetaAtRow(row: number): Handsontable.GridSettings[];
-    getCellRenderer(row: number, col: number): Handsontable.renderers.Base;
+    getCellEditor<T extends FreeGrid._editors.Base>(row: number, col: number): T;
+    getCellMeta(row: number, col: number): FreeGrid.GridSettings;
+    getCellMetaAtRow(row: number): FreeGrid.GridSettings[];
+    getCellRenderer(row: number, col: number): FreeGrid.renderers.Base;
     getCellValidator(row: number, col: number): (value: any, callback: (valid: boolean) => void) => void | RegExp | undefined;
     getColHeader(col?: number): any[] | string;
     getColWidth(col: number): number;
@@ -41,16 +41,16 @@ declare namespace _Handsontable {
     getDataAtRow(row: number): any[];
     getDataAtRowProp(row: number, prop: string): any;
     getDataType(rowFrom: number, columnFrom: number, rowTo: number, columnTo: number): string;
-    getInstance(): Handsontable;
-    getPlugin<T extends keyof Handsontable.PluginsCollection>(pluginName: T): Handsontable.PluginsCollection[T];
+    getInstance(): FreeGrid;
+    getPlugin<T extends keyof FreeGrid.PluginsCollection>(pluginName: T): FreeGrid.PluginsCollection[T];
     getRowHeader(row?: number): any[] | string;
     getRowHeight(row: number): number;
     getSchema(): object;
     getSelected(): Array<[number, number, number, number]> | undefined;
     getSelectedLast(): number[] | undefined;
-    getSelectedRange():  Handsontable.wot.CellRange[] | undefined;
-    getSelectedRangeLast(): Handsontable.wot.CellRange | undefined;
-    getSettings(): Handsontable.DefaultSettings;
+    getSelectedRange():  FreeGrid.wot.CellRange[] | undefined;
+    getSelectedRangeLast(): FreeGrid.wot.CellRange | undefined;
+    getSettings(): FreeGrid.DefaultSettings;
     getSourceData(r?: number, c?: number, r2?: number, c2?: number): any[];
     getSourceDataArray(r?: number, c?: number, r2?: number, c2?: number): any[];
     getSourceDataAtCell(row: number, column: number): any;
@@ -78,7 +78,7 @@ declare namespace _Handsontable {
     selectAll(): void;
     selectCell(row: number, col: number, endRow?: number, endCol?: number, scrollToCell?: boolean, changeListener?: boolean): boolean;
     selectCellByProp(row: number, prop: string, endRow?: number, endProp?: string, scrollToCell?: boolean): boolean;
-    selectCells(coords: Array<[number, number | string, number, number | string]> | Array<Handsontable.wot.CellRange>, scrollToCell?: boolean, changeListener?: boolean): boolean;
+    selectCells(coords: Array<[number, number | string, number, number | string]> | Array<FreeGrid.wot.CellRange>, scrollToCell?: boolean, changeListener?: boolean): boolean;
     selectColumns(startColumn: number | string, endColumn?: number | string): boolean;
     selectRows(startRow: number, endRow?: number): boolean;
     setCellMeta(row: number, col: number, key: string, val: string): void;
@@ -94,7 +94,7 @@ declare namespace _Handsontable {
     toVisualColumn(column: number): number;
     toVisualRow(row: number): number;
     unlisten(): void;
-    updateSettings(settings: Handsontable.DefaultSettings, init: boolean): void;
+    updateSettings(settings: FreeGrid.DefaultSettings, init: boolean): void;
     validateCells(callback: (valid: boolean) => void): void;
     validateColumns(columns: number[], callback: (valid: boolean) => void): void;
     validateRows(rows: number[], callback: (valid: boolean) => void): void;
@@ -102,7 +102,7 @@ declare namespace _Handsontable {
   }
 }
 
-declare namespace Handsontable {
+declare namespace FreeGrid {
   namespace wot {
     interface CellCoords {
       col: number,
@@ -139,8 +139,8 @@ declare namespace Handsontable {
       validator: (value: any, callback: (valid: boolean) => void) => void;
     }
 
-    interface Handsontable {
-      editor: _editors.Handsontable;
+    interface FreeGrid {
+      editor: _editors.FreeGrid;
       renderer: renderers.Autocomplete;
     }
 
@@ -171,14 +171,14 @@ declare namespace Handsontable {
 
   namespace _editors {
     class Base {
-      instance: _Handsontable.Core;
+      instance: _FreeGrid.Core;
       row: number;
       col: number;
       prop: string | number;
       TD: HTMLElement;
       cellProperties: object;
 
-      constructor(hotInstance: _Handsontable.Core, row: number, col: number, prop: string | number, TD: HTMLElement, cellProperties: GridSettings)
+      constructor(hotInstance: _FreeGrid.Core, row: number, col: number, prop: string | number, TD: HTMLElement, cellProperties: GridSettings)
 
       beginEditing(initialValue?: string): void;
       cancelChanges(): void;
@@ -246,7 +246,7 @@ declare namespace Handsontable {
       showDatepicker(event?: Event): void;
     }
 
-    class Handsontable extends Text {
+    class FreeGrid extends Text {
       assignHooks(): void;
       beginEditing(initialValue?: any): void;
       close(): void;
@@ -259,7 +259,7 @@ declare namespace Handsontable {
 
     class Password extends Text {}
 
-    class Autocomplete extends Handsontable {
+    class Autocomplete extends FreeGrid {
       allowKeyEventPropagation(keyCode?: number): boolean;
       finishEditing(restoreOriginalValue?: boolean): void;
       flipDropdown(dropdownHeight?: number): void;
@@ -327,7 +327,7 @@ declare namespace Handsontable {
           visualCol: number,
           visualRow: number,
           type: string,
-          instance: _Handsontable.Core,
+          instance: _FreeGrid.Core,
           dateFormat?: string
         },
         value: string
@@ -368,7 +368,7 @@ declare namespace Handsontable {
       interface BaseUI {
         buildState: boolean;
         eventManager: EventManager;
-        hot: _Handsontable.Core;
+        hot: _FreeGrid.Core;
         options: object;
 
         build(): void;
@@ -387,7 +387,7 @@ declare namespace Handsontable {
       interface MultipleSelectUI extends BaseUI {
         clearAllUI: BaseUI;
         items: any[];
-        itemsBox: _Handsontable.Core;
+        itemsBox: _FreeGrid.Core;
         searchInput: InputUI;
         selectAllUI: BaseUI;
 
@@ -452,7 +452,7 @@ declare namespace Handsontable {
     }
 
     interface CommandExecutor {
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       commands: object;
       commonCallback: (() => void) | void;
 
@@ -481,7 +481,7 @@ declare namespace Handsontable {
 
     interface Endpoints {
       plugin: plugins.ColumnSummary;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       endpoints: any[];
       settings: object | (() => void);
       settingsType: string;
@@ -514,7 +514,7 @@ declare namespace Handsontable {
     interface GhostTable {
       columns: number[];
       container: HTMLElement | null;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       injected: boolean;
       rows: object[];
       samples: object | null;
@@ -545,7 +545,7 @@ declare namespace Handsontable {
 
     interface ItemsFactory {
       defaultOrderPattern: any[] | void;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       predefinedItems: object;
 
       getItems(pattern?: any[] | object | boolean): any[];
@@ -555,8 +555,8 @@ declare namespace Handsontable {
     interface Menu {
       container: HTMLElement;
       eventManager: EventManager;
-      hot: _Handsontable.Core;
-      hotMenu: _Handsontable.Core;
+      hot: _FreeGrid.Core;
+      hotMenu: _FreeGrid.Core;
       hotSubMenus: object;
       keyEvent: boolean;
       menuItems: any[] | null;
@@ -609,7 +609,7 @@ declare namespace Handsontable {
       enabled: boolean;
       initialized: boolean;
 
-      constructor(hotInstance?: _Handsontable.Core);
+      constructor(hotInstance?: _FreeGrid.Core);
 
       addHook(name: string, callback: () => void): void;
       callOnPluginsReady(callback: () => void): void;
@@ -851,7 +851,7 @@ declare namespace Handsontable {
     }
 
     interface RecordTranslator {
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
 
       toPhysical(row: number | object, column?: number): object | any[];
       toPhysicalColumn(column: number): number;
@@ -863,7 +863,7 @@ declare namespace Handsontable {
 
     interface DataProvider {
       changes: object;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       t: RecordTranslator;
 
       clearChanges(): void;
@@ -881,7 +881,7 @@ declare namespace Handsontable {
 
     interface AlterManager {
       sheet: Sheet;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       dataProvider: DataProvider;
       matrix: Matrix;
 
@@ -941,7 +941,7 @@ declare namespace Handsontable {
     interface Sheet {
       alterManager: AlterManager
       dataProvider: DataProvider;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       matrix: Matrix;
       parser: Parser;
       t: RecordTranslator;
@@ -998,7 +998,7 @@ declare namespace Handsontable {
       currentYear: number | void;
       dateCalculator: object | void;
       dataFeed: object | void;
-      hotSource: _Handsontable.Core | void;
+      hotSource: _FreeGrid.Core | void;
       initialSettings: object | void;
       monthHeadersArray: any[];
       monthList: any[];
@@ -1022,7 +1022,7 @@ declare namespace Handsontable {
       removeAllRangeBars(): void;
       setRangeBarColors(rows: object): void;
       setYear(year: number): void;
-      uniformBackgroundRenderer(instance: _Handsontable.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: string | number, cellProperties: GridSettings): void;
+      uniformBackgroundRenderer(instance: _FreeGrid.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: string | number, cellProperties: GridSettings): void;
       unrenderRangeBar(row: number, startDateColumn: number, endDateColumn: number): void;
       updateRangeBarData(row: number, column: number, data: object): void;
     }
@@ -1111,7 +1111,7 @@ declare namespace Handsontable {
 
     namespace moveUI {
       interface BaseUI {
-        hot: _Handsontable.Core;
+        hot: _FreeGrid.Core;
         state: number;
 
         appendTo(wrapper: HTMLElement): void;
@@ -1167,7 +1167,7 @@ declare namespace Handsontable {
         colspan: number;
         removed: boolean;
 
-        normalize(hotInstance: _Handsontable.Core): void;
+        normalize(hotInstance: _FreeGrid.Core): void;
         includes(row: number, column: number): boolean;
         includesHorizontally(column: number): boolean;
         includesVertically(row: number): boolean;
@@ -1181,7 +1181,7 @@ declare namespace Handsontable {
       interface MergedCellsCollection {
         plugin: MergeCells;
         mergedCells: MergeCellsPlugin.MergedCellCoords[];
-        hot: _Handsontable.Core;
+        hot: _FreeGrid.Core;
 
         get(row: number, column: number): MergeCellsPlugin.MergedCellCoords | boolean;
         getByRange(range: wot.CellRange | object): MergeCellsPlugin.MergedCellCoords | boolean;
@@ -1217,7 +1217,7 @@ declare namespace Handsontable {
       handle: HTMLElement;
       manualColumnWidths: any[];
       newSize: number | void;
-      pressed: _Handsontable.Core | void;
+      pressed: _FreeGrid.Core | void;
       selectedCols: any[];
       startOffset: number | void;
       startWidth: number | void;
@@ -1258,7 +1258,7 @@ declare namespace Handsontable {
       handle: HTMLElement;
       manualRowHeights: any[];
       newSize: number | void;
-      pressed: _Handsontable.Core | void;
+      pressed: _FreeGrid.Core | void;
       selectedRows: any[];
       startOffset: number | void;
       startWidth: number | void;
@@ -1316,7 +1316,7 @@ declare namespace Handsontable {
     interface DataManager {
       cache: object;
       data: object;
-      hot: _Handsontable.Core;
+      hot: _FreeGrid.Core;
       parentReference: any; //WeakMap
       plugin: NestedRows;
 
@@ -1396,7 +1396,7 @@ declare namespace Handsontable {
 
   namespace renderers {
     interface Base {
-      (instance: _Handsontable.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: any, cellProperties: GridSettings): HTMLElement;
+      (instance: _FreeGrid.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: any, cellProperties: GridSettings): HTMLElement;
     }
 
     interface Autocomplete extends Base {}
@@ -1552,8 +1552,8 @@ declare namespace Handsontable {
     afterColumnResize?: (currentColumn: number, newSize: number, isDoubleClick: boolean) => void;
     afterColumnSort?: (currentSortConfig: object[], destinationSortConfigs: object[]) => void;
     afterContextMenuDefaultOptions?: (predefinedItems: any[]) => void;
-    afterContextMenuHide?: (context: Handsontable.plugins.ContextMenu) => void;
-    afterContextMenuShow?: (context: Handsontable.plugins.ContextMenu) => void;
+    afterContextMenuHide?: (context: FreeGrid.plugins.ContextMenu) => void;
+    afterContextMenuShow?: (context: FreeGrid.plugins.ContextMenu) => void;
     afterCopy?: (data: any[], coords: any[]) => void;
     afterCopyLimit?: (selectedRows: number, selectedColumnds: number, copyRowsLimit: number, copyColumnsLimit: number) => void;
     afterCreateCol?: (index: number, amount: number) => void;
@@ -1565,8 +1565,8 @@ declare namespace Handsontable {
     afterDocumentKeyDown?: (event: Event) => void;
     afterDrawSelection?: (currentRow: number, currentColumn: number, cornersOfSelection: number[], layerLevel: number | void) => string | void
     afterDropdownMenuDefaultOptions?: (predefinedItems: any[]) => void;
-    afterDropdownMenuHide?: (instance: Handsontable.plugins.DropdownMenu) => void;
-    afterDropdownMenuShow?: (instance: Handsontable.plugins.DropdownMenu) => void;
+    afterDropdownMenuHide?: (instance: FreeGrid.plugins.DropdownMenu) => void;
+    afterDropdownMenuShow?: (instance: FreeGrid.plugins.DropdownMenu) => void;
     afterFilter?: (formulasStack: any[]) => void;
     afterGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     afterGetColHeader?: (col: number, TH: Element) => void;
@@ -1626,7 +1626,7 @@ declare namespace Handsontable {
     beforeColumnResize?: (currentColumn: number, newSize: number, isDoubleClick: boolean) => void;
     beforeColumnSort?: (currentSortConfig: object[], destinationSortConfigs: object[]) => void;
     beforeContextMenuSetItems?: (menuItems: any[]) => void;
-    beforeContextMenuShow?: (context: Handsontable.plugins.ContextMenu) => void;
+    beforeContextMenuShow?: (context: FreeGrid.plugins.ContextMenu) => void;
     beforeCopy?: (data: any[], coords: any[]) => any;
     beforeCreateCol?: (index: number, amount: number, source?: string) => void;
     beforeCreateRow?: (index: number, amount: number, source?: string) => void;
@@ -1634,7 +1634,7 @@ declare namespace Handsontable {
     beforeDetachChild?: (parent: object, element: object) => void;
     beforeDrawBorders?: (corners: any[], borderClassName: string) => void;
     beforeDropdownMenuSetItems?: (menuItems: any[]) => void;
-    beforeDropdownMenuShow?: (instance: Handsontable.plugins.DropdownMenu) => void;
+    beforeDropdownMenuShow?: (instance: FreeGrid.plugins.DropdownMenu) => void;
     beforeFilter?: (formulasStack: any[]) => void;
     beforeGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     beforeInit?: () => void;
@@ -1715,7 +1715,7 @@ declare namespace Handsontable {
     checkbox: cellTypes.Checkbox;
     date: cellTypes.Date;
     dropdown: cellTypes.Dropdown;
-    handsontable: cellTypes.Handsontable;
+    handsontable: cellTypes.FreeGrid;
     numeric: cellTypes.Numeric;
     password: cellTypes.Password;
     text: cellTypes.Text;
@@ -1723,18 +1723,18 @@ declare namespace Handsontable {
   }
 
   interface Editors {
-    AutocompleteEditor: typeof Handsontable._editors.Autocomplete;
-    BaseEditor: typeof Handsontable._editors.Base;
-    CheckboxEditor: typeof Handsontable._editors.Checkbox;
-    DateEditor: typeof Handsontable._editors.Date;
-    DropdownEditor: typeof Handsontable._editors.Dropdown;
-    HandsontableEditor: typeof Handsontable._editors.Handsontable;
-    MobileEditor: typeof Handsontable._editors.Mobile;
-    NumericEditor: typeof Handsontable._editors.Numeric;
-    PasswordEditor: typeof Handsontable._editors.Password;
-    SelectEditor: typeof Handsontable._editors.Select;
-    TextEditor: typeof Handsontable._editors.Text;
-    getEditor: (editorName: string, hotInstance: Handsontable) => any;
+    AutocompleteEditor: typeof FreeGrid._editors.Autocomplete;
+    BaseEditor: typeof FreeGrid._editors.Base;
+    CheckboxEditor: typeof FreeGrid._editors.Checkbox;
+    DateEditor: typeof FreeGrid._editors.Date;
+    DropdownEditor: typeof FreeGrid._editors.Dropdown;
+    HandsontableEditor: typeof FreeGrid._editors.FreeGrid;
+    MobileEditor: typeof FreeGrid._editors.Mobile;
+    NumericEditor: typeof FreeGrid._editors.Numeric;
+    PasswordEditor: typeof FreeGrid._editors.Password;
+    SelectEditor: typeof FreeGrid._editors.Select;
+    TextEditor: typeof FreeGrid._editors.Text;
+    getEditor: (editorName: string, hotInstance: FreeGrid) => any;
     registerEditor: (editorName: string, editorClass: any) => void;
   }
 
@@ -2059,20 +2059,20 @@ declare namespace Handsontable {
 }
 
 
-declare class Handsontable extends _Handsontable.Core {
+declare class FreeGrid extends _FreeGrid.Core {
   static baseVersion: string;
   static buildDate: string;
   static packageName: string;
   static version: string;
-  static cellTypes: Handsontable.CellTypes;
-  static languages: Handsontable.I18n.Internationalization;
-  static dom: Handsontable.Dom;
-  static editors: Handsontable.Editors;
-  static helper: Handsontable.Helper;
-  static hooks: Handsontable.Hooks;
-  static plugins: Handsontable.Plugins;
-  static renderers: Handsontable.Renderers;
+  static cellTypes: FreeGrid.CellTypes;
+  static languages: FreeGrid.I18n.Internationalization;
+  static dom: FreeGrid.Dom;
+  static editors: FreeGrid.Editors;
+  static helper: FreeGrid.Helper;
+  static hooks: FreeGrid.Hooks;
+  static plugins: FreeGrid.Plugins;
+  static renderers: FreeGrid.Renderers;
 }
 
-export = Handsontable;
-export as namespace Handsontable;
+export = FreeGrid;
+export as namespace FreeGrid;
