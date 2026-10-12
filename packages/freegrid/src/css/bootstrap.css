@@ -6,7 +6,7 @@
 }
 
 .freegrid tr {
-  background: #fff;
+  background: var(--fg-cell-background);
 }
 
 .freegrid td {
@@ -19,7 +19,7 @@
 .freegrid .table colgroup + thead tr:first-child td,
 .freegrid .table thead:first-child tr:first-child th,
 .freegrid .table thead:first-child tr:first-child td {
-  border-top: 1px solid #CCCCCC;
+  border-top: 1px solid var(--fg-cell-border-color);
 }
 
 /* table-bordered */
@@ -35,7 +35,7 @@
 
 .freegrid .table-bordered th:first-child,
 .freegrid .table-bordered td:first-child {
-  border-left: 1px solid #CCCCCC;
+  border-left: 1px solid var(--fg-cell-border-color);
 }
 
 .freegrid .table > tbody > tr > td,
@@ -61,5 +61,5 @@
 }
 
 .freegrid .table-striped > tbody > tr:nth-of-type(even) {
-  background-color: #FFF;
+  background-color: var(--fg-cell-background);
 }

@@ -24,15 +24,14 @@
   display: none;
 }
 .freegrid .fg-manual-column-move--guideline {
-  background: #757575;
+  background: var(--fg-move-guideline-color);
   width: 2px;
   top: 0;
   margin-left: -1px;
   z-index: 105;
 }
 .freegrid .fg-manual-column-move--backlight {
-  background: #343434;
-  background: rgba(52, 52, 52, 0.25);
+  background: var(--fg-move-backlight-background);
   display: none;
   z-index: 105;
   pointer-events: none;

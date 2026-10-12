@@ -1,3 +1,4 @@
+import './css/variables.css';
 import './css/bootstrap.css';
 import './css/handsontable.css';
 import './css/mobile.handsontable.css';

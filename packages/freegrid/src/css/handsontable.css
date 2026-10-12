@@ -78,14 +78,14 @@
 .freegrid td {
   border-top-width: 0;
   border-left-width: 0;
-  border-right: 1px solid #CCC;
-  border-bottom: 1px solid #CCC;
+  border-right: 1px solid var(--fg-cell-border-color);
+  border-bottom: 1px solid var(--fg-cell-border-color);
   height: 22px;
   empty-cells: show;
   line-height: 21px;
   padding: 0 4px 0 4px;
   /* top, bottom padding different than 0 is handled poorly by FF with HTML5 doctype */
-  background-color: #FFF;
+  background-color: var(--fg-cell-background);
   vertical-align: top;
   overflow: hidden;
   outline-width: 0;
@@ -95,7 +95,7 @@
 }
 
 .freegrid td.fg-invalid {
-  background-color: #ff4c42 !important; /*gives priority over td.area selection background*/
+  background-color: var(--fg-invalid-background) !important; /*gives priority over td.area selection background*/
 }
 
 .freegrid td.fg-no-wrap {
@@ -104,16 +104,16 @@
 
 .freegrid th:last-child {
   /*Foundation framework fix*/
-  border-right: 1px solid #CCC;
-  border-bottom: 1px solid #CCC;
+  border-right: 1px solid var(--fg-cell-border-color);
+  border-bottom: 1px solid var(--fg-cell-border-color);
 }
 
 .freegrid tr:first-child th.fg-no-frame,
 .freegrid th:first-child.fg-no-frame,
 .freegrid th.fg-no-frame {
   border-left-width: 0;
-  background-color: white;
-  border-color: #FFF;
+  background-color: var(--fg-cell-background);
+  border-color: var(--fg-cell-background);
 }
 
 .freegrid th:first-child,
@@ -121,16 +121,16 @@
 .freegrid td:first-of-type,
 .freegrid .fg-no-frame + th,
 .freegrid .fg-no-frame + td {
-  border-left: 1px solid #CCC;
+  border-left: 1px solid var(--fg-cell-border-color);
 }
 
 .freegrid.fg-row-headers thead tr th:nth-child(2) {
-  border-left: 1px solid #CCC;
+  border-left: 1px solid var(--fg-cell-border-color);
 }
 
 .freegrid tr:first-child th,
 .freegrid tr:first-child td {
-  border-top: 1px solid #CCC;
+  border-top: 1px solid var(--fg-cell-border-color);
 }
 
 .fg-master:not(.innerBorderLeft):not(.emptyColumns) ~ .freegrid tbody tr th,
@@ -146,8 +146,8 @@
 }
 
 .freegrid th {
-  background-color: #f0f0f0;
-  color: #222;
+  background-color: var(--fg-header-background);
+  color: var(--fg-header-text);
   text-align: center;
   font-weight: normal;
   white-space: nowrap;
@@ -158,18 +158,10 @@
 }
 
 .freegrid th.active {
-  background-color: #CCC;
+  background-color: var(--fg-header-active-background);
 }
 .freegrid thead th .relative {
   padding: 2px 4px;
-}
-
-#hot-display-license-info {
-  font-size: 10px;
-  color: #323232 ;
-  padding: 5px 0 3px 0;
-  font-family: Helvetica, Arial, sans-serif;
-  text-align: left;
 }
 
 /* plugins */
@@ -197,17 +189,17 @@
 .freegrid .manualColumnResizer.active,
 .freegrid .manualRowResizer:hover,
 .freegrid .manualRowResizer.active {
-  background-color: #34a9db;
+  background-color: var(--fg-resizer-color);
 }
 
 .freegrid .manualColumnResizerGuide {
   position: fixed;
   right: 0;
   top: 0;
-  background-color: #34a9db;
+  background-color: var(--fg-resizer-color);
   display: none;
   width: 0;
-  border-right: 1px dashed #777;
+  border-right: 1px dashed var(--fg-resizer-guide-border-color);
   margin-left: 5px;
 }
 
@@ -215,10 +207,10 @@
   position: fixed;
   left: 0;
   bottom: 0;
-  background-color: #34a9db;
+  background-color: var(--fg-resizer-color);
   display: none;
   height: 0;
-  border-bottom: 1px dashed #777;
+  border-bottom: 1px dashed var(--fg-resizer-guide-border-color);
   margin-top: 5px;
 }
 
@@ -325,7 +317,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #005eff;
+  background: var(--fg-selection-area-background);
 }
 
 .freegrid td.area:before {
@@ -355,13 +347,13 @@
 
 .freegrid tbody th.fg-highlight,
 .freegrid thead th.fg-highlight {
-  background-color: #dcdcdc;
+  background-color: var(--fg-header-highlight-background);
 }
 
 .freegrid tbody th.fg-active-highlight,
 .freegrid thead th.fg-active-highlight {
-  background-color: #8eb0e7;
-  color: #000;
+  background-color: var(--fg-header-active-highlight-background);
+  color: var(--fg-header-active-highlight-text);
 }
 
 /* fill handle */
@@ -372,7 +364,7 @@
 }
 
 .freegrid .fg-border.fg-fill-border {
-  background: red;
+  background: var(--fg-fill-border-color);
   width: 1px;
   height: 1px;
 }
@@ -385,13 +377,13 @@
   font-family: inherit;
   line-height: 21px;
   font-size: inherit;
-  box-shadow: 0 0 0 2px #5292F7 inset;
+  box-shadow: var(--fg-editor-border-color);
   resize: none;
   /*below are needed to overwrite stuff added by jQuery UI Bootstrap theme*/
   display: block;
-  color: #000;
+  color: var(--fg-editor-text);
   border-radius: 0;
-  background-color: #FFF;
+  background-color: var(--fg-editor-background);
   /*overwrite styles potentionally made by a framework*/
 }
 
@@ -413,7 +405,7 @@ TextRenderer readOnly cell
 */
 
 .freegrid .fg-dimmed {
-  color: #777;
+  color: var(--fg-readonly-text);
 }
 
 .freegrid .fg-submenu {
@@ -422,7 +414,7 @@ TextRenderer readOnly cell
 
 .freegrid .fg-submenu :after{
   content: '▶';
-  color: #777;
+  color: var(--fg-menu-arrow-color);
   position: absolute;
   right: 5px;
   font-size: 9px;
@@ -462,7 +454,7 @@ TextRenderer placeholder value
 */
 
 .freegrid .fg-placeholder {
-  color: #999;
+  color: var(--fg-placeholder-text);
 }
 
 /*
@@ -472,18 +464,18 @@ AutocompleteRenderer down arrow
 .freegrid .fg-autocomplete-arrow {
   float: right;
   font-size: 10px;
-  color: #EEE;
+  color: var(--fg-autocomplete-arrow-color);
   cursor: default;
   width: 16px;
   text-align: center;
 }
 
 .freegrid td .fg-autocomplete-arrow:hover {
-  color: #777;
+  color: var(--fg-autocomplete-arrow-hover-color);
 }
 
 .freegrid td.area .fg-autocomplete-arrow {
-  color: #d3d3d3;
+  color: var(--fg-autocomplete-arrow-selected-color);
 }
 
 /*
@@ -530,9 +522,9 @@ CheckboxRenderer
 }
 
 .freegrid.listbox .fg-master table {
-  border: 1px solid #ccc;
+  border: 1px solid var(--fg-listbox-border-color);
   border-collapse: separate;
-  background: white;
+  background: var(--fg-listbox-background);
 }
 
 .freegrid.listbox th,
@@ -561,7 +553,7 @@ CheckboxRenderer
 
 .freegrid.listbox tr td.current,
 .freegrid.listbox tr:hover td {
-  background: #eee;
+  background: var(--fg-listbox-hover-background);
 }
 
 .fg-clone-top {
@@ -582,8 +574,8 @@ CheckboxRenderer
 }
 
 .freegrid td.fg-search-result {
-  background: #fcedd9;
-  color: #583707;
+  background: var(--fg-search-result-background);
+  color: var(--fg-search-result-text);
 }
 
 /*
@@ -595,33 +587,33 @@ Cell borders
 }
 .fg-bordered.fg-top-border-solid {
   border-top-style: solid;
-  border-top-color: #000;
+  border-top-color: var(--fg-custom-border-color);
 }
 .fg-bordered.fg-right-border-solid {
   border-right-style: solid;
-  border-right-color: #000;
+  border-right-color: var(--fg-custom-border-color);
 }
 .fg-bordered.fg-bottom-border-solid {
   border-bottom-style: solid;
-  border-bottom-color: #000;
+  border-bottom-color: var(--fg-custom-border-color);
 }
 .fg-bordered.fg-left-border-solid {
   border-left-style: solid;
-  border-left-color: #000;
+  border-left-color: var(--fg-custom-border-color);
 }
 
 .freegrid tbody tr th:nth-last-child(2) {
-  border-right: 1px solid #CCC;
+  border-right: 1px solid var(--fg-cell-border-color);
 }
 
 .freegrid thead tr:nth-last-child(2) th.fg-group-indicator-container {
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid var(--fg-cell-border-color);
   padding-bottom: 5px;
 }
 
 
 .fg-clone-top-left-corner thead tr th:nth-last-child(2) {
-  border-right: 1px solid #CCC;
+  border-right: 1px solid var(--fg-cell-border-color);
 }
 
 .fg-collapse-button {
@@ -630,9 +622,9 @@ Cell borders
   line-height: 10px;
   text-align: center;
   border-radius: 5px;
-  border: 1px solid #f3f3f3;
-  -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--fg-collapse-button-border-color);
+  -webkit-box-shadow: var(--fg-collapse-button-shadow);
+  box-shadow: var(--fg-collapse-button-shadow);
   cursor: pointer;
   margin-bottom: 3px;
   position: relative;
@@ -643,7 +635,7 @@ Cell borders
   height: 300%;
   width: 1px;
   display: block;
-  background: #ccc;
+  background: var(--fg-collapse-button-line-color);
   margin-left: 4px;
   position: absolute;
   /*top: -300%;*/
@@ -655,7 +647,7 @@ thead .fg-collapse-button {
   right: 5px;
   position: absolute;
   top: 5px;
-  background: #fff;
+  background: var(--fg-collapse-button-background);
 }
 
 thead .fg-collapse-button:after {
@@ -672,9 +664,9 @@ thead .fg-collapse-button:after {
   line-height: 10px;
   text-align: center;
   border-radius: 5px;
-  border: 1px solid #f3f3f3;
-  -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--fg-collapse-button-border-color);
+  -webkit-box-shadow: var(--fg-collapse-button-shadow);
+  box-shadow: var(--fg-collapse-button-shadow);
   cursor: pointer;
   top: 0;
   display: none;
@@ -694,18 +686,18 @@ thead .fg-collapse-button:after {
   top: 50%;
   transform: translate(0% ,-50%);
   right: 5px;
-  border: 1px solid #A6A6A6;
+  border: 1px solid var(--fg-collapsible-indicator-border-color);
   line-height: 10px;
-  color: #222;
+  color: var(--fg-collapsible-indicator-text);
   border-radius: 10px;
   font-size: 10px;
   width: 10px;
   height: 10px;
   cursor: pointer;
-  -webkit-box-shadow: 0 0 0 6px rgba(238,238,238,1);
-  -moz-box-shadow: 0 0 0 6px rgba(238,238,238,1);
-  box-shadow: 0 0 0 6px rgba(238,238,238,1);
-  background: #eee;
+  -webkit-box-shadow: 0 0 0 6px var(--fg-collapsible-indicator-ring);
+  -moz-box-shadow: 0 0 0 6px var(--fg-collapsible-indicator-ring);
+  box-shadow: 0 0 0 6px var(--fg-collapsible-indicator-ring);
+  background: var(--fg-collapsible-indicator-background);
 }
 
 .freegrid col.hidden {
@@ -713,7 +705,7 @@ thead .fg-collapse-button:after {
 }
 
 .freegrid table tr th.lightRightBorder {
-  border-right: 1px solid #E6E6E6;
+  border-right: 1px solid var(--fg-header-light-border-color);
 }
 
 .freegrid tr.hidden,

@@ -11,7 +11,7 @@
   -khtml-user-select:none;
   -moz-user-select:none;
   user-select:none;
-  -webkit-tap-highlight-color:rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -21,9 +21,9 @@
   top: 0;
   width: 70%;
   height: 54pt;
-  background: #f8f8f8;
+  background: var(--fg-mobile-editor-background);
   border-radius: 20px;
-  border: 1px solid #ebebeb;
+  border: 1px solid var(--fg-mobile-editor-border-color);
   z-index: 999;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -59,7 +59,7 @@
 
 .fg-mobile-editor-container .inputs textarea {
   font-size: 13pt;
-  border: 1px solid #a1a1a1;
+  border: 1px solid var(--fg-mobile-editor-input-border-color);
   -webkit-appearance: none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -81,7 +81,7 @@
 
   border-left: 13pt solid transparent;
   border-right: 13pt solid transparent;
-  border-bottom: 13pt solid #ebebeb;
+  border-bottom: 13pt solid var(--fg-mobile-editor-border-color);
 }
 
 .fg-mobile-editor-container .cellPointer.hidden {
@@ -99,7 +99,7 @@
 
   border-left: 13pt solid transparent;
   border-right: 13pt solid transparent;
-  border-bottom: 13pt solid #f8f8f8;
+  border-bottom: 13pt solid var(--fg-mobile-editor-background);
 }
 
 .fg-mobile-editor-container .moveHandle {
@@ -119,7 +119,7 @@
   font-size: 20pt;
   display: inline-block;
   margin-top: -8px;
-  color: #ebebeb;
+  color: var(--fg-mobile-editor-border-color);
 }
 
 .fg-mobile-editor-container .positionControls {
@@ -155,48 +155,48 @@
 }
 
 .fg-mobile-editor-container .leftButton:after {
-  border-top: 2px solid #288ffe;
-  border-left: 2px solid #288ffe;
+  border-top: 2px solid var(--fg-mobile-editor-button-color);
+  border-left: 2px solid var(--fg-mobile-editor-button-color);
   -webkit-transform: rotate(-45deg);
   /*margin-top: 17pt;*/
   /*margin-left: 20pt;*/
 }
 .fg-mobile-editor-container .leftButton:active:after {
-  border-color: #cfcfcf;
+  border-color: var(--fg-mobile-editor-button-active-color);
 }
 
 .fg-mobile-editor-container .rightButton:after {
-  border-top: 2px solid #288ffe;
-  border-left: 2px solid #288ffe;
+  border-top: 2px solid var(--fg-mobile-editor-button-color);
+  border-left: 2px solid var(--fg-mobile-editor-button-color);
   -webkit-transform: rotate(135deg);
   /*margin-top: 17pt;*/
   /*margin-left: 10pt;*/
 }
 .fg-mobile-editor-container .rightButton:active:after {
-  border-color: #cfcfcf;
+  border-color: var(--fg-mobile-editor-button-active-color);
 }
 
 .fg-mobile-editor-container .upButton:after {
   /*border-top: 2px solid #cfcfcf;*/
-  border-top: 2px solid #288ffe;
-  border-left: 2px solid #288ffe;
+  border-top: 2px solid var(--fg-mobile-editor-button-color);
+  border-left: 2px solid var(--fg-mobile-editor-button-color);
   -webkit-transform: rotate(45deg);
   /*margin-top: 22pt;*/
   /*margin-left: 15pt;*/
 }
 .fg-mobile-editor-container .upButton:active:after {
-  border-color: #cfcfcf;
+  border-color: var(--fg-mobile-editor-button-active-color);
 }
 
 .fg-mobile-editor-container .downButton:after {
-  border-top: 2px solid #288ffe;
-  border-left: 2px solid #288ffe;
+  border-top: 2px solid var(--fg-mobile-editor-button-color);
+  border-left: 2px solid var(--fg-mobile-editor-button-color);
   -webkit-transform: rotate(225deg);
   /*margin-top: 15pt;*/
   /*margin-left: 15pt;*/
 }
 .fg-mobile-editor-container .downButton:active:after {
-  border-color: #cfcfcf;
+  border-color: var(--fg-mobile-editor-button-active-color);
 }
 
 .freegrid.hide-tween {

@@ -1,0 +1,109 @@
+/*
+ * FreeGrid theme variables. Every color, the font and the shadows of FreeGrid come from here; no other stylesheet
+ * contains a color value.
+ *
+ * - Base variables (--fg-color-*, --fg-font-*, --fg-shadow) are defaults on :root. Override them anywhere: on :root,
+ *   on an ancestor of the grid, or on the grid itself.
+ * - Component variables are declared on the grid's parts (the grid and the elements FreeGrid puts in <body>), so they
+ *   always follow the base variables. Override them on the grid: `.freegrid { --fg-cell-background: ... }`.
+ * - --fg-color-text, --fg-font-family and --fg-font-size are not set by default: the grid inherits the page's text
+ *   color and font, as before.
+ * - Themes: class "fg-theme-dark" or data-fg-theme="dark"; "fg-theme-auto" / data-fg-theme="auto" follows the
+ *   system's dark mode.
+ */
+
+/* == Base == */
+:where(:root) {
+  --fg-color-background: #fff; /* Cell, editor and menu background. */
+  --fg-color-border: #ccc; /* Grid lines and outlines. */
+  --fg-color-header-background: #f0f0f0; /* Row and column header background. */
+  --fg-color-header-text: #222; /* Header text. */
+  --fg-color-accent: #4b89ff; /* Selection border. */
+  --fg-color-invalid: #ff4c42; /* Background of cells that failed validation. */
+  --fg-color-readonly-text: #777; /* Text of read-only cells. */
+  --fg-color-muted-text: #999; /* Placeholders and disabled menu items. */
+  --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
+}
+
+/* == Components (declared on the grid and on the parts FreeGrid appends to <body>) == */
+:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container) {
+  /* == Cells == */
+  --fg-cell-background: var(--fg-color-background); /* Cell background. */
+  --fg-cell-text: var(--fg-color-text); /* Cell text (the page's text color by default). */
+  --fg-cell-border-color: var(--fg-color-border); /* Lines between cells. */
+  --fg-readonly-text: var(--fg-color-readonly-text); /* Read-only cell text. */
+  --fg-placeholder-text: var(--fg-color-muted-text); /* Placeholder text. */
+  --fg-invalid-background: var(--fg-color-invalid); /* Invalid cell background. */
+  --fg-search-result-background: #fcedd9; /* Cells matched by the search plugin. */
+  --fg-search-result-text: #583707; /* Text of search matches. */
+  --fg-custom-border-color: #000; /* Default color of custom borders. */
+
+  /* == Headers == */
+  --fg-header-background: var(--fg-color-header-background); /* Header background. */
+  --fg-header-text: var(--fg-color-header-text); /* Header text. */
+  --fg-header-active-background: #ccc; /* Header being resized or moved. */
+  --fg-header-highlight-background: #dcdcdc; /* Headers of the selected cells. */
+  --fg-header-active-highlight-background: #8eb0e7; /* Headers of fully selected rows/columns. */
+  --fg-header-active-highlight-text: #000; /* Their text. */
+  --fg-header-light-border-color: #e6e6e6; /* Light right border of some headers. */
+
+  /* == Selection == */
+  --fg-selection-border-color: var(--fg-color-accent); /* Border of the current cell and the selected range. */
+  --fg-selection-area-background: #005eff; /* Selected range tint (drawn with low opacity). */
+  --fg-fill-border-color: #ff0000; /* Border while dragging the fill handle. */
+  --fg-fill-handle-border-color: #fff; /* Outline of the fill handle square. */
+  --fg-mobile-handle-background: #f5f5ff; /* Selection handles on touch devices. */
+  --fg-mobile-handle-border-color: #4285c8; /* Their border. */
+
+  /* == Editors == */
+  --fg-editor-background: var(--fg-color-background); /* Cell editor background. */
+  --fg-editor-text: var(--fg-color-text, #000); /* Cell editor text. */
+  --fg-editor-border-color: #5292f7; /* Cell editor frame. */
+  --fg-autocomplete-arrow-color: #eee; /* Dropdown arrow in autocomplete cells. */
+  --fg-autocomplete-arrow-hover-color: #777; /* The arrow on hover. */
+  --fg-autocomplete-arrow-selected-color: #d3d3d3; /* The arrow in selected cells. */
+  --fg-listbox-background: var(--fg-color-background); /* Autocomplete/dropdown list background. */
+  --fg-listbox-border-color: var(--fg-color-border); /* List border. */
+  --fg-listbox-hover-background: #eee; /* Hovered list item. */
+
+  /* == Column and row resize == */
+  --fg-resizer-color: #34a9db; /* Resize handle and guide. */
+  --fg-resizer-guide-border-color: #777; /* Dashed guide line. */
+
+  /* == Context menu == */
+  --fg-menu-background: var(--fg-color-background); /* Menu background. */
+  --fg-menu-border-color: var(--fg-color-border); /* Menu border. */
+  --fg-menu-hover-background: #f3f3f3; /* Hovered menu item. */
+  --fg-menu-separator-color: #e6e6e6; /* Separator line. */
+  --fg-menu-dimmed-text: #323232; /* Dimmed items. */
+  --fg-menu-disabled-text: var(--fg-color-muted-text); /* Disabled items. */
+  --fg-menu-arrow-color: #777; /* Submenu arrow. */
+
+  /* == Comments == */
+  --fg-comment-indicator-color: #000; /* Triangle in the corner of commented cells. */
+  --fg-comment-background: var(--fg-color-background); /* Comment editor background. */
+  --fg-comment-border-color: var(--fg-color-border); /* Comment editor left border. */
+  --fg-comment-focus-border-color: #5292f7; /* That border while editing. */
+  --fg-comment-shadow: var(--fg-shadow); /* Comment editor shadow. */
+
+  /* == Row and column move == */
+  --fg-move-guideline-color: #757575; /* Line where a moved row/column will drop. */
+  --fg-move-backlight-background: rgba(52, 52, 52, 0.25); /* Shadow of the moved row/column. */
+
+  /* == Collapsible headers == */
+  --fg-collapse-button-background: #fff; /* Collapse/expand button. */
+  --fg-collapse-button-border-color: #f3f3f3; /* Its border. */
+  --fg-collapse-button-line-color: #ccc; /* Its +/- line. */
+  --fg-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); /* Its shadow. */
+  --fg-collapsible-indicator-background: #eee; /* Collapsible indicator. */
+  --fg-collapsible-indicator-border-color: #a6a6a6; /* Its border. */
+  --fg-collapsible-indicator-text: #222; /* Its text. */
+  --fg-collapsible-indicator-ring: rgba(238, 238, 238, 1); /* Ring around it. */
+
+  /* == Mobile editor == */
+  --fg-mobile-editor-background: #f8f8f8; /* Mobile editor panel. */
+  --fg-mobile-editor-border-color: #ebebeb; /* Its border and pointer. */
+  --fg-mobile-editor-input-border-color: #a1a1a1; /* Its text field border. */
+  --fg-mobile-editor-button-color: #288ffe; /* Arrow buttons. */
+  --fg-mobile-editor-button-active-color: #cfcfcf; /* Pressed arrow button. */
+}

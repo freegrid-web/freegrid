@@ -16,7 +16,7 @@
 }
 
 .fg-context-menu table.fg-core {
-  border: 1px solid #ccc;
+  border: 1px solid var(--fg-menu-border-color);
   border-bottom-width: 2px;
   border-right-width: 2px;
 }
@@ -26,7 +26,7 @@
 }
 
 .fg-context-menu table tbody tr td {
-  background: white;
+  background: var(--fg-menu-background);
   border-width: 0;
   padding: 4px 6px 0 6px;
   cursor: pointer;
@@ -41,29 +41,29 @@
 
 .fg-context-menu table tbody tr td.fg-dimmed {
   font-style: normal;
-  color: #323232;
+  color: var(--fg-menu-dimmed-text);
 }
 
 .fg-context-menu table tbody tr td.current,
 .fg-context-menu table tbody tr td.zeroclipboard-is-hover {
-  background: #f3f3f3;
+  background: var(--fg-menu-hover-background);
 }
 
 .fg-context-menu table tbody tr td.fg-separator {
-  border-top: 1px solid #e6e6e6;
+  border-top: 1px solid var(--fg-menu-separator-color);
   height: 0;
   padding: 0;
   cursor: default;
 }
 
 .fg-context-menu table tbody tr td.fg-disabled {
-  color: #999;
+  color: var(--fg-menu-disabled-text);
   cursor: default;
 }
 
 .fg-context-menu table tbody tr td.fg-disabled:hover {
-  background: #fff;
-  color: #999;
+  background: var(--fg-menu-background);
+  color: var(--fg-menu-disabled-text);
   cursor: default;
 }
 
