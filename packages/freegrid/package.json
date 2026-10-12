@@ -1,14 +1,27 @@
 {
   "name": "freegrid",
-  "version": "0.0.0",
-  "description": "Free, MIT-licensed, spreadsheet-like data grid for the web. Continues Handsontable 6.2.2.",
+  "version": "0.0.1",
+  "description": "Free, MIT-licensed, spreadsheet-like data grid for the web. Preview release.",
   "license": "MIT",
-  "type": "module",
+  "keywords": [
+    "data grid",
+    "spreadsheet",
+    "table",
+    "excel",
+    "grid",
+    "datagrid",
+    "editable table"
+  ],
+  "homepage": "https://freegrid-web.github.io/freegrid/",
+  "bugs": {
+    "url": "https://github.com/freegrid-web/freegrid/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/freegrid-web/freegrid.git",
     "directory": "packages/freegrid"
   },
+  "type": "module",
   "types": "./types/freegrid.d.ts",
   "exports": {
     ".": {
@@ -25,8 +38,14 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "README.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": false
+  },
   "scripts": {
     "build": "node build/build.js",
     "test": "pnpm test:unit && pnpm test:types && pnpm build && pnpm test:dist && pnpm test:e2e && pnpm test:e2e:min && pnpm test:walkontable",
