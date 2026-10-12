@@ -93,6 +93,6 @@ export function applyLanguageSetting(settings, languageCode) {
 export function warnUserAboutLanguageRegistration(languageCode) {
   if (isDefined(languageCode)) {
     error(toSingleLine`Language with code "${languageCode}" was not found. You should register particular language 
-    before using it (for example, load dist/languages/${languageCode}.js or import 'freegrid/languages/${languageCode}').`);
+    before using it (for example, load dist/languages/${languageCode}.js or import '@freegrid/core/languages/${languageCode}').`);
   }
 }

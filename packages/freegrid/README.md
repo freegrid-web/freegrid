@@ -13,8 +13,8 @@ release. It is not affiliated with or endorsed by Handsoncode.
 - **Source and issues:** https://github.com/freegrid-web/freegrid
 
 ```js
-import FreeGrid from 'freegrid';
-import 'freegrid/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/core';
+import '@freegrid/core/dist/freegrid.full.css';
 
 new FreeGrid(document.getElementById('grid'), {
   data: [['A1', 'B1'], ['A2', 'B2']],

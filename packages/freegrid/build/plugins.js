@@ -28,7 +28,7 @@ export function localeRegistration() {
     transform(code, id) {
       if (!/[\\/]src[\\/]i18n[\\/]languages[\\/][a-z]{2}-[A-Z]{2}\.js$/.test(id)) return null;
       return code
-        .replace(/import \* as C from '\.\.\/constants';/, "import FreeGrid from 'freegrid';\n\nconst C = FreeGrid.languages.dictionaryKeys;")
+        .replace(/import \* as C from '\.\.\/constants';/, "import FreeGrid from '@freegrid/core';\n\nconst C = FreeGrid.languages.dictionaryKeys;")
         .replace(/export default dictionary;/, 'FreeGrid.languages.registerLanguageDictionary(dictionary);\n\nexport default dictionary;');
     },
   };
