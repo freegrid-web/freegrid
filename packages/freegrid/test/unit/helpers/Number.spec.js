@@ -112,6 +112,27 @@ describe('Number helper', () => {
     });
   });
 
+  // JS callers are not bound by types: these pin how the loops coerce a non-number start index.
+  describe('rangeEach and rangeEachReverse with a non-number start', () => {
+    const visit = (iterate) => {
+      const visited = [];
+
+      iterate(index => visited.push(index));
+
+      return visited;
+    };
+
+    it('rangeEach coerces the start index arithmetically', () => {
+      expect(visit(fn => rangeEach(null, 3, fn))).toEqual([0, 1, 2, 3]);
+      expect(visit(fn => rangeEach('2', 5, fn))).toEqual([2, 3, 4, 5]);
+    });
+
+    it('rangeEachReverse coerces the start index with `+ 1` (so a string start is concatenated)', () => {
+      expect(visit(fn => rangeEachReverse(null, fn))).toEqual([0]);
+      expect(visit(fn => rangeEachReverse('2', 18, fn))).toEqual([20, 19, 18]);
+    });
+  });
+
   describe('isNumeric', () => {
     it('accepts finite numbers only', () => {
       expect(isNumeric(0)).toBe(true);

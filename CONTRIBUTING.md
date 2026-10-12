@@ -44,6 +44,8 @@ Rules:
   `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>`.
 - Type-only imports use `import type` (`pnpm typecheck` enforces it).
 - No `@ts-ignore` or `@ts-nocheck`.
+- Types do not bind JavaScript callers. Keep the original runtime behavior for unexpected inputs (coercions,
+  `null`, strings) unless the change is deliberate and listed in the CHANGELOG.
 - Never keep `foo.js` next to `foo.ts`: Vite would load the `.js`. A unit test checks this.
 - Conversion PRs are merged with **Rebase and merge**, so the move commit stays separate from the typing commit.
 
