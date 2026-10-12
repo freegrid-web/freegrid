@@ -1,3 +1,4 @@
+import { toFreeGridClassName, toLegacyClassName, withCounterpartClassNames } from '../classNames';
 import { isIE8, isIE9, isSafari } from '../browser';
 import { hasCaptionProblem } from '../feature';
 
@@ -204,7 +205,7 @@ export function index(element) {
  * @returns {boolean}
  */
 export function overlayContainsElement(overlayType, element) {
-  const overlayElement = document.querySelector(`.ht_clone_${overlayType}`);
+  const overlayElement = document.querySelector(`.fg-clone-${overlayType.replace(/_/g, '-')}`);
   return overlayElement ? overlayElement.contains(element) : null;
 }
 
@@ -354,7 +355,15 @@ if (classListSupport) {
  * @returns {Boolean}
  */
 export function hasClass(element, className) {
-  return _hasClass(element, className);
+  const counterpart = toFreeGridClassName(className) === className ? toLegacyClassName(className) : toFreeGridClassName(className);
+
+  return _hasClass(element, className) || (counterpart !== className && _hasClass(element, counterpart));
+}
+
+function expandClassNames(className) {
+  const classNames = typeof className === 'string' ? className.split(' ') : className;
+
+  return Array.isArray(classNames) ? withCounterpartClassNames(classNames.filter(name => name)) : classNames;
 }
 
 /**
@@ -364,7 +373,7 @@ export function hasClass(element, className) {
  * @param {String|Array} className Class name as string or array of strings
  */
 export function addClass(element, className) {
-  return _addClass(element, className);
+  return _addClass(element, expandClassNames(className));
 }
 
 /**
@@ -374,7 +383,7 @@ export function addClass(element, className) {
  * @param {String|Array} className Class name as string or array of strings
  */
 export function removeClass(element, className) {
-  return _removeClass(element, className);
+  return _removeClass(element, expandClassNames(className));
 }
 
 export function removeTextNodes(element, parent) {
@@ -1015,5 +1024,5 @@ export function isInput(element) {
  * @returns {Boolean}
  */
 export function isOutsideInput(element) {
-  return isInput(element) && element.className.indexOf('handsontableInput') == -1 && element.className.indexOf('copyPaste') == -1;
+  return isInput(element) && element.className.indexOf('fg-editor-input') == -1 && element.className.indexOf('copyPaste') == -1;
 }

@@ -1,0 +1,120 @@
+/**
+ * FreeGrid's CSS class names and the legacy names inherited from Handsontable 6.
+ *
+ * FreeGrid uses `fg-` names (`htCore` → `fg-core`, `ht_master` → `fg-master`, `wtHolder` → `fg-holder`,
+ * `handsontable` → `freegrid`). During FreeGrid 0.x every element carries both names, so stylesheets and
+ * code written for the old names keep working; the DOM class helpers (`addClass`, `removeClass`,
+ * `hasClass`) add, remove and match the counterpart automatically. The legacy names are removed in 1.0.
+ */
+
+/** Every legacy class name FreeGrid knows. Names not listed here (e.g. `current`, `area`) are not branded. */
+export const LEGACY_CLASS_NAMES = [
+  'handsontable', 'handsontableEditor', 'handsontableInput', 'handsontableInputHolder', 'htAutoSize',
+  'htAutocomplete', 'htAutocompleteArrow', 'htAutocompleteWrapper', 'htBadValue', 'htBorder', 'htBordered',
+  'htBorders', 'htBottom', 'htBottomBorderSolid', 'htCenter', 'htCheckboxRendererInput',
+  'htCheckboxRendererLabel', 'htCollapseButton', 'htCommentCell', 'htCommentTextArea', 'htComments',
+  'htCommentsContainer', 'htContextMenu', 'htCore', 'htCustomMenuRenderer', 'htDatepickerHolder', 'htDimmed',
+  'htDisabled', 'htExpandButton', 'htFillBorder', 'htGhostTable', 'htGroupIndicatorContainer', 'htHidden',
+  'htInvalid', 'htItemWrapper', 'htJustify', 'htLeft', 'htLeftBorderSolid', 'htMacScroll', 'htMenu',
+  'htMiddle', 'htMobileEditorContainer', 'htNoFrame', 'htNoWrap', 'htNumeric', 'htPlaceholder', 'htRight',
+  'htRightBorderSolid', 'htRowHeaders', 'htSearchResult', 'htSelectEditor', 'htSelectionDisabled',
+  'htSeparator', 'htSubmenu', 'htTop', 'htTopBorderSolid', 'ht__active_highlight', 'ht__highlight',
+  'ht__manualColumnMove', 'ht__manualColumnMove--backlight', 'ht__manualColumnMove--guideline',
+  'ht__manualRowMove', 'ht__manualRowMove--backlight', 'ht__manualRowMove--guideline',
+  'ht__selection--columns', 'ht__selection--rows', 'ht_clone_bottom', 'ht_clone_bottom_left_corner',
+  'ht_clone_corner', 'ht_clone_debug', 'ht_clone_left', 'ht_clone_top', 'ht_clone_top_left_corner',
+  'ht_master', 'wtBorder', 'wtDebugVisible', 'wtHider', 'wtHolder', 'wtSpreader',
+];
+
+// Where the general rule would produce a clash or a misleading name.
+const EXCEPTIONS = {
+  handsontable: 'freegrid',
+  handsontableEditor: 'fg-editor-grid',
+  handsontableInput: 'fg-editor-input',
+  handsontableInputHolder: 'fg-editor-holder',
+  wtBorder: 'fg-selection-border',
+};
+
+const kebab = value => value
+  .replace(/_/g, '-')
+  .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+  .toLowerCase();
+
+function convert(legacy) {
+  if (EXCEPTIONS[legacy]) {
+    return EXCEPTIONS[legacy];
+  }
+  // BEM: ht__block--modifier → fg-block--modifier
+  const bem = /^ht__([A-Za-z_]+)(--[a-z-]+)?$/.exec(legacy);
+
+  if (bem) {
+    return `fg-${kebab(bem[1])}${bem[2] || ''}`;
+  }
+  const prefixed = /^(?:ht_|ht|wt)([A-Za-z][A-Za-z_]*)$/.exec(legacy);
+
+  return prefixed ? `fg-${kebab(prefixed[1])}` : legacy;
+}
+
+const LEGACY_TO_FREEGRID = new Map(LEGACY_CLASS_NAMES.map(legacy => [legacy, convert(legacy)]));
+const FREEGRID_TO_LEGACY = new Map(Array.from(LEGACY_TO_FREEGRID, ([legacy, name]) => [name, legacy]));
+
+/**
+ * @param {String} className A class name.
+ * @returns {String} The FreeGrid name for a legacy name; any other name unchanged.
+ */
+export function toFreeGridClassName(className) {
+  return LEGACY_TO_FREEGRID.get(className) || className;
+}
+
+/**
+ * @param {String} className A class name.
+ * @returns {String} The legacy name for a FreeGrid name; any other name unchanged.
+ */
+export function toLegacyClassName(className) {
+  return FREEGRID_TO_LEGACY.get(className) || className;
+}
+
+/**
+ * Adds the counterpart (legacy or FreeGrid) after every known class name.
+ *
+ * @param {String[]} classNames
+ * @returns {String[]}
+ */
+export function withCounterpartClassNames(classNames) {
+  const result = [];
+
+  classNames.forEach((className) => {
+    result.push(className);
+    const counterpart = LEGACY_TO_FREEGRID.get(className) || FREEGRID_TO_LEGACY.get(className);
+
+    if (counterpart && classNames.indexOf(counterpart) === -1) {
+      result.push(counterpart);
+    }
+  });
+
+  return result;
+}
+
+/**
+ * For code that writes `element.className` directly: a FreeGrid class name followed by its legacy name.
+ *
+ * @param {...String} classNames FreeGrid class names.
+ * @returns {String}
+ */
+export function withLegacyClassNames(...classNames) {
+  return withCounterpartClassNames(classNames).join(' ');
+}
+
+/**
+ * Whether a space-separated class string (such as a cell's `className` setting) contains a FreeGrid
+ * class name or its legacy counterpart.
+ *
+ * @param {String} classNames Space-separated class names.
+ * @param {String} className A FreeGrid class name.
+ * @returns {Boolean}
+ */
+export function classNameIncludes(classNames, className) {
+  const tokens = String(classNames || '').split(/\s+/);
+
+  return tokens.indexOf(className) !== -1 || tokens.indexOf(toLegacyClassName(className)) !== -1;
+}
