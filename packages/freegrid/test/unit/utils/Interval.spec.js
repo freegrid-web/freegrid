@@ -1,6 +1,15 @@
 import Interval from 'handsontable/utils/interval';
 
 describe('Interval', () => {
+  // Fake timers (including requestAnimationFrame and Date) make the timing checks below exact; with real timers
+  // their 50 ms margins failed on a busy machine.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'Date'] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('should create instance of Interval object', () => {
     const i = Interval.create(() => {}, 10);
@@ -28,6 +37,7 @@ describe('Interval', () => {
       expect(spy).not.toHaveBeenCalled();
       done();
     }, 100);
+    vi.advanceTimersByTime(100);
   });
 
   it('should repeatedly invoke callback function after calling `start` method', (done) => {
@@ -53,6 +63,7 @@ describe('Interval', () => {
       i.stop();
       done();
     }, 350);
+    vi.advanceTimersByTime(350);
   });
 
   it('should stop repeatedly invoking callback function after calling `stop` method', (done) => {
@@ -80,5 +91,6 @@ describe('Interval', () => {
       i.stop();
       done();
     }, 400);
+    vi.advanceTimersByTime(400);
   });
 });
