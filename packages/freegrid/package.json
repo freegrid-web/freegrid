@@ -48,7 +48,8 @@
   },
   "scripts": {
     "build": "node build/build.js",
-    "test": "pnpm test:unit && pnpm test:types && pnpm build && pnpm test:dist && pnpm test:e2e && pnpm test:e2e:min && pnpm test:walkontable",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "pnpm typecheck && pnpm test:unit && pnpm test:types && pnpm build && pnpm test:dist && pnpm test:e2e && pnpm test:e2e:min && pnpm test:walkontable",
     "test:unit": "vitest run --reporter=default --reporter=json --outputFile.json=test-results/unit.json; node ../../tools/compare-baseline.mjs unit test-results/unit.json",
     "test:dist": "vitest run --config vitest.dist.config.js",
     "test:types": "tsc -p test/types",
