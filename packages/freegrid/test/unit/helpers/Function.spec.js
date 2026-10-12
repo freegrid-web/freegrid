@@ -236,4 +236,47 @@ describe('Function helper', () => {
       expect(isFunction(toCheck[5])).toBeFalsy();
     });
   });
+
+  // The wrappers are called as methods by FreeGrid code; they must pass their `this` on to `func`.
+  describe('this forwarding', () => {
+    it('throttle and throttleAfterHits call `func` with the wrapper\'s `this`', () => {
+      const seen = [];
+      const record = function() { seen.push(this); };
+      const owner = { throttled: throttle(record), afterHits: throttleAfterHits(record) };
+
+      owner.throttled();
+      owner.afterHits();
+
+      expect(seen).toEqual([owner, owner]);
+    });
+
+    it('debounce calls `func` with the wrapper\'s `this`', async() => {
+      const seen = [];
+      const owner = { debounced: debounce(function() { seen.push(this); }, 10) };
+
+      owner.debounced();
+      await sleep(50);
+
+      expect(seen).toEqual([owner]);
+    });
+
+    it('pipe, partial, curry and curryRight call `func` with the wrapper\'s `this`', () => {
+      const seen = [];
+      // Two parameters on purpose: curry/curryRight wait for `func.length` arguments.
+      const record = function(a, b) { seen.push(this); return a; }; // eslint-disable-line no-unused-vars
+      const owner = {
+        piped: pipe(record),
+        partialized: partial(record, 1),
+        curried: curry(record),
+        curriedRight: curryRight(record),
+      };
+
+      owner.piped(1);
+      owner.partialized(2);
+      owner.curried(1, 2);
+      owner.curriedRight(1, 2);
+
+      expect(seen).toEqual([owner, owner, owner, owner]);
+    });
+  });
 });
