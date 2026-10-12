@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../helpers/classNames';
 import { empty, addClass } from './../helpers/dom/element';
 import { equalsIgnoreCase } from './../helpers/string';
 import EventManager from './../eventManager';
@@ -8,7 +9,7 @@ import { getRenderer } from './index';
 
 const isListeningKeyDownEvent = new WeakMap();
 const isCheckboxListenerAdded = new WeakMap();
-const BAD_VALUE_CLASS = 'htBadValue';
+const BAD_VALUE_CLASS = 'fg-bad-value';
 
 /**
  * Checkbox renderer
@@ -242,7 +243,7 @@ function registerEvents(instance) {
 function createInput() {
   const input = document.createElement('input');
 
-  input.className = 'htCheckboxRendererInput';
+  input.className = withLegacyClassNames('fg-checkbox-renderer-input');
   input.type = 'checkbox';
   input.setAttribute('autocomplete', 'off');
   input.setAttribute('tabindex', '-1');
@@ -258,7 +259,7 @@ function createInput() {
 function createLabel(text) {
   const label = document.createElement('label');
 
-  label.className = 'htCheckboxRendererLabel';
+  label.className = withLegacyClassNames('fg-checkbox-renderer-label');
   label.appendChild(document.createTextNode(text));
 
   return label.cloneNode(true);

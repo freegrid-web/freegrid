@@ -18,7 +18,7 @@ class DebugOverlay extends Overlay {
     this.clone.wtTable.holder.style.opacity = 0.4;
     this.clone.wtTable.holder.style.textShadow = '0 0 2px #ff0000';
 
-    addClass(this.clone.wtTable.holder.parentNode, 'wtDebugVisible');
+    addClass(this.clone.wtTable.holder.parentNode, 'fg-debug-visible');
   }
 }
 

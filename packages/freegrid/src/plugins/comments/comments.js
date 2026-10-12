@@ -229,7 +229,7 @@ class Comments extends BasePlugin {
   targetIsCellWithComment(event) {
     const closestCell = closest(event.target, 'TD', 'TBODY');
 
-    return !!(closestCell && hasClass(closestCell, 'htCommentCell') && closest(closestCell, [this.hot.rootElement]));
+    return !!(closestCell && hasClass(closestCell, 'fg-comment-cell') && closest(closestCell, [this.hot.rootElement]));
   }
 
   /**
@@ -526,7 +526,7 @@ class Comments extends BasePlugin {
 
     priv.cellBelowCursor = document.elementFromPoint(event.clientX, event.clientY);
 
-    if (this.mouseDown || this.editor.isFocused() || hasClass(event.target, 'wtBorder')
+    if (this.mouseDown || this.editor.isFocused() || hasClass(event.target, 'fg-selection-border')
         || priv.cellBelowCursor !== event.target || !this.editor) {
       return;
     }

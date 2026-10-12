@@ -207,14 +207,14 @@ TextEditor.prototype.createElements = function() {
   this.TEXTAREA = document.createElement('TEXTAREA');
   this.TEXTAREA.tabIndex = -1;
 
-  addClass(this.TEXTAREA, 'handsontableInput');
+  addClass(this.TEXTAREA, 'fg-editor-input');
 
   this.textareaStyle = this.TEXTAREA.style;
   this.textareaStyle.width = 0;
   this.textareaStyle.height = 0;
 
   this.TEXTAREA_PARENT = document.createElement('DIV');
-  addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
+  addClass(this.TEXTAREA_PARENT, 'fg-editor-holder');
 
   this.textareaParentStyle = this.TEXTAREA_PARENT.style;
   this.textareaParentStyle.zIndex = '-1';

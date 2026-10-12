@@ -1,22 +1,22 @@
-.wtHolder {
+.fg-holder {
   position: relative;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.3em;
   font-size: 13px;
 }
 
-.wtHolder table,
-.wtHolder tbody,
-.wtHolder thead,
-.wtHolder td,
-.wtHolder th,
-.wtHolder div {
+.fg-holder table,
+.fg-holder tbody,
+.fg-holder thead,
+.fg-holder td,
+.fg-holder th,
+.fg-holder div {
   box-sizing: content-box;
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
 }
 
-.wtHolder table {
+.fg-holder table {
   border-collapse: separate;
   /*it must be separate, otherwise there are offset miscalculations in WebKit: http://stackoverflow.com/questions/2655987/border-collapse-differences-in-ff-and-webkit*/
   /*position: relative;*/
@@ -38,16 +38,16 @@
   max-height: none;
 }
 
-.wtHolder col {
+.fg-holder col {
   width: 50px;
 }
 
-.wtHolder col.rowHeader {
+.fg-holder col.rowHeader {
   width: 50px;
 }
 
-.wtHolder th,
-.wtHolder td {
+.fg-holder th,
+.fg-holder td {
   border-right: 1px solid #CCC;
   border-bottom: 1px solid #CCC;
   height: 22px;
@@ -63,41 +63,41 @@
   /* preserve new line character in cell */
 }
 
-.wtHolder th:last-child {
+.fg-holder th:last-child {
   /*Foundation framework fix*/
   border-right: 1px solid #CCC;
   border-bottom: 1px solid #CCC;
 }
 
-.wtHolder tr:first-child th.htNoFrame,
-.wtHolder th:first-child.htNoFrame,
-.wtHolder th.htNoFrame {
+.fg-holder tr:first-child th.fg-no-frame,
+.fg-holder th:first-child.fg-no-frame,
+.fg-holder th.fg-no-frame {
   border-left-width: 0;
   background-color: white;
   border-color: #FFF;
 }
 
-.wtHolder th:first-child,
-.wtHolder td:first-child,
-.wtHolder .htNoFrame + th,
-.wtHolder .htNoFrame + td {
+.fg-holder th:first-child,
+.fg-holder td:first-child,
+.fg-holder .fg-no-frame + th,
+.fg-holder .fg-no-frame + td {
   border-left: 1px solid #CCC;
 }
 
-.wtHolder tr:first-child th,
-.wtHolder tr:first-child td {
+.fg-holder tr:first-child th,
+.fg-holder tr:first-child td {
   border-top: 1px solid #CCC;
 }
 
-.wtHolder thead tr:last-child th {
+.fg-holder thead tr:last-child th {
   border-bottom-width: 0;
 }
 
-.wtHolder thead tr.lastChild th {
+.fg-holder thead tr.lastChild th {
   border-bottom-width: 0;
 }
 
-.wtHolder th {
+.fg-holder th {
   background-color: #EEE;
   color: #222;
   text-align: center;
@@ -105,55 +105,55 @@
   white-space: nowrap;
 }
 
-.wtHolder th .small {
+.fg-holder th .small {
   font-size: 12px;
 }
 
-.wtHolder thead th {
+.fg-holder thead th {
   padding: 0;
 }
 
-.wtHolder th.active {
+.fg-holder th.active {
   background-color: #CCC;
 }
 
-.wtHolder thead th .relative {
+.fg-holder thead th .relative {
   position: relative;
   padding: 2px 4px;
 }
 
 /* border line */
-.wtHolder .wtBorder {
+.fg-holder .fg-selection-border {
   position: absolute;
   font-size: 0;
 }
 
-.wtHolder td.area {
+.fg-holder td.area {
   background-color: #EEF4FF;
 }
 
 /* fill handle */
-.wtHolder .wtBorder.corner {
+.fg-holder .fg-selection-border.corner {
   font-size: 0;
   cursor: crosshair;
 }
 
-.wtHolder .htBorder.htFillBorder {
+.fg-holder .fg-border.fg-fill-border {
   background: red;
   width: 1px;
   height: 1px;
 }
 
-.ht_master .wtHolder {
+.fg-master .fg-holder {
   overflow: auto;
 }
 
-.ht_clone_left .wtHolder {
+.fg-clone-left .fg-holder {
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.ht_clone_top .wtHolder {
+.fg-clone-top .fg-holder {
   overflow-x: auto;
   overflow-y: hidden;
 }

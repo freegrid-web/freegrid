@@ -422,7 +422,7 @@ class GhostTable {
     const d = document;
     const fragment = d.createDocumentFragment();
     const container = d.createElement('div');
-    const containerClassName = `htGhostTable htAutoSize ${className.trim()}`;
+    const containerClassName = `fg-ghost-table fg-auto-size ${className.trim()}`;
 
     addClass(container, containerClassName);
     fragment.appendChild(container);

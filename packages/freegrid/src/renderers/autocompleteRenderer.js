@@ -1,13 +1,14 @@
+import { withLegacyClassNames } from './../helpers/classNames';
 import { addClass, hasClass } from './../helpers/dom/element';
 import EventManager from './../eventManager';
 import { CellCoords } from './../3rdparty/walkontable/src';
 import { getRenderer } from './index';
 
 const clonableWRAPPER = document.createElement('DIV');
-clonableWRAPPER.className = 'htAutocompleteWrapper';
+clonableWRAPPER.className = withLegacyClassNames('fg-autocomplete-wrapper');
 
 const clonableARROW = document.createElement('DIV');
-clonableARROW.className = 'htAutocompleteArrow';
+clonableARROW.className = withLegacyClassNames('fg-autocomplete-arrow');
 // workaround for https://github.com/handsontable/handsontable/issues/1946
 // this is faster than innerHTML. See: https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
 clonableARROW.appendChild(document.createTextNode(String.fromCharCode(9660)));
@@ -38,14 +39,14 @@ function autocompleteRenderer(instance, TD, row, col, prop, value, cellPropertie
   }
 
   TD.insertBefore(ARROW, TD.firstChild);
-  addClass(TD, 'htAutocomplete');
+  addClass(TD, 'fg-autocomplete');
 
   if (!instance.acArrowListener) {
     const eventManager = new EventManager(instance);
 
     // not very elegant but easy and fast
     instance.acArrowListener = function(event) {
-      if (hasClass(event.target, 'htAutocompleteArrow')) {
+      if (hasClass(event.target, 'fg-autocomplete-arrow')) {
         instance.view.wt.getSetting('onCellDblClick', null, new CellCoords(row, col), TD);
       }
     };

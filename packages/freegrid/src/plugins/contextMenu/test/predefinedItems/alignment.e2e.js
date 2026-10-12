@@ -31,7 +31,7 @@ describe('ContextMenu', () => {
       const button = contextSubMenu.find('.ht_master .htCore tbody td').not('.htSeparator').eq(0);
       button.simulate('mousedown'); // Text left
 
-      expect(getCellMeta(0, 0).className).toEqual('htLeft');
+      expect(getCellMeta(0, 0).className).toEqual('fg-left');
       expect(getCell(0, 0).className).toContain('htLeft');
     });
 
@@ -52,7 +52,7 @@ describe('ContextMenu', () => {
       const button = contextSubMenu.find('.ht_master .htCore tbody td').not('.htSeparator').eq(1);
 
       button.simulate('mousedown'); // Text center
-      expect(getCellMeta(0, 0).className).toEqual('htCenter');
+      expect(getCellMeta(0, 0).className).toEqual('fg-center');
       expect(getCell(0, 0).className).toContain('htCenter');
     });
 
@@ -73,7 +73,7 @@ describe('ContextMenu', () => {
       const button = contextSubMenu.find('.ht_master .htCore tbody td').not('.htSeparator').eq(2);
 
       button.simulate('mousedown'); // Text right
-      expect(getCellMeta(0, 0).className).toEqual('htRight');
+      expect(getCellMeta(0, 0).className).toEqual('fg-right');
       expect(getCell(0, 0).className).toContain('htRight');
     });
 
@@ -96,7 +96,7 @@ describe('ContextMenu', () => {
 
       button.simulate('mousedown'); // Text justify
       deselectCell();
-      expect(getCellMeta(0, 0).className).toEqual('htJustify');
+      expect(getCellMeta(0, 0).className).toEqual('fg-justify');
       expect(getCell(0, 0).className).toContain('htJustify');
     });
 
@@ -118,7 +118,7 @@ describe('ContextMenu', () => {
 
       button.simulate('mousedown'); // Text top
       deselectCell();
-      expect(getCellMeta(0, 0).className).toEqual('htTop');
+      expect(getCellMeta(0, 0).className).toEqual('fg-top');
       expect(getCell(0, 0).className).toContain('htTop');
     });
 
@@ -140,7 +140,7 @@ describe('ContextMenu', () => {
 
       button.simulate('mousedown'); // Text middle
       deselectCell();
-      expect(getCellMeta(0, 0).className).toEqual('htMiddle');
+      expect(getCellMeta(0, 0).className).toEqual('fg-middle');
       expect(getCell(0, 0).className).toContain('htMiddle');
     });
 
@@ -160,7 +160,7 @@ describe('ContextMenu', () => {
       const button = contextSubMenu.find('.ht_master .htCore tbody td').not('.htSeparator').eq(6);
       button.simulate('mousedown'); // Text bottom
       deselectCell();
-      expect(getCellMeta(0, 0).className).toEqual('htBottom');
+      expect(getCellMeta(0, 0).className).toEqual('fg-bottom');
       expect(getCell(0, 0).className).toContain('htBottom');
     });
 
@@ -184,7 +184,7 @@ describe('ContextMenu', () => {
       const button = contextSubMenu.find('.ht_master .htCore tbody td').not('.htSeparator').eq(2);
       button.simulate('mousedown'); // Text bottom
       deselectCell();
-      expect(afterSetCellMetaCallback).toHaveBeenCalledWith(2, 3, 'className', 'htRight', undefined, undefined);
+      expect(afterSetCellMetaCallback).toHaveBeenCalledWith(2, 3, 'className', 'fg-right', undefined, undefined);
     });
   });
 });

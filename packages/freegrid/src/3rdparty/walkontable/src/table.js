@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../../../helpers/classNames';
 import {
   getStyle,
   getTrimmingContainer,
@@ -96,9 +97,9 @@ class Table {
     const parent = table.parentNode;
     let spreader;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'wtHolder')) {
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
       spreader = document.createElement('div');
-      spreader.className = 'wtSpreader';
+      spreader.className = withLegacyClassNames('fg-spreader');
 
       if (parent) {
         // if TABLE is detached (e.g. in Jasmine test), it has no parentNode so we cannot attach holder to it
@@ -119,9 +120,9 @@ class Table {
     const parent = spreader.parentNode;
     let hider;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'wtHolder')) {
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
       hider = document.createElement('div');
-      hider.className = 'wtHider';
+      hider.className = withLegacyClassNames('fg-hider');
 
       if (parent) {
         // if TABLE is detached (e.g. in Jasmine test), it has no parentNode so we cannot attach holder to it
@@ -142,17 +143,17 @@ class Table {
     const parent = hider.parentNode;
     let holder;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'wtHolder')) {
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
       holder = document.createElement('div');
       holder.style.position = 'relative';
-      holder.className = 'wtHolder';
+      holder.className = withLegacyClassNames('fg-holder');
 
       if (parent) {
         // if TABLE is detached (e.g. in Jasmine test), it has no parentNode so we cannot attach holder to it
         parent.insertBefore(holder, hider);
       }
       if (!this.isWorkingOnClone()) {
-        holder.parentNode.className += 'ht_master handsontable';
+        holder.parentNode.className += withLegacyClassNames('fg-master', 'freegrid');
       }
       holder.appendChild(hider);
     }

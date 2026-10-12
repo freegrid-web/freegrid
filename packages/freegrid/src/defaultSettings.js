@@ -944,7 +944,7 @@ DefaultSettings.prototype = {
    * currentHeaderClassName: 'ht__highlight',
    * ```
    */
-  currentHeaderClassName: 'ht__highlight',
+  currentHeaderClassName: 'fg-highlight',
 
   /**
    * Class name for all active headers in selections. The header will be marked with this class name
@@ -960,7 +960,7 @@ DefaultSettings.prototype = {
    * activeHeaderClassName: 'ht__active_highlight',
    * ```
    */
-  activeHeaderClassName: 'ht__active_highlight',
+  activeHeaderClassName: 'fg-active-highlight',
 
   /**
    * Class name for the FreeGrid container element.
@@ -1151,7 +1151,7 @@ DefaultSettings.prototype = {
    * invalidCellClassName: 'highlight--error',
    * ```
    */
-  invalidCellClassName: 'htInvalid',
+  invalidCellClassName: 'fg-invalid',
 
   /**
    * When set to an non-empty string, displayed as the cell content for empty cells. If a value of a different type is provided,
@@ -1180,7 +1180,7 @@ DefaultSettings.prototype = {
    * placeholderCellClassName: 'has-placeholder',
    * ```
    */
-  placeholderCellClassName: 'htPlaceholder',
+  placeholderCellClassName: 'fg-placeholder',
 
   /**
    * CSS class name for read-only cells.
@@ -1194,7 +1194,7 @@ DefaultSettings.prototype = {
    * readOnlyCellClassName: 'is-readOnly',
    * ```
    */
-  readOnlyCellClassName: 'htDimmed',
+  readOnlyCellClassName: 'fg-dimmed',
 
   /**
    * @description
@@ -1261,7 +1261,7 @@ DefaultSettings.prototype = {
    * commentedCellClassName: 'has-comment',
    * ```
    */
-  commentedCellClassName: 'htCommentCell',
+  commentedCellClassName: 'fg-comment-cell',
 
   /**
    * If set to `true`, it enables the browser's native selection of a fragment of the text within a single cell, between
@@ -1542,7 +1542,7 @@ DefaultSettings.prototype = {
    * noWordWrapClassName: 'is-noWrapCell',
    * ```
    */
-  noWordWrapClassName: 'htNoWrap',
+  noWordWrapClassName: 'fg-no-wrap',
 
   /**
    * @description

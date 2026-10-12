@@ -1,3 +1,4 @@
+import { classNameIncludes } from './../helpers/classNames';
 import numbro from 'numbro';
 import { getRenderer } from './index';
 import { isNumeric } from './../helpers/number';
@@ -38,13 +39,14 @@ function numericRenderer(instance, TD, row, col, prop, value, cellProperties) {
 
     newValue = numbro(newValue).format(cellFormatPattern || '0');
 
-    if (classArr.indexOf('htLeft') < 0 && classArr.indexOf('htCenter') < 0 &&
-      classArr.indexOf('htRight') < 0 && classArr.indexOf('htJustify') < 0) {
-      classArr.push('htRight');
+    const classes = classArr.join(' ');
+
+    if (!['fg-left', 'fg-center', 'fg-right', 'fg-justify'].some(alignment => classNameIncludes(classes, alignment))) {
+      classArr.push('fg-right');
     }
 
-    if (classArr.indexOf('htNumeric') < 0) {
-      classArr.push('htNumeric');
+    if (!classNameIncludes(classes, 'fg-numeric')) {
+      classArr.push('fg-numeric');
     }
 
     cellProperties.className = classArr.join(' ');

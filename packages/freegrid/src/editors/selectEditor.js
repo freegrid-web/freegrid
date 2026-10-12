@@ -24,7 +24,7 @@ const SelectEditor = BaseEditor.prototype.extend();
  */
 SelectEditor.prototype.init = function() {
   this.select = document.createElement('SELECT');
-  addClass(this.select, 'htSelectEditor');
+  addClass(this.select, 'fg-select-editor');
   this.select.style.display = 'none';
   this.instance.rootElement.appendChild(this.select);
   this.registerHooks();

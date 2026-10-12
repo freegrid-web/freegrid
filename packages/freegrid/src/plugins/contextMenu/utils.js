@@ -1,3 +1,4 @@
+import { classNameIncludes, toLegacyClassName } from './../../helpers/classNames';
 import { arrayEach, arrayMap } from './../../helpers/array';
 import { hasClass } from './../../helpers/dom/element';
 import { KEY as SEPARATOR } from './predefinedItems/separator';
@@ -10,19 +11,19 @@ export function normalizeSelection(selRanges) {
 }
 
 export function isSeparator(cell) {
-  return hasClass(cell, 'htSeparator');
+  return hasClass(cell, 'fg-separator');
 }
 
 export function hasSubMenu(cell) {
-  return hasClass(cell, 'htSubmenu');
+  return hasClass(cell, 'fg-submenu');
 }
 
 export function isDisabled(cell) {
-  return hasClass(cell, 'htDisabled');
+  return hasClass(cell, 'fg-disabled');
 }
 
 export function isSelectionDisabled(cell) {
-  return hasClass(cell, 'htSelectionDisabled');
+  return hasClass(cell, 'fg-selection-disabled');
 }
 
 export function getValidSelection(hot) {
@@ -38,32 +39,34 @@ export function getValidSelection(hot) {
   return selected;
 }
 
+const VERTICAL_ALIGNMENTS = ['fg-top', 'fg-middle', 'fg-bottom'];
+const HORIZONTAL_ALIGNMENTS = ['fg-left', 'fg-center', 'fg-right', 'fg-justify'];
+
+// Removes alignment classes, in both their FreeGrid and legacy names.
+function removeAlignmentClasses(className, alignments) {
+  let result = className;
+
+  alignments.forEach((alignment) => {
+    result = result.replace(alignment, '').replace(toLegacyClassName(alignment), '');
+  });
+
+  return result.replace('  ', '');
+}
+
 export function prepareVerticalAlignClass(className, alignment) {
-  if (className.indexOf(alignment) !== -1) {
+  if (classNameIncludes(className, alignment)) {
     return className;
   }
 
-  const replacedClassName = className
-    .replace('htTop', '')
-    .replace('htMiddle', '')
-    .replace('htBottom', '')
-    .replace('  ', '');
-
-  return `${replacedClassName} ${alignment}`;
+  return `${removeAlignmentClasses(className, VERTICAL_ALIGNMENTS)} ${alignment}`;
 }
 
 export function prepareHorizontalAlignClass(className, alignment) {
-  if (className.indexOf(alignment) !== -1) {
+  if (classNameIncludes(className, alignment)) {
     return className;
   }
-  const replacedClassName = className
-    .replace('htLeft', '')
-    .replace('htCenter', '')
-    .replace('htRight', '')
-    .replace('htJustify', '')
-    .replace('  ', '');
 
-  return `${replacedClassName} ${alignment}`;
+  return `${removeAlignmentClasses(className, HORIZONTAL_ALIGNMENTS)} ${alignment}`;
 }
 
 export function getAlignmentClasses(ranges, callback) {

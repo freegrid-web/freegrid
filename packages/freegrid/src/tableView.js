@@ -48,10 +48,10 @@ function TableView(instance) {
     instance.rootElement.setAttribute('data-originalstyle', originalStyle); // needed to retrieve original style in jsFiddle link generator in HT examples. may be removed in future versions
   }
 
-  addClass(instance.rootElement, 'handsontable');
+  addClass(instance.rootElement, 'freegrid');
 
   const table = document.createElement('TABLE');
-  addClass(table, 'htCore');
+  addClass(table, 'fg-core');
 
   if (instance.getSettings().tableClassName) {
     addClass(table, instance.getSettings().tableClassName);

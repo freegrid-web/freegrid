@@ -1,3 +1,4 @@
+import { withLegacyClassNames } from './../../../../helpers/classNames';
 import {
   getScrollableElement,
   getTrimmingContainer,
@@ -201,7 +202,7 @@ class Overlay {
     const clone = document.createElement('DIV');
     const clonedTable = document.createElement('TABLE');
 
-    clone.className = `ht_clone_${direction} handsontable`;
+    clone.className = withLegacyClassNames(`fg-clone-${direction.replace(/_/g, '-')}`, 'freegrid');
     clone.style.position = 'absolute';
     clone.style.top = 0;
     clone.style.left = 0;
