@@ -399,7 +399,8 @@ class AutoColumnSize extends BasePlugin {
     const columnHeaders = this.hot.getColHeader();
     const { cachedColumnHeaders } = privatePool.get(this);
 
-    const changedColumns = columnHeaders.reduce((acc, columnTitle, physicalColumn) => {
+    // `getColHeader()` can return a single header instead of an array (see `modifyColHeader`).
+    const changedColumns = Array.from(columnHeaders).reduce((acc, columnTitle, physicalColumn) => {
       const cachedColumnsLength = cachedColumnHeaders.length;
 
       if (cachedColumnsLength - 1 < physicalColumn || cachedColumnHeaders[physicalColumn] !== columnTitle) {

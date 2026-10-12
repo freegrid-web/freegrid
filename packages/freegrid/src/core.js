@@ -292,7 +292,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
           return result;
         };
-        const spliceArgs = Array.from({ length: count }, () => valueFactory());
+        // `new Array(count)` (not `{ length: count }`) keeps how odd `amount` values behaved, e.g. a RangeError for 1.5.
+        const spliceArgs = Array.from(new Array(count), () => valueFactory());
 
         spliceArgs.unshift(startIndex, 0);
         data.splice(...spliceArgs);

@@ -637,6 +637,31 @@ describe('ContextMenu', () => {
       expect(contextSubMenu.length).toEqual(0);
     });
 
+    it('should open an empty submenu (not throw) when submenu `items` is an object', async() => {
+      const spy = spyOn(window, 'onerror');
+
+      handsontable({
+        data: createSpreadsheetData(4, 4),
+        contextMenu: {
+          items: {
+            sub: {
+              name: 'Submenu',
+              submenu: {
+                items: { a: { name: 'A' } },
+              },
+            },
+          },
+        },
+      });
+
+      contextMenu();
+      $('.htSubmenu').simulate('mouseover');
+
+      await sleep(350);
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
     it('should not throw error when opening multi-level menu with name declared as `function` #4550', async() => {
       const spy = spyOn(window, 'onerror');
 
