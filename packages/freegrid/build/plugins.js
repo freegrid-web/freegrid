@@ -1,12 +1,15 @@
 const EMPTY = '\0fg-empty';
 const WINDOW = '\0fg-window';
 
-/** Drop `pikaday/css/*` imports (non-full builds and test bundles). */
+/**
+ * Drop `pikaday/css/*` imports, and FreeGrid's theme for them (`pikaday-theme.css`), in non-full builds and test
+ * bundles: those builds leave Pikaday's styles to the user.
+ */
 export function ignorePikadayCss() {
   return {
     name: 'fg-ignore-pikaday-css',
     enforce: 'pre',
-    resolveId: id => (id.startsWith('pikaday/css') ? EMPTY : null),
+    resolveId: id => (id.startsWith('pikaday/css') || /(^|[\\/])pikaday-theme\.css$/.test(id) ? EMPTY : null),
     load: id => (id === EMPTY ? '' : null),
   };
 }
