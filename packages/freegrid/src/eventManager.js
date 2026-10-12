@@ -1,6 +1,5 @@
 import { polymerWrap, closest } from './helpers/dom/element';
 import { hasOwnProperty } from './helpers/object';
-import { isWebComponentSupportedNatively } from './helpers/feature';
 import { stopImmediatePropagation as _stopImmediatePropagation } from './helpers/dom/event';
 
 /**
@@ -219,10 +218,8 @@ function extendEvent(context, event) {
   }
   event.isTargetWebComponent = true;
 
-  if (isWebComponentSupportedNatively()) {
-    event.realTarget = event.srcElement || event.toElement;
-
-  } else if (hasOwnProperty(context, 'hot') || context.isHotTableEnv || context.wtTable) {
+  // Shadow DOM v0 (`createShadowRoot`) is gone from browsers, so the target is always resolved here.
+  if (hasOwnProperty(context, 'hot') || context.isHotTableEnv || context.wtTable) {
     // Polymer doesn't support `event.target` property properly we must emulate it ourselves
     if (hasOwnProperty(context, 'hot')) {
       // Custom element

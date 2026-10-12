@@ -1,6 +1,5 @@
 import { toFreeGridClassName, toLegacyClassName, withCounterpartClassNames } from '../classNames';
 import { isSafari } from '../browser';
-import { hasCaptionProblem } from '../feature';
 
 /**
  * Get the parent of the specified node in the DOM tree.
@@ -505,18 +504,7 @@ export function offset(elem) {
   let offsetLeft;
   let offsetTop;
   let lastElem;
-  let box;
 
-  if (hasCaptionProblem() && elementToCheck.firstChild && elementToCheck.firstChild.nodeName === 'CAPTION') {
-    // fixes problem with Firefox ignoring <caption> in TABLE offset (see also export outerHeight)
-    // http://jsperf.com/offset-vs-getboundingclientrect/8
-    box = elementToCheck.getBoundingClientRect();
-
-    return {
-      top: box.top + (window.pageYOffset || docElem.scrollTop) - (docElem.clientTop || 0),
-      left: box.left + (window.pageXOffset || docElem.scrollLeft) - (docElem.clientLeft || 0)
-    };
-  }
   offsetLeft = elementToCheck.offsetLeft;
   offsetTop = elementToCheck.offsetTop;
   lastElem = elementToCheck;
@@ -749,17 +737,6 @@ export function outerWidth(element) {
  * @returns {number} Element's outer height
  */
 export function outerHeight(elem) {
-  if (hasCaptionProblem() && elem.firstChild && elem.firstChild.nodeName === 'CAPTION') {
-    // fixes problem with Firefox ignoring <caption> in TABLE.offsetHeight
-    // jQuery (1.10.1) still has this unsolved
-    // may be better to just switch to getBoundingClientRect
-    // http://bililite.com/blog/2009/03/27/finding-the-size-of-a-table/
-    // http://lists.w3.org/Archives/Public/www-style/2009Oct/0089.html
-    // http://bugs.jquery.com/ticket/2196
-    // http://lists.w3.org/Archives/Public/www-style/2009Oct/0140.html#start140
-    return elem.offsetHeight + elem.firstChild.offsetHeight;
-  }
-
   return elem.offsetHeight;
 }
 
