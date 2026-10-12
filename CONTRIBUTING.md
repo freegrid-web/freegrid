@@ -23,6 +23,30 @@ them will be closed.
 - Keep file moves and content edits in separate commits so `git log --follow` and `git blame` keep working.
 - Do not reformat code you are not otherwise changing.
 
+## TypeScript
+
+FreeGrid is moving to TypeScript one module group at a time (see
+`docs/specs/2026-10-12-typescript-and-clean-code-design.md`). JavaScript and TypeScript modules import each
+other freely, and imports have no file extension, so converting a module needs no changes in its importers.
+Unit and E2E specs stay JavaScript for now.
+
+To convert a module (`src/helpers/number.ts` is the reference):
+
+1. If some behavior is not covered by a unit test, add the test first, in its own commit, against the JS code.
+2. Move commit: `git mv foo.js foo.ts` and nothing else, so git keeps the file's history. This commit may fail
+   `pnpm typecheck`; the build and tests still run.
+3. Typing commit: add types and apply the clean-code rules from the spec. Behavior stays the same.
+4. `pnpm lint`, `pnpm typecheck` and `pnpm test` pass.
+
+Rules:
+
+- `strict` mode. No `any`; if one is unavoidable, use
+  `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>`.
+- Type-only imports use `import type` (`pnpm typecheck` enforces it).
+- No `@ts-ignore` or `@ts-nocheck`.
+- Never keep `foo.js` next to `foo.ts`: Vite would load the `.js`. A unit test checks this.
+- Conversion PRs are merged with **Rebase and merge**, so the move commit stays separate from the typing commit.
+
 ## Design documents
 
 Larger changes start with a design document in `docs/specs/`.

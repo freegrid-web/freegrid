@@ -20,6 +20,8 @@
   clicking an input next to the grid, and with several grids on a page).
 - Code comments and runtime messages name FreeGrid (e.g. "this FreeGrid instance has been destroyed").
 - jQuery plugin available as `$.fn.freegrid`; `$.fn.handsontable` remains as a compatibility name.
+- Source code is moving to TypeScript (strict). The first converted module is `helpers/number`; there is no change
+  in behavior.
 
 ---
 
