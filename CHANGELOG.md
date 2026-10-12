@@ -1,6 +1,8 @@
 # FreeGrid changelog
 
 ## Unreleased (Stage 0)
+- FreeGrid is an independent project; versions start at `0.1.0`. The Handsontable compatibility layer is
+  a migration aid during `0.x` and will be removed in `1.0.0`.
 - Forked from Handsontable 6.2.2 (MIT). Renamed to FreeGrid; a `Handsontable` alias is available via
   `freegrid/compat` (ESM) or `dist/compat.js` (script tag).
 - Vite build (ESM + UMD), ES2020 target, Node 24, pnpm. CommonJS output and IE support dropped.

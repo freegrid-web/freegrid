@@ -231,8 +231,13 @@ install (pnpm, cached) → lint → unit → types → build
 | Stage | Content |
 |---|---|
 | **0** | This document |
-| **1** | Publish `freegrid@1.0.0`, bug fixes, Firefox/WebKit fixes, React/Vue/Angular wrappers (`@freegrid/*`), docs site, release workflow, Renovate |
+| **1** | Publish `freegrid@0.1.0` (FreeGrid versions start at 0; `1.0.0` marks FreeGrid's own stable API), bug fixes, Firefox/WebKit fixes, React/Vue/Angular wrappers (`@freegrid/*`), docs site, release workflow, Renovate |
 | **2** | TypeScript conversion module by module. Signals-based fine-grained reactivity (candidates: `alien-signals`, `@preact/signals-core`), not a virtual DOM. Theming via CSS custom properties (`--fg-*`) plus an optional Tailwind preset. Replace `moment` (`Intl`/Temporal or `date-fns`; decided then). Migrate tests to Vitest. |
 | **3+** | Features never in MIT 6.2.2, written from scratch: filters, column dropdown menu, hidden rows/columns, nested headers, export, formulas (candidate engine: IronCalc or another MIT engine) |
+
+Versioning and identity (decided 2026-10-12): FreeGrid is an independent project, not a Handsontable
+release line. It follows SemVer from `0.1.0`. The compatibility layer (`freegrid/compat`, `dist/compat.js`,
+`$.fn.handsontable`, the old CSS class names) is a migration aid during `0.x` and is removed in `1.0.0`.
+Documentation is written from scratch (clean-room), in English, with VitePress on GitHub Pages.
 
 Stage 2 directions are recorded here for context only. Each stage gets its own design document.
