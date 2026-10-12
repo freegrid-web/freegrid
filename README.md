@@ -10,6 +10,8 @@ modernized step by step (TypeScript, signals-based reactivity, CSS-variable them
 > FreeGrid is not affiliated with or endorsed by Handsoncode. "Handsontable" is a trademark of its owner
 > and is used here only to describe where the code came from and how to migrate.
 
+**Documentation and live examples:** https://freegrid-web.github.io/freegrid/
+
 ## Status
 
 Stage 0 — repository, modern toolchain, upstream test suite passing. Not yet published to npm.

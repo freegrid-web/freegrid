@@ -1,4 +1,4 @@
-name: Demo site
+name: Docs site
 on:
   push:
     branches: [main]
@@ -23,9 +23,9 @@ jobs:
         with: { node-version-file: .nvmrc, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: node tools/build-site.mjs
+      - run: pnpm --filter @freegrid/docs build
       - uses: actions/upload-pages-artifact@v3
-        with: { path: _site }
+        with: { path: packages/docs/.vitepress/dist }
 
   deploy:
     needs: build
