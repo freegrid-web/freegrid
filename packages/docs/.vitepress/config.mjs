@@ -37,6 +37,7 @@ export default defineConfigWithTheme({
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },
             { text: 'Styling', link: '/guide/styling' },
+            { text: 'Theming', link: '/guide/theming' },
           ],
         },
       ],
