@@ -1003,7 +1003,7 @@ describe('ColumnSorting', () => {
       expect(getDataAtRow(4)).toEqual(['Audi', 'A4 Avant', 'July 8th 1999', 33900]);
     });
 
-    // FG-SKIP: spec uses the malformed format 'mm/dd/yy' (minutes/weekday); moment >= 2.25 parses it differently and every CVE-fixed moment (>= 2.29.4) is >= 2.25. Valid formats are covered by freegridDateSort.e2e.js — TBD-ISSUE
+    // FG-SKIP: spec uses the malformed format 'mm/dd/yy' (minutes/weekday); moment >= 2.25 parses it differently and every CVE-fixed moment (>= 2.29.4) is >= 2.25. Valid formats are covered by freegridDateSort.e2e.js — https://github.com/freegrid-web/freegrid/issues/4
     xit('should sort date columns along with empty and null values', () => {
       handsontable({
         data: [

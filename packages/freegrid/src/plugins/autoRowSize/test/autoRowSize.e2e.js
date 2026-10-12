@@ -461,7 +461,7 @@ describe('AutoRowSize', () => {
     expect(parseInt(hot.getCell(2, -1).style.height, 10)).toBeInArray([22, 42]); // -1px of cell border
   });
 
-  // FG-SKIP: multi-line header measures 77px in Chromium 156 vs 75px in Chromium 72 (baseline); same fonts — TBD-ISSUE
+  // FG-SKIP: multi-line header measures 77px in Chromium 156 vs 75px in Chromium 72 (baseline); same fonts — https://github.com/freegrid-web/freegrid/issues/3
   xit('should resize the column headers properly, according the their content sizes', () => {
     handsontable({
       data: Handsontable.helper.createSpreadsheetData(30, 30),

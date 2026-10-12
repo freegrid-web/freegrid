@@ -483,7 +483,7 @@ describe('AutoColumnSize', () => {
     expect(spy.calls.mostRecent().args[5]).toEqual([{ id: 1000 }]);
   });
 
-  // FG-SKIP: text width of 'Processing' rounds to 139px in Chromium 156 vs 140px in Chromium 72 (baseline); same fonts — TBD-ISSUE
+  // FG-SKIP: text width of 'Processing' rounds to 139px in Chromium 156 vs 140px in Chromium 72 (baseline); same fonts — https://github.com/freegrid-web/freegrid/issues/2
   xit('should not change width after select/click cell', async() => {
     handsontable({
       data: [
