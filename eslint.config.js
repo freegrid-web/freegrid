@@ -1,10 +1,13 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 // Upstream code has eslint-disable comments for eslint-plugin-import rules (airbnb config). Register
 // no-op stand-ins so those comments stay valid without pulling in the plugin.
 const noop = { create: () => ({}) };
 const importStandIn = { rules: { 'no-unresolved': noop, 'prefer-default-export': noop } };
+const tsSources = ['packages/freegrid/src/**/*.ts'];
+const tsTypeTests = ['packages/freegrid/src/**/test/**'];
 
 export default [
   {
@@ -49,5 +52,17 @@ export default [
   {
     files: ['tools/baseline/run-puppeteer-json.js'],
     languageOptions: { sourceType: 'commonjs' },
+  },
+  // TypeScript (spec docs/specs/2026-10-12-typescript-and-clean-code-design.md). `no-explicit-any` is an error:
+  // an unavoidable `any` needs `// eslint-disable-next-line @typescript-eslint/no-explicit-any -- <reason>`.
+  // Type tests in src/**/test/ belong to `pnpm test:types`, like the ones in test/types/.
+  ...tseslint.configs.recommended.map(config => ({ ...config, files: tsSources, ignores: tsTypeTests })),
+  {
+    files: tsSources,
+    ignores: tsTypeTests,
+    rules: {
+      // Same option as for JS: unused catch bindings are allowed.
+      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
+    },
   },
 ];
