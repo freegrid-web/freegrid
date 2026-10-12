@@ -30,4 +30,42 @@ describe('immediate helper', () => {
     await new Promise(resolve => setTimeout(resolve, 20));
     expect(order).toEqual(['first', 'second', 'microtask after first']);
   });
+
+  it('clearImmediate from inside a callback cancels a sibling queued in the same turn', async() => {
+    const order = [];
+    let secondId;
+
+    fgSetImmediate(() => {
+      order.push('first');
+      fgClearImmediate(secondId);
+    });
+    secondId = fgSetImmediate(() => order.push('second'));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(order).toEqual(['first']);
+  });
+
+  it('an exception in one callback does not drop the rest; it is re-thrown asynchronously', async() => {
+    const order = [];
+    const error = new Error('boom');
+    const rethrows = [];
+    const realSetTimeout = globalThis.setTimeout;
+
+    globalThis.setTimeout = (fn, delay, ...args) => {
+      if (delay === 0 && fn.length === 0) {
+        rethrows.push(fn);
+        return 0;
+      }
+      return realSetTimeout(fn, delay, ...args);
+    };
+    try {
+      fgSetImmediate(() => { throw error; });
+      fgSetImmediate(() => order.push('second'));
+      await new Promise(resolve => realSetTimeout(resolve, 20));
+    } finally {
+      globalThis.setTimeout = realSetTimeout;
+    }
+    expect(order).toEqual(['second']);
+    expect(rethrows.length).toBe(1);
+    expect(() => rethrows[0]()).toThrow(error);
+  });
 });
