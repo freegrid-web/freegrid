@@ -1,4 +1,4 @@
-import { arrayReduce, arrayMap, arrayMax } from './../helpers/array';
+import { arrayMax } from './../helpers/array';
 import { defineGetter } from './../helpers/object';
 import { rangeEach } from './../helpers/number';
 
@@ -98,7 +98,7 @@ const arrayMapper = {
 
     function countRowShift(logicalRow) {
       // Todo: compare perf between reduce vs sort->each->brake
-      return arrayReduce(removedItems, (count, removedLogicalRow) => {
+      return removedItems.reduce((count, removedLogicalRow) => {
         let result = count;
 
         if (logicalRow > removedLogicalRow) {
@@ -109,7 +109,7 @@ const arrayMapper = {
       }, 0);
     }
 
-    this._arrayMap = arrayMap(this._arrayMap, (logicalRow) => {
+    this._arrayMap = this._arrayMap.map((logicalRow) => {
       let logicalRowIndex = logicalRow;
       const rowShift = countRowShift(logicalRowIndex);
 
@@ -128,7 +128,7 @@ const arrayMapper = {
    * @param {Number} [amount=1] Defines how many items will be created to an array.
    */
   shiftItems(physicalIndex, amount = 1) {
-    this._arrayMap = arrayMap(this._arrayMap, (row) => {
+    this._arrayMap = this._arrayMap.map((row) => {
       let physicalRowIndex = row;
 
       if (physicalRowIndex >= physicalIndex) {

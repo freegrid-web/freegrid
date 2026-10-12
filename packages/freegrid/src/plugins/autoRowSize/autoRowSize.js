@@ -1,5 +1,5 @@
 import BasePlugin from './../_base';
-import { arrayEach, arrayFilter } from './../../helpers/array';
+import { arrayEach } from './../../helpers/array';
 import { isVisible } from './../../helpers/dom/element';
 import GhostTable from './../../utils/ghostTable';
 import { isObject, hasOwnProperty } from './../../helpers/object';
@@ -389,7 +389,8 @@ class AutoRowSize extends BasePlugin {
    * @returns {Boolean}
    */
   isNeedRecalculate() {
-    return !!arrayFilter(this.heights, item => (item === void 0)).length;
+    // `includes` also counts holes (rows whose height was never measured), like the old helper did.
+    return this.heights.includes(void 0);
   }
 
   /**
