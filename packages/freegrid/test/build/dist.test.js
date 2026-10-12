@@ -110,6 +110,25 @@ describe('dist outputs', () => {
     expect(helper.getComparisonFunction()('a', 'b')).toBe(-1);
   });
 
+  it('CSS has a dark theme and an automatic theme with the same values', () => {
+    const css = read('freegrid.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    const media = css.match(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?\})\s*\}/)?.[1] ?? '';
+    const outside = css.replace(/@media[^{]*\{[\s\S]*?\}\s*\}/g, '');
+    const themeRules = (text, theme) => [...text.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, selector]) => selector.includes(`fg-theme-${theme}`))
+      .map(([, , body]) => body.replace(/\s+/g, ' ').trim());
+    const dark = themeRules(outside, 'dark');
+
+    expect(dark.join(' ')).toContain('--fg-color-background');
+    expect(themeRules(media, 'auto')).toEqual(dark);
+    expect(css).toMatch(/\[data-fg-theme=["']?dark["']?\]/);
+    expect(css).toMatch(/\[data-fg-theme=["']?auto["']?\]/);
+  });
+
+  it('the date picker takes its colors from variables', () => {
+    expect(read('freegrid.full.css')).toMatch(/\.pika-single[^{]*\{[^}]*var\(--fg-datepicker-/);
+  });
+
   it('CSS has no IE hacks', () => {
     ['freegrid.css', 'freegrid.full.css'].forEach((file) => {
       const css = read(file);
