@@ -18,6 +18,23 @@ function windowWith(...scripts) {
 
 describe('dist outputs', () => {
 
+  it('FreeGrid.dom exposes exactly the public DOM helper names', () => {
+    // A change here is a public API change: list it in the CHANGELOG.
+    const expected = [
+      'HTML_CHARACTERS', 'addClass', 'addEvent', 'closest', 'closestDown', 'empty', 'fastInnerHTML', 'fastInnerText',
+      'getCaretPosition', 'getComputedStyle', 'getCssTransform', 'getParent', 'getScrollLeft', 'getScrollTop',
+      'getScrollableElement', 'getScrollbarWidth', 'getSelectionEndPosition', 'getSelectionText', 'getStyle',
+      'getTrimmingContainer', 'getWindowScrollLeft', 'getWindowScrollTop', 'hasClass', 'hasHorizontalScrollbar',
+      'hasVerticalScrollbar', 'index', 'innerHeight', 'innerWidth', 'isChildOf', 'isChildOfWebComponentTable',
+      'isImmediatePropagationStopped', 'isInput', 'isLeftClick', 'isOutsideInput', 'isRightClick', 'isVisible',
+      'offset', 'outerHeight', 'outerWidth', 'overlayContainsElement', 'pageX', 'pageY', 'polymerUnwrap',
+      'polymerWrap', 'removeClass', 'removeEvent', 'removeTextNodes', 'resetCssTransform', 'setCaretPosition',
+      'setOverlayPosition', 'stopImmediatePropagation', 'stopPropagation',
+    ];
+
+    expect(Object.keys(windowWith(read('freegrid.full.js')).FreeGrid.dom).sort()).toEqual(expected);
+  });
+
   it('FreeGrid.helper exposes exactly the public helper names', () => {
     // A change here is a public API change: list it in the CHANGELOG.
     const expected = [
