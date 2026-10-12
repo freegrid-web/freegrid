@@ -6,3 +6,4 @@ packages/freegrid/src/3rdparty/walkontable/test/dist/
 packages/freegrid/test-results/
 *.log
 .DS_Store
+_site/
