@@ -1,74 +1,89 @@
-/**
- * Checks if value of n is a numeric one
- * http://jsperf.com/isnan-vs-isnumeric/4
- * @param n
- * @returns {boolean}
- */
-export function isNumeric(n) {
-  /* eslint-disable */
-  var t = typeof n;
+/** Called with each index; returning `false` stops the iteration. */
+export type RangeIteratee = (index: number) => unknown;
 
-  return t == 'number' ? !isNaN(n) && isFinite(n) :
-    t == 'string' ? !n.length ? false :
-      n.length == 1 ? /\d/.test(n) :
-        /^\s*[+-]?\s*(?:(?:\d+(?:\.\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))\s*$/i.test(n) :
-      t == 'object' ? !!n && typeof n.valueOf() == 'number' && !(n instanceof Date) : false;
+/**
+ * Checks if a value is numeric: a finite number, a `Number` object, or a string in decimal, exponent or hex
+ * notation (surrounding whitespace allowed). Dates are not numeric.
+ */
+export function isNumeric(value: unknown): boolean {
+  if (typeof value === 'number') {
+    return Number.isFinite(value);
+  }
+  if (typeof value === 'string') {
+    if (value.length === 0) {
+      return false;
+    }
+    if (value.length === 1) {
+      return /\d/.test(value);
+    }
+
+    return /^\s*[+-]?\s*(?:(?:\d+(?:\.\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))\s*$/i.test(value);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return typeof value.valueOf() === 'number' && !(value instanceof Date);
+  }
+
+  return false;
 }
 
 /**
- * A specialized version of `.forEach` defined by ranges.
- *
- * @param {Number} rangeFrom The number from start iterate.
- * @param {Number|Function} rangeTo The number where finish iterate or function as a iteratee.
- * @param {Function} [iteratee] The function invoked per iteration.
+ * Calls `iteratee` for each index from `rangeFrom` to `rangeTo`, both included. With two arguments, iterates
+ * from 0 to the first argument.
  */
-export function rangeEach(rangeFrom, rangeTo, iteratee) {
-  let index = -1;
+export function rangeEach(rangeTo: number, iteratee: RangeIteratee): void;
+export function rangeEach(rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
+export function rangeEach(rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void {
+  let from = rangeFrom;
+  let to: number;
+  let callback: RangeIteratee;
 
   if (typeof rangeTo === 'function') {
-    iteratee = rangeTo;
-    rangeTo = rangeFrom;
+    from = 0;
+    to = rangeFrom;
+    callback = rangeTo;
   } else {
-    index = rangeFrom - 1;
+    to = rangeTo;
+    // The overloads require an iteratee whenever `rangeTo` is a number.
+    callback = iteratee as RangeIteratee;
   }
-  while (++index <= rangeTo) {
-    if (iteratee(index) === false) {
+  for (let index = from; index <= to; index++) {
+    if (callback(index) === false) {
       break;
     }
   }
 }
 
 /**
- * A specialized version of `.forEach` defined by ranges iterable in reverse order.
- *
- * @param {Number} rangeFrom The number from start iterate.
- * @param {Number|Function} rangeTo The number where finish iterate or function as a iteratee.
- * @param {Function} [iteratee] The function invoked per iteration.
+ * Calls `iteratee` for each index from `rangeFrom` down to `rangeTo`, both included. With two arguments,
+ * iterates down to 0.
  */
-export function rangeEachReverse(rangeFrom, rangeTo, iteratee) {
-  let index = rangeFrom + 1;
+export function rangeEachReverse(rangeFrom: number, iteratee: RangeIteratee): void;
+export function rangeEachReverse(rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
+export function rangeEachReverse(rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void {
+  let to: number;
+  let callback: RangeIteratee;
 
   if (typeof rangeTo === 'function') {
-    iteratee = rangeTo;
-    rangeTo = 0;
+    to = 0;
+    callback = rangeTo;
+  } else {
+    to = rangeTo;
+    // The overloads require an iteratee whenever `rangeTo` is a number.
+    callback = iteratee as RangeIteratee;
   }
-  while (--index >= rangeTo) {
-    if (iteratee(index) === false) {
+  for (let index = rangeFrom; index >= to; index--) {
+    if (callback(index) === false) {
       break;
     }
   }
 }
 
 /**
- * Calculate value from percent.
- *
- * @param {Number} value Base value from percent will be calculated.
- * @param {String|Number} percent Can be Number or String (eq. `'33%'`).
- * @returns {Number}
+ * Returns `percent` of `value`, truncated to an integer. `percent` is a number or a string such as `'33%'`;
+ * its fraction is dropped first.
  */
-export function valueAccordingPercent(value, percent) {
-  percent = parseInt(percent.toString().replace('%', ''), 10);
-  percent = parseInt(value * percent / 100, 10);
+export function valueAccordingPercent(value: number, percent: string | number): number {
+  const wholePercent = parseInt(percent.toString().replace('%', ''), 10);
 
-  return percent;
+  return parseInt(String(value * wholePercent / 100), 10);
 }
