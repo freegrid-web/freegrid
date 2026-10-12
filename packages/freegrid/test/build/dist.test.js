@@ -64,6 +64,15 @@ describe('dist outputs', () => {
     ['isChrome', 'isSafari', 'isMobileBrowser', 'setBrowserMeta'].forEach(name => expect(typeof helper[name], name).toBe('function'));
   });
 
+  it('polyfills and dead feature detections are gone from FreeGrid.helper', () => {
+    const { helper } = windowWith(read('freegrid.full.js')).FreeGrid;
+
+    ['requestAnimationFrame', 'cancelAnimationFrame', 'isWebComponentSupportedNatively', 'hasCaptionProblem']
+      .forEach(name => expect(helper[name], name).toBeUndefined());
+    ['isTouchSupported', 'getComparisonFunction'].forEach(name => expect(typeof helper[name], name).toBe('function'));
+    expect(helper.getComparisonFunction()('a', 'b')).toBe(-1);
+  });
+
   it('compat.js aliases Handsontable and fails loudly without FreeGrid', () => {
     const w = windowWith(read('freegrid.full.js'), read('compat.js'));
     expect(w.Handsontable).toBe(w.FreeGrid);

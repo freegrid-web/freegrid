@@ -1,6 +1,5 @@
 import BasePlugin from './../_base';
 import { arrayEach, arrayFilter, arrayReduce, arrayMap } from './../../helpers/array';
-import { cancelAnimationFrame, requestAnimationFrame } from './../../helpers/feature';
 import { isVisible } from './../../helpers/dom/element';
 import GhostTable from './../../utils/ghostTable';
 import { isObject, hasOwnProperty } from './../../helpers/object';
