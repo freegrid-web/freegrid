@@ -34,7 +34,8 @@
     "test:types": "tsc -p test/types",
     "test:e2e": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build dev",
     "test:e2e:min": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build min",
-    "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable"
+    "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable",
+    "test:selftest": "node build/build-tests.js selftest && node test/runner/run.js --suite selftest"
   },
   "dependencies": {
     "moment": "^2.30.1",

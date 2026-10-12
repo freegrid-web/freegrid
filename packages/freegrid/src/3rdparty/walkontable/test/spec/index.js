@@ -1,7 +1,1 @@
-[
-  require.context('.', true, /\.spec\.js$/),
-].forEach((req) => {
-  req.keys().forEach((key) => {
-    req(key);
-  });
-});
+import.meta.glob('./**/*.spec.js', { eager: true });
