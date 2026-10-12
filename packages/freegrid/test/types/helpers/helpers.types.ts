@@ -16,7 +16,6 @@ Handsontable.helper.arrayMin([1, 'foo', true]);
 Handsontable.helper.arrayReduce([1, 'foo', true], (value, index, array) => {}, 'foo', false);
 Handsontable.helper.arraySum([1, 'foo', true]);
 Handsontable.helper.arrayUnique([1, 'foo', true]);
-Handsontable.helper.cancelAnimationFrame(1);
 Handsontable.helper.cellMethodLookupFactory('foo', true);
 Handsontable.helper.clone({key: 'foo'});
 Handsontable.helper.columnFactory(gridSettings, [1, 'foo', true]);
@@ -40,21 +39,15 @@ Handsontable.helper.getComparisonFunction('en', {});
 Handsontable.helper.getNormalizedDate('YYYY-mm-dd');
 Handsontable.helper.getProperty({key: 'foo'}, 'key');
 Handsontable.helper.getPrototypeOf({key: 'foo'});
-Handsontable.helper.hasCaptionProblem();
 Handsontable.helper.inherit({key: 'foo'}, {key2: 'bar'});
 Handsontable.helper.isChrome();
 Handsontable.helper.isCtrlKey(1);
 Handsontable.helper.isDefined(1);
-Handsontable.helper.isEdge();
 Handsontable.helper.isEmpty(1);
 Handsontable.helper.isFunction(1);
-Handsontable.helper.isIE();
-Handsontable.helper.isIE8();
-Handsontable.helper.isIE9();
 Handsontable.helper.isKey(1, 'foo');
 Handsontable.helper.isMetaKey(1);
 Handsontable.helper.isMobileBrowser();
-Handsontable.helper.isMSBrowser();
 Handsontable.helper.isNumeric(true);
 Handsontable.helper.isObject('foo');
 Handsontable.helper.isObjectEqual([1, 2, 3], {});
@@ -63,7 +56,6 @@ Handsontable.helper.isPrintableChar(1);
 Handsontable.helper.isSafari();
 Handsontable.helper.isTouchSupported();
 Handsontable.helper.isUndefined(null);
-Handsontable.helper.isWebComponentSupportedNatively();
 Handsontable.helper.mixin({}, {key: 'foo'}, {key2: 'bar'});
 Handsontable.helper.objectEach({key: 'foo'}, (value, key, object) => {});
 Handsontable.helper.padStart('foo', 1, 'bar');
@@ -73,7 +65,6 @@ Handsontable.helper.pivot([1, 'foo', true]);
 Handsontable.helper.randomString();
 Handsontable.helper.rangeEach(0, 0, (index) => {});
 Handsontable.helper.rangeEachReverse(0, 0, (index) => {});
-Handsontable.helper.requestAnimationFrame(() => {});
 Handsontable.helper.spreadsheetColumnIndex('foo');
 Handsontable.helper.spreadsheetColumnLabel(1);
 Handsontable.helper.startsWith('foo', 'bar');
@@ -86,3 +77,23 @@ Handsontable.helper.to2dArray([1, 'foo', true]);
 Handsontable.helper.toUpperCaseFirst('foo');
 Handsontable.helper.translateRowsToColumns([1, 'foo', true]);
 Handsontable.helper.valueAccordingPercent(1, 90);
+
+// Removed in 0.1 (IE and polyfill-era helpers, see CHANGELOG).
+// @ts-expect-error
+Handsontable.helper.isIE();
+// @ts-expect-error
+Handsontable.helper.isIE8();
+// @ts-expect-error
+Handsontable.helper.isIE9();
+// @ts-expect-error
+Handsontable.helper.isEdge();
+// @ts-expect-error
+Handsontable.helper.isMSBrowser();
+// @ts-expect-error
+Handsontable.helper.isWebComponentSupportedNatively();
+// @ts-expect-error
+Handsontable.helper.hasCaptionProblem();
+// @ts-expect-error
+Handsontable.helper.requestAnimationFrame(() => {});
+// @ts-expect-error
+Handsontable.helper.cancelAnimationFrame(1);
