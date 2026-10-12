@@ -29,12 +29,12 @@
   "scripts": {
     "build": "node build/build.js",
     "test": "pnpm test:unit && pnpm test:types && pnpm build && pnpm test:dist && pnpm test:e2e && pnpm test:e2e:min && pnpm test:walkontable",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --reporter=default --reporter=json --outputFile.json=test-results/unit.json; node ../../tools/compare-baseline.mjs unit test-results/unit.json",
     "test:dist": "vitest run --config vitest.dist.config.js",
     "test:types": "tsc -p test/types",
-    "test:e2e": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build dev",
-    "test:e2e:min": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build min",
-    "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable",
+    "test:e2e": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build dev; node ../../tools/compare-baseline.mjs e2e test-results/e2e-dev-chromium.json",
+    "test:e2e:min": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build min; node ../../tools/compare-baseline.mjs production test-results/e2e-min-chromium.json",
+    "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable; node ../../tools/compare-baseline.mjs walkontable test-results/walkontable-dev-chromium.json",
     "test:selftest": "node build/build-tests.js selftest && node test/runner/run.js --suite selftest"
   },
   "dependencies": {
