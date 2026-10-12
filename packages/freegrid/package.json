@@ -1,0 +1,52 @@
+{
+  "name": "freegrid",
+  "version": "0.0.0",
+  "description": "Free, MIT-licensed, spreadsheet-like data grid for the web. Continues Handsontable 6.2.2.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freegrid-web/freegrid.git",
+    "directory": "packages/freegrid"
+  },
+  "types": "./types/freegrid.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/freegrid.d.ts",
+      "import": "./dist/esm/index.js"
+    },
+    "./compat": {
+      "types": "./types/compat.d.ts",
+      "import": "./dist/esm/compat.js"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "build": "node build/build.js",
+    "test": "pnpm test:unit && pnpm test:types && pnpm build && pnpm test:dist && pnpm test:e2e && pnpm test:e2e:min && pnpm test:walkontable",
+    "test:unit": "vitest run",
+    "test:dist": "vitest run --config vitest.dist.config.js",
+    "test:types": "tsc -p test/types",
+    "test:e2e": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build dev",
+    "test:e2e:min": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build min",
+    "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable"
+  },
+  "dependencies": {
+    "moment": "^2.30.1",
+    "numbro": "2.1.1",
+    "pikaday": "1.5.1"
+  },
+  "devDependencies": {
+    "jasmine-core": "^5.13.0",
+    "jsdom": "^30.1.2",
+    "playwright": "^1.64.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7",
+    "vitest": "^4.1.11"
+  }
+}
