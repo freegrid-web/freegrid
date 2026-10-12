@@ -39,7 +39,7 @@ const privatePool = new WeakMap();
  * * `'rowsLimit'` (see {@link CopyPaste#rowsLimit})
  * * `'pasteMode'` (see {@link CopyPaste#pasteMode})
  *
- * See [the copy/paste demo](https://docs.handsontable.com/demo-copy-paste.html) for examples.
+ * See [the copy/paste demo](https://github.com/freegrid-web/freegrid) for examples.
  *
  * @example
  * ```js
