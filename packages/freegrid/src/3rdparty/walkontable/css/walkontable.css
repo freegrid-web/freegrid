@@ -25,7 +25,6 @@
   -khtml-user-select: none;
   -moz-user-select: none;
   -o-user-select: none;
-  -ms-user-select: none;
   /*user-select: none; /*no browser supports unprefixed version*/
   border-spacing: 0;
   margin: 0;
