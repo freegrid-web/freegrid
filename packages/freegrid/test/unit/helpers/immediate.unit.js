@@ -18,4 +18,16 @@ describe('immediate helper', () => {
     await new Promise(resolve => setTimeout(resolve, 20));
     expect(spy).not.toHaveBeenCalled();
   });
+
+  it('runs callbacks queued in the same turn together, in one task (like Node setImmediate)', async() => {
+    const order = [];
+
+    fgSetImmediate(() => {
+      order.push('first');
+      Promise.resolve().then(() => order.push('microtask after first'));
+    });
+    fgSetImmediate(() => order.push('second'));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(order).toEqual(['first', 'second', 'microtask after first']);
+  });
 });
