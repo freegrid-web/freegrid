@@ -31,7 +31,7 @@ const privatePool = new WeakMap();
  * @example
  *
  * ```js
- * const hot = new Handsontable(document.getElementById('example'), {
+ * const hot = new FreeGrid(document.getElementById('example'), {
  *  data: getData(),
  *  mergeCells: [
  *    {row: 0, col: 3, rowspan: 3, colspan: 3},
@@ -72,7 +72,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link MergeCells#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -82,7 +82,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -120,7 +120,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     this.clearCollections();

@@ -99,7 +99,7 @@ export function getDragDirectionAndRange(startSelection, endSelection) {
  * Get mapped FillHandle setting containing information about
  * allowed FillHandle directions and if allowed is automatic insertion of rows on drag
  *
- * @param {Boolean|Object} fillHandle property of Handsontable settings
+ * @param {Boolean|Object} fillHandle property of FreeGrid settings
  * @returns {{directions: Array, autoInsertRow: Boolean}} object allowing access to information
  * about FillHandle in more useful way
  */

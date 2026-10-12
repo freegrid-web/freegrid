@@ -1,13 +1,17 @@
-export default function jQueryWrapper(Handsontable) {
+// The plugin is registered as $.fn.freegrid; $.fn.handsontable is kept as a compatibility name for code
+// written against FreeGrid 6.x. Both names share one instance per element.
+const PLUGIN_NAMES = ['freegrid', 'handsontable'];
+
+export default function jQueryWrapper(FreeGrid) {
   const jQuery = typeof window === 'undefined' ? false : window.jQuery;
 
   if (!jQuery) {
     return;
   }
 
-  jQuery.fn.handsontable = function(action, ...args) {
+  function plugin(action, ...args) {
     const $this = this.first(); // Use only first element from list
-    let instance = $this.data('handsontable');
+    let instance = $this.data('freegrid') || $this.data('handsontable');
 
     // Init case
     if (typeof action !== 'string') {
@@ -17,8 +21,8 @@ export default function jQueryWrapper(Handsontable) {
         instance.updateSettings(userSettings);
 
       } else {
-        instance = new Handsontable.Core($this[0], userSettings);
-        $this.data('handsontable', instance);
+        instance = new FreeGrid.Core($this[0], userSettings);
+        PLUGIN_NAMES.forEach(name => $this.data(name, instance));
         instance.init();
       }
 
@@ -37,10 +41,14 @@ export default function jQueryWrapper(Handsontable) {
         }
 
       } else {
-        throw new Error(`Handsontable do not provide action: ${action}`);
+        throw new Error(`FreeGrid does not provide action: ${action}`);
       }
     }
 
     return output;
-  };
+  }
+
+  PLUGIN_NAMES.forEach((name) => {
+    jQuery.fn[name] = plugin;
+  });
 }

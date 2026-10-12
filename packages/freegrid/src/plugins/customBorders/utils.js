@@ -36,7 +36,7 @@ export function createSingleEmptyBorder() {
 }
 
 /**
- * Create default Handsontable border object.
+ * Create default FreeGrid border object.
  *
  * @returns {Object} `{{width: number, color: string, cornerVisible: boolean}}`
  */

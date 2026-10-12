@@ -89,7 +89,12 @@ later, or from HyperFormula. Contributions that appear to be derived from them a
 | Build-time constants | `process.env.HOT_VERSION` etc. | Renamed to `__FG_VERSION__`, `__FG_BUILD_DATE__`, `__FG_PACKAGE_NAME__`. `HOT_RELEASE_DATE` is dropped (only the license check used it). `HOT_PACKAGE_TYPE` and `HOT_BASE_VERSION` are removed together with the code that used them (see 4.4). |
 | Global namespace in the UMD build | `window.Handsontable` | `window.FreeGrid`. Loading `dist/compat.js` afterwards also sets `window.Handsontable`. |
 
-Internal identifiers such as variable names or `hot` instances are not renamed in Stage 0.
+Decided after review (2026-10-12): code comments, JSDoc and runtime messages are renamed to FreeGrid in
+Stage 0, and the jQuery plugin is registered as `$.fn.freegrid` with `$.fn.handsontable` kept as a
+compatibility name. Internal variable names such as `hot` are not renamed. CSS class names move to
+FreeGrid names in a separate step with a transition period: FreeGrid-generated elements carry both the
+old and the new class, and user-facing classes (such as `htCenter`) get both selectors in the CSS. The old
+names are removed several major versions later.
 
 ## 5. Structure & Build
 

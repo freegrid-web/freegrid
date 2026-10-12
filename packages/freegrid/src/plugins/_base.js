@@ -11,11 +11,11 @@ let initializedPlugins = null;
  */
 class BasePlugin {
   /**
-   * @param {Object} hotInstance Handsontable instance.
+   * @param {Object} hotInstance FreeGrid instance.
    */
   constructor(hotInstance) {
     /**
-     * Handsontable instance.
+     * FreeGrid instance.
      *
      * @type {Core}
      */
@@ -59,14 +59,14 @@ class BasePlugin {
   }
 
   /**
-   * Enable plugin for this Handsontable instance.
+   * Enable plugin for this FreeGrid instance.
    */
   enablePlugin() {
     this.enabled = true;
   }
 
   /**
-   * Disable plugin for this Handsontable instance.
+   * Disable plugin for this FreeGrid instance.
    */
   disablePlugin() {
     if (this.eventManager) {

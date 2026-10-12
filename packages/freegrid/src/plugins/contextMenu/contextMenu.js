@@ -32,7 +32,7 @@ Hooks.getSingleton().register('afterContextMenuExecute');
 
 /**
  * @description
- * This plugin creates the Handsontable Context Menu. It allows to create a new row or column at any place in the
+ * This plugin creates the FreeGrid Context Menu. It allows to create a new row or column at any place in the
  * grid among [other features](https://github.com/freegrid-web/freegrid).
  * Possible values:
  * * `true` (to enable default options),
@@ -121,7 +121,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ContextMenu#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -131,7 +131,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -198,7 +198,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     this.close();
@@ -231,7 +231,7 @@ class ContextMenu extends BasePlugin {
 
     // ContextMenu is not detected HotTableEnv correctly because is injected outside hot-table
     this.menu.hotMenu.isHotTableEnv = this.hot.isHotTableEnv;
-    // Handsontable.eventManager.isHotTableEnv = this.hot.isHotTableEnv;
+    // FreeGrid.eventManager.isHotTableEnv = this.hot.isHotTableEnv;
   }
 
   /**

@@ -33,7 +33,7 @@ export function equalsIgnoreCase(...strings) {
 }
 
 /**
- * Generates a random hex string. Used as namespace for Handsontable instance events.
+ * Generates a random hex string. Used as namespace for FreeGrid instance events.
  *
  * @return {String} Returns 16-long character random string (eq. `'92b1bfc74ec4'`).
  */

@@ -40,7 +40,7 @@ const privatePool = new WeakMap();
  *
  * @example
  * ```js
- * const hot = new Handsontable(document.getElementById('example'), {
+ * const hot = new FreeGrid(document.getElementById('example'), {
  *   date: getData(),
  *   autoColumnSize: true
  * });
@@ -139,7 +139,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoColumnSize#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -149,7 +149,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -185,7 +185,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     super.disablePlugin();
@@ -522,7 +522,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * On after Handsontable init fill plugin with all necessary values.
+   * On after FreeGrid init fill plugin with all necessary values.
    *
    * @private
    */

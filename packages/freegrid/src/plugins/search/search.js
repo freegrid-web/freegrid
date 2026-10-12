@@ -25,7 +25,7 @@ const DEFAULT_QUERY_METHOD = function(query, value) {
  * @plugin Search
  *
  * @description
- * The search plugin provides an easy interface to search data across Handsontable.
+ * The search plugin provides an easy interface to search data across FreeGrid.
  *
  * In order to enable search mechanism, {@link Options#search} option must be set to `true`.
  *
@@ -78,7 +78,7 @@ class Search extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoRowSize#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -88,7 +88,7 @@ class Search extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -104,7 +104,7 @@ class Search extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     const beforeRendererCallback = (...args) => this.onBeforeRenderer(...args);
@@ -225,7 +225,7 @@ class Search extends BasePlugin {
   /**
    * Updates the settings of the plugin.
    *
-   * @param {Object} searchSettings The plugin settings, taken from Handsontable configuration.
+   * @param {Object} searchSettings The plugin settings, taken from FreeGrid configuration.
    * @private
    */
   updatePluginSettings(searchSettings) {

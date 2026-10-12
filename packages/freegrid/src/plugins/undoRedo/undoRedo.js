@@ -1,5 +1,5 @@
 /**
- * Handsontable UndoRedo class
+ * FreeGrid UndoRedo class
  */
 import Hooks from './../../pluginHooks';
 import { arrayMap, arrayEach } from './../../helpers/array';
@@ -10,7 +10,7 @@ import { align } from './../contextMenu/utils';
 
 /**
  * @description
- * Handsontable UndoRedo plugin allows to undo and redo certain actions done in the table.
+ * FreeGrid UndoRedo plugin allows to undo and redo certain actions done in the table.
  *
  * __Note__, that not all actions are currently undo-able. The UndoRedo plugin is enabled by default.
  *
@@ -605,10 +605,10 @@ function init() {
   if (pluginEnabled) {
     if (!instance.undoRedo) {
       /**
-       * Instance of Handsontable.UndoRedo Plugin {@link Handsontable.UndoRedo}
+       * Instance of FreeGrid.UndoRedo Plugin {@link FreeGrid.UndoRedo}
        *
        * @alias undoRedo
-       * @memberof! Handsontable.Core#
+       * @memberof! FreeGrid.Core#
        * @type {UndoRedo}
        */
       instance.undoRedo = new UndoRedo(instance);
@@ -655,7 +655,7 @@ function exposeUndoRedoMethods(instance) {
   /**
    * {@link UndoRedo#undo}
    * @alias undo
-   * @memberof! Handsontable.Core#
+   * @memberof! FreeGrid.Core#
    */
   instance.undo = function() {
     return instance.undoRedo.undo();
@@ -664,7 +664,7 @@ function exposeUndoRedoMethods(instance) {
   /**
    * {@link UndoRedo#redo}
    * @alias redo
-   * @memberof! Handsontable.Core#
+   * @memberof! FreeGrid.Core#
    */
   instance.redo = function() {
     return instance.undoRedo.redo();
@@ -673,7 +673,7 @@ function exposeUndoRedoMethods(instance) {
   /**
    * {@link UndoRedo#isUndoAvailable}
    * @alias isUndoAvailable
-   * @memberof! Handsontable.Core#
+   * @memberof! FreeGrid.Core#
    */
   instance.isUndoAvailable = function() {
     return instance.undoRedo.isUndoAvailable();
@@ -682,7 +682,7 @@ function exposeUndoRedoMethods(instance) {
   /**
    * {@link UndoRedo#isRedoAvailable}
    * @alias isRedoAvailable
-   * @memberof! Handsontable.Core#
+   * @memberof! FreeGrid.Core#
    */
   instance.isRedoAvailable = function() {
     return instance.undoRedo.isRedoAvailable();
@@ -691,7 +691,7 @@ function exposeUndoRedoMethods(instance) {
   /**
    * {@link UndoRedo#clear}
    * @alias clearUndo
-   * @memberof! Handsontable.Core#
+   * @memberof! FreeGrid.Core#
    */
   instance.clearUndo = function() {
     return instance.undoRedo.clear();

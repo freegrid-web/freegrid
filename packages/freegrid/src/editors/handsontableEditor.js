@@ -124,7 +124,7 @@ HandsontableEditor.prototype.open = function(...args) {
     this.htContainer.style.display = '';
   }
 
-  // Construct and initialise a new Handsontable
+  // Construct and initialise a new FreeGrid
   this.htEditor = new this.instance.constructor(this.htContainer, this.htOptions);
   this.htEditor.init();
   this.htEditor.rootElement.style.display = '';

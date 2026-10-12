@@ -45,7 +45,7 @@ class ManualColumnFreeze extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ManualColumnFreeze#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -55,7 +55,7 @@ class ManualColumnFreeze extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -70,7 +70,7 @@ class ManualColumnFreeze extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     const priv = privatePool.get(this);

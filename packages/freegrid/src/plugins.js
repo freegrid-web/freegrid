@@ -56,7 +56,7 @@ function getPlugin(instance, pluginName) {
 }
 
 /**
- * Get all registred plugins names for concrete Handsontable instance.
+ * Get all registred plugins names for concrete FreeGrid instance.
  *
  * @param {Object} hotInstance
  * @returns {Array}

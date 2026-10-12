@@ -51,7 +51,7 @@ const META_READONLY = 'readOnly';
  * @example
  *
  * ```js
- * const hot = new Handsontable(document.getElementById('example'), {
+ * const hot = new FreeGrid(document.getElementById('example'), {
  *   date: getData(),
  *   comments: true,
  *   cell: [
@@ -128,7 +128,7 @@ class Comments extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link Comments#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -138,7 +138,7 @@ class Comments extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -183,7 +183,7 @@ class Comments extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     super.disablePlugin();

@@ -83,7 +83,7 @@ AutocompleteEditor.prototype.prepare = function(...args) {
 
 AutocompleteEditor.prototype.open = function(...args) {
   this.instance.addHook('beforeKeyDown', onBeforeKeyDown);
-  // Ugly fix for handsontable which grab window object for autocomplete scroll listener instead table element.
+  // Ugly fix for FreeGrid which grab window object for autocomplete scroll listener instead table element.
   this.TEXTAREA_PARENT.style.overflow = 'auto';
   HandsontableEditor.prototype.open.apply(this, args);
   this.TEXTAREA_PARENT.style.overflow = '';

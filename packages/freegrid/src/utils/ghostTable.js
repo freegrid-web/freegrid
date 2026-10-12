@@ -8,7 +8,7 @@ import { arrayEach } from './../helpers/array';
 class GhostTable {
   constructor(hotInstance) {
     /**
-     * Handsontable instance.
+     * FreeGrid instance.
      *
      * @type {Core}
      */

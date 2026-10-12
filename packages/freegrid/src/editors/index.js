@@ -61,7 +61,7 @@ export function RegisteredEditor(editorClass) {
  * Returns instance (singleton) of editor class.
  *
  * @param {String} name Name of an editor under which it has been stored.
- * @param {Object} hotInstance Instance of Handsontable.
+ * @param {Object} hotInstance Instance of FreeGrid.
  * @returns {Function} Returns instance of editor.
  */
 export function _getEditorInstance(name, hotInstance) {

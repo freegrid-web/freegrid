@@ -11,7 +11,7 @@ import { stopImmediatePropagation as _stopImmediatePropagation } from './helpers
 let listenersCounter = 0;
 
 /**
- * Event DOM manager for internal use in Handsontable.
+ * Event DOM manager for internal use in FreeGrid.
  *
  * @class EventManager
  * @util
@@ -229,7 +229,7 @@ function extendEvent(context, event) {
       fromElement = context.hot ? context.hot.view.wt.wtTable.TABLE : null;
 
     } else if (context.isHotTableEnv) {
-      // Handsontable.Core
+      // FreeGrid.Core
       fromElement = context.view.activeWt.wtTable.TABLE.parentNode.parentNode;
 
     } else if (context.wtTable) {

@@ -4,7 +4,7 @@ import { registerPlugin } from './../../plugins';
 
 /**
  * @description
- * Plugin used to scroll Handsontable by selecting a cell and dragging outside of the visible viewport.
+ * Plugin used to scroll FreeGrid by selecting a cell and dragging outside of the visible viewport.
  *
  *
  * @class DragToScroll
@@ -44,7 +44,7 @@ class DragToScroll extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link DragToScroll#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -54,7 +54,7 @@ class DragToScroll extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -80,7 +80,7 @@ class DragToScroll extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     this.unregisterEvents();

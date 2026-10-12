@@ -7,7 +7,7 @@ import { isNumeric } from './../helpers/number';
  *
  * @private
  * @renderer NumericRenderer
- * @param {Object} instance Handsontable instance
+ * @param {Object} instance FreeGrid instance
  * @param {Element} TD Table cell where to render
  * @param {Number} row
  * @param {Number} col

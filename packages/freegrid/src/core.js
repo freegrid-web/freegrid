@@ -43,22 +43,22 @@ import { Selection } from './selection';
 let activeGuid = null;
 
 /**
- * Handsontable constructor
+ * FreeGrid constructor
  *
  * @core
  * @constructor Core
  * @description
  *
- * After Handsontable is constructed, you can modify the grid behavior using the available public methods.
+ * After FreeGrid is constructed, you can modify the grid behavior using the available public methods.
  *
  * ---
  * ## How to call methods
  *
- * These are 2 equal ways to call a Handsontable method:
+ * These are 2 equal ways to call a FreeGrid method:
  *
  * ```js
- * // all following examples assume that you constructed Handsontable like this
- * const hot = new Handsontable(document.getElementById('example1'), options);
+ * // all following examples assume that you constructed FreeGrid like this
+ * const hot = new FreeGrid(document.getElementById('example1'), options);
  *
  * // now, to use setDataAtCell method, you can either:
  * ht.setDataAtCell(0, 0, 'new value');
@@ -66,7 +66,7 @@ let activeGuid = null;
  *
  * Alternatively, you can call the method using jQuery wrapper (__obsolete__, requires initialization using our jQuery guide
  * ```js
- *   $('#example1').handsontable('setDataAtCell', 0, 0, 'new value');
+ *   $('#example1').freegrid('setDataAtCell', 0, 0, 'new value');
  * ```
  * ---
  */
@@ -937,7 +937,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       if (changes.length) {
         beforeChangeResult = instance.runHooks('beforeChange', changes, source || 'edit');
         if (isFunction(beforeChangeResult)) {
-          warn('Your beforeChange callback returns a function. It\'s not supported since Handsontable 0.12.1 (and the returned function will not be executed).');
+          warn('Your beforeChange callback returns a function. It\'s not supported (the returned function will not be executed).');
         } else if (beforeChangeResult === false) {
           changes.splice(0, changes.length); // invalidate all changes (remove everything from array)
         }
@@ -1176,7 +1176,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Listen to the keyboard input on document body. This allows Handsontable to capture keyboard events and respond
+   * Listen to the keyboard input on document body. This allows FreeGrid to capture keyboard events and respond
    * in the right way.
    *
    * @memberof Core#
@@ -1204,7 +1204,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Stop listening to keyboard input on the document body. Calling this method makes the Handsontable inactive for
+   * Stop listening to keyboard input on the document body. Calling this method makes the FreeGrid inactive for
    * any keyboard events.
    *
    * @memberof Core#
@@ -1218,7 +1218,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Returns `true` if the current Handsontable instance is listening to keyboard input on document body.
+   * Returns `true` if the current FreeGrid instance is listening to keyboard input on document body.
    *
    * @memberof Core#
    * @function isListening
@@ -1406,7 +1406,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * Rerender the table. Calling this method starts the process of recalculating, redrawing and applying the changes
    * to the DOM. While rendering the table all cell renderers are recalled.
    *
-   * Calling this method manually is not recommended. Handsontable tries to render itself by choosing the most
+   * Calling this method manually is not recommended. FreeGrid tries to render itself by choosing the most
    * optimal moments in its lifecycle.
    *
    * @memberof Core#
@@ -1423,7 +1423,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Loads new data to Handsontable. Loading new data resets the cell meta.
+   * Loads new data to FreeGrid. Loading new data resets the cell meta.
    *
    * @memberof Core#
    * @function loadData
@@ -2180,7 +2180,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
   /**
    * @description
-   * Returns a data type defined in the Handsontable settings under the `type` key ([Options#type](https://github.com/freegrid-web/freegrid)).
+   * Returns a data type defined in the FreeGrid settings under the `type` key ([Options#type](https://github.com/freegrid-web/freegrid)).
    * If there are cells with different types in the selected range, it returns `'mixed'`.
    *
    * __Note__: If data is reordered, sorted or trimmed, the currently visible order will be used.
@@ -3110,7 +3110,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} [endRow] Visual end row index (if selecting a range).
    * @param {Number|String} [endColumn] Visual end column index or column property (if selecting a range).
    * @param {Boolean} [scrollToCell=true] If `true`, the viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, Handsontable will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   this.selectCell = function(row, column, endRow, endColumn, scrollToCell = true, changeListener = true) {
@@ -3151,7 +3151,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *                                     the same format as `getSelected` method returns or as an CellRange objects
    *                                     which is the same format what `getSelectedRange` method returns.
    * @param {Boolean} [scrollToCell=true] If `true`, the viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, Handsontable will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   this.selectCells = function(coords = [[]], scrollToCell = true, changeListener = true) {
@@ -3181,7 +3181,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} [endRow] visual end row index (if selecting a range).
    * @param {String} [endProp] End property name (if selecting a range).
    * @param {Boolean} [scrollToCell=true] If `true`, viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, Handsontable will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   this.selectCellByProp = function(row, prop, endRow, endProp, scrollToCell = true, changeListener = true) {
@@ -3294,7 +3294,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Removes the table from the DOM and destroys the instance of the Handsontable.
+   * Removes the table from the DOM and destroys the instance of the FreeGrid.
    *
    * @memberof Core#
    * @function destroy
@@ -3359,7 +3359,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    */
   function postMortem(method) {
     return () => {
-      throw new Error(`The "${method}" method cannot be called because this Handsontable instance has been destroyed`);
+      throw new Error(`The "${method}" method cannot be called because this FreeGrid instance has been destroyed`);
     };
   }
 
@@ -3387,18 +3387,18 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Returns the Handsontable instance.
+   * Returns the FreeGrid instance.
    *
    * @memberof Core#
    * @function getInstance
-   * @returns {Handsontable} The Handsontable instance.
+   * @returns {FreeGrid} The FreeGrid instance.
    */
   this.getInstance = function() {
     return instance;
   };
 
   /**
-   * Adds listener to the specified hook name (only for this Handsontable instance).
+   * Adds listener to the specified hook name (only for this FreeGrid instance).
    *
    * @memberof Core#
    * @function addHook
@@ -3415,7 +3415,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Check if for a specified hook name there are added listeners (only for this Handsontable instance). All available
+   * Check if for a specified hook name there are added listeners (only for this FreeGrid instance). All available
    * hooks you will find {@link Hooks}.
    *
    * @memberof Core#
@@ -3434,7 +3434,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
   };
 
   /**
-   * Adds listener to specified hook name (only for this Handsontable instance). After the listener is triggered,
+   * Adds listener to specified hook name (only for this FreeGrid instance). After the listener is triggered,
    * it will be automatically removed.
    *
    * @memberof Core#

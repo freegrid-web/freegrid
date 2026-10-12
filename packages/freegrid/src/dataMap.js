@@ -21,7 +21,7 @@ import MultiMap from './multiMap';
  * @todo refactor arguments of methods getRange, getText to be numbers (not objects)
  * @todo remove priv, GridSettings from object constructor
  *
- * @param {Object} instance Instance of Handsontable
+ * @param {Object} instance Instance of FreeGrid
  * @param {*} priv
  * @param {*} GridSettings Grid settings
  * @util

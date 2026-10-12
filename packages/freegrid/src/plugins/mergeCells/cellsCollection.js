@@ -27,9 +27,9 @@ class MergedCellsCollection {
      */
     this.mergedCells = [];
     /**
-     * The Handsontable instance.
+     * The FreeGrid instance.
      *
-     * @type {Handsontable}
+     * @type {FreeGrid}
      */
     this.hot = plugin.hot;
   }

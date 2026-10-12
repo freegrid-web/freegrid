@@ -190,7 +190,7 @@ class ViewportColumnsCalculator {
   }
 
   /**
-   * Get stretched column width based on stretchH (all or last) setting passed in handsontable instance.
+   * Get stretched column width based on stretchH (all or last) setting passed in FreeGrid instance.
    *
    * @param {Number} column
    * @param {Number} baseWidth

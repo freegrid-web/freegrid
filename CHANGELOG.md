@@ -10,6 +10,8 @@
   moment ≥ 2.25 parses some malformed date formats differently (for example `mm/dd/yy`, which means
   minutes/weekday/year); valid formats such as `MM/DD/YYYY` behave as before.
 - Removed the unused Handsontable Pro license-key check.
+- Code comments and runtime messages name FreeGrid (e.g. "this FreeGrid instance has been destroyed").
+- jQuery plugin available as `$.fn.freegrid`; `$.fn.handsontable` remains as a compatibility name.
 
 ---
 

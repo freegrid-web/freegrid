@@ -23,7 +23,7 @@ import { toSingleLine } from './../helpers/templateLiteralTag';
 class Selection {
   constructor(settings, tableProps) {
     /**
-     * Handsontable settings instance.
+     * FreeGrid settings instance.
      *
      * @type {GridSettings}
      */
@@ -316,7 +316,7 @@ class Selection {
    * @param {Number} rowDelta Rows number to move, value can be passed as negative number.
    * @param {Number} colDelta Columns number to move, value can be passed as negative number.
    * @param {Boolean} force If `true` the new rows/columns will be created if necessary. Otherwise, row/column will
-   *                        be created according to `minSpareRows/minSpareCols` settings of Handsontable.
+   *                        be created according to `minSpareRows/minSpareCols` settings of FreeGrid.
    */
   transformStart(rowDelta, colDelta, force) {
     this.setRangeStart(this.transformation.transformStart(rowDelta, colDelta, force));

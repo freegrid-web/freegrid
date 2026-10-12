@@ -16,7 +16,7 @@ import TextEditor from './textEditor';
  */
 class DateEditor extends TextEditor {
   /**
-   * @param {Core} hotInstance Handsontable instance
+   * @param {Core} hotInstance FreeGrid instance
    * @private
    */
   constructor(hotInstance) {

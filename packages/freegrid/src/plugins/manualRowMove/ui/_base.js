@@ -10,7 +10,7 @@ const UNIT = 'px';
 class BaseUI {
   constructor(hotInstance) {
     /**
-     * Instance of Handsontable.
+     * Instance of FreeGrid.
      *
      * @type {Core}
      */

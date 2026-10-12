@@ -118,7 +118,7 @@ export function normalizeSelectionFactory(type, { keepDirection = false, propToC
  * contains an array of arrays. The single item contains at index 0 visual column index from the selection was
  * started and at index 1 distance as a count of selected columns.
  *
- * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by Handsontable.
+ * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by FreeGrid.
  * @return {Array[]} Returns an array of arrays with ranges defines in that schema:
  *                   `[[visualColumnStart, distance], [visualColumnStart, distance], ...]`.
  *                   The column distances are always created starting from the left (zero index) to the
@@ -168,7 +168,7 @@ export function transformSelectionToColumnDistance(selectionRanges) {
  * contains an array of arrays. The single item contains at index 0 visual column index from the selection was
  * started and at index 1 distance as a count of selected columns.
  *
- * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by Handsontable.
+ * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by FreeGrid.
  * @return {Array[]} Returns an array of arrays with ranges defines in that schema:
  *                   `[[visualColumnStart, distance], [visualColumnStart, distance], ...]`.
  *                   The column distances are always created starting from the left (zero index) to the

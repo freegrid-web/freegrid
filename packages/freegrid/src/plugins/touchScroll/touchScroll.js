@@ -74,7 +74,7 @@ class TouchScroll extends BasePlugin {
   }
 
   /**
-   * Disable plugin for this Handsontable instance.
+   * Disable plugin for this FreeGrid instance.
    */
   disablePlugin() {
     super.disablePlugin();

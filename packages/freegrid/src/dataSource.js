@@ -9,9 +9,9 @@ import { rangeEach } from './helpers/number';
 class DataSource {
   constructor(hotInstance, dataSource = []) {
     /**
-     * Instance of Handsontable.
+     * Instance of FreeGrid.
      *
-     * @type {Handsontable}
+     * @type {FreeGrid}
      */
     this.hot = hotInstance;
     /**

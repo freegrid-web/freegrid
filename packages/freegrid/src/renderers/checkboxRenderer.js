@@ -14,7 +14,7 @@ const BAD_VALUE_CLASS = 'htBadValue';
  * Checkbox renderer
  *
  * @private
- * @param {Object} instance Handsontable instance
+ * @param {Object} instance FreeGrid instance
  * @param {Element} TD Table cell where to render
  * @param {Number} row
  * @param {Number} col
@@ -216,7 +216,7 @@ function checkboxRenderer(instance, TD, row, col, prop, value, cellProperties, .
 /**
  * Register checkbox listeners.
  *
- * @param {Handsontable} instance Handsontable instance.
+ * @param {FreeGrid} instance FreeGrid instance.
  * @returns {EventManager}
  */
 function registerEvents(instance) {
@@ -269,7 +269,7 @@ function createLabel(text) {
  *
  * @private
  * @param {Event} event `mouseup` event.
- * @param {Object} instance Handsontable instance.
+ * @param {Object} instance FreeGrid instance.
  */
 function onMouseUp(event, instance) {
   if (!isCheckboxInput(event.target)) {
@@ -283,7 +283,7 @@ function onMouseUp(event, instance) {
  *
  * @private
  * @param {Event} event `click` event.
- * @param {Object} instance Handsontable instance.
+ * @param {Object} instance FreeGrid instance.
  */
 function onClick(event, instance) {
   if (!isCheckboxInput(event.target)) {
@@ -303,7 +303,7 @@ function onClick(event, instance) {
  * `change` callback.
  *
  * @param {Event} event `change` event.
- * @param {Object} instance Handsontable instance.
+ * @param {Object} instance FreeGrid instance.
  * @param {Object} cellProperties Reference to cell properties.
  * @returns {Boolean}
  */

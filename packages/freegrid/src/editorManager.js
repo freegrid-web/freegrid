@@ -273,7 +273,7 @@ function EditorManager(instance, priv, selection) {
   * reinitialized after selecting the new cell. This feature is necessary for a mobile editor.
   *
   * @function lockEditor
-  * @memberof! Handsontable.EditorManager#
+  * @memberof! FreeGrid.EditorManager#
    */
   this.lockEditor = function() {
     lock = true;
@@ -284,7 +284,7 @@ function EditorManager(instance, priv, selection) {
   * the editors where for every new selection its instances are closed.
   *
   * @function unlockEditor
-  * @memberof! Handsontable.EditorManager#
+  * @memberof! FreeGrid.EditorManager#
    */
   this.unlockEditor = function() {
     lock = false;
@@ -294,7 +294,7 @@ function EditorManager(instance, priv, selection) {
    * Destroy current editor, if exists.
    *
    * @function destroyEditor
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @param {Boolean} revertOriginal
    */
   this.destroyEditor = function(revertOriginal) {
@@ -307,7 +307,7 @@ function EditorManager(instance, priv, selection) {
    * Get active editor.
    *
    * @function getActiveEditor
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @returns {*}
    */
   this.getActiveEditor = function() {
@@ -318,7 +318,7 @@ function EditorManager(instance, priv, selection) {
    * Prepare text input to be displayed at given grid cell.
    *
    * @function prepareEditor
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    */
   this.prepareEditor = function() {
     if (lock) {
@@ -356,7 +356,7 @@ function EditorManager(instance, priv, selection) {
    * Check is editor is opened/showed.
    *
    * @function isEditorOpened
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @returns {Boolean}
    */
   this.isEditorOpened = function() {
@@ -367,7 +367,7 @@ function EditorManager(instance, priv, selection) {
    * Open editor with initial value.
    *
    * @function openEditor
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @param {null|String} newInitialValue new value from which editor will start if handled property it's not the `null`.
    * @param {DOMEvent} event
    */
@@ -392,7 +392,7 @@ function EditorManager(instance, priv, selection) {
    * Close editor, finish editing cell.
    *
    * @function closeEditor
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @param {Boolean} restoreOriginalValue
    * @param {Boolean} [ctrlDown]
    * @param {Function} [callback]
@@ -410,7 +410,7 @@ function EditorManager(instance, priv, selection) {
    * Close editor and save changes.
    *
    * @function closeEditorAndSaveChanges
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @param {Boolean} ctrlDown
    */
   this.closeEditorAndSaveChanges = function(ctrlDown) {
@@ -421,7 +421,7 @@ function EditorManager(instance, priv, selection) {
    * Close editor and restore original value.
    *
    * @function closeEditorAndRestoreOriginalValue
-   * @memberof! Handsontable.EditorManager#
+   * @memberof! FreeGrid.EditorManager#
    * @param {Boolean} ctrlDown
    */
   this.closeEditorAndRestoreOriginalValue = function(ctrlDown) {

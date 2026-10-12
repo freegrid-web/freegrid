@@ -32,7 +32,7 @@ class MultipleSelectionHandles extends BasePlugin {
   }
 
   /**
-   * Check if the plugin is enabled in the handsontable settings.
+   * Check if the plugin is enabled in the FreeGrid settings.
    *
    * @returns {Boolean}
    */
@@ -41,7 +41,7 @@ class MultipleSelectionHandles extends BasePlugin {
   }
 
   /**
-   * Enable plugin for this Handsontable instance.
+   * Enable plugin for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {

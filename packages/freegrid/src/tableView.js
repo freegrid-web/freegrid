@@ -31,7 +31,7 @@ const clearTextSelection = function() {
 };
 
 /**
- * Handsontable TableView constructor
+ * FreeGrid TableView constructor
  * @param {Object} instance
  */
 function TableView(instance) {
@@ -477,14 +477,14 @@ TableView.prototype.isCellEdited = function() {
 
 TableView.prototype.beforeRender = function(force, skipRender) {
   if (force) {
-    // this.instance.forceFullRender = did Handsontable request full render?
+    // this.instance.forceFullRender = did FreeGrid request full render?
     this.instance.runHooks('beforeRender', this.instance.forceFullRender, skipRender);
   }
 };
 
 TableView.prototype.onDraw = function(force) {
   if (force) {
-    // this.instance.forceFullRender = did Handsontable request full render?
+    // this.instance.forceFullRender = did FreeGrid request full render?
     this.instance.runHooks('afterRender', this.instance.forceFullRender);
   }
 };

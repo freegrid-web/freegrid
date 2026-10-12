@@ -49,7 +49,7 @@ class Autofill extends BasePlugin {
      */
     this.mouseDownOnCellCorner = false;
     /**
-     * Specifies if mouse was dragged outside Handsontable.
+     * Specifies if mouse was dragged outside FreeGrid.
      *
      * @private
      * @type {Boolean}
@@ -78,7 +78,7 @@ class Autofill extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the Handsontable settings.
+   * Checks if the plugin is enabled in the FreeGrid settings.
    *
    * @returns {Boolean}
    */
@@ -87,7 +87,7 @@ class Autofill extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -114,7 +114,7 @@ class Autofill extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     this.clearMappedSettings();

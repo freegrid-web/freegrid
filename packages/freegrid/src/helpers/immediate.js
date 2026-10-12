@@ -1,5 +1,5 @@
 /**
- * `setImmediate`/`clearImmediate` for browsers. Handsontable 6.2.2 used the globals that
+ * `setImmediate`/`clearImmediate` for browsers. FreeGrid 6.2.2 used the globals that
  * `@babel/polyfill` installed; FreeGrid targets ES2020 without polyfills, so it ships this helper.
  *
  * Callbacks queued during the same turn run together in one later macrotask (as Node's setImmediate

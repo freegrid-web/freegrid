@@ -28,7 +28,7 @@ const privatePool = new WeakMap();
 
 /**
  * @description
- * This plugin enables the copy/paste functionality in the Handsontable. The functionality works for API, Context Menu,
+ * This plugin enables the copy/paste functionality in the FreeGrid. The functionality works for API, Context Menu,
  * using keyboard shortcuts and menu bar from the browser.
  * Possible values:
  * * `true` (to enable default options),
@@ -99,7 +99,7 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the handsontable settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link CopyPaste#enablePlugin} method is called.
    *
    * @returns {Boolean}
@@ -109,7 +109,7 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this Handsontable instance.
+   * Enables the plugin functionality for this FreeGrid instance.
    */
   enablePlugin() {
     if (this.enabled) {
@@ -152,7 +152,7 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this Handsontable instance.
+   * Disables the plugin functionality for this FreeGrid instance.
    */
   disablePlugin() {
     if (this.focusableElement) {

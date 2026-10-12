@@ -4,7 +4,7 @@ import localHooks from './../mixins/localHooks';
 
 /**
  * The Transformation class implements algorithms for transforming coordinates based on current settings
- * passed to the Handsontable.
+ * passed to the FreeGrid.
  *
  * Transformation is always applied relative to the current selection.
  *
@@ -33,7 +33,7 @@ class Transformation {
    * @param {Number} rowDelta Rows number to move, value can be passed as negative number.
    * @param {Number} colDelta Columns number to move, value can be passed as negative number.
    * @param {Boolean} force If `true` the new rows/columns will be created if necessary. Otherwise, row/column will
-   *                        be created according to `minSpareRows/minSpareCols` settings of Handsontable.
+   *                        be created according to `minSpareRows/minSpareCols` settings of FreeGrid.
    * @returns {CellCoords}
    */
   transformStart(rowDelta, colDelta, force) {
