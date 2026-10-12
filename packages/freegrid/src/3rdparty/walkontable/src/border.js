@@ -51,7 +51,7 @@ class Border {
       height: '6px',
       borderWidth: '1px',
       borderStyle: 'solid',
-      borderColor: '#FFF'
+      borderColor: 'var(--fg-fill-handle-border-color)', // see src/css/variables.css
     };
     this.corner = null;
     this.cornerStyle = null;
@@ -243,8 +243,8 @@ class Border {
       height: `${width}px`,
       width: `${width}px`,
       'border-radius': `${parseInt(width / 1.5, 10)}px`,
-      background: '#F5F5FF',
-      border: '1px solid #4285c8'
+      background: 'var(--fg-mobile-handle-background)',
+      border: '1px solid var(--fg-mobile-handle-border-color)',
     };
 
     objectEach(handleStyle, (value, key) => {
@@ -629,7 +629,7 @@ class Border {
   changeBorderToDefaultStyle(position) {
     const defaultBorder = {
       width: 1,
-      color: '#000',
+      color: 'var(--fg-custom-border-color)',
     };
     const style = this[position].style;
 
