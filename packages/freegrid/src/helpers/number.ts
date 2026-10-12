@@ -5,7 +5,7 @@ export type RangeIteratee = (index: number) => unknown;
  * Checks if a value is numeric: a finite number, a `Number` object, or a string in decimal, exponent or hex
  * notation (surrounding whitespace allowed). Dates are not numeric.
  */
-export function isNumeric(value: unknown): boolean {
+export const isNumeric = (value: unknown): boolean => {
   if (typeof value === 'number') {
     return Number.isFinite(value);
   }
@@ -24,15 +24,18 @@ export function isNumeric(value: unknown): boolean {
   }
 
   return false;
-}
+};
 
 /**
  * Calls `iteratee` for each index from `rangeFrom` to `rangeTo`, both included. With two arguments, iterates
  * from 0 to the first argument.
  */
-export function rangeEach(rangeTo: number, iteratee: RangeIteratee): void;
-export function rangeEach(rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
-export function rangeEach(rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void {
+type RangeEach = {
+  (rangeTo: number, iteratee: RangeIteratee): void;
+  (rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
+};
+
+export const rangeEach: RangeEach = (rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void => {
   let from = rangeFrom;
   let to: number;
   let callback: RangeIteratee;
@@ -54,15 +57,18 @@ export function rangeEach(rangeFrom: number, rangeTo: number | RangeIteratee, it
       break;
     }
   }
-}
+};
 
 /**
  * Calls `iteratee` for each index from `rangeFrom` down to `rangeTo`, both included. With two arguments,
  * iterates down to 0.
  */
-export function rangeEachReverse(rangeFrom: number, iteratee: RangeIteratee): void;
-export function rangeEachReverse(rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
-export function rangeEachReverse(rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void {
+type RangeEachReverse = {
+  (rangeFrom: number, iteratee: RangeIteratee): void;
+  (rangeFrom: number, rangeTo: number, iteratee: RangeIteratee): void;
+};
+
+export const rangeEachReverse: RangeEachReverse = (rangeFrom: number, rangeTo: number | RangeIteratee, iteratee?: RangeIteratee): void => {
   let to: number;
   let callback: RangeIteratee;
 
@@ -82,14 +88,14 @@ export function rangeEachReverse(rangeFrom: number, rangeTo: number | RangeItera
       break;
     }
   }
-}
+};
 
 /**
  * Returns `percent` of `value`, truncated to an integer. `percent` is a number or a string such as `'33%'`;
  * its fraction is dropped first.
  */
-export function valueAccordingPercent(value: number, percent: string | number): number {
+export const valueAccordingPercent = (value: number, percent: string | number): number => {
   const wholePercent = parseInt(percent.toString().replace('%', ''), 10);
 
   return parseInt(String(value * wholePercent / 100), 10);
-}
+};

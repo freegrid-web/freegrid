@@ -1,25 +1,39 @@
-export function to2dArray(arr) {
-  const ilen = arr.length;
-  let i = 0;
+/**
+ * Array helpers. Unlike the built-in methods, the iteration helpers accept array-likes (they are copied with
+ * `Array.from`) and visit every index up to the starting length, holes included (as `undefined`).
+ */
 
-  while (i < ilen) {
+export type ArrayIteratee<T, R> = (value: T, index: number, array: T[]) => R;
+
+type ArrayInput<T> = ArrayLike<T> | Iterable<T>;
+
+const toArray = <T>(array: ArrayInput<T>): T[] => (Array.isArray(array) ? array : Array.from(array));
+
+/**
+ * Wraps every item of `arr` in an array, in place (`[1, 2]` becomes `[[1], [2]]`).
+ */
+export const to2dArray = (arr: unknown[]): void => {
+  for (let i = 0; i < arr.length; i++) {
     arr[i] = [arr[i]];
-    i += 1;
   }
-}
+};
 
-export function extendArray(arr, extension) {
-  const ilen = extension.length;
-  let i = 0;
+/**
+ * Appends the items of `extension` to `arr`, in place.
+ */
+export const extendArray = <T>(arr: T[], extension: ArrayLike<T>): void => {
+  const length = extension.length;
 
-  while (i < ilen) {
+  for (let i = 0; i < length; i++) {
     arr.push(extension[i]);
-    i += 1;
   }
-}
+};
 
-export function pivot(arr) {
-  const pivotedArr = [];
+/**
+ * Transposes a 2D array (rows become columns).
+ */
+export const pivot = <T>(arr: T[][]): T[][] => {
+  const pivotedArr: T[][] = [];
 
   if (!arr || arr.length === 0 || !arr[0] || arr[0].length === 0) {
     return pivotedArr;
@@ -39,213 +53,133 @@ export function pivot(arr) {
   }
 
   return pivotedArr;
-}
+};
 
 /**
- * A specialized version of `.reduce` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * {@link https://github.com/lodash/lodash/blob/master/lodash.js}
- *
- * @param {Array} array The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {*} [accumulator] The initial value.
- * @param {Boolean} [initFromArray] Specify using the first element of `array` as the initial value.
- * @returns {*} Returns the accumulated value.
+ * Reduces `array` to one value. With `initFromArray`, the first item is the initial value instead of `accumulator`.
  */
-export function arrayReduce(array, iteratee, accumulator, initFromArray) {
-  let index = -1;
-  let iterable = array;
+export const arrayReduce = <T, A>(
+  array: ArrayInput<T>,
+  iteratee: (accumulator: A, value: T, index: number, array: T[]) => A,
+  accumulator: A,
+  initFromArray = false,
+): A => {
+  const items = toArray(array);
+  const length = items.length;
+  let index = 0;
   let result = accumulator;
 
-  if (!Array.isArray(array)) {
-    iterable = Array.from(array);
-  }
-  const length = iterable.length;
-
   if (initFromArray && length) {
-    index += 1;
-    result = iterable[index];
+    // The caller asks for the first item as the start value, so here A is T.
+    result = items[0] as unknown as A;
+    index = 1;
   }
 
-  index += 1;
-
-  while (index < length) {
-    result = iteratee(result, iterable[index], index, iterable);
-    index += 1;
+  for (; index < length; index++) {
+    result = iteratee(result, items[index], index, items);
   }
 
   return result;
-}
+};
 
 /**
- * A specialized version of `.filter` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * {@link https://github.com/lodash/lodash/blob/master/lodash.js}
- *
- * @param {Array} array The array to iterate over.
- * @param {Function} predicate The function invoked per iteration.
- * @returns {Array} Returns the new filtered array.
+ * Returns the items for which `predicate` returns a truthy value.
  */
-export function arrayFilter(array, predicate) {
-  let index = 0;
-  let iterable = array;
+export const arrayFilter = <T>(array: ArrayInput<T>, predicate: ArrayIteratee<T, unknown>): T[] => {
+  const items = toArray(array);
+  const length = items.length;
+  const result: T[] = [];
 
-  if (!Array.isArray(array)) {
-    iterable = Array.from(array);
-  }
+  for (let index = 0; index < length; index++) {
+    const value = items[index];
 
-  const length = iterable.length;
-  const result = [];
-  let resIndex = -1;
-
-  while (index < length) {
-    const value = iterable[index];
-
-    if (predicate(value, index, iterable)) {
-      resIndex += 1;
-      result[resIndex] = value;
+    if (predicate(value, index, items)) {
+      result.push(value);
     }
-
-    index += 1;
   }
 
   return result;
-}
+};
 
 /**
- * A specialized version of `.map` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * @param {Array} array The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new filtered array.
+ * Returns the results of calling `iteratee` for every item.
  */
-export function arrayMap(array, iteratee) {
-  let index = 0;
-  let iterable = array;
+export const arrayMap = <T, R>(array: ArrayInput<T>, iteratee: ArrayIteratee<T, R>): R[] => {
+  const items = toArray(array);
+  const length = items.length;
+  const result: R[] = [];
 
-  if (!Array.isArray(array)) {
-    iterable = Array.from(array);
-  }
-
-  const length = iterable.length;
-  const result = [];
-  let resIndex = -1;
-
-  while (index < length) {
-    const value = iterable[index];
-
-    resIndex += 1;
-    result[resIndex] = iteratee(value, index, iterable);
-    index += 1;
+  for (let index = 0; index < length; index++) {
+    result.push(iteratee(items[index], index, items));
   }
 
   return result;
-}
+};
 
 /**
- * A specialized version of `.forEach` for arrays without support for callback
- * shorthands and `this` binding.
- *
- * {@link https://github.com/lodash/lodash/blob/master/lodash.js}
- *
- * @param {Array|*} array The array to iterate over or an any element with implemented iterator protocol.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns `array`.
+ * Calls `iteratee` for every item; stops when it returns `false`. Returns `array` itself.
  */
-export function arrayEach(array, iteratee) {
-  let index = 0;
-  let iterable = array;
+export const arrayEach = <T>(array: ArrayInput<T>, iteratee: ArrayIteratee<T, unknown>): ArrayInput<T> => {
+  const items = toArray(array);
+  const length = items.length;
 
-  if (!Array.isArray(array)) {
-    iterable = Array.from(array);
-  }
-
-  const length = iterable.length;
-
-  while (index < length) {
-    if (iteratee(iterable[index], index, iterable) === false) {
+  for (let index = 0; index < length; index++) {
+    if (iteratee(items[index], index, items) === false) {
       break;
     }
-
-    index += 1;
   }
 
   return array;
-}
+};
 
 /**
- * Calculate sum value for each item of the array.
- *
- * @param {Array} array The array to process.
- * @returns {Number} Returns calculated sum value.
+ * Sums the items (with `+`, so strings concatenate).
  */
-export function arraySum(array) {
-  return arrayReduce(array, (a, b) => (a + b), 0);
-}
+export const arraySum = (array: ArrayInput<number>): number => arrayReduce(array, (a, b) => a + b, 0);
+
+// `>` and `<` compare any values the way JavaScript does; the casts only let the type checker accept that.
+type Loose = number;
 
 /**
- * Returns the highest value from an array. Can be array of numbers or array of strings.
- * NOTICE: Mixed values is not supported.
- *
- * @param {Array} array The array to process.
- * @returns {Number} Returns the highest value from an array.
+ * Returns the largest item (compared with `>`), or `undefined` when `array` is not a real array.
  */
-export function arrayMax(array) {
-  return arrayReduce(array, (a, b) => (a > b ? a : b), Array.isArray(array) ? array[0] : void 0);
-}
+export const arrayMax = <T>(array: ArrayInput<T>): T | undefined =>
+  arrayReduce<T, T | undefined>(array, (a, b) => ((a as Loose) > (b as Loose) ? a : b), Array.isArray(array) ? array[0] : undefined);
 
 /**
- * Returns the lowest value from an array. Can be array of numbers or array of strings.
- * NOTICE: Mixed values is not supported.
- *
- * @param {Array} array The array to process.
- * @returns {Number} Returns the lowest value from an array.
+ * Returns the smallest item (compared with `<`), or `undefined` when `array` is not a real array.
  */
-export function arrayMin(array) {
-  return arrayReduce(array, (a, b) => (a < b ? a : b), Array.isArray(array) ? array[0] : void 0);
-}
+export const arrayMin = <T>(array: ArrayInput<T>): T | undefined =>
+  arrayReduce<T, T | undefined>(array, (a, b) => ((a as Loose) < (b as Loose) ? a : b), Array.isArray(array) ? array[0] : undefined);
 
 /**
- * Calculate average value for each item of the array.
- *
- * @param {Array} array The array to process.
- * @returns {Number} Returns calculated average value.
+ * Returns the average of the items, or 0 for an empty array.
  */
-export function arrayAvg(array) {
+export const arrayAvg = (array: ArrayLike<number>): number => {
   if (!array.length) {
     return 0;
   }
 
   return arraySum(array) / array.length;
-}
+};
 
 /**
- * Flatten multidimensional array.
- *
- * @param {Array} array Array of Arrays
- * @returns {Array}
+ * Flattens nested arrays into one array (any depth).
  */
-export function arrayFlatten(array) {
-  return arrayReduce(array, (initial, value) => initial.concat(Array.isArray(value) ? arrayFlatten(value) : value), []);
-}
+export const arrayFlatten = (array: ArrayInput<unknown>): unknown[] =>
+  arrayReduce<unknown, unknown[]>(array, (initial, value) => initial.concat(Array.isArray(value) ? arrayFlatten(value) : value), []);
 
 /**
- * Unique values in the array.
- *
- * @param {Array} array The array to process.
- * @returns {Array}
+ * Returns the items without duplicates (compared with `indexOf`), in first-seen order.
  */
-export function arrayUnique(array) {
-  const unique = [];
+export const arrayUnique = <T>(array: ArrayInput<T>): T[] => {
+  const unique: T[] = [];
 
-  arrayEach(array, (value) => {
+  arrayEach(array, (value: T) => {
     if (unique.indexOf(value) === -1) {
       unique.push(value);
     }
   });
 
   return unique;
-}
+};
