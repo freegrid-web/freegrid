@@ -1,21 +1,18 @@
-export function isTouchSupported() {
-  return ('ontouchstart' in window);
-}
+/**
+ * Checks if the browser supports touch events.
+ */
+export const isTouchSupported = (): boolean => ('ontouchstart' in window);
 
-let comparisonFunction;
+let comparisonFunction: ((a: string, b: string) => number) | undefined;
 
 /**
- * Get string comparison function for sorting purposes. It supports multilingual string comparison base on Internationalization API.
- * The first call decides the language and options; later calls return the same function.
- *
- * @param {String} [language]
- * @param {Object} [options]
- * @returns {Function}
+ * Returns a string comparison function for sorting (`Intl.Collator`). The first call decides the language and
+ * options; later calls return the same function.
  */
-export function getComparisonFunction(language, options = {}) {
+export const getComparisonFunction = (language?: string, options: Intl.CollatorOptions = {}): (a: string, b: string) => number => {
   if (!comparisonFunction) {
     comparisonFunction = new Intl.Collator(language, options).compare;
   }
 
   return comparisonFunction;
-}
+};

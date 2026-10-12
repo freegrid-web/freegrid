@@ -9,11 +9,11 @@
  * triggered by both MessageChannel and `setTimeout(0)`, whichever comes first.
  */
 let nextId = 1;
-const pending = new Map();
+const pending = new Map<number, () => void>();
 let flushScheduled = false;
-let channel = null;
+let channel: MessageChannel | null = null;
 
-function flush() {
+const flush = (): void => {
   if (!flushScheduled) {
     return; // Already flushed by the other trigger (see scheduleFlush).
   }
@@ -35,9 +35,9 @@ function flush() {
       setTimeout(() => { throw error; }, 0);
     }
   });
-}
+};
 
-function scheduleFlush() {
+const scheduleFlush = (): void => {
   if (flushScheduled) {
     return;
   }
@@ -47,26 +47,23 @@ function scheduleFlush() {
     channel = new MessageChannel();
     channel.port1.onmessage = flush;
 
-    if (typeof channel.port1.unref === 'function') {
-      channel.port1.unref(); // Node (unit tests): don't keep the process alive.
-    }
+    // Node (unit tests): don't keep the process alive.
+    (channel.port1 as MessagePort & { unref?: () => void }).unref?.();
   }
 
-  if (channel) {
-    channel.port2.postMessage(null);
-  }
+  channel?.port2.postMessage(null);
   // Also schedule a timer: Firefox and WebKit may deliver the message after timers that are already
   // due, and callers expect immediates to run before any timer scheduled after them. Whichever
   // trigger fires first flushes; the other finds nothing scheduled.
   setTimeout(flush, 0);
-}
+};
 
 /**
- * @param {Function} callback
- * @param {...*} args Arguments passed to the callback.
- * @returns {Number} Handle for `clearImmediate`.
+ * Runs `callback(...args)` in a later macrotask, before timers scheduled after this call.
+ *
+ * @returns Handle for `clearImmediate`.
  */
-export function setImmediate(callback, ...args) {
+export const setImmediate = <A extends unknown[]>(callback: (...args: A) => void, ...args: A): number => {
   const id = nextId;
 
   nextId += 1;
@@ -74,11 +71,11 @@ export function setImmediate(callback, ...args) {
   scheduleFlush();
 
   return id;
-}
+};
 
 /**
- * @param {Number} id Handle returned by `setImmediate`.
+ * Cancels a callback queued with `setImmediate`.
  */
-export function clearImmediate(id) {
+export const clearImmediate = (id: number): void => {
   pending.delete(id);
-}
+};
