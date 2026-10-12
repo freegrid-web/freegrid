@@ -28,6 +28,7 @@ import TableView from './tableView';
 import DataSource from './dataSource';
 import { translateRowsToColumns, cellMethodLookupFactory, spreadsheetColumnLabel } from './helpers/data';
 import { getTranslator } from './utils/recordTranslator';
+import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
 import Hooks from './pluginHooks';

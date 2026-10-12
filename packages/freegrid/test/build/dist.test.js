@@ -68,4 +68,16 @@ describe('dist outputs', () => {
     expect(read('freegrid.css')).not.toMatch(/\.pika-single/);
     expect(read('freegrid.full.css')).toMatch(/\.pika-single/);
   });
+
+  it('does not depend on a global setImmediate (upstream got it from @babel/polyfill)', async() => {
+    const w = windowWith(read('freegrid.full.js'));
+    expect(w.setImmediate).toBeUndefined();
+    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1]] });
+    let ran = false;
+
+    expect(() => hot._registerImmediate(() => { ran = true; })).not.toThrow();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(ran).toBe(true);
+    expect(() => hot.destroy()).not.toThrow();
+  });
 });
