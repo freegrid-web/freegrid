@@ -5,6 +5,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$(node -p "require('$ROOT/packages/freegrid/node_modules/playwright/package.json').version")"
-exec docker run --rm --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -e CI=1 \
+PNPM="$(node -p "require('$ROOT/package.json').packageManager")"
+exec docker run --rm --ipc=host -u "$(id -u):$(id -g)" -e HOME=/tmp -e CI=1 -e PNPM="$PNPM" \
   -v "$ROOT":"$ROOT" -w "$PWD" "mcr.microsoft.com/playwright:v${VERSION}-noble" \
-  bash -c 'corepack enable --install-directory /tmp/bin >/dev/null 2>&1 || true; export PATH=/tmp/bin:$PATH; "$@"' _ "$@"
+  bash -c 'if ! command -v pnpm >/dev/null; then npm install -g --silent --prefix /tmp/pnpm "$PNPM" >/dev/null; export PATH=/tmp/pnpm/bin:$PATH; fi; "$@"' _ "$@"
