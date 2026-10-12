@@ -109,7 +109,8 @@ class Menu {
     const delayedOpenSubMenu = debounce(row => this.openSubMenu(row), 300);
     const minWidthOfMenu = this.options.minWidth || MIN_WIDTH;
 
-    let filteredItems = this.menuItems.filter(item => isItemHidden(item, this.hot));
+    // Submenu `items` come straight from the settings and may be an object; such a submenu stays empty.
+    let filteredItems = Array.from(this.menuItems).filter(item => isItemHidden(item, this.hot));
 
     filteredItems = filterSeparators(filteredItems, SEPARATOR);
 
