@@ -46,7 +46,10 @@ export function rangeEach(rangeFrom: number, rangeTo: number | RangeIteratee, it
     // The overloads require an iteratee whenever `rangeTo` is a number.
     callback = iteratee as RangeIteratee;
   }
-  for (let index = from; index <= to; index++) {
+  // `from - 1` then `++index` (not `index = from`) keeps the original coercion of a non-number start from JS callers.
+  let index = from - 1;
+
+  while (++index <= to) {
     if (callback(index) === false) {
       break;
     }
@@ -71,7 +74,10 @@ export function rangeEachReverse(rangeFrom: number, rangeTo: number | RangeItera
     // The overloads require an iteratee whenever `rangeTo` is a number.
     callback = iteratee as RangeIteratee;
   }
-  for (let index = rangeFrom; index >= to; index--) {
+  // `rangeFrom + 1` then `--index` keeps the original coercion of a non-number start from JS callers.
+  let index = rangeFrom + 1;
+
+  while (--index >= to) {
     if (callback(index) === false) {
       break;
     }
