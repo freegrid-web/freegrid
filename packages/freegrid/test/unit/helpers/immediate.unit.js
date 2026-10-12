@@ -51,7 +51,7 @@ describe('immediate helper', () => {
     const realSetTimeout = globalThis.setTimeout;
 
     globalThis.setTimeout = (fn, delay, ...args) => {
-      if (delay === 0 && fn.length === 0) {
+      if (delay === 0 && /^\(\) => \{\s*throw /.test(String(fn))) { // the helper's asynchronous re-throw
         rethrows.push(fn);
         return 0;
       }
@@ -67,5 +67,31 @@ describe('immediate helper', () => {
     expect(order).toEqual(['second']);
     expect(rethrows.length).toBe(1);
     expect(() => rethrows[0]()).toThrow(error);
+  });
+
+  it('runs before a setTimeout(0) scheduled after it, in every browser', async() => {
+    const order = [];
+
+    // Firefox and WebKit may deliver a MessageChannel message after an already-due timer.
+    // Simulate a channel that is slower than timers.
+    const RealChannel = globalThis.MessageChannel;
+
+    globalThis.MessageChannel = class SlowChannel {
+      constructor() {
+        this.port1 = {};
+        this.port2 = { postMessage: () => setTimeout(() => this.port1.onmessage({ data: null }), 30) };
+      }
+    };
+    try {
+      vi.resetModules();
+      const { setImmediate: freshSetImmediate } = await import('handsontable/helpers/immediate');
+
+      freshSetImmediate(() => order.push('immediate'));
+      setTimeout(() => order.push('timeout'), 0);
+      await new Promise(resolve => setTimeout(resolve, 60));
+    } finally {
+      globalThis.MessageChannel = RealChannel;
+    }
+    expect(order).toEqual(['immediate', 'timeout']);
   });
 });

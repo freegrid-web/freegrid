@@ -37,8 +37,8 @@
     "test:e2e:min": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --build min; node ../../tools/compare-baseline.mjs production test-results/e2e-min-chromium.json",
     "test:walkontable": "node build/build-tests.js walkontable && node test/runner/run.js --suite walkontable; node ../../tools/compare-baseline.mjs walkontable test-results/walkontable-dev-chromium.json",
     "test:selftest": "node build/build-tests.js selftest && node test/runner/run.js --suite selftest",
-    "test:e2e:firefox": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser firefox",
-    "test:e2e:webkit": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser webkit"
+    "test:e2e:firefox": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser firefox; node ../../tools/check-known-failures.mjs firefox test-results/e2e-dev-firefox.json",
+    "test:e2e:webkit": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser webkit; node ../../tools/check-known-failures.mjs webkit test-results/e2e-dev-webkit.json"
   },
   "dependencies": {
     "moment": "^2.30.1",

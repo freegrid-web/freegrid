@@ -40,13 +40,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: e2e-chromium-dev, script: 'test:e2e', required: true }
-          - { name: e2e-chromium-min, script: 'test:e2e:min', required: true }
-          - { name: walkontable-chromium, script: 'test:walkontable', required: true }
-          - { name: e2e-firefox, script: 'test:e2e:firefox', required: false }
-          - { name: e2e-webkit, script: 'test:e2e:webkit', required: false }
+          # Chromium is gated on the upstream baseline; Firefox and WebKit on known-failures.json.
+          - { name: e2e-chromium-dev, script: 'test:e2e' }
+          - { name: e2e-chromium-min, script: 'test:e2e:min' }
+          - { name: walkontable-chromium, script: 'test:walkontable' }
+          - { name: e2e-firefox, script: 'test:e2e:firefox' }
+          - { name: e2e-webkit, script: 'test:e2e:webkit' }
     name: ${{ matrix.name }}
-    continue-on-error: ${{ !matrix.required }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
