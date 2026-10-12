@@ -2,12 +2,13 @@
 
 A free, MIT-licensed, spreadsheet-like data grid for the web — and it stays that way.
 
-FreeGrid is a fork of **Handsontable 6.2.2**, the last MIT-licensed release. It keeps the 6.x API so
-existing projects can move over by changing an import, and is being modernized step by step
-(TypeScript, signals-based reactivity, CSS-variable theming).
+FreeGrid is an independent project that started from the code of **Handsontable 6.2.2**, the last
+MIT-licensed release. From here on, its API, structure and releases are FreeGrid's own: it is being
+modernized step by step (TypeScript, signals-based reactivity, CSS-variable theming). Versions start at
+`0.1.0`; while FreeGrid is `0.x`, a compatibility layer helps projects migrate from Handsontable 6.x.
 
 > FreeGrid is not affiliated with or endorsed by Handsoncode. "Handsontable" is a trademark of its owner
-> and is used here only to describe compatibility.
+> and is used here only to describe where the code came from and how to migrate.
 
 ## Status
 
@@ -27,7 +28,7 @@ new FreeGrid(document.getElementById('grid'), {
 });
 ```
 
-Migrating from Handsontable 6.x:
+Migrating from Handsontable 6.x (compatibility layer, available until FreeGrid 1.0):
 
 ```js
 import Handsontable from 'freegrid/compat'; // the rest of your code stays the same
