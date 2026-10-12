@@ -4,7 +4,6 @@ import {
 } from '../../helpers/dom/element';
 import { isUndefined, isDefined } from '../../helpers/mixed';
 import { isObject } from '../../helpers/object';
-import { arrayMap } from '../../helpers/array';
 import { rangeEach } from '../../helpers/number';
 import BasePlugin from '../_base';
 import { registerPlugin } from './../../plugins';
@@ -225,7 +224,7 @@ class ColumnSorting extends BasePlugin {
     if (sortPossible) {
       const translateColumnToPhysical = ({ column: visualColumn, ...restOfProperties }) =>
         ({ column: this.hot.toPhysicalColumn(visualColumn), ...restOfProperties });
-      const internalSortStates = arrayMap(destinationSortConfigs, columnSortConfig => translateColumnToPhysical(columnSortConfig));
+      const internalSortStates = destinationSortConfigs.map(columnSortConfig => translateColumnToPhysical(columnSortConfig));
 
       this.columnStatesManager.setSortStates(internalSortStates);
       this.sortByPresetSortStates();
@@ -279,7 +278,7 @@ class ColumnSorting extends BasePlugin {
 
     const sortStates = this.columnStatesManager.getSortStates();
 
-    return arrayMap(sortStates, columnState => translateColumnToVisual(columnState));
+    return sortStates.map(columnState => translateColumnToVisual(columnState));
   }
 
   /**
@@ -311,7 +310,7 @@ class ColumnSorting extends BasePlugin {
     if (this.areValidSortConfigs(destinationSortConfigs)) {
       const translateColumnToPhysical = ({ column: visualColumn, ...restOfProperties }) =>
         ({ column: this.hot.toPhysicalColumn(visualColumn), ...restOfProperties });
-      const internalSortStates = arrayMap(destinationSortConfigs, columnSortConfig => translateColumnToPhysical(columnSortConfig));
+      const internalSortStates = destinationSortConfigs.map(columnSortConfig => translateColumnToPhysical(columnSortConfig));
 
       this.columnStatesManager.setSortStates(internalSortStates);
     }
@@ -386,7 +385,7 @@ class ColumnSorting extends BasePlugin {
       ({ column: this.hot.toVisualColumn(physicalColumn), ...restOfProperties });
 
     if (isDefined(allSortSettings) && Array.isArray(allSortSettings.initialConfig)) {
-      allSortSettings.initialConfig = arrayMap(allSortSettings.initialConfig, translateColumnToVisual);
+      allSortSettings.initialConfig = allSortSettings.initialConfig.map(translateColumnToVisual);
     }
 
     return allSortSettings;
@@ -572,7 +571,7 @@ class ColumnSorting extends BasePlugin {
     this.blockPluginTranslation = true;
 
     const getDataForSortedColumns = visualRowIndex =>
-      arrayMap(sortedColumnsList, physicalColumn => this.hot.getDataAtCell(visualRowIndex, this.hot.toVisualColumn(physicalColumn)));
+      sortedColumnsList.map(physicalColumn => this.hot.getDataAtCell(visualRowIndex, this.hot.toVisualColumn(physicalColumn)));
 
     for (let visualRowIndex = 0; visualRowIndex < this.getNumberOfRowsToSort(numberOfRows); visualRowIndex += 1) {
       indexesWithData.push([visualRowIndex].concat(getDataForSortedColumns(visualRowIndex)));
@@ -581,8 +580,8 @@ class ColumnSorting extends BasePlugin {
     sort(
       indexesWithData,
       this.pluginKey,
-      arrayMap(sortedColumnsList, physicalColumn => this.columnStatesManager.getSortOrderOfColumn(physicalColumn)),
-      arrayMap(sortedColumnsList, physicalColumn => this.getFirstCellSettings(this.hot.toVisualColumn(physicalColumn)))
+      sortedColumnsList.map(physicalColumn => this.columnStatesManager.getSortOrderOfColumn(physicalColumn)),
+      sortedColumnsList.map(physicalColumn => this.getFirstCellSettings(this.hot.toVisualColumn(physicalColumn)))
     );
 
     // Append spareRows
@@ -594,7 +593,7 @@ class ColumnSorting extends BasePlugin {
     this.blockPluginTranslation = false;
 
     // Save all indexes to arrayMapper, a completely new sequence is set by the plugin
-    this.rowsMapper._arrayMap = arrayMap(indexesWithData, indexWithData => indexWithData[0]);
+    this.rowsMapper._arrayMap = indexesWithData.map(indexWithData => indexWithData[0]);
   }
 
   /**

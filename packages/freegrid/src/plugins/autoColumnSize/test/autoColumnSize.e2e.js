@@ -12,6 +12,32 @@ describe('AutoColumnSize', () => {
     }
   });
 
+  it('should not throw on updateSettings when modifyColHeader turns the header list into a single header', () => {
+    // `getColHeader()` returns one header (here '') instead of an array when the hook returns a value for `undefined`.
+    handsontable({
+      data: [[1, 2], [3, 4]],
+      colHeaders: true,
+      autoColumnSize: true,
+      modifyColHeader: column => column + 1,
+    });
+
+    expect(() => updateSettings({ readOnly: true })).not.toThrow();
+  });
+
+  it('should report that recalculation is needed after part of the width cache is cleared', () => {
+    const hot = handsontable({
+      data: Handsontable.helper.createSpreadsheetData(5, 10),
+      autoColumnSize: true,
+    });
+    const plugin = hot.getPlugin('autoColumnSize');
+
+    expect(plugin.isNeedRecalculate()).toBe(false);
+
+    plugin.clearCache([2, 3]);
+
+    expect(plugin.isNeedRecalculate()).toBe(true);
+  });
+
   const arrayOfObjects = function() {
     return [
       { id: 'Short', name: 'Somewhat long', lastName: 'The very very very longest one', nestedData: [{ id: 1000 }] }

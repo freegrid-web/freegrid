@@ -1,5 +1,4 @@
 import arrayMapper from './../../mixins/arrayMapper';
-import { arrayFilter } from './../../helpers/array';
 import { mixin } from './../../helpers/object';
 import { rangeEach } from './../../helpers/number';
 
@@ -55,7 +54,7 @@ class RowsMapper {
    * Clearing arrayMap from `null` entries.
    */
   clearNull() {
-    this._arrayMap = arrayFilter(this._arrayMap, i => i !== null);
+    this._arrayMap = this._arrayMap.filter(i => i !== null);
   }
 }
 

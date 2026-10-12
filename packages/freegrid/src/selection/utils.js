@@ -1,5 +1,5 @@
 import { CellRange } from './../3rdparty/walkontable/src';
-import { arrayEach, arrayReduce } from './../helpers/array';
+import { arrayEach } from './../helpers/array';
 import { isUndefined } from './../helpers/mixed';
 
 export const SELECTION_TYPE_UNRECOGNIZED = 0;
@@ -148,7 +148,7 @@ export function transformSelectionToColumnDistance(selectionRanges) {
 
   // Sort indexes in ascending order to easily detecting non-consecutive columns.
   const orderedIndexes = Array.from(unorderedIndexes).sort((a, b) => a - b);
-  const normalizedColumnRanges = arrayReduce(orderedIndexes, (acc, visualColumnIndex, index, array) => {
+  const normalizedColumnRanges = orderedIndexes.reduce((acc, visualColumnIndex, index, array) => {
     if (index !== 0 && visualColumnIndex === array[index - 1] + 1) {
       acc[acc.length - 1][1] += 1;
 
@@ -198,7 +198,7 @@ export function transformSelectionToRowDistance(selectionRanges) {
 
   // Sort indexes in ascending order to easily detecting non-consecutive columns.
   const orderedIndexes = Array.from(unorderedIndexes).sort((a, b) => a - b);
-  const normalizedRowRanges = arrayReduce(orderedIndexes, (acc, rowIndex, index, array) => {
+  const normalizedRowRanges = orderedIndexes.reduce((acc, rowIndex, index, array) => {
     if (index !== 0 && rowIndex === array[index - 1] + 1) {
       acc[acc.length - 1][1] += 1;
 

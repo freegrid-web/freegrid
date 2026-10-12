@@ -2,7 +2,7 @@
  * FreeGrid UndoRedo class
  */
 import Hooks from './../../pluginHooks';
-import { arrayMap, arrayEach } from './../../helpers/array';
+import { arrayEach } from './../../helpers/array';
 import { rangeEach } from './../../helpers/number';
 import { inherit, deepClone } from './../../helpers/object';
 import { stopImmediatePropagation } from './../../helpers/dom/event';
@@ -390,11 +390,11 @@ UndoRedo.RemoveColumnAction.prototype.undo = function(instance, undoneCallback) 
 
   const sortedData = [];
   rangeEach(this.data.length - 1, (i) => {
-    sortedData[i] = arrayMap(this.data[i], sortByIndexes);
+    sortedData[i] = this.data[i].map(sortByIndexes);
   });
 
   let sortedHeaders = [];
-  sortedHeaders = arrayMap(this.headers, sortByIndexes);
+  sortedHeaders = this.headers.map(sortByIndexes);
 
   const changes = [];
 

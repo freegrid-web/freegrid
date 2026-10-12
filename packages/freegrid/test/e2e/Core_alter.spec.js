@@ -12,6 +12,12 @@ describe('Core_alter', () => {
     }
   });
 
+  it('should keep throwing a RangeError when inserting a fractional number of rows', () => {
+    handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 3) });
+
+    expect(() => alter('insert_row', 0, 1.5)).toThrowError(RangeError);
+  });
+
   const arrayOfNestedObjects = function() {
     return [
       { id: 1,
