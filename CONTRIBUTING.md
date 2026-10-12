@@ -16,6 +16,9 @@ them will be closed.
   `// FG-SKIP: <specific reason> — <issue URL>`.
 - `pnpm test` must pass before a PR is merged. It compares results with the upstream baseline in
   `docs/baseline/`.
+- A test is removed only together with the public behavior it checks, when that removal is deliberate and
+  listed in the CHANGELOG. Add the test's full name and the reason to `docs/baseline/retired.json`, and say so
+  in the PR.
 
 ## Commits
 

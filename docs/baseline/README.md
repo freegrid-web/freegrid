@@ -3,6 +3,8 @@
 `6.2.2-results.json` records which upstream Handsontable 6.2.2 tests pass with the original toolchain
 (Node 10, Jest 23, Jasmine 2.5, Puppeteer 1). FreeGrid's acceptance rule: every test that passed here
 must pass on the new toolchain, or be marked `xit` with an `FG-SKIP` comment and a linked issue.
+Tests removed on purpose, together with the public behavior they checked (for example IE detection), are listed
+with a reason in `retired.json`; the comparator accepts them as missing and fails if a listed test still runs.
 
 Recorded 2026-10-12: unit 454 passed; e2e 2034 passed / 27 pending; walkontable 256 passed / 8 pending;
 production (minified build) 2034 passed / 27 pending; types passed. No upstream test failed.

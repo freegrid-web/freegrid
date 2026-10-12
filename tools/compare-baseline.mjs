@@ -1,5 +1,7 @@
 // Usage: node tools/compare-baseline.mjs <unit|e2e|walkontable|production> <results.json>
 // Exits 1 when a test that passed in the upstream baseline does not pass now (and is not FG-SKIP'd).
+// Tests removed on purpose, together with the behavior they checked, are listed with a reason in
+// docs/baseline/retired.json; a listed test that still runs is an error, so the list stays accurate.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +10,7 @@ import { toMap, entriesOf } from './baseline/results-map.mjs';
 const [suite, file] = process.argv.slice(2);
 const baseline = JSON.parse(readFileSync(new URL('../docs/baseline/6.2.2-results.json', import.meta.url), 'utf8')).suites[suite];
 const now = toMap(entriesOf(JSON.parse(readFileSync(file, 'utf8'))));
+const retired = JSON.parse(readFileSync(new URL('../docs/baseline/retired.json', import.meta.url), 'utf8'))[suite] || {};
 
 if (!baseline) {
   console.log(`No baseline for "${suite}" — every non-passing test needs an issue.`);
@@ -26,8 +29,14 @@ const regressions = [];
 const skippedNow = [];
 const newlyPassing = [];
 
+for (const name of Object.keys(retired)) {
+  if (name in now) regressions.push(`${name}  (listed in docs/baseline/retired.json but still runs)`);
+}
+
 for (const [name, status] of Object.entries(baseline || now)) {
   const current = now[name];
+
+  if (current === undefined && name in retired) continue;
 
   if ((baseline ? status === 'passed' : true) && current !== 'passed') {
     const line = `${name}  [baseline: ${baseline ? status : 'n/a'}, now: ${current ?? 'missing'}]`;
@@ -45,7 +54,7 @@ if (baseline) {
 }
 
 console.log(`${suite}: ${Object.keys(now).length} now, ${baseline ? Object.keys(baseline).length : 0} in baseline`);
-console.log(`FG-SKIP markers in repo: ${skipCount}; baseline-passing tests now pending: ${skippedNow.length}`);
+console.log(`FG-SKIP markers in repo: ${skipCount}; baseline-passing tests now pending: ${skippedNow.length}; retired: ${Object.keys(retired).length}`);
 if (newlyPassing.length) console.log(`Newly passing (${newlyPassing.length}):\n  ${newlyPassing.join('\n  ')}`);
 if (regressions.length) {
   console.log(`REGRESSIONS (${regressions.length}):\n  ${regressions.join('\n  ')}`);

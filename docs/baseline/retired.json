@@ -1,0 +1,7 @@
+{
+  "unit": {
+    "Browser helper isIE should recognize browser properly": "isIE() removed with IE support (phase 2a, see CHANGELOG)",
+    "Browser helper isEdge should recognize browser properly": "isEdge() removed with legacy Edge support (phase 2a, see CHANGELOG)",
+    "Browser helper isMSBrowser should recognize browser properly": "isMSBrowser() removed with IE and legacy Edge support (phase 2a, see CHANGELOG)"
+  }
+}

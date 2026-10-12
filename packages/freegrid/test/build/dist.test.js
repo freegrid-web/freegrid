@@ -57,6 +57,13 @@ describe('dist outputs', () => {
     });
   });
 
+  it('IE and legacy Edge detection is gone from FreeGrid.helper', () => {
+    const { helper } = windowWith(read('freegrid.full.js')).FreeGrid;
+
+    ['isIE', 'isIE8', 'isIE9', 'isEdge', 'isMSBrowser'].forEach(name => expect(helper[name], name).toBeUndefined());
+    ['isChrome', 'isSafari', 'isMobileBrowser', 'setBrowserMeta'].forEach(name => expect(typeof helper[name], name).toBe('function'));
+  });
+
   it('compat.js aliases Handsontable and fails loudly without FreeGrid', () => {
     const w = windowWith(read('freegrid.full.js'), read('compat.js'));
     expect(w.Handsontable).toBe(w.FreeGrid);
