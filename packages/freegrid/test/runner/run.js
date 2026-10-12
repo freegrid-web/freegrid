@@ -21,7 +21,13 @@ const HARD_TIMEOUT_MS = 45 * 60 * 1000;
 
 const results = [];
 const server = await startServer(root, { '/__runner.html': runnerHtml(o.suite, o.build) });
-const browser = await { chromium, firefox, webkit }[o.browser].launch();
+// Upstream kept scrollbars visible in headless Chrome; many layout specs depend on their width.
+// Modern Chromium dispatches scroll events in the next rendering step; without the 60fps frame cap
+// that step comes within the few milliseconds upstream specs wait after scrolling.
+const launchOptions = o.browser === 'chromium'
+  ? { ignoreDefaultArgs: ['--hide-scrollbars'], args: ['--disable-frame-rate-limit', '--disable-gpu-vsync'] }
+  : {};
+const browser = await { chromium, firefox, webkit }[o.browser].launch(launchOptions);
 const page = await browser.newPage({ viewport: { width: 1200, height: 1000 } });
 
 let finished = false;
