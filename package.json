@@ -1,6 +1,7 @@
 {
   "name": "freegrid-workspace",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@12.9.1",
   "engines": {
     "node": ">=24"
@@ -11,7 +12,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.5",
     "eslint": "^9.39.5",
     "globals": "^17.13.0"
   }
