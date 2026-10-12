@@ -9,7 +9,9 @@
   "scripts": {
     "build": "pnpm --filter freegrid build",
     "test": "pnpm --filter freegrid test",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "docs:dev": "pnpm --filter @freegrid/docs dev",
+    "docs:build": "pnpm --filter @freegrid/docs build"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

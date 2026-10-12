@@ -1,0 +1,20 @@
+{
+  "name": "@freegrid/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "test:smoke": "node test/smoke.js"
+  },
+  "dependencies": {
+    "freegrid": "workspace:*"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0",
+    "vitepress": "^1.6.4",
+    "vitepress-carbon": "^1.7.0",
+    "vue": "^3.5.43"
+  }
+}

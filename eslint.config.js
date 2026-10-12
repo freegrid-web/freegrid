@@ -9,7 +9,8 @@ const importStandIn = { rules: { 'no-unresolved': noop, 'prefer-default-export':
 export default [
   {
     ignores: ['**/node_modules/**', '**/dist/**', 'packages/freegrid/lib/**', 'packages/freegrid/test/lib/**',
-      'packages/freegrid/src/3rdparty/walkontable/test/lib/**', 'packages/freegrid/test-results/**', '.superpowers/**'],
+      'packages/freegrid/src/3rdparty/walkontable/test/lib/**', 'packages/freegrid/test-results/**', '.superpowers/**',
+      'packages/docs/.vitepress/cache/**', 'packages/docs/.vitepress/dist/**'],
   },
   js.configs.recommended,
   {
@@ -41,7 +42,8 @@ export default [
     rules: { 'no-undef': 'off' },
   },
   {
-    files: ['packages/freegrid/build/**', 'packages/freegrid/test/runner/**', 'packages/freegrid/test/build/**', 'packages/freegrid/*.config.js', 'tools/**', 'eslint.config.js'],
+    files: ['packages/freegrid/build/**', 'packages/freegrid/test/runner/**', 'packages/freegrid/test/build/**', 'packages/freegrid/*.config.js', 'tools/**', 'eslint.config.js',
+      'packages/docs/test/**', 'packages/docs/.vitepress/config.mjs', 'packages/docs/postcss.config.mjs'],
     languageOptions: { globals: { ...globals.node } },
   },
   {
