@@ -1,5 +1,4 @@
 import { isObject, objectEach, deepClone } from '../../helpers/object';
-import { arrayMap } from '../../helpers/array';
 
 const inheritedColumnProperties = ['sortEmptyCells', 'indicator', 'headerAction', 'compareFunctionFactory'];
 
@@ -122,7 +121,7 @@ export class ColumnStatesManager {
    * @returns {Array}
    */
   getSortedColumns() {
-    return arrayMap(this.sortedColumnsStates, ({ column }) => column);
+    return this.sortedColumnsStates.map(({ column }) => column);
   }
 
   /**

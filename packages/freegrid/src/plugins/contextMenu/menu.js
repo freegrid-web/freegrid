@@ -8,7 +8,7 @@ import {
   isChildOf,
   removeClass,
 } from './../../helpers/dom/element';
-import { arrayEach, arrayFilter, arrayReduce } from './../../helpers/array';
+import { arrayEach } from './../../helpers/array';
 import Cursor from './cursor';
 import EventManager from './../../eventManager';
 import { mixin, hasOwnProperty } from './../../helpers/object';
@@ -109,7 +109,7 @@ class Menu {
     const delayedOpenSubMenu = debounce(row => this.openSubMenu(row), 300);
     const minWidthOfMenu = this.options.minWidth || MIN_WIDTH;
 
-    let filteredItems = arrayFilter(this.menuItems, item => isItemHidden(item, this.hot));
+    let filteredItems = this.menuItems.filter(item => isItemHidden(item, this.hot));
 
     filteredItems = filterSeparators(filteredItems, SEPARATOR);
 
@@ -676,7 +676,7 @@ class Menu {
     const holderStyle = this.hotMenu.view.wt.wtTable.holder.style;
     const currentHiderWidth = parseInt(hiderStyle.width, 10);
 
-    const realHeight = arrayReduce(data, (accumulator, value) => accumulator + (value.name === SEPARATOR ? 1 : 26), 0);
+    const realHeight = data.reduce((accumulator, value) => accumulator + (value.name === SEPARATOR ? 1 : 26), 0);
 
     holderStyle.width = `${currentHiderWidth + 22}px`;
     holderStyle.height = `${realHeight + 4}px`;

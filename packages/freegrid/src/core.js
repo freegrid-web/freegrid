@@ -17,7 +17,7 @@ import {
   createObjectPropListener,
   objectEach
 } from './helpers/object';
-import { arrayFlatten, arrayMap, arrayEach, arrayReduce } from './helpers/array';
+import { arrayFlatten, arrayEach } from './helpers/array';
 import { toSingleLine } from './helpers/templateLiteralTag';
 import { getPlugin } from './plugins';
 import { getRenderer } from './renderers';
@@ -292,7 +292,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
           return result;
         };
-        const spliceArgs = arrayMap(new Array(count), () => valueFactory());
+        const spliceArgs = Array.from({ length: count }, () => valueFactory());
 
         spliceArgs.unshift(startIndex, 0);
         data.splice(...spliceArgs);
@@ -315,7 +315,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
         });
 
         // Normalize the {index, amount} groups into bigger groups.
-        const normalizedIndexes = arrayReduce(sortedIndexes, (acc, [groupIndex, groupAmount]) => {
+        const normalizedIndexes = sortedIndexes.reduce((acc, [groupIndex, groupAmount]) => {
           const previousItem = acc[acc.length - 1];
           const [prevIndex, prevAmount] = previousItem;
           const prevLastIndex = prevIndex + prevAmount;
@@ -1312,7 +1312,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    */
   this.getSelected = function() { // https://github.com/handsontable/handsontable/issues/44  //cjl
     if (selection.isSelected()) {
-      return arrayMap(selection.getSelectedRange(), ({ from, to }) => [from.row, from.col, to.row, to.col]);
+      // `getSelectedRange()` is an iterable SelectionRange, not an array.
+      return Array.from(selection.getSelectedRange(), ({ from, to }) => [from.row, from.col, to.row, to.col]);
     }
   };
 
