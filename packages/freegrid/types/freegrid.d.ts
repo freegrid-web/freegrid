@@ -1823,7 +1823,7 @@ declare namespace FreeGrid {
     equalsIgnoreCase(...string: string[]): boolean,
     extend(target: object, extension: object): void,
     extendArray(arr: any[], extension: any[]): void,
-    getComparisonFunction(language?: string, options?: Intl.CollatorOptions): (a: string, b: string) => number,
+    getComparisonFunction(language?: string, options?: Intl.CollatorOptions): (a: any, b: any) => number,
     getNormalizedDate(dateString: string): Date,
     getProperty(object: object, name: string): any | void,
     getPrototypeOf(obj: object): any | void,
