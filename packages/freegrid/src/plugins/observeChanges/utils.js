@@ -1,4 +1,3 @@
-import { arrayFilter, arrayMap } from '../../helpers/array';
 
 /**
  * Clean and extend patches from jsonpatch observer.
@@ -13,7 +12,7 @@ export function cleanPatches(patches) {
    * If observeChanges uses native Object.observe method, then it produces patches for length property. Filter them.
    * If path can't be parsed. Filter it.
    */
-  let cleanedPatches = arrayFilter(patches, (patch) => {
+  let cleanedPatches = patches.filter((patch) => {
     if (/[/]length/ig.test(patch.path)) {
       return false;
     }
@@ -26,7 +25,7 @@ export function cleanPatches(patches) {
   /**
    * Extend patches with changed cells coords
    */
-  cleanedPatches = arrayMap(cleanedPatches, (patch) => {
+  cleanedPatches = cleanedPatches.map((patch) => {
     const coords = parsePath(patch.path);
 
     patch.row = coords.row;
@@ -38,7 +37,7 @@ export function cleanPatches(patches) {
    * Removing or adding column will produce one patch for each table row.
    * Leaves only one patch for each column add/remove operation.
    */
-  cleanedPatches = arrayFilter(cleanedPatches, (patch) => {
+  cleanedPatches = cleanedPatches.filter((patch) => {
     if (['add', 'remove'].indexOf(patch.op) !== -1 && !isNaN(patch.col)) {
       if (newOrRemovedColumns.indexOf(patch.col) !== -1) {
         return false;

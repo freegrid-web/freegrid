@@ -1,5 +1,5 @@
 import BasePlugin from './../_base';
-import { arrayEach, arrayFilter, arrayReduce, arrayMap } from './../../helpers/array';
+import { arrayEach } from './../../helpers/array';
 import { isVisible } from './../../helpers/dom/element';
 import GhostTable from './../../utils/ghostTable';
 import { isObject, hasOwnProperty } from './../../helpers/object';
@@ -399,7 +399,8 @@ class AutoColumnSize extends BasePlugin {
     const columnHeaders = this.hot.getColHeader();
     const { cachedColumnHeaders } = privatePool.get(this);
 
-    const changedColumns = arrayReduce(columnHeaders, (acc, columnTitle, physicalColumn) => {
+    // `getColHeader()` can return a single header instead of an array (see `modifyColHeader`).
+    const changedColumns = Array.from(columnHeaders).reduce((acc, columnTitle, physicalColumn) => {
       const cachedColumnsLength = cachedColumnHeaders.length;
 
       if (cachedColumnsLength - 1 < physicalColumn || cachedColumnHeaders[physicalColumn] !== columnTitle) {
@@ -439,7 +440,8 @@ class AutoColumnSize extends BasePlugin {
    * @returns {Boolean}
    */
   isNeedRecalculate() {
-    return !!arrayFilter(this.widths, item => (item === void 0)).length;
+    // `includes` also counts holes (columns whose width was never measured), like the old helper did.
+    return this.widths.includes(void 0);
   }
 
   /**
@@ -494,7 +496,7 @@ class AutoColumnSize extends BasePlugin {
    * @param {Array} changes
    */
   onBeforeChange(changes) {
-    const changedColumns = arrayMap(changes, ([, column]) => this.hot.propToCol(column));
+    const changedColumns = changes.map(([, column]) => this.hot.propToCol(column));
 
     this.clearCache(changedColumns);
   }

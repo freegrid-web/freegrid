@@ -1,10 +1,10 @@
 import { classNameIncludes, toLegacyClassName } from './../../helpers/classNames';
-import { arrayEach, arrayMap } from './../../helpers/array';
+import { arrayEach } from './../../helpers/array';
 import { hasClass } from './../../helpers/dom/element';
 import { KEY as SEPARATOR } from './predefinedItems/separator';
 
 export function normalizeSelection(selRanges) {
-  return arrayMap(selRanges, range => ({
+  return selRanges.map(range => ({
     start: range.getTopLeftCorner(),
     end: range.getBottomRightCorner()
   }));

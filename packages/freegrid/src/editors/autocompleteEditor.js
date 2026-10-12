@@ -1,7 +1,7 @@
 import { KEY_CODES, isPrintableChar } from './../helpers/unicode';
 import { stringify, isDefined } from './../helpers/mixed';
 import { stripTags } from './../helpers/string';
-import { pivot, arrayMap } from './../helpers/array';
+import { pivot } from './../helpers/array';
 import {
   addClass,
   getCaretPosition,
@@ -409,8 +409,8 @@ AutocompleteEditor.prototype.stripValueIfNeeded = function(value) {
 AutocompleteEditor.prototype.stripValuesIfNeeded = function(values) {
   const { allowHtml } = this.cellProperties;
 
-  const stringifiedValues = arrayMap(values, value => stringify(value));
-  const strippedValues = arrayMap(stringifiedValues, value => (allowHtml ? value : stripTags(value)));
+  const stringifiedValues = Array.from(values, value => stringify(value));
+  const strippedValues = stringifiedValues.map(value => (allowHtml ? value : stripTags(value)));
 
   return strippedValues;
 };
