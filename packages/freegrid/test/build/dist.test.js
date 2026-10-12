@@ -63,7 +63,7 @@ describe('dist outputs', () => {
     expect(esm).toMatch(/from ["']moment["']/);
   });
 
-  it('CSS keeps upstream class names; only the full CSS contains Pikaday styles', () => {
+  it('CSS keeps legacy class names; only the full CSS contains Pikaday styles', () => {
     expect(read('freegrid.css')).toMatch(/\.handsontable/);
     expect(read('freegrid.css')).not.toMatch(/\.pika-single/);
     expect(read('freegrid.full.css')).toMatch(/\.pika-single/);
@@ -111,5 +111,26 @@ describe('dist outputs', () => {
     expect(code).toMatch(/from ["']freegrid["']/);
     expect(code).toMatch(/registerLanguageDictionary/);
     expect(existsSync(dist('esm/languages/all.js'))).toBe(true);
+  });
+
+  it('CSS uses FreeGrid class names and keeps legacy selectors during 0.x', () => {
+    const css = read('freegrid.css');
+
+    expect(css).toMatch(/\.fg-core\b/);
+    expect(css).toMatch(/\.freegrid\b/);
+    // A user-supplied legacy class (e.g. className: 'htCenter') must still be styled.
+    expect(css).toMatch(/\.fg-center[^{]*,[^{]*\.htCenter|\.htCenter[^{]*,[^{]*\.fg-center/);
+  });
+
+  it('elements carry both the FreeGrid and the legacy class names', () => {
+    const w = windowWith(read('freegrid.full.js'));
+    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1, 2]], readOnly: true, colHeaders: true });
+    const root = w.document.getElementById('root');
+
+    ['freegrid', 'handsontable'].forEach(c => expect(root.classList.contains(c), c).toBe(true));
+    ['fg-core', 'htCore'].forEach(c => expect(root.querySelector(`table.${c}`), c).not.toBeNull());
+    ['fg-master', 'ht_master', 'fg-holder', 'wtHolder', 'fg-clone-top', 'ht_clone_top'].forEach(c => expect(root.querySelector(`.${c}`), c).not.toBeNull());
+    ['fg-dimmed', 'htDimmed'].forEach(c => expect(root.querySelector(`td.${c}`), c).not.toBeNull());
+    hot.destroy();
   });
 });

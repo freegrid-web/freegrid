@@ -52,7 +52,7 @@ describe('GhostTable', () => {
       gt.addRow(2, samples);
 
       expect(gt.createContainer.calls.count()).toBe(1);
-      expect(gt.createContainer.calls.mostRecent().args).toEqual(['handsontable']);
+      expect(gt.createContainer.calls.mostRecent().args).toEqual(['freegrid handsontable']);
     });
 
     it('should add row to rows collection after call `addRow` method', () => {
@@ -69,7 +69,7 @@ describe('GhostTable', () => {
 
       expect(gt.rows.length).toBe(1);
       expect(gt.rows[0].row).toBe(0);
-      expect(gt.rows[0].table.className).toBe('htCore');
+      expect(gt.rows[0].table.className).toBe('fg-core htCore');
       expect(gt.rows[0].table.nodeName).toBe('TABLE');
       expect(gt.rows[0].table.querySelectorAll('colgroup > col').length).toBe(2);
       expect(gt.rows[0].table.querySelector('tbody > tr > td').innerHTML).toBe('Foo');
@@ -81,7 +81,7 @@ describe('GhostTable', () => {
 
       expect(gt.rows.length).toBe(2);
       expect(gt.rows[1].row).toBe(1);
-      expect(gt.rows[1].table.className).toBe('htCore');
+      expect(gt.rows[1].table.className).toBe('fg-core htCore');
       expect(gt.rows[1].table.nodeName).toBe('TABLE');
       expect(gt.rows[1].table.querySelectorAll('colgroup > col').length).toBe(2);
       expect(gt.rows[1].table.querySelector('tbody > tr > td').innerHTML).toBe('Bar');
@@ -151,7 +151,7 @@ describe('GhostTable', () => {
       gt.addColumn(2, samples);
 
       expect(gt.createContainer.calls.count()).toBe(1);
-      expect(gt.createContainer.calls.mostRecent().args).toEqual(['handsontable']);
+      expect(gt.createContainer.calls.mostRecent().args).toEqual(['freegrid handsontable']);
     });
 
     it('should add column to columns collection after call `addColumn` method', () => {
@@ -168,7 +168,7 @@ describe('GhostTable', () => {
 
       expect(gt.columns.length).toBe(1);
       expect(gt.columns[0].col).toBe(0);
-      expect(gt.columns[0].table.className).toBe('htCore');
+      expect(gt.columns[0].table.className).toBe('fg-core htCore');
       expect(gt.columns[0].table.style.width).toBe('auto');
       expect(gt.columns[0].table.style.tableLayout).toBe('auto');
       expect(gt.columns[0].table.nodeName).toBe('TABLE');
@@ -182,7 +182,7 @@ describe('GhostTable', () => {
 
       expect(gt.columns.length).toBe(2);
       expect(gt.columns[1].col).toBe(1);
-      expect(gt.columns[1].table.className).toBe('htCore');
+      expect(gt.columns[1].table.className).toBe('fg-core htCore');
       expect(gt.columns[1].table.nodeName).toBe('TABLE');
       expect(gt.columns[1].table.querySelectorAll('thead > tr > th').length).toBe(1);
       expect(gt.columns[1].table.querySelector('tbody > tr > td').innerHTML).toBe('Bar');

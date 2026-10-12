@@ -62,7 +62,7 @@ describe('TextRenderer', () => {
     const TD = document.createElement('TD');
     TD.className = 'someClass';
     Handsontable.renderers.TextRenderer(instance, TD, 0, 0, 0, '', { readOnly: true, readOnlyCellClassName: 'htDimmed' });
-    expect(TD.className).toEqual('someClass htDimmed');
+    expect(TD.className).toEqual('someClass htDimmed fg-dimmed');
 
     instance.destroy();
   });
