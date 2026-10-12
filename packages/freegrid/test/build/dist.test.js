@@ -17,6 +17,26 @@ function windowWith(...scripts) {
 }
 
 describe('dist outputs', () => {
+
+  it('FreeGrid.helper exposes exactly the public helper names', () => {
+    // A change here is a public API change: list it in the CHANGELOG.
+    const expected = [
+      'KEY_CODES', 'arrayAvg', 'arrayEach', 'arrayFilter', 'arrayFlatten', 'arrayMap', 'arrayMax', 'arrayMin',
+      'arrayReduce', 'arraySum', 'arrayUnique', 'cellMethodLookupFactory', 'clone', 'columnFactory',
+      'createEmptySpreadsheetData', 'createObjectPropListener', 'createSpreadsheetData',
+      'createSpreadsheetObjectData', 'curry', 'curryRight', 'debounce', 'deepClone', 'deepExtend', 'deepObjectSize',
+      'defineGetter', 'duckSchema', 'equalsIgnoreCase', 'extend', 'extendArray', 'getComparisonFunction',
+      'getNormalizedDate', 'getProperty', 'hasOwnProperty', 'inherit', 'isChrome', 'isCtrlKey', 'isCtrlMetaKey',
+      'isDefined', 'isEmpty', 'isFunction', 'isKey', 'isMetaKey', 'isMobileBrowser', 'isNumeric', 'isObject',
+      'isObjectEqual', 'isPercentValue', 'isPrintableChar', 'isRegExp', 'isSafari', 'isTouchSupported',
+      'isUndefined', 'mixin', 'objectEach', 'partial', 'pipe', 'pivot', 'randomString', 'rangeEach',
+      'rangeEachReverse', 'setBrowserMeta', 'spreadsheetColumnIndex', 'spreadsheetColumnLabel', 'stringify',
+      'stripTags', 'substitute', 'throttle', 'throttleAfterHits', 'to2dArray', 'toUpperCaseFirst',
+      'translateRowsToColumns', 'valueAccordingPercent',
+    ];
+
+    expect(Object.keys(windowWith(read('freegrid.full.js')).FreeGrid.helper).sort()).toEqual(expected);
+  });
   it('produces every expected file', () => {
     ['esm/index.js', 'esm/compat.js', 'freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js',
       'freegrid.css', 'freegrid.min.css', 'freegrid.full.css', 'freegrid.full.min.css', 'compat.js',
