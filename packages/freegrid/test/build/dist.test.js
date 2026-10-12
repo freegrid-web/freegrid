@@ -124,8 +124,9 @@ describe('dist outputs', () => {
     ['freegrid.js', 'freegrid.min.js', 'esm/index.js'].forEach(f => expect(read(f), f).not.toMatch(/pikaday\/css/));
   });
 
-  it('minified CSS avoids properties newer than the browser target (e.g. `inset`)', () => {
-    ['freegrid.min.css', 'freegrid.full.min.css'].forEach(f => expect(read(f), f).not.toMatch(/[{;]inset:/));
+  it('minified CSS is built for the same browsers as the JS (it may use `inset`, Chrome 87+)', () => {
+    // With a lower CSS target the minifier would keep `top/right/bottom/left` instead.
+    ['freegrid.min.css', 'freegrid.full.min.css'].forEach(f => expect(read(f), f).toMatch(/[{;]inset:/));
   });
 
   it('plugins are registered in the plugin registry, not just exported', () => {

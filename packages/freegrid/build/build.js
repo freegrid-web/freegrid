@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConstants, banner } from './constants.js';
+import { browserTarget, defineConstants, banner } from './constants.js';
 import { commonjsOptions, ignorePikadayCss, localeRegistration } from './plugins.js';
 import { legacyClassNames } from './legacyClassNames.js';
 
@@ -14,8 +14,6 @@ const deps = ['moment', 'numbro', 'pikaday'];
 // Pikaday's CSS is not a dependency to keep external: ignorePikadayCss() drops it (upstream used an
 // empty module), and an external CSS import would break Node/SSR and AMD/CommonJS consumers.
 const isDep = id => !id.startsWith('pikaday/css') && deps.some(d => id === d || id.startsWith(`${d}/`));
-// CSS output must not use properties newer than the JS browser target (e.g. `inset` needs Chrome 87).
-const cssTarget = ['chrome80', 'edge80', 'firefox74', 'safari14'];
 
 const base = { configFile: false, logLevel: 'warn', define, css: { postcss: { plugins: [legacyClassNames()] } } };
 
@@ -24,7 +22,7 @@ async function esm() {
     ...base,
     plugins: [ignorePikadayCss()],
     build: {
-      target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
+      target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
       lib: { entry: { index: r('src/index.js'), compat: r('src/compat.js') }, formats: ['es'], cssFileName: 'freegrid' },
       rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
     },
@@ -38,7 +36,7 @@ async function umd({ full, minify }) {
     ...base,
     plugins: full ? [] : [ignorePikadayCss()],
     build: {
-      target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+      target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
       cssMinify: minify, sourcemap: true,
       lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
@@ -68,7 +66,7 @@ async function locales({ minify }) {
         ...base,
         plugins: [localeRegistration()],
         build: {
-          target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
+          target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
           lib: { entry, name: 'FreeGridLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
           rollupOptions: { external: ['@freegrid/core'], output: { globals: { '@freegrid/core': 'FreeGrid' } } },
         },
@@ -95,7 +93,7 @@ async function esmLocales() {
         resolveId: (id, importer) => (importer === allEntry && id.startsWith('./') ? join(dir, id) : null),
       }],
       build: {
-        target: 'es2020', cssTarget, commonjsOptions, outDir: r('dist/esm/languages'), emptyOutDir: false, minify: false,
+        target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm/languages'), emptyOutDir: false, minify: false,
         lib: {
           entry: Object.fromEntries([['all', allEntry], ...files.map(f => [f.replace(/\.js$/, ''), join(dir, f)])]),
           formats: ['es'],
@@ -113,7 +111,7 @@ async function walkontable() {
   await build({
     ...base,
     build: {
-      target: 'es2020', cssTarget, commonjsOptions, outDir: r('src/3rdparty/walkontable/dist'), emptyOutDir: true, minify: false, sourcemap: true,
+      target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('src/3rdparty/walkontable/dist'), emptyOutDir: true, minify: false, sourcemap: true,
       lib: { entry: r('src/3rdparty/walkontable/src/index.js'), name: 'Walkontable', formats: ['iife'], fileName: () => 'walkontable.js' },
       rollupOptions: { output: { exports: 'named' } },
     },

@@ -43,8 +43,8 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 ## 4. Check these differences
 
 - **No license key.** The `licenseKey` setting is ignored, because there is nothing to unlock.
-- **CommonJS and IE are not supported.** FreeGrid ships ES modules and UMD bundles, and targets ES2020
-  browsers.
+- **CommonJS and IE are not supported.** FreeGrid ships ES modules and UMD bundles for Chrome/Edge
+  107+, Firefox 104+ and Safari 16+.
 - **jQuery:** the plugin is `$(el).freegrid(...)`. `$(el).handsontable(...)` still works during `0.x`.
 - **Dates:** FreeGrid uses a current moment release. Use real moment formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Malformed formats may be parsed differently than in Handsontable 6.

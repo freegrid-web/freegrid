@@ -1,9 +1,9 @@
 // Type checking only (`pnpm typecheck`). Vite compiles both .js and .ts for the build and the tests.
 {
   "compilerOptions": {
-    // Same as the build target in build/build.js; browser floor Chrome 80, Firefox 74, Safari 14.
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    // Matches the browser target in build/constants.js (Chrome/Edge 107, Firefox 104, Safari 16).
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
