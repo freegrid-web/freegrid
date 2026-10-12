@@ -124,9 +124,20 @@ overriding on `:root` or on a theme class.
 
 ## 7. Documentation
 
-A "Theming" page in the docs site: how to override variables, how to switch to the dark or automatic theme, a live
-example with a light / dark / auto switch, and the table of all variables generated from the comments in
-`variables.css`. CHANGELOG entry.
+A "Theming" page in the docs site:
+
+- how to override variables, and how to switch to the dark or automatic theme;
+- **a theme playground**: a live grid (with headers, a selection, an invalid cell, a comment, a context menu and a
+  date column) next to a panel with a light / dark / auto switch and editors for the base variables (color pickers,
+  font family, font size). Changes apply to the grid at once, and the panel shows the CSS to copy
+  (`:root { --fg-…: …; }`) with only the changed variables, plus a reset button;
+- **the table of all variables** (name, what it styles, light and dark value), generated at docs build time from
+  `variables.css` and its comments, so it cannot go out of date.
+
+CHANGELOG entry.
+
+Also on the docs site (independent of theming, same PR): the "About this page" block (Markdown, edit on GitHub, last
+updated) moves below the page outline in the right column, so "On this page" comes first.
 
 ## 8. Compatibility
 
