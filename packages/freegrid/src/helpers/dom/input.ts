@@ -7,15 +7,15 @@ type TextInput = HTMLInputElement | HTMLTextAreaElement;
 /**
  * Adds an event listener (bubbling phase).
  */
-export const addEvent = (element: EventTarget, event: string, callback: EventListener): void => {
-  element.addEventListener(event, callback, false);
+export const addEvent = <E extends Event>(element: EventTarget, event: string, callback: (event: E) => void): void => {
+  element.addEventListener(event, callback as EventListener, false);
 };
 
 /**
  * Removes an event listener added with `addEvent`.
  */
-export const removeEvent = (element: EventTarget, event: string, callback: EventListener): void => {
-  element.removeEventListener(event, callback, false);
+export const removeEvent = <E extends Event>(element: EventTarget, event: string, callback: (event: E) => void): void => {
+  element.removeEventListener(event, callback as EventListener, false);
 };
 
 /**
