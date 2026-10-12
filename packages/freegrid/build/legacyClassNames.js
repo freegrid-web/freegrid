@@ -1,4 +1,5 @@
-import { LEGACY_CLASS_NAMES, toFreeGridClassName } from '../src/helpers/classNames.js';
+// Node runs this build script directly; it strips the TypeScript types of classNames.ts (Node 23.6+).
+import { LEGACY_CLASS_NAMES, toFreeGridClassName } from '../src/helpers/classNames.ts';
 
 // FreeGrid name → legacy name, e.g. fg-center → htCenter.
 const LEGACY_BY_NAME = new Map(LEGACY_CLASS_NAMES.map(legacy => [toFreeGridClassName(legacy), legacy]));
