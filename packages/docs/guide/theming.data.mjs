@@ -27,6 +27,16 @@ function declarations(body) {
   return result;
 }
 
+// The colors and the font that differ between Classic and Modern are style defaults (--fg-style-*): they are shown
+// as the value of the base or component variable they stand in for.
+const STYLE_GROUPS = [
+  [/^--fg-header-/, 'Headers'],
+  [/^--fg-selection-/, 'Selection'],
+  [/^--fg-editor-/, 'Editors'],
+  [/^--fg-menu-/, 'Context menu'],
+  [/^--fg-datepicker-/, 'Date picker'],
+];
+
 export default {
   watch: [file],
   load() {
@@ -36,28 +46,39 @@ export default {
     const rules = [...css.matchAll(/([^{}]*)\{([^{}]*)\}/g)]
       .map(([, selector, body]) => ({ selector: selector.replace(/\/\*[\s\S]*?\*\//g, '').trim(), body }));
     const find = predicate => declarations(rules.find(predicate)?.body || '');
+    const unstyle = declaration => ({ ...declaration, name: declaration.name.replace(/^--fg-style-/, '--fg-') });
     // :root has the base variables (before the first group heading) and the component variables with their own
     // value; the grid's parts have the component variables that follow a base variable.
-    const root = find(({ selector }) => selector.includes(':where(:root)'));
-    const lightBase = root.filter(({ group }) => !group);
-    const lightComponents = [
-      ...root.filter(({ group }) => group),
-      ...find(({ selector }) => selector.startsWith(':where(.freegrid')),
-    ];
+    const root = find(({ selector }) => selector === ':where(:root)');
+    const styleDefaults = find(({ selector }) => selector.startsWith(':where(:root,')).map(unstyle);
+    const modern = new Map(find(({ selector }) => selector.startsWith(':where(.fg-style-modern'))
+      .map(unstyle).map(({ name, value }) => [name, value]));
     const dark = new Map(find(({ selector }) => selector.includes('fg-theme-dark'))
       .map(({ name, value }) => [name, value]));
-    const row = ({ name, value, description }) => ({ name, description, light: value, dark: dark.get(name) || '' });
-    const unsetBase = ['--fg-color-text', '--fg-font-family', '--fg-font-size']
-      .filter(name => !lightBase.some(declaration => declaration.name === name))
-      .map(name => ({
-        name,
-        description: name === '--fg-color-text' ? 'Text color.' : `Font ${name.endsWith('family') ? 'family' : 'size'}.`,
-        light: '(page)',
-        dark: dark.get(name) || '',
-      }));
+    // var(--fg-color-border, var(--fg-style-color-border)) is shown as var(--fg-color-border).
+    const shown = value => value.replace(/var\((--fg-[\w-]+), var\(--fg-style-[\w-]+(?:, ([^()]+))?\)\)/g,
+      (match, name, fallback) => (fallback ? `var(${name}, ${fallback})` : `var(${name})`));
+    const row = ({ name, value, description }) => ({
+      name,
+      description,
+      light: shown(value),
+      modern: modern.get(name) && modern.get(name) !== value ? modern.get(name) : '',
+      dark: dark.get(name) || '',
+    });
+    const isColor = ({ name }) => /^--fg-color-/.test(name);
+    const rootBase = root.filter(({ group }) => !group);
+    const lightBase = [...rootBase.filter(isColor), ...styleDefaults.filter(isColor), ...rootBase.filter(d => !isColor(d))];
+    const unsetBase = [['--fg-color-text', 'Text color.'], ['--fg-font-family', 'Font family.'], ['--fg-font-size', 'Font size.']]
+      .map(([name, description]) => ({ name, description, light: '(page)', modern: modern.get(name) || '', dark: dark.get(name) || '' }));
+    const components = [
+      ...root.filter(({ group }) => group),
+      ...find(({ selector }) => selector.startsWith(':where(.freegrid')),
+      ...styleDefaults.filter(declaration => !isColor(declaration))
+        .map(declaration => ({ ...declaration, group: STYLE_GROUPS.find(([pattern]) => pattern.test(declaration.name))?.[1] || '' })),
+    ];
     const groups = [];
 
-    lightComponents.forEach((declaration) => {
+    components.forEach((declaration) => {
       let group = groups.find(({ name }) => name === declaration.group);
 
       if (!group) {

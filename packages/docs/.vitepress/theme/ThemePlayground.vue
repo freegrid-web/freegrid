@@ -4,9 +4,10 @@
 // editor, date picker), so they apply in every theme; the panel shows the CSS to copy.
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useData } from 'vitepress';
+import { GRID_STYLES as STYLES, gridStyle, loadGridStyle } from './gridStyle';
 
 const props = defineProps({
-  // Base variables from theming.data.mjs: [{ name, description, light, dark }].
+  // Base variables from theming.data.mjs: [{ name, description, light, modern, dark }].
   variables: { type: Array, required: true },
 });
 
@@ -15,10 +16,6 @@ const THEMES = [
   { value: 'light', label: 'Light', icon: 'M8 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1' },
   { value: 'dark', label: 'Dark', icon: 'M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z' },
   { value: 'auto', label: 'Auto', icon: 'M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 1.5v13' },
-];
-const STYLES = [
-  { value: 'classic', label: 'Classic' },
-  { value: 'modern', label: 'Modern' },
 ];
 const LABELS = {
   '--fg-color-background': 'Background',
@@ -72,7 +69,6 @@ const TARGETS = '.theme-playground__frame, .fg-context-menu, .fg-comments-contai
 
 const container = ref(null);
 const theme = ref('light');
-const gridStyle = ref('classic');
 const changed = reactive({});
 const copied = ref(false);
 const systemDark = ref(false);
@@ -92,10 +88,13 @@ const toHex = (value) => {
 };
 const isDark = computed(() => theme.value === 'dark' || (theme.value === 'auto' && systemDark.value));
 const colors = computed(() => props.variables.filter(({ name }) => LABELS[name]));
-const themeDefault = variable => toHex(isDark.value ? (variable.dark || variable.light) : variable.light);
+const styleDefault = variable => (gridStyle.value === 'modern' && variable.modern) || variable.light;
+const themeDefault = variable => toHex(isDark.value ? (variable.dark || styleDefault(variable)) : styleDefault(variable));
 // The swatch and hex shown for a variable: the edited value, else the active theme's default ('' = from the page).
 const valueOf = variable => changed[variable.name] ?? themeDefault(variable);
-const fontSize = computed(() => parseInt(changed['--fg-font-size'], 10) || 13);
+// Modern has its own font (14px); Classic uses the page's.
+const fontSize = computed(() => parseInt(changed['--fg-font-size'], 10) || (gridStyle.value === 'modern' ? 14 : 13));
+const unsetLabel = computed(() => (gridStyle.value === 'modern' ? 'Modern' : 'page'));
 const css = computed(() => {
   const lines = Object.entries(changed).map(([name, value]) => `  ${name}: ${value};`);
 
@@ -152,6 +151,7 @@ watch(changed, () => {
 const { isDark: docsDark } = useData();
 
 onMounted(async() => {
+  loadGridStyle();
   // Light in the built HTML; the docs' own mode after mount (hydration would keep a server-rendered value).
   theme.value = docsDark.value ? 'dark' : 'light';
   media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -215,19 +215,21 @@ onBeforeUnmount(() => {
         <label class="tp-field">
           <span class="tp-name">Font</span>
           <select :value="changed['--fg-font-family'] || ''" @change="set('--fg-font-family', $event.target.value)">
-            <option v-for="font in FONTS" :key="font.label" :value="font.value">{{ font.label }}</option>
+            <option v-for="font in FONTS" :key="font.label" :value="font.value">
+              {{ font.value ? font.label : `${unsetLabel === 'page' ? 'Page' : 'Modern'} font` }}
+            </option>
           </select>
         </label>
         <label class="tp-field">
           <span class="tp-name">Size</span>
           <input type="range" min="11" max="16" :value="fontSize"
             @input="set('--fg-font-size', `${$event.target.value}px`)">
-          <span class="tp-size">{{ changed['--fg-font-size'] ? `${fontSize}px` : 'page' }}</span>
+          <span class="tp-size">{{ changed['--fg-font-size'] ? `${fontSize}px` : unsetLabel }}</span>
         </label>
       </div>
 
       <div class="theme-playground__frame" :data-fg-theme="theme === 'light' ? null : theme"
-        :data-fg-style="gridStyle === 'modern' ? 'modern' : null">
+        :data-fg-style="gridStyle">
         <div ref="container" class="theme-playground__grid" />
       </div>
     </div>

@@ -61,10 +61,12 @@ wins.
 
 Two looks, independent of the color theme:
 
-- **Classic** (the default): compact rows, as in Handsontable 6.
-- **Modern**: roomier 32px rows and 8px cell padding, semibold headers, a rounded editor and context menu with a soft
-  shadow. The colors come from the theme and your variables, as in Classic. Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any element
-  around it, together with any theme:
+- **Classic** (the default): compact 23px rows and the colors of Handsontable 6; the grid uses the page's font and
+  text color.
+- **Modern**: roomier 32px rows and 8px cell padding, a rounded editor and context menu with a soft shadow, a round
+  fill handle, and its own light palette (light grid lines, soft text, light headers, a blue accent) and font
+  (14px Roboto or the system's sans-serif). Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any
+  element around it, together with any theme:
 
 ```html
 <div class="fg-style-modern fg-theme-dark">
@@ -72,10 +74,17 @@ Two looks, independent of the color theme:
 </div>
 ```
 
-Sizes are variables too (`--fg-row-height`, `--fg-cell-padding-x`, `--fg-radius`, `--fg-header-font-weight`), so you
-can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeGrid reads `--fg-row-height` when the
-grid is created; after changing it later, call `updateSettings({})`. Modern's wider padding needs a little more
-column width: with fixed `colWidths`, add about 8px per column so that text does not wrap.
+The examples on this site use Modern; switch them with **Grid** in the top bar.
+
+Modern's colors and font are defaults, not overrides: a base variable you set (`--fg-color-border`, `--fg-font-family`,
+…) wins in Modern too, and the dark theme gives Modern its dark colors. The "Modern" column in [Variables](#variables)
+lists what Modern changes. To show a Classic grid inside a Modern page, add `fg-style-classic` (or
+`data-fg-style="classic"`) around it: the closest style wins.
+
+Sizes are variables too (`--fg-row-height`, `--fg-cell-padding-x`, `--fg-radius`, `--fg-header-font-weight`,
+`--fg-fill-handle-radius`), so you can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeGrid
+reads `--fg-row-height` when the grid is created; after changing it later, call `updateSettings({})`. Modern's wider
+padding needs a little more column width: with fixed `colWidths`, add about 8px per column so that text does not wrap.
 
 ## Playground
 
@@ -86,17 +95,18 @@ context menu, double-click a date to open the date picker.
 
 ## Variables
 
-The light and dark values are read from FreeGrid's `variables.css`. "(page)" means the grid inherits the value from
-the page; an empty dark value means the variable keeps its light value or follows a base variable.
+The values are read from FreeGrid's `variables.css`. "Light" is the default (Classic) value; "Modern" is shown where
+the Modern style differs; "(page)" means the grid inherits the value from the page; an empty dark value means the
+variable keeps its light value or follows a base variable.
 
 ### Base
 
 <table class="theming-variables">
-  <thead><tr><th>Variable</th><th>What it styles</th><th>Light</th><th>Dark</th></tr></thead>
+  <thead><tr><th>Variable</th><th>What it styles</th><th>Light</th><th>Modern</th><th>Dark</th></tr></thead>
   <tbody>
     <tr v-for="row in data.base" :key="row.name">
       <td><code>{{ row.name }}</code></td><td>{{ row.description }}</td><td><code>{{ row.light }}</code></td>
-      <td><code v-if="row.dark">{{ row.dark }}</code></td>
+      <td><code v-if="row.modern">{{ row.modern }}</code></td><td><code v-if="row.dark">{{ row.dark }}</code></td>
     </tr>
   </tbody>
 </table>
@@ -104,11 +114,11 @@ the page; an empty dark value means the variable keeps its light value or follow
 <template v-for="group in data.groups" :key="group.name">
   <h3>{{ group.name }}</h3>
   <table class="theming-variables">
-    <thead><tr><th>Variable</th><th>What it styles</th><th>Light</th><th>Dark</th></tr></thead>
+    <thead><tr><th>Variable</th><th>What it styles</th><th>Light</th><th>Modern</th><th>Dark</th></tr></thead>
     <tbody>
       <tr v-for="row in group.rows" :key="row.name">
         <td><code>{{ row.name }}</code></td><td>{{ row.description }}</td><td><code>{{ row.light }}</code></td>
-        <td><code v-if="row.dark">{{ row.dark }}</code></td>
+        <td><code v-if="row.modern">{{ row.modern }}</code></td><td><code v-if="row.dark">{{ row.dark }}</code></td>
       </tr>
     </tbody>
   </table>

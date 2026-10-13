@@ -19,7 +19,6 @@ export default function createGrid(container) {
       { data: 'city', type: 'autocomplete', source: ['Vilnius', 'Kaunas', 'Klaipėda', 'Šiauliai', 'Riga', 'Tallinn', 'Warsaw'], strict: false },
       { data: 'code', type: 'password' },
     ],
-    rowHeaders: true,
     stretchH: 'all',
   });
 }
