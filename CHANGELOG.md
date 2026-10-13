@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Editors: `BaseEditor` and `TextEditor` are ES classes now (TypeScript rewrite). Custom editors made with
+  `FreeGrid.editors.TextEditor.prototype.extend()` or `class MyEditor extends FreeGrid.editors.TextEditor` keep working;
+  one that calls a parent editor as a function (`TextEditor.call(this, instance)`) must use `class … extends` instead.
 - Docs, API reference:
   - The right-hand lists (Related API on guide pages, and an index on each reference page) are alphabetical, one
     entry per line, in the order settings, methods, events, with plugin methods grouped by plugin. A filter box
