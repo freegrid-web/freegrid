@@ -1,59 +1,43 @@
 import { addClass, removeClass } from './../../helpers/dom/element';
-import { arrayEach } from './../../helpers/array';
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { isTouchSupported } from './../../helpers/feature';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
+type Overlay = any;
 
 /**
  * @private
  * @plugin TouchScroll
  * @class TouchScroll
+ *
+ * On touch devices: hides the fixed parts of the grid (the overlays) while the grid scrolls with momentum, and shows
+ * them again, in place, when it stops.
  */
 class TouchScroll extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
+  /** The overlays to put in place after scrolling. */
+  scrollbars: Overlay[] = [];
 
-    /**
-     * Collection of scrollbars to update.
-     *
-     * @type {Array}
-     */
-    this.scrollbars = [];
-    /**
-     * Collection of overlays to update.
-     *
-     * @type {Array}
-     */
-    this.clones = [];
-    /**
-     * Flag which determines if collection of overlays should be refilled on every table render.
-     *
-     * @type {Boolean}
-     * @default false
-     */
-    this.lockedCollection = false;
-    /**
-     * Flag which determines if walkontable should freeze overlays while scrolling.
-     *
-     * @type {Boolean}
-     * @default false
-     */
-    this.freezeOverlays = false;
-  }
+  /** The overlays' elements to hide while scrolling. */
+  clones: HTMLElement[] = [];
+
+  /** Whether `scrollbars` and `clones` are filled (they are filled again after the settings change). */
+  lockedCollection = false;
+
+  /** Whether Walkontable keeps the overlays in place while scrolling. */
+  freezeOverlays = false;
 
   /**
    * Check if plugin is enabled.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return isTouchSupported();
   }
 
   /**
    * Enable the plugin.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -67,7 +51,7 @@ class TouchScroll extends BasePlugin {
   /**
    * Updates the plugin to use the latest options you have specified.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.lockedCollection = false;
 
     super.updatePlugin();
@@ -76,7 +60,7 @@ class TouchScroll extends BasePlugin {
   /**
    * Disable plugin for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     super.disablePlugin();
   }
 
@@ -85,56 +69,37 @@ class TouchScroll extends BasePlugin {
    *
    * @private
    */
-  registerEvents() {
+  registerEvents(): void {
     this.addHook('beforeTouchScroll', () => this.onBeforeTouchScroll());
     this.addHook('afterMomentumScroll', () => this.onAfterMomentumScroll());
   }
 
   /**
-   * After render listener.
+   * After render listener: collects the overlays (once).
    *
    * @private
    */
-  onAfterRender() {
+  onAfterRender(): void {
     if (this.lockedCollection) {
       return;
     }
-
-    const { topOverlay, bottomOverlay, leftOverlay, topLeftCornerOverlay, bottomLeftCornerOverlay } = this.hot.view.wt.wtOverlays;
+    const { topOverlay, bottomOverlay, leftOverlay, topLeftCornerOverlay, bottomLeftCornerOverlay } =
+      this.hot.view.wt.wtOverlays;
+    const element = (overlay: Overlay): HTMLElement => overlay.clone.wtTable.holder.parentNode;
 
     this.lockedCollection = true;
-    this.scrollbars.length = 0;
-    this.scrollbars.push(topOverlay);
-
-    if (bottomOverlay.clone) {
-      this.scrollbars.push(bottomOverlay);
-    }
-    this.scrollbars.push(leftOverlay);
-
-    if (topLeftCornerOverlay) {
-      this.scrollbars.push(topLeftCornerOverlay);
-    }
-    if (bottomLeftCornerOverlay && bottomLeftCornerOverlay.clone) {
-      this.scrollbars.push(bottomLeftCornerOverlay);
-    }
-
-    this.clones.length = 0;
-
-    if (topOverlay.needFullRender) {
-      this.clones.push(topOverlay.clone.wtTable.holder.parentNode);
-    }
-    if (bottomOverlay.needFullRender) {
-      this.clones.push(bottomOverlay.clone.wtTable.holder.parentNode);
-    }
-    if (leftOverlay.needFullRender) {
-      this.clones.push(leftOverlay.clone.wtTable.holder.parentNode);
-    }
-    if (topLeftCornerOverlay) {
-      this.clones.push(topLeftCornerOverlay.clone.wtTable.holder.parentNode);
-    }
-    if (bottomLeftCornerOverlay && bottomLeftCornerOverlay.clone) {
-      this.clones.push(bottomLeftCornerOverlay.clone.wtTable.holder.parentNode);
-    }
+    this.scrollbars = [
+      topOverlay,
+      ...(bottomOverlay.clone ? [bottomOverlay] : []),
+      leftOverlay,
+      ...(topLeftCornerOverlay ? [topLeftCornerOverlay] : []),
+      ...(bottomLeftCornerOverlay?.clone ? [bottomLeftCornerOverlay] : []),
+    ];
+    this.clones = [
+      ...[topOverlay, bottomOverlay, leftOverlay].filter(overlay => overlay.needFullRender).map(element),
+      ...(topLeftCornerOverlay ? [element(topLeftCornerOverlay)] : []),
+      ...(bottomLeftCornerOverlay?.clone ? [element(bottomLeftCornerOverlay)] : []),
+    ];
   }
 
   /**
@@ -142,12 +107,9 @@ class TouchScroll extends BasePlugin {
    *
    * @private
    */
-  onBeforeTouchScroll() {
+  onBeforeTouchScroll(): void {
     this.freezeOverlays = true;
-
-    arrayEach(this.clones, (clone) => {
-      addClass(clone, 'hide-tween');
-    });
+    this.clones.forEach(clone => addClass(clone, 'hide-tween'));
   }
 
   /**
@@ -155,21 +117,19 @@ class TouchScroll extends BasePlugin {
    *
    * @private
    */
-  onAfterMomentumScroll() {
+  onAfterMomentumScroll(): void {
     this.freezeOverlays = false;
 
-    arrayEach(this.clones, (clone) => {
+    this.clones.forEach((clone) => {
       removeClass(clone, 'hide-tween');
       addClass(clone, 'show-tween');
     });
 
     setTimeout(() => {
-      arrayEach(this.clones, (clone) => {
-        removeClass(clone, 'show-tween');
-      });
+      this.clones.forEach(clone => removeClass(clone, 'show-tween'));
     }, 400);
 
-    arrayEach(this.scrollbars, (scrollbar) => {
+    this.scrollbars.forEach((scrollbar) => {
       scrollbar.refresh();
       scrollbar.resetFixedPosition();
     });

@@ -1,24 +1,34 @@
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { isObject } from './../../helpers/object';
-import { rangeEach } from './../../helpers/number';
-import { isUndefined } from './../../helpers/mixed';
+import type { PluginHost } from './../_base';
+import type { CellProperties } from '../../cellTypes/types';
+
+/** Called for every cell a query checks, with whether the cell matches. */
+export type SearchCallback = (instance: PluginHost, row: number, col: number, data: unknown, testResult: boolean) => void;
+
+/** Whether a cell's value matches the query. */
+export type QueryMethod = (query: unknown, value: unknown) => boolean;
+
+/** A cell that matches a query. */
+export type SearchResult = { row: number; col: number; data: unknown };
+
+type SearchSettings = { callback?: SearchCallback; queryMethod?: QueryMethod; searchResultClass?: string };
 
 const DEFAULT_SEARCH_RESULT_CLASS = 'fg-search-result';
 
-const DEFAULT_CALLBACK = function(instance, row, col, data, testResult) {
+// Marks the cell, so that the next render gives it the search result class.
+const DEFAULT_CALLBACK: SearchCallback = (instance, row, col, data, testResult) => {
   instance.getCellMeta(row, col).isSearchResult = testResult;
 };
 
-const DEFAULT_QUERY_METHOD = function(query, value) {
-  if (isUndefined(query) || query === null || !query.toLowerCase || query.length === 0) {
-    return false;
-  }
-  if (isUndefined(value) || value === null) {
+// Case-insensitive "contains"; an empty query matches nothing.
+const DEFAULT_QUERY_METHOD: QueryMethod = (query, value) => {
+  if (typeof query !== 'string' || query.length === 0 || value === undefined || value === null) {
     return false;
   }
 
-  return value.toString().toLowerCase().indexOf(query.toLowerCase()) !== -1;
+  return value.toString().toLowerCase().includes(query.toLowerCase());
 };
 
 /**
@@ -52,53 +62,47 @@ const DEFAULT_QUERY_METHOD = function(query, value) {
  * ```
  */
 class Search extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
-    /**
-     * Function called during querying for each cell from the {@link DataMap}.
-     *
-     * @private
-     * @type {Function}
-     */
-    this.callback = DEFAULT_CALLBACK;
-    /**
-     * Query function is responsible for determining whether a query matches the value stored in a cell.
-     *
-     * @private
-     * @type {Function}
-     */
-    this.queryMethod = DEFAULT_QUERY_METHOD;
-    /**
-     * Class name added to each cell that belongs to the searched query.
-     *
-     * @private
-     * @type {String}
-     */
-    this.searchResultClass = DEFAULT_SEARCH_RESULT_CLASS;
-  }
+  /**
+   * Function called during querying for each cell from the {@link DataMap}.
+   *
+   * @private
+   */
+  callback: SearchCallback = DEFAULT_CALLBACK;
+
+  /**
+   * Query function is responsible for determining whether a query matches the value stored in a cell.
+   *
+   * @private
+   */
+  queryMethod: QueryMethod = DEFAULT_QUERY_METHOD;
+
+  /**
+   * Class name added to each cell that belongs to the searched query.
+   *
+   * @private
+   */
+  searchResultClass = DEFAULT_SEARCH_RESULT_CLASS;
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoRowSize#enablePlugin} method is called.
    *
-   * @returns {Boolean}
    */
-  isEnabled() {
-    return this.hot.getSettings().search;
+  isEnabled(): boolean {
+    return !!this.hot.getSettings().search;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
 
-    const searchSettings = this.hot.getSettings().search;
-    this.updatePluginSettings(searchSettings);
+    this.updatePluginSettings(this.hot.getSettings().search);
 
-    this.addHook('beforeRenderer', (...args) => this.onBeforeRenderer(...args));
+    this.addHook('beforeRenderer', (...args: Parameters<Search['onBeforeRenderer']>) => this.onBeforeRenderer(...args));
 
     super.enablePlugin();
   }
@@ -106,8 +110,9 @@ class Search extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
-    const beforeRendererCallback = (...args) => this.onBeforeRenderer(...args);
+  disablePlugin(): void {
+    // The next render takes the search result class off the cells.
+    const beforeRendererCallback = (...args: Parameters<Search['onBeforeRenderer']>) => this.onBeforeRenderer(...args);
 
     this.hot.addHook('beforeRenderer', beforeRendererCallback);
     this.hot.addHookOnce('afterRender', () => {
@@ -120,7 +125,7 @@ class Search extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
 
@@ -130,40 +135,30 @@ class Search extends BasePlugin {
   /**
    * Makes the query.
    *
-   * @param {String} queryStr Value to be search.
-   * @param {Function} [callback] Callback function performed on cells with values which matches to the searched query.
-   * @param {Function} [queryMethod] Query function responsible for determining whether a query matches the value stored in a cell.
-   * @returns {Object[]} Return an array of objects with `row`, `col`, `data` properties or empty array.
+   * @param queryStr Value to be search.
+   * @param [callback] Callback function performed on cells with values which matches to the searched query.
+   * @param [queryMethod] Query function responsible for determining whether a query matches the value stored in a cell.
+   * @returns Return an array of objects with `row`, `col`, `data` properties or empty array.
    */
-  query(queryStr, callback = this.getCallback(), queryMethod = this.getQueryMethod()) {
-    const rowCount = this.hot.countRows();
-    const colCount = this.hot.countCols();
-    const queryResult = [];
-    const instance = this.hot;
+  query(queryStr: string, callback: SearchCallback = this.getCallback(),
+    queryMethod: QueryMethod = this.getQueryMethod()): SearchResult[] {
+    const rowCount: number = this.hot.countRows();
+    const colCount: number = this.hot.countCols();
+    const queryResult: SearchResult[] = [];
 
-    rangeEach(0, rowCount - 1, (rowIndex) => {
-      rangeEach(0, colCount - 1, (colIndex) => {
-        const cellData = this.hot.getDataAtCell(rowIndex, colIndex);
-        const cellProperties = this.hot.getCellMeta(rowIndex, colIndex);
-        const cellCallback = cellProperties.search.callback || callback;
-        const cellQueryMethod = cellProperties.search.queryMethod || queryMethod;
-        const testResult = cellQueryMethod(queryStr, cellData);
+    for (let row = 0; row < rowCount; row += 1) {
+      for (let col = 0; col < colCount; col += 1) {
+        const data = this.hot.getDataAtCell(row, col);
+        // A cell's own `search` settings win.
+        const cellSearch = (this.hot.getCellMeta(row, col).search || {}) as SearchSettings;
+        const testResult = (cellSearch.queryMethod || queryMethod)(queryStr, data);
 
         if (testResult) {
-          const singleResult = {
-            row: rowIndex,
-            col: colIndex,
-            data: cellData,
-          };
-
-          queryResult.push(singleResult);
+          queryResult.push({ row, col, data });
         }
-
-        if (cellCallback) {
-          cellCallback(instance, rowIndex, colIndex, cellData, testResult);
-        }
-      });
-    });
+        (cellSearch.callback || callback)?.(this.hot, row, col, data, testResult);
+      }
+    }
 
     return queryResult;
   }
@@ -171,64 +166,64 @@ class Search extends BasePlugin {
   /**
    * Gets the callback function.
    *
-   * @returns {Function} Return the callback function.
+   * @returns Return the callback function.
    */
-  getCallback() {
+  getCallback(): SearchCallback {
     return this.callback;
   }
 
   /**
    * Sets the callback function. This function will be called during querying for each cell.
    *
-   * @param {Function} newCallback
+   * @param newCallback Called for every cell a query checks.
    */
-  setCallback(newCallback) {
+  setCallback(newCallback: SearchCallback): void {
     this.callback = newCallback;
   }
 
   /**
    * Gets the query method function.
    *
-   * @returns {Function} Return the query method.
+   * @returns Return the query method.
    */
-  getQueryMethod() {
+  getQueryMethod(): QueryMethod {
     return this.queryMethod;
   }
 
   /**
    * Sets the query method function. The function is responsible for determining whether a query matches the value stored in a cell.
    *
-   * @param {Function} newQueryMethod
+   * @param newQueryMethod Whether a cell's value matches the query.
    */
-  setQueryMethod(newQueryMethod) {
+  setQueryMethod(newQueryMethod: QueryMethod): void {
     this.queryMethod = newQueryMethod;
   }
 
   /**
    * Gets search result cells class name.
    *
-   * @returns {String} Return the cell class name.
+   * @returns Return the cell class name.
    */
-  getSearchResultClass() {
+  getSearchResultClass(): string {
     return this.searchResultClass;
   }
 
   /**
    * Sets search result cells class name. This class name will be added to each cell that belongs to the searched query.
    *
-   * @param {String} newElementClass
+   * @param newElementClass The class name.
    */
-  setSearchResultClass(newElementClass) {
+  setSearchResultClass(newElementClass: string): void {
     this.searchResultClass = newElementClass;
   }
 
   /**
    * Updates the settings of the plugin.
    *
-   * @param {Object} searchSettings The plugin settings, taken from FreeGrid configuration.
+   * @param searchSettings The plugin settings, taken from FreeGrid configuration.
    * @private
    */
-  updatePluginSettings(searchSettings) {
+  updatePluginSettings(searchSettings: boolean | SearchSettings): void {
     if (isObject(searchSettings)) {
       if (searchSettings.searchResultClass) {
         this.setSearchResultClass(searchSettings.searchResultClass);
@@ -244,28 +239,22 @@ class Search extends BasePlugin {
     }
   }
 
-  /** *
-   * The `beforeRenderer` hook callback.
+  /**
+   * The `beforeRenderer` hook callback: gives search results the search result class.
    *
    * @private
-   * @param {HTMLTableCellElement} TD The rendered `TD` element.
-   * @param {Number} row Visual row index.
-   * @param {Number} col Visual column index.
-   * @param {String | Number} prop Column property name or a column index, if datasource is an array of arrays.
-   * @param {String} value Value of the rendered cell.
-   * @param {Object} cellProperties Object containing the cell's properties.
+   * @param TD The rendered `TD` element.
+   * @param row Visual row index.
+   * @param col Visual column index.
+   * @param prop Column property name or a column index, if datasource is an array of arrays.
+   * @param value Value of the rendered cell.
+   * @param cellProperties Object containing the cell's properties.
    */
-  onBeforeRenderer(TD, row, col, prop, value, cellProperties) {
-    // TODO: #4972
-    const className = cellProperties.className || [];
-    let classArray = [];
-
-    if (typeof className === 'string') {
-      classArray = className.split(' ');
-
-    } else {
-      classArray.push(...className);
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBeforeRenderer(TD: HTMLTableCellElement, row: number, col: number, prop: string | number, value: unknown,
+    cellProperties: CellProperties): void {
+    const { className = [] } = cellProperties;
+    const classArray = typeof className === 'string' ? className.split(' ') : [...className];
 
     if (this.isEnabled() && cellProperties.isSearchResult) {
       if (!classArray.includes(this.searchResultClass)) {
@@ -282,7 +271,7 @@ class Search extends BasePlugin {
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     super.destroy();
   }
 }

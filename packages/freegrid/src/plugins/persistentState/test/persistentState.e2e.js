@@ -92,6 +92,21 @@ describe('persistentState', () => {
     expect(storedData.value).toBeUndefined();
   });
 
+  it('should keep the data under other keys, when persistentStateReset is run with a key', () => {
+    const hot = handsontable({
+      persistentState: true
+    });
+
+    hot.runHooks('persistentStateSave', 'testData', 100);
+    hot.runHooks('persistentStateSave', 'otherData', 200);
+    hot.runHooks('persistentStateReset', 'testData');
+
+    const storedData = {};
+    hot.runHooks('persistentStateLoad', 'otherData', storedData);
+
+    expect(storedData.value).toEqual(200);
+  });
+
   it('should NOT clear the data under the given key, when persistentStateReset is run', () => {
     const hot = handsontable({
       persistentState: false

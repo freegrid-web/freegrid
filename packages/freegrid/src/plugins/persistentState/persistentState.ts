@@ -24,31 +24,25 @@ Hooks.getSingleton().register('persistentStateReset');
  * with table will be cleared.
  */
 class PersistentState extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
-    /**
-     * Instance of {@link Storage}.
-     *
-     * @private
-     * @type {Storage}
-     */
-    this.storage = void 0;
-  }
+  /**
+   * Instance of {@link Storage}.
+   *
+   * @private
+   */
+  storage: Storage | undefined = undefined;
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link PersistentState#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return !!this.hot.getSettings().persistentState;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -57,9 +51,9 @@ class PersistentState extends BasePlugin {
       this.storage = new Storage(this.hot.rootElement.id);
     }
 
-    this.addHook('persistentStateSave', (key, value) => this.saveValue(key, value));
-    this.addHook('persistentStateLoad', (key, saveTo) => this.loadValue(key, saveTo));
-    this.addHook('persistentStateReset', () => this.resetValue());
+    this.addHook('persistentStateSave', (key: string, value: unknown) => this.saveValue(key, value));
+    this.addHook('persistentStateLoad', (key: string, saveTo: { value?: unknown }) => this.loadValue(key, saveTo));
+    this.addHook('persistentStateReset', (key?: string) => this.resetValue(key));
 
     super.enablePlugin();
   }
@@ -67,8 +61,8 @@ class PersistentState extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
-    this.storage = void 0;
+  disablePlugin(): void {
+    this.storage = undefined;
 
     super.disablePlugin();
   }
@@ -76,7 +70,7 @@ class PersistentState extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
 
@@ -86,41 +80,40 @@ class PersistentState extends BasePlugin {
   /**
    * Loads the value from local storage.
    *
-   * @param {String} key Storage key.
-   * @param {Object} saveTo Saved value from local storage.
+   * @param key Storage key.
+   * @param saveTo Gets the loaded value in its `value` property.
    */
-  loadValue(key, saveTo) {
-    saveTo.value = this.storage.loadValue(key);
+  loadValue(key: string, saveTo: { value?: unknown }): void {
+    saveTo.value = this.storage!.loadValue(key);
   }
 
   /**
    * Saves the data to local storage.
    *
-   * @param {String} key Storage key.
-   * @param {Mixed} value Value to save.
+   * @param key Storage key.
+   * @param value Value to save.
    */
-  saveValue(key, value) {
-    this.storage.saveValue(key, value);
+  saveValue(key: string, value: unknown): void {
+    this.storage!.saveValue(key, value);
   }
 
   /**
    * Resets the data or all data from local storage.
    *
-   * @param {String} key [optional] Storage key.
+   * @param [key] Storage key. Without it, every value of the grid is removed.
    */
-  resetValue(key) {
-    if (typeof key === 'undefined') {
-      this.storage.resetAll();
-
+  resetValue(key?: string): void {
+    if (key === undefined) {
+      this.storage!.resetAll();
     } else {
-      this.storage.reset(key);
+      this.storage!.reset(key);
     }
   }
 
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     super.destroy();
   }
 }

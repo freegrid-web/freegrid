@@ -241,7 +241,8 @@ export const readPlugin = (source) => {
   }
   const header = parseBlock(headerText);
   const name = /@plugin\s+(\w+)/.exec(headerText)[1];
-  const methods = [...source.matchAll(/\/\*\*([\s\S]*?)\*\/\s*\n {2}(?:static\s+)?(\w+)\s*\(/g)]
+  // The comment's text has no `*/`; line comments (e.g. eslint's) may come between it and the method.
+  const methods = [...source.matchAll(/\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*\n(?: {2}\/\/[^\n]*\n)* {2}(?:static\s+)?(\w+)\s*\(/g)]
     .map(({ 0: match, 1: text, 2: method, index }) => withSignatureTypes(
       { ...parseBlock(text), kind: 'method', owner: name, name: method },
       readSignature(source.slice(index + match.length)),

@@ -1,37 +1,36 @@
-import { arrayEach } from './../../helpers/array';
-
 /**
  * @class Storage
  * @plugin PersistentState
+ *
+ * Values in `localStorage` under `<prefix>_<key>`, as JSON. The keys in use are kept under
+ * `<prefix>__persistentStateKeys`.
  */
 class Storage {
-  constructor(prefix) {
-    /**
-     * Prefix for key (id element).
-     *
-     * @type {String}
-     */
-    this.prefix = prefix;
+  /**
+   * Prefix for key (id element).
+   */
+  prefix: string;
 
-    /**
-     * Saved keys.
-     *
-     * @type {Array}
-     */
-    this.savedKeys = [];
+  /**
+   * Saved keys.
+   */
+  savedKeys: string[] = [];
+
+  constructor(prefix: string) {
+    this.prefix = prefix;
     this.loadSavedKeys();
   }
 
   /**
    * Save data to localStorage.
    *
-   * @param {String} key Key string.
-   * @param {Mixed} value Value to save.
+   * @param key Key string.
+   * @param value Value to save.
    */
-  saveValue(key, value) {
+  saveValue(key: string, value: unknown): void {
     window.localStorage.setItem(`${this.prefix}_${key}`, JSON.stringify(value));
 
-    if (this.savedKeys.indexOf(key) === -1) {
+    if (!this.savedKeys.includes(key)) {
       this.savedKeys.push(key);
       this.saveSavedKeys();
     }
@@ -40,36 +39,30 @@ class Storage {
   /**
    * Load data from localStorage.
    *
-   * @param {String} key Key string.
-   * @param {Object} defaultValue Object containing the loaded data.
-   *
-   * @returns {}
+   * @param key Key string.
+   * @param defaultValue The key to read when `key` is undefined.
+   * @returns The value, or `undefined` when there is none.
    */
-  loadValue(key, defaultValue) {
-    const itemKey = typeof key === 'undefined' ? defaultValue : key;
-    const value = window.localStorage.getItem(`${this.prefix}_${itemKey}`);
+  loadValue(key?: string, defaultValue?: string): unknown {
+    const value = window.localStorage.getItem(`${this.prefix}_${key === undefined ? defaultValue : key}`);
 
-    return value === null ? void 0 : JSON.parse(value);
+    return value === null ? undefined : JSON.parse(value);
   }
 
   /**
    * Reset given data from localStorage.
    *
-   * @param {String} key Key string.
+   * @param key Key string.
    */
-  reset(key) {
+  reset(key: string): void {
     window.localStorage.removeItem(`${this.prefix}_${key}`);
   }
 
   /**
    * Reset all data from localStorage.
-   *
    */
-  resetAll() {
-    arrayEach(this.savedKeys, (value, index) => {
-      window.localStorage.removeItem(`${this.prefix}_${this.savedKeys[index]}`);
-    });
-
+  resetAll(): void {
+    this.savedKeys.forEach(key => window.localStorage.removeItem(`${this.prefix}_${key}`));
     this.clearSavedKeys();
   }
 
@@ -78,11 +71,10 @@ class Storage {
    *
    * @private
    */
-  loadSavedKeys() {
+  loadSavedKeys(): void {
     const keysJSON = window.localStorage.getItem(`${this.prefix}__persistentStateKeys`);
-    const keys = typeof keysJSON === 'string' ? JSON.parse(keysJSON) : void 0;
 
-    this.savedKeys = keys || [];
+    this.savedKeys = (typeof keysJSON === 'string' ? JSON.parse(keysJSON) : undefined) || [];
   }
 
   /**
@@ -90,7 +82,7 @@ class Storage {
    *
    * @private
    */
-  saveSavedKeys() {
+  saveSavedKeys(): void {
     window.localStorage.setItem(`${this.prefix}__persistentStateKeys`, JSON.stringify(this.savedKeys));
   }
 
@@ -99,7 +91,7 @@ class Storage {
    *
    * @private
    */
-  clearSavedKeys() {
+  clearSavedKeys(): void {
     this.savedKeys.length = 0;
     this.saveSavedKeys();
   }

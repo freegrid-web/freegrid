@@ -249,3 +249,59 @@ class Search extends BasePlugin {
   assert.equal(isEnabled.returns.type, 'Boolean');
   assert.equal(enablePlugin.returns, undefined);
 });
+
+test('a line comment between a JSDoc comment and its method does not join it with the next method', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin Search
+ */
+class Search extends BasePlugin {
+  /**
+   * Hook callback.
+   *
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBeforeRenderer(TD: HTMLTableCellElement): void {
+  }
+
+  /**
+   * Destroys the plugin instance.
+   */
+  destroy(): void {
+  }
+}`);
+
+  assert.deepEqual(plugin.methods.map(({ name, description }) => [name, description]),
+    [['destroy', 'Destroys the plugin instance.']]);
+});
+
+test('the JSDoc of a field set in the constructor does not take the next method', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin DragToScroll
+ */
+class DragToScroll extends BasePlugin {
+  constructor(hotInstance) {
+    super(hotInstance);
+    /**
+     * Callback function.
+     *
+     * @private
+     * @type {Function}
+     */
+    this.callback = null;
+  }
+
+  /**
+   * Checks if the plugin is enabled.
+   *
+   * @returns {Boolean}
+   */
+  isEnabled() {
+  }
+}`);
+
+  assert.deepEqual(plugin.methods.map(({ name, description }) => [name, description]),
+    [['isEnabled', 'Checks if the plugin is enabled.']]);
+});

@@ -1,89 +1,61 @@
 /**
- * Utility to register plugins and common namespace for keeping reference to all plugins classes
+ * The plugin registry: a plugin class registered under a name gets an instance in every grid.
  */
 import Hooks from './pluginHooks';
-import { objectEach } from './helpers/object';
 import { toUpperCaseFirst } from './helpers/string';
+import type BasePlugin from './plugins/_base';
+import type { PluginHost } from './plugins/_base';
 
-const registeredPlugins = new WeakMap();
+type PluginClass = new (hotInstance: PluginHost) => BasePlugin;
+
+/** Each grid's plugins by name (`ColumnSorting`, …). */
+const registeredPlugins = new WeakMap<PluginHost, Record<string, BasePlugin>>();
 
 /**
- * Registers plugin under given name
- *
- * @param {String} pluginName
- * @param {Function} PluginClass
+ * Registers a plugin class under `pluginName` (its first letter is made upper case): each grid created afterwards
+ * gets an instance of it.
  */
-function registerPlugin(pluginName, PluginClass) {
+export const registerPlugin = (pluginName: string, PluginClass: PluginClass): void => {
   const correctedPluginName = toUpperCaseFirst(pluginName);
 
-  Hooks.getSingleton().add('construct', function() {
+  // Functions, not arrows: `this` is the grid.
+  Hooks.getSingleton().add('construct', function(this: PluginHost) {
     if (!registeredPlugins.has(this)) {
       registeredPlugins.set(this, {});
     }
-
-    const holder = registeredPlugins.get(this);
+    const holder = registeredPlugins.get(this)!;
 
     if (!holder[correctedPluginName]) {
       holder[correctedPluginName] = new PluginClass(this);
     }
   });
-  Hooks.getSingleton().add('afterDestroy', function() {
-    if (registeredPlugins.has(this)) {
-      const pluginsHolder = registeredPlugins.get(this);
+  Hooks.getSingleton().add('afterDestroy', function(this: PluginHost) {
+    const pluginsHolder = registeredPlugins.get(this);
 
-      objectEach(pluginsHolder, plugin => plugin.destroy());
+    if (pluginsHolder) {
+      Object.values(pluginsHolder).forEach(plugin => plugin.destroy());
       registeredPlugins.delete(this);
     }
   });
-}
+};
 
-/**
- * @param {Object} instance
- * @param {String|Function} pluginName
- * @returns {Function} pluginClass Returns plugin instance if exists or `undefined` if not exists.
- */
-function getPlugin(instance, pluginName) {
+/** The grid's instance of a plugin (`undefined` when there is none). */
+export const getPlugin = (instance: PluginHost, pluginName: string): BasePlugin | undefined => {
   if (typeof pluginName !== 'string') {
     throw Error('Only strings can be passed as "plugin" parameter');
   }
-  const _pluginName = toUpperCaseFirst(pluginName);
 
-  if (!registeredPlugins.has(instance) || !registeredPlugins.get(instance)[_pluginName]) {
-    return void 0;
-  }
+  return registeredPlugins.get(instance)?.[toUpperCaseFirst(pluginName)];
+};
 
-  return registeredPlugins.get(instance)[_pluginName];
-}
+/** The names of the grid's plugins. */
+export const getRegistredPluginNames = (hotInstance: PluginHost): string[] => Object.keys(
+  registeredPlugins.get(hotInstance) ?? {});
 
-/**
- * Get all registred plugins names for concrete FreeGrid instance.
- *
- * @param {Object} hotInstance
- * @returns {Array}
- */
-function getRegistredPluginNames(hotInstance) {
-  return registeredPlugins.has(hotInstance) ? Object.keys(registeredPlugins.get(hotInstance)) : [];
-}
+/** The name `plugin` is registered under in the grid, or `null`. */
+export const getPluginName = (hotInstance: PluginHost, plugin: BasePlugin): string | null => {
+  const entry = Object.entries(registeredPlugins.get(hotInstance) ?? {})
+    .find(([, pluginInstance]) => pluginInstance === plugin);
 
-/**
- * Get plugin name.
- *
- * @param {Object} hotInstance
- * @param {Object} plugin
- * @returns {String|null}
- */
-function getPluginName(hotInstance, plugin) {
-  let pluginName = null;
-
-  if (registeredPlugins.has(hotInstance)) {
-    objectEach(registeredPlugins.get(hotInstance), (pluginInstance, name) => {
-      if (pluginInstance === plugin) {
-        pluginName = name;
-      }
-    });
-  }
-
-  return pluginName;
-}
-
-export { registerPlugin, getPlugin, getRegistredPluginNames, getPluginName };
+  return entry ? entry[0] : null;
+};
