@@ -44,6 +44,41 @@ const isHTMLTable = (element: unknown): element is HTMLTableElement => (
   ((element as Element | null)?.nodeName || '').toLowerCase() === 'table');
 
 /**
+ * The text of a pasted cell, read from its nodes (no HTML is written anywhere): the first `<br>` is a new line (and
+ * a new line right after it is dropped), other tags are dropped, and the whitespace around the cell's content (in its
+ * first and last text nodes) is trimmed.
+ */
+const cellText = (cell: HTMLTableCellElement): string => {
+  const parts: string[] = [];
+  const walker = cell.ownerDocument.createTreeWalker(cell, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  let brFound = false;
+  let afterBr = false;
+
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      let text = (node as Text).data;
+
+      if (node === cell.firstChild) {
+        text = text.trimStart();
+      }
+      if (node === cell.lastChild) {
+        text = text.trimEnd();
+      }
+      parts.push(afterBr ? text.replace(/^\n/, '') : text);
+      afterBr = false;
+    } else if (node.nodeName === 'BR' && !brFound) {
+      brFound = true;
+      afterBr = true;
+      parts.push('\n');
+    } else {
+      afterBr = false;
+    }
+  }
+
+  return parts.join('');
+};
+
+/**
  * Converts HTMLTable or string into array.
  *
  * @param element Node element or string, which should contain `<table>...</table>`.
@@ -62,9 +97,5 @@ export const tableToArray = (element: Element | string | null): string[][] => {
     return [];
   }
 
-  return Array.from(checkElement.rows, row => Array.from(row.cells, (cell) => {
-    cell.innerHTML = cell.innerHTML.trim().replace(/<br(.|)>(\n?)/, '\n');
-
-    return cell.innerText;
-  }));
+  return Array.from(checkElement.rows, row => Array.from(row.cells, cellText));
 };
