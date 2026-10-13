@@ -1,33 +1,24 @@
-/* eslint-disable import/prefer-default-export */
-
 import { getCompareFunctionFactory } from './sortService';
+import type { CompareFunctionFactory, SortOrder, SortSettings } from './utils';
+
+/** A row to sort: `[rowIndex, value]` (the sorted column's value). */
+export type RowWithValues = [number, ...unknown[]];
 
 /**
- * Sort comparator handled by conventional sort algorithm.
+ * Sort comparator handled by conventional sort algorithm: compares the sorted column's values of two rows, with the
+ * column's compare function (its `compareFunctionFactory` setting, or the one of its type).
  *
- * @param {Array} sortOrders Sort orders (`asc` for ascending, `desc` for descending).
- * @param {Array} columnMetas Column meta objects.
- * @returns {Function}
+ * @param sortingOrders Sort orders (`asc` for ascending, `desc` for descending).
+ * @param columnMetas Column meta objects.
  */
-export function rootComparator(sortingOrders, columnMetas) {
-  return function(rowIndexWithValues, nextRowIndexWithValues) {
-    // We sort array of arrays. Single array is in form [rowIndex, ...values].
-    // We compare just values, stored at second index of array.
-    const [, ...values] = rowIndexWithValues;
-    const [, ...nextValues] = nextRowIndexWithValues;
+// eslint-disable-next-line import/prefer-default-export
+export const rootComparator = (sortingOrders: SortOrder[], columnMetas: Record<string, unknown>[]) => (
+  [, ...values]: RowWithValues, [, ...nextValues]: RowWithValues): number => {
+  // Only the first column: ColumnSorting sorts by one column.
+  const columnMeta = columnMetas[0];
+  const pluginSettings = columnMeta.columnSorting as SortSettings;
+  const compareFunctionFactory: CompareFunctionFactory = pluginSettings.compareFunctionFactory ||
+    getCompareFunctionFactory(columnMeta.type as string);
 
-    return (function getCompareResult(column) {
-      const sortingOrder = sortingOrders[column];
-      const columnMeta = columnMetas[column];
-      const value = values[column];
-      const nextValue = nextValues[column];
-      const pluginSettings = columnMeta.columnSorting;
-      const compareFunctionFactory = pluginSettings.compareFunctionFactory ? pluginSettings.compareFunctionFactory : getCompareFunctionFactory(columnMeta.type);
-      const compareResult = compareFunctionFactory(sortingOrder, columnMeta, pluginSettings)(value, nextValue);
-
-      // DIFF - MultiColumnSorting & ColumnSorting: removed iteration through next sorted columns.
-
-      return compareResult;
-    }(0));
-  };
-}
+  return compareFunctionFactory(sortingOrders[0], columnMeta, pluginSettings)(values[0], nextValues[0]);
+};
