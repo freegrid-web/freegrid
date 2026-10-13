@@ -1,19 +1,18 @@
-/* eslint-disable import/prefer-default-export */
-
 import { parseDate } from '../../../helpers/dateFormat';
 import { isEmpty } from '../../../helpers/mixed';
 import { DO_NOT_SWAP, FIRST_BEFORE_SECOND, FIRST_AFTER_SECOND } from '../sortService';
+import type { CompareFunctionFactory } from '../utils';
 
 /**
  * Date sorting compare function factory. Method get as parameters `sortOrder` and `columnMeta` and return compare function.
  *
- * @param {String} sortOrder Sort order (`asc` for ascending, `desc` for descending).
- * @param {Object} columnMeta Column meta object.
- * @param {Object} columnPluginSettings Plugin settings for the column.
- * @returns {Function} The compare function.
+ * @param sortOrder Sort order (`asc` for ascending, `desc` for descending).
+ * @param columnMeta Column meta object.
+ * @param columnPluginSettings Plugin settings for the column.
+ * @returns The compare function.
  */
-export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettings) {
-  return function(value, nextValue) {
+export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, columnMeta, columnPluginSettings) => (
+  (value, nextValue) => {
     const { sortEmptyCells } = columnPluginSettings;
 
     if (value === nextValue) {
@@ -42,9 +41,9 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
       return FIRST_BEFORE_SECOND;
     }
 
-    const dateFormat = columnMeta.dateFormat;
-    const firstDate = parseDate(value, dateFormat);
-    const nextDate = parseDate(nextValue, dateFormat);
+    const dateFormat = columnMeta.dateFormat as string | undefined;
+    const firstDate = parseDate(value as string, dateFormat);
+    const nextDate = parseDate(nextValue as string, dateFormat);
 
     if (!firstDate) {
       return FIRST_AFTER_SECOND;
@@ -63,7 +62,6 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
     }
 
     return DO_NOT_SWAP;
-  };
-}
+  });
 
 export const COLUMN_DATA_TYPE = 'date';

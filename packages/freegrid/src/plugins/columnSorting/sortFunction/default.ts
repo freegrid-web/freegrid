@@ -1,27 +1,22 @@
-/* eslint-disable import/prefer-default-export */
-
 import { isEmpty } from '../../../helpers/mixed';
 import { DO_NOT_SWAP, FIRST_BEFORE_SECOND, FIRST_AFTER_SECOND } from '../sortService';
+import type { CompareFunctionFactory } from '../utils';
 
 /**
  * Default sorting compare function factory. Method get as parameters `sortOrder` and `columnMeta` and return compare function.
  *
- * @param {String} sortOrder Sort order (`asc` for ascending, `desc` for descending).
- * @param {Object} columnMeta Column meta object.
- * @param {Object} columnPluginSettings Plugin settings for the column.
- * @returns {Function} The compare function.
+ * @param sortOrder Sort order (`asc` for ascending, `desc` for descending).
+ * @param columnMeta Column meta object.
+ * @param columnPluginSettings Plugin settings for the column.
+ * @returns The compare function.
  */
-export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettings) {
-  return function(value, nextValue) {
+export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, columnMeta, columnPluginSettings) => (
+  (firstValue, secondValue) => {
     const { sortEmptyCells } = columnPluginSettings;
-
-    if (typeof value === 'string') {
-      value = value.toLowerCase();
-    }
-
-    if (typeof nextValue === 'string') {
-      nextValue = nextValue.toLowerCase();
-    }
+    // Strings compare case-insensitively; values that are numbers (also as strings) compare as numbers.
+    let value = typeof firstValue === 'string' ? firstValue.toLowerCase() : firstValue;
+    let nextValue = typeof secondValue === 'string' ? secondValue.toLowerCase() : secondValue;
+    const notNumber = (item: unknown) => Number.isNaN(Number(item));
 
     if (value === nextValue) {
       return DO_NOT_SWAP;
@@ -49,27 +44,26 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
       return FIRST_BEFORE_SECOND;
     }
 
-    if (isNaN(value) && !isNaN(nextValue)) {
+    if (notNumber(value) && !notNumber(nextValue)) {
       return sortOrder === 'asc' ? FIRST_AFTER_SECOND : FIRST_BEFORE_SECOND;
 
-    } else if (!isNaN(value) && isNaN(nextValue)) {
+    } else if (!notNumber(value) && notNumber(nextValue)) {
       return sortOrder === 'asc' ? FIRST_BEFORE_SECOND : FIRST_AFTER_SECOND;
 
-    } else if (!(isNaN(value) || isNaN(nextValue))) {
-      value = parseFloat(value);
-      nextValue = parseFloat(nextValue);
+    } else if (!(notNumber(value) || notNumber(nextValue))) {
+      value = parseFloat(value as string);
+      nextValue = parseFloat(nextValue as string);
     }
 
-    if (value < nextValue) {
+    if ((value as number) < (nextValue as number)) {
       return sortOrder === 'asc' ? FIRST_BEFORE_SECOND : FIRST_AFTER_SECOND;
     }
 
-    if (value > nextValue) {
+    if ((value as number) > (nextValue as number)) {
       return sortOrder === 'asc' ? FIRST_AFTER_SECOND : FIRST_BEFORE_SECOND;
     }
 
     return DO_NOT_SWAP;
-  };
-}
+  });
 
 export const COLUMN_DATA_TYPE = 'default';

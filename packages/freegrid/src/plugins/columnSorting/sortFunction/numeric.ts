@@ -1,24 +1,23 @@
-/* eslint-disable import/prefer-default-export */
-
 import { isEmpty } from '../../../helpers/mixed';
 import { DO_NOT_SWAP, FIRST_BEFORE_SECOND, FIRST_AFTER_SECOND } from '../sortService';
+import type { CompareFunctionFactory } from '../utils';
 
 /**
  * Numeric sorting compare function factory. Method get as parameters `sortOrder` and `columnMeta` and return compare function.
  *
- * @param {String} sortOrder Sort order (`asc` for ascending, `desc` for descending).
- * @param {Object} columnMeta Column meta object.
- * @param {Object} columnPluginSettings Plugin settings for the column.
- * @returns {Function} The compare function.
+ * @param sortOrder Sort order (`asc` for ascending, `desc` for descending).
+ * @param columnMeta Column meta object.
+ * @param columnPluginSettings Plugin settings for the column.
+ * @returns The compare function.
  */
-export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettings) {
-  return function(value, nextValue) {
-    const parsedFirstValue = parseFloat(value);
-    const parsedSecondValue = parseFloat(nextValue);
+export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, columnMeta, columnPluginSettings) => (
+  (value, nextValue) => {
+    const parsedFirstValue = parseFloat(value as string);
+    const parsedSecondValue = parseFloat(nextValue as string);
     const { sortEmptyCells } = columnPluginSettings;
 
     // Watch out when changing this part of code! Check below returns 0 (as expected) when comparing empty string, null, undefined
-    if (parsedFirstValue === parsedSecondValue || (isNaN(parsedFirstValue) && isNaN(parsedSecondValue))) {
+    if (parsedFirstValue === parsedSecondValue || (Number.isNaN(parsedFirstValue) && Number.isNaN(parsedSecondValue))) {
       return DO_NOT_SWAP;
     }
 
@@ -32,11 +31,11 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
       }
     }
 
-    if (isNaN(parsedFirstValue)) {
+    if (Number.isNaN(parsedFirstValue)) {
       return FIRST_AFTER_SECOND;
     }
 
-    if (isNaN(parsedSecondValue)) {
+    if (Number.isNaN(parsedSecondValue)) {
       return FIRST_BEFORE_SECOND;
     }
 
@@ -48,7 +47,6 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
     }
 
     return DO_NOT_SWAP;
-  };
-}
+  });
 
 export const COLUMN_DATA_TYPE = 'numeric';
