@@ -1,7 +1,8 @@
 <script setup>
 // Renders packages/docs/examples/<name>.js in the browser only: FreeGrid needs `window` when imported.
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useData } from 'vitepress';
+import { gridStyle, loadGridStyle } from './gridStyle';
 
 const props = defineProps({
   name: { type: String, required: true },
@@ -15,8 +16,10 @@ const examples = import.meta.glob('../../examples/*.js');
 const container = ref(null);
 const error = ref('');
 let instance = null;
+let create = null;
 
 onMounted(async() => {
+  loadGridStyle();
   mounted.value = true;
   const load = examples[`../../examples/${props.name}.js`];
 
@@ -27,10 +30,21 @@ onMounted(async() => {
   try {
     const module = await load();
 
-    instance = module.default(container.value);
+    create = module.default;
+    await nextTick();
+    instance = create(container.value);
   } catch (e) {
     error.value = e.message;
     throw e;
+  }
+});
+
+// A new grid for the new style, so the row height (--fg-row-height) and the column widths are measured again.
+watch(gridStyle, async() => {
+  await nextTick();
+  if (create && container.value) {
+    instance?.destroy();
+    instance = create(container.value);
   }
 });
 
@@ -42,7 +56,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': mounted && isDark }">
+  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': mounted && isDark }"
+    :data-fg-style="mounted ? gridStyle : null">
     <div ref="container" class="live-example__grid" :style="height ? { height, overflow: 'hidden' } : null" />
     <p v-if="error" class="live-example__error">{{ error }}</p>
   </div>

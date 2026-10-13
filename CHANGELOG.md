@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Modern style has its own look, inspired by modern spreadsheet apps:
+  - light grid lines, soft text and light headers in medium weight;
+  - a blue accent and a round fill handle;
+  - a 14px font (Roboto or the system's sans-serif).
+
+  These colors and the font are *style defaults* (`--fg-style-*`). Base variables that you or a theme set still win
+  in Modern, and the dark theme gives Modern its dark colors. New: `--fg-fill-handle-radius`. New:
+  `fg-style-classic` / `data-fg-style="classic"`, for a Classic grid inside a Modern page (the closest style wins).
+  The Classic look is unchanged.
+- Docs:
+  - The live examples use Modern; **Grid** in the top bar switches all of them to Classic and back, and the choice
+    is remembered.
+  - The Theming page's variable tables have a Modern column.
 - Numbers without numbro: FreeGrid formats `numericFormat` itself. numbro patterns keep working and give the same
   text; the separators and the currency of `culture` come from the browser (`Intl`), so every locale works without
   language files. Without a `pattern`, `numericFormat` takes `Intl.NumberFormat` options (`style`, `currency`,
