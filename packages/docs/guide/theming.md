@@ -67,8 +67,8 @@ stay light in the dark theme.
 Two looks, independent of the color theme:
 
 - **Classic** (the default): compact rows, as in Handsontable 6.
-- **Modern**: roomier 32px rows and 8px cell padding, flat headers on the cell background, lighter grid lines, a
-  rounded editor and context menu. Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any element
+- **Modern**: roomier 32px rows and 8px cell padding, semibold headers, a rounded editor and context menu with a soft
+  shadow. The colors come from the theme and your variables, as in Classic. Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any element
   around it, together with any theme:
 
 ```html
