@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { methodSection, safe, settingSection } from './generate.mjs';
+import { eventSection, methodSection, safe, settingSection, unlinkMissing } from './generate.mjs';
 
 test('keeps HTML tags in text from being parsed, but not inside code', () => {
   assert.equal(safe('Adds a <td> element, see `<td class="x">` and {{ value }}.'),
@@ -49,4 +49,35 @@ test('keeps a backslash before a pipe from breaking a table cell', () => {
   // Three cells: the pipes inside the description are all escaped, and so is the backslash before one of them.
   assert.equal(row.split(/(?<!\\)\|/).length - 2, 3);
   assert.match(row, /Splits on `\\\\\\\|` or on `,`\./);
+});
+
+test('puts the examples in a collapsible "Example" block', () => {
+  const text = methodSection({ name: 'x', anchor: 'x', description: '', params: [], examples: ['```js\nfoo();\n```'] });
+
+  assert.match(text, /^::: details Example\n```js\nfoo\(\);\n```\n:::$/m);
+});
+
+test('writes a collapsible "Usage" example where the source code has none', () => {
+  const method = methodSection({ name: 'getDataAtCell', anchor: 'getdataatcell', description: '', examples: [],
+    params: [{ name: 'row', optional: false }, { name: 'column', optional: false }, { name: 'source', optional: true }],
+    returns: { type: '*', description: '' } });
+  const plugin = methodSection({ name: 'sort', owner: 'ColumnSorting', anchor: 'columnsorting-sort', description: '',
+    examples: [], params: [{ name: 'sortConfig', optional: false }] }, 'ColumnSorting.sort');
+  const event = eventSection({ name: 'afterChange', anchor: 'afterchange', description: '', examples: [],
+    params: [{ name: 'changes' }, { name: 'source' }] });
+  const setting = settingSection({ name: 'fillHandle', anchor: 'fillhandle', type: 'Boolean|String|Object',
+    default: 'true', description: '', params: [], examples: [] });
+
+  assert.match(method, /::: details Usage\n```js\nconst result = grid\.getDataAtCell\(row, column\);\n```\n:::/);
+  assert.match(plugin, /::: details Usage\n```js\ngrid\.getPlugin\('columnSorting'\)\.sort\(sortConfig\);\n```\n:::/);
+  assert.match(event, /::: details Usage\n```js\nnew FreeGrid\(element, \{\n {2}afterChange\(changes, source\) \{\n {4}\/\/ …\n {2}\},\n\}\);\n\n\/\/ or later\ngrid\.addHook\('afterChange', \(changes, source\) => \{\n {2}\/\/ …\n\}\);\n```\n:::/);
+  assert.match(setting, /::: details Usage\n```js\nnew FreeGrid\(element, \{\n {2}fillHandle: false,\n\}\);\n\n\/\/ or later\ngrid\.updateSettings\(\{ fillHandle: false \}\);\n```\n:::/);
+});
+
+test('turns links to entries the reference does not have into plain text', () => {
+  const anchors = { methods: new Set(['getdata']), plugins: new Set(['columnsorting-sort']) };
+
+  assert.equal(unlinkMissing('See [getData()](./methods#getdata), [DataMap.get()](./plugins#datamap-get) and '
+    + '[sort](./plugins#columnsorting-sort).', anchors),
+  'See [getData()](./methods#getdata), DataMap.get() and [sort](./plugins#columnsorting-sort).');
 });

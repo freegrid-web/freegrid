@@ -119,18 +119,32 @@ const total = computed(() => groups.value.reduce((sum, group) => sum + group.ite
 }
 
 .related-api__group {
-  margin: 8px 0 12px;
+  margin: 14px 0 8px;
 }
 
+/* Group headings (Settings, Methods, Events, a plugin's name) stand out from the entries. */
 .related-api__label {
-  margin-bottom: 2px;
-  font-weight: 500;
-  color: var(--vp-c-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 .related-api__label span {
-  font-weight: normal;
-  color: var(--vp-c-text-3);
+  min-width: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-default-soft);
+  border-radius: 9px;
 }
 
 .related-api ul {
