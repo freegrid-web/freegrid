@@ -11,6 +11,10 @@ on:
   merge_group:
   workflow_dispatch:
 
+# The jobs only read the repository.
+permissions:
+  contents: read
+
 # A new push to a pull request cancels the runs of its earlier pushes.
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
