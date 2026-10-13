@@ -46,8 +46,9 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 - **CommonJS and IE are not supported.** FreeGrid ships ES modules and UMD bundles for Chrome/Edge
   107+, Firefox 104+ and Safari 16+.
 - **jQuery:** the plugin is `$(el).freegrid(...)`. `$(el).handsontable(...)` still works during `0.x`.
-- **Dates:** FreeGrid uses a current moment release. Use real moment formats (`MM/DD/YYYY`, not
-  `mm/dd/yy`). Malformed formats may be parsed differently than in Handsontable 6.
+- **Dates:** FreeGrid no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
+  rules (see [Date and time formats](./cell-types#date-and-time-formats)); use real formats (`MM/DD/YYYY`, not
+  `mm/dd/yy`). Week tokens (`w`, `W`, `gggg`) and locales other than English are not supported.
 - **CSS class names** are now FreeGrid's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
   old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
   switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now

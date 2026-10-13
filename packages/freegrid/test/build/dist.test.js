@@ -61,10 +61,15 @@ describe('dist outputs', () => {
       .forEach(f => expect(existsSync(dist(f)), f).toBe(true));
   });
 
-  it('plain UMD keeps moment/numbro/pikaday external and registers all 6.2.2 plugins', () => {
+  it('no bundle contains or needs moment', () => {
+    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js']
+      .forEach(f => expect(read(f), f).not.toMatch(/moment construction falls back|from ["']moment["']/));
+    expect(windowWith(read('freegrid.full.js')).moment).toBeUndefined();
+  });
+
+  it('plain UMD keeps numbro/pikaday external and registers all 6.2.2 plugins', () => {
     const code = read('freegrid.js');
-    expect(code).not.toMatch(/hooks\.version = ['"]2\.3/); // moment's version marker
-    const w = windowWith(nm('moment/moment.js'), nm('numbro/dist/numbro.js'), nm('pikaday/pikaday.js'), code);
+    const w = windowWith(nm('numbro/dist/numbro.js'), nm('pikaday/pikaday.js'), code);
 
     expect(typeof w.FreeGrid).toBe('function');
     expect(w.FreeGrid.packageName).toBe('@freegrid/core');
@@ -72,11 +77,10 @@ describe('dist outputs', () => {
     PLUGINS_622.forEach(p => expect(typeof w.FreeGrid.plugins[p], p).toBe('function'));
   });
 
-  it('full UMD bundles dependencies and exposes window.moment / window.numbro', () => {
+  it('full UMD bundles dependencies and exposes window.numbro', () => {
     const w = windowWith(read('freegrid.full.js'));
 
     expect(typeof w.FreeGrid).toBe('function');
-    expect(typeof w.moment).toBe('function');
     expect(typeof w.numbro).toBe('function');
   });
 
@@ -156,7 +160,6 @@ describe('dist outputs', () => {
     const compat = read('esm/compat.js');
     expect(esm).toMatch(/export\s*\{[^}]*as default/);
     expect(compat).toMatch(/Handsontable/);
-    expect(esm).toMatch(/from ["']moment["']/);
   });
 
   it('CSS keeps legacy class names; only the full CSS contains Pikaday styles', () => {

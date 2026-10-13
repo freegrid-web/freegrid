@@ -35,7 +35,7 @@ The result:
 
 ## Without a bundler
 
-Load the "full" build, which already includes its dependencies (moment, numbro and Pikaday), from a
+Load the "full" build, which already includes its dependencies (numbro and Pikaday), from a
 `<script>` tag. It defines a global `FreeGrid`:
 
 ```html
@@ -52,8 +52,9 @@ Load the "full" build, which already includes its dependencies (moment, numbro a
 </script>
 ```
 
-If your page already loads moment, numbro and Pikaday, use `freegrid.min.js` and `freegrid.min.css`
-instead. Those builds expect the three libraries as globals.
+If your page already loads numbro and Pikaday, use `freegrid.min.js` and `freegrid.min.css`
+instead. Those builds expect both libraries as globals. FreeGrid reads and writes dates itself and needs no date
+library.
 
 ## Sizing
 

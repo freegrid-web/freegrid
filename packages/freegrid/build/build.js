@@ -10,7 +10,7 @@ import { legacyClassNames } from './legacyClassNames.js';
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const buildDate = new Date();
 const define = defineConstants({ buildDate });
-const deps = ['moment', 'numbro', 'pikaday'];
+const deps = ['numbro', 'pikaday'];
 // Pikaday's CSS is not a dependency to keep external: ignorePikadayCss() drops it (upstream used an
 // empty module), and an external CSS import would break Node/SSR and AMD/CommonJS consumers.
 const isDep = id => !id.startsWith('pikaday/css') && deps.some(d => id === d || id.startsWith(`${d}/`));
@@ -41,7 +41,7 @@ async function umd({ full, minify }) {
       lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
         external: full ? [] : isDep,
-        output: { exports: 'default', banner: banner(buildDate), globals: { moment: 'moment', numbro: 'numbro', pikaday: 'Pikaday' } },
+        output: { exports: 'default', banner: banner(buildDate), globals: { numbro: 'numbro', pikaday: 'Pikaday' } },
       },
     },
   });

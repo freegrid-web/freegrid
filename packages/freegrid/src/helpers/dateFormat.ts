@@ -381,12 +381,36 @@ const parseWithFormat = (text: string, format: string, strict: boolean): ParseRe
   return { date, valid, score: leftOver + (state.unusedTokens * 10) };
 };
 
+const ISO = /^\s*\d{4}(-\d\d(-\d\d)?)?([T ]\d\d(:\d\d(:\d\d([.,]\d{1,3})?)?)?)?(Z|[+-]\d\d(:?\d\d)?)?\s*$/;
+
+// Without a format, like moment: an ISO 8601 date (local time unless it has an offset), else the browser's parser.
+const parseWithoutFormat = (text: string): Date | null => {
+  const iso = text.match(ISO);
+
+  if (iso) {
+    const [, month, day, time, minutes, seconds, fraction, zone] = iso;
+    const format = ['YYYY', month && '-MM', day && '-DD', time && `${time[0]}HH`, minutes && ':mm', seconds && ':ss',
+      fraction && `${fraction[0]}${'S'.repeat(fraction.length - 1)}`, zone && 'Z'].filter(Boolean).join('');
+    const result = parseWithFormat(text.trim(), format, true);
+
+    return result.valid ? result.date : null;
+  }
+  const date = new Date(text);
+
+  return text === '' || Number.isNaN(date.getTime()) ? null : date;
+};
+
 /**
  * Reads `input` written in `format` (or the best matching of several formats). Lenient by default, like moment:
  * extra text is skipped and missing parts are filled in (today's date, midnight). `strict` requires the input to
- * match the format exactly. Returns `null` for anything that is not a real date or time.
+ * match the format exactly. Without a format, an ISO 8601 date or what the browser can read. A `Date` is returned as it is (`null` if invalid). Returns `null` for anything that is not
+ * a real date or time.
  */
-export const parseDate = (input: unknown, format: string | readonly string[], strict = false): Date | null => {
+export const parseDate = (
+  input: unknown,
+  format: string | readonly string[] | undefined,
+  strict = false,
+): Date | null => {
   if (input === null) {
     return null;
   }
@@ -396,6 +420,9 @@ export const parseDate = (input: unknown, format: string | readonly string[], st
   const text = String(input);
   let best: ParseResult | undefined;
 
+  if (!format) {
+    return parseWithoutFormat(text);
+  }
   if (typeof format === 'string') {
     best = parseWithFormat(text, format, strict);
   } else {

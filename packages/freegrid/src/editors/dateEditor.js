@@ -1,10 +1,10 @@
-import moment from 'moment';
 import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
 import './pikaday-theme.css';
 import { addClass, outerHeight } from './../helpers/dom/element';
 import { applyTheme } from './../helpers/dom/theme';
 import { deepExtend } from './../helpers/object';
+import { formatDate, parseDate } from './../helpers/dateFormat';
 import EventManager from './../eventManager';
 import { isMetaKey } from './../helpers/unicode';
 import { stopPropagation } from './../helpers/dom/event';
@@ -31,10 +31,6 @@ class DateEditor extends TextEditor {
   }
 
   init() {
-    if (typeof moment !== 'function') {
-      throw new Error('You need to include moment.js to your project.');
-    }
-
     if (typeof Pikaday !== 'function') {
       throw new Error('You need to include Pikaday to your project.');
     }
@@ -157,9 +153,7 @@ class DateEditor extends TextEditor {
     if (this.originalValue) {
       dateStr = this.originalValue;
 
-      if (moment(dateStr, dateFormat, true).isValid()) {
-        this.$datePicker.setMoment(moment(dateStr, dateFormat), true);
-      }
+      this.selectDateInPicker(dateStr, dateFormat);
 
       // workaround for date/time cells - pikaday resets the cell value to 12:00 AM by default, this will overwrite the value.
       if (this.getValue() !== this.originalValue) {
@@ -175,9 +169,7 @@ class DateEditor extends TextEditor {
 
       datePickerConfig.defaultDate = dateStr;
 
-      if (moment(dateStr, dateFormat, true).isValid()) {
-        this.$datePicker.setMoment(moment(dateStr, dateFormat), true);
-      }
+      this.selectDateInPicker(dateStr, dateFormat);
 
       if (!isMeta && !isMouseDown) {
         this.setValue('');
@@ -190,6 +182,20 @@ class DateEditor extends TextEditor {
 
     this.datePickerStyle.display = 'block';
     this.$datePicker.show();
+  }
+
+  /**
+   * Shows the day of `dateStr` in the date picker, if `dateStr` is a date in `dateFormat`.
+   *
+   * @param {String} dateStr
+   * @param {String} dateFormat
+   */
+  selectDateInPicker(dateStr, dateFormat) {
+    const date = parseDate(dateStr, dateFormat, true);
+
+    if (date) {
+      this.$datePicker.setDate(date, true);
+    }
   }
 
   /**
@@ -225,7 +231,7 @@ class DateEditor extends TextEditor {
       let dateStr = value;
 
       if (!isNaN(dateStr.getTime())) {
-        dateStr = moment(dateStr).format(this.cellProperties.dateFormat || this.defaultDateFormat);
+        dateStr = formatDate(dateStr, this.cellProperties.dateFormat || this.defaultDateFormat);
       }
       this.setValue(dateStr);
       this.hideDatepicker();
