@@ -44,7 +44,8 @@ export default function dateValidator(this: ValidatorContext, value: unknown, ca
 export const correctFormat = (value: string, dateFormat?: string): string => {
   const dateFromDate = getNormalizedDate(value);
   const dateFromFormat = parseDate(value, dateFormat);
-  const isAlphanumeric = value.search(/[A-z]/g) > -1;
+  // Letters (e.g. a month name): read as the browser reads dates.
+  const isAlphanumeric = /[A-Za-z]/.test(value);
   const date = !dateFromFormat || isAlphanumeric ? dateFromDate : dateFromFormat;
 
   return Number.isNaN(date.getTime()) ? 'Invalid date' : formatDate(date, dateFormat || 'YYYY-MM-DDTHH:mm:ssZ');
