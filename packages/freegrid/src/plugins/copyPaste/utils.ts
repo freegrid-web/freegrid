@@ -53,10 +53,9 @@ export const tableToArray = (element: Element | string | null): string[][] => {
   let checkElement: Element | null = element as Element | null;
 
   if (typeof element === 'string') {
-    const tempElem = document.createElement('div');
-
-    tempElem.innerHTML = element.replace(/\n/g, '');
-    checkElement = tempElem.querySelector('table');
+    // A parsed document is inert: pasted HTML runs no code and loads nothing (`innerHTML` of an element would, e.g.
+    // an image's `onerror`).
+    checkElement = new DOMParser().parseFromString(element.replace(/\n/g, ''), 'text/html').querySelector('table');
   }
 
   if (!isHTMLTable(checkElement)) {
