@@ -16,7 +16,7 @@ export type EditorStateValue = typeof EditorState[keyof typeof EditorState];
  * overlays).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-export type EditorGrid = any;
+export type EditorHost = any;
 
 /**
  * The base of every editor. An editor edits one cell at a time: the grid calls `prepare()` for the selected cell,
@@ -26,8 +26,8 @@ export type EditorGrid = any;
  * The constructor calls `init()`: fields that `init()` sets must be declared with `declare` in subclasses, or the
  * subclass's field definitions would reset them after the constructor.
  */
-class BaseEditor {
-  instance: EditorGrid;
+class EditorBase {
+  instance: EditorHost;
 
   state: EditorStateValue = EditorState.VIRGIN;
 
@@ -50,7 +50,7 @@ class BaseEditor {
 
   declare cellProperties: CellProperties;
 
-  constructor(instance: EditorGrid) {
+  constructor(instance: EditorHost) {
     this.instance = instance;
     this.init();
   }
@@ -100,11 +100,11 @@ class BaseEditor {
 
   /**
    * A subclass of this editor's class, for editors written in the style of older versions:
-   * `const MyEditor = FreeGrid.editors.TextEditor.prototype.extend(); MyEditor.prototype.open = function() { … }`.
-   * (`class MyEditor extends FreeGrid.editors.TextEditor {}` does the same.)
+   * `const MyEditor = FreeGrid.editors.EditorText.prototype.extend(); MyEditor.prototype.open = function() { … }`.
+   * (`class MyEditor extends FreeGrid.editors.EditorText {}` does the same.)
    */
-  extend(): typeof BaseEditor {
-    const Base = this.constructor as typeof BaseEditor;
+  extend(): typeof EditorBase {
+    const Base = this.constructor as typeof EditorBase;
 
     return class Editor extends Base {};
   }
@@ -259,4 +259,4 @@ class BaseEditor {
   }
 }
 
-export default BaseEditor;
+export default EditorBase;

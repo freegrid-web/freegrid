@@ -171,7 +171,7 @@ describe('settings', () => {
               ['Jerry']
             ],
             columns(column) {
-              return column === 0 ? { editor: Handsontable.editors.PasswordEditor } : null;
+              return column === 0 ? { editor: Handsontable.editors.EditorPassword } : null;
             }
           });
 

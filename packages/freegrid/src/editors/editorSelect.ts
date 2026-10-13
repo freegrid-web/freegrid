@@ -12,8 +12,8 @@ import {
 } from './../helpers/dom/element';
 import { stopImmediatePropagation } from './../helpers/dom/event';
 import { KEY_CODES } from './../helpers/unicode';
-import BaseEditor, { EditorState } from './_baseEditor';
-import type { EditorGrid } from './_baseEditor';
+import EditorBase, { EditorState } from './editorBase';
+import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
 import { objectEach } from '../helpers/object';
 
@@ -21,8 +21,8 @@ import { objectEach } from '../helpers/object';
 type SelectOptions = unknown[] | Record<string, unknown>;
 
 // A grid hook: `this` is the grid. The arrow keys change the selected option.
-const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: KeyboardEvent) {
-  const editor = this.getActiveEditor() as SelectEditor;
+const onBeforeKeyDown = function onBeforeKeyDown(this: EditorHost, event: KeyboardEvent) {
+  const editor = this.getActiveEditor() as EditorSelect;
   const { select } = editor;
   let optionIndex: number;
 
@@ -41,7 +41,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
 };
 
 /** A native `<select>` over the cell, with the cell's `selectOptions`. */
-class SelectEditor extends BaseEditor {
+class EditorSelect extends EditorBase {
   // Set by init(), inside the base constructor.
   declare select: HTMLSelectElement;
 
@@ -217,4 +217,4 @@ class SelectEditor extends BaseEditor {
   }
 }
 
-export default SelectEditor;
+export default EditorSelect;

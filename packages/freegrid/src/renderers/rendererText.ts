@@ -7,7 +7,7 @@ import type { Renderer } from '../cellTypes/types';
  * The default renderer: the value as text (or the placeholder when it is empty). Spaces are kept unless
  * `trimWhitespace` is on.
  */
-const textRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+const rendererText: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
   getRenderer('base')(instance, TD, row, col, prop, value, cellProperties);
   let text = stringify(!value && cellProperties.placeholder ? cellProperties.placeholder : value);
 
@@ -18,4 +18,4 @@ const textRenderer: Renderer = (instance, TD, row, col, prop, value, cellPropert
   fastInnerText(TD, text);
 };
 
-export default textRenderer;
+export default rendererText;

@@ -1,13 +1,13 @@
 import staticRegister from './../utils/staticRegister';
 import type { Renderer } from '../cellTypes/types';
 
-import baseRenderer from './_cellDecorator';
-import autocompleteRenderer from './autocompleteRenderer';
-import checkboxRenderer from './checkboxRenderer';
-import htmlRenderer from './htmlRenderer';
-import numericRenderer from './numericRenderer';
-import passwordRenderer from './passwordRenderer';
-import textRenderer from './textRenderer';
+import rendererBase from './rendererBase';
+import rendererAutocomplete from './rendererAutocomplete';
+import rendererCheckbox from './rendererCheckbox';
+import rendererHtml from './rendererHtml';
+import rendererNumeric from './rendererNumeric';
+import rendererPassword from './rendererPassword';
+import rendererText from './rendererText';
 
 const {
   register,
@@ -17,13 +17,13 @@ const {
   getValues,
 } = staticRegister<Renderer>('renderers');
 
-register('base', baseRenderer);
-register('autocomplete', autocompleteRenderer);
-register('checkbox', checkboxRenderer);
-register('html', htmlRenderer);
-register('numeric', numericRenderer);
-register('password', passwordRenderer);
-register('text', textRenderer);
+register('base', rendererBase);
+register('autocomplete', rendererAutocomplete);
+register('checkbox', rendererCheckbox);
+register('html', rendererHtml);
+register('numeric', rendererNumeric);
+register('password', rendererPassword);
+register('text', rendererText);
 
 /** A registered renderer by name (a function is returned as it is); throws for an unknown name. */
 const getRendererItem = (name: string | Renderer): Renderer => {

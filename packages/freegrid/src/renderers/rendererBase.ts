@@ -6,7 +6,7 @@ import type { Renderer } from '../cellTypes/types';
  * The base renderer: the cell's classes (its `className`, read-only, invalid, no word wrap, placeholder). The other
  * renderers start with it.
  */
-const cellDecorator: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+const rendererBase: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
   const classesToAdd: string[] = [];
   const classesToRemove: string[] = [];
 
@@ -37,4 +37,4 @@ const cellDecorator: Renderer = (instance, TD, row, col, prop, value, cellProper
   addClass(TD, classesToAdd);
 };
 
-export default cellDecorator;
+export default rendererBase;

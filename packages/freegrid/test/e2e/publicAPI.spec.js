@@ -49,19 +49,19 @@ describe('Public API', () => {
     });
 
     it('should expose BaseEditor class', () => {
-      expect(Handsontable.editors.BaseEditor).toBeFunction();
+      expect(Handsontable.editors.EditorBase).toBeFunction();
     });
 
     it('should expose all registered editor classes', () => {
-      expect(Handsontable.editors.AutocompleteEditor).toBeFunction();
-      expect(Handsontable.editors.CheckboxEditor).toBeFunction();
-      expect(Handsontable.editors.DateEditor).toBeFunction();
-      expect(Handsontable.editors.DropdownEditor).toBeFunction();
-      expect(Handsontable.editors.HandsontableEditor).toBeFunction();
-      expect(Handsontable.editors.NumericEditor).toBeFunction();
-      expect(Handsontable.editors.PasswordEditor).toBeFunction();
-      expect(Handsontable.editors.SelectEditor).toBeFunction();
-      expect(Handsontable.editors.TextEditor).toBeFunction();
+      expect(Handsontable.editors.EditorAutocomplete).toBeFunction();
+      expect(Handsontable.editors.EditorCheckbox).toBeFunction();
+      expect(Handsontable.editors.EditorDate).toBeFunction();
+      expect(Handsontable.editors.EditorDropdown).toBeFunction();
+      expect(Handsontable.editors.EditorHandsontable).toBeFunction();
+      expect(Handsontable.editors.EditorNumeric).toBeFunction();
+      expect(Handsontable.editors.EditorPassword).toBeFunction();
+      expect(Handsontable.editors.EditorSelect).toBeFunction();
+      expect(Handsontable.editors.EditorText).toBeFunction();
     });
   });
 
@@ -75,16 +75,16 @@ describe('Public API', () => {
     });
 
     it('should expose BaseRenderer class', () => {
-      expect(Handsontable.renderers.BaseRenderer).toBeFunction();
+      expect(Handsontable.renderers.RendererBase).toBeFunction();
     });
 
     it('should expose all registered renderer functions', () => {
-      expect(Handsontable.renderers.AutocompleteRenderer).toBeFunction();
-      expect(Handsontable.renderers.CheckboxRenderer).toBeFunction();
-      expect(Handsontable.renderers.HtmlRenderer).toBeFunction();
-      expect(Handsontable.renderers.NumericRenderer).toBeFunction();
-      expect(Handsontable.renderers.PasswordRenderer).toBeFunction();
-      expect(Handsontable.renderers.TextRenderer).toBeFunction();
+      expect(Handsontable.renderers.RendererAutocomplete).toBeFunction();
+      expect(Handsontable.renderers.RendererCheckbox).toBeFunction();
+      expect(Handsontable.renderers.RendererHtml).toBeFunction();
+      expect(Handsontable.renderers.RendererNumeric).toBeFunction();
+      expect(Handsontable.renderers.RendererPassword).toBeFunction();
+      expect(Handsontable.renderers.RendererText).toBeFunction();
     });
   });
 
@@ -98,10 +98,24 @@ describe('Public API', () => {
     });
 
     it('should expose all registered validator functions', () => {
-      expect(Handsontable.validators.AutocompleteValidator).toBeFunction();
-      expect(Handsontable.validators.DateValidator).toBeFunction();
-      expect(Handsontable.validators.NumericValidator).toBeFunction();
-      expect(Handsontable.validators.TimeValidator).toBeFunction();
+      expect(Handsontable.validators.ValidatorAutocomplete).toBeFunction();
+      expect(Handsontable.validators.ValidatorDate).toBeFunction();
+      expect(Handsontable.validators.ValidatorNumeric).toBeFunction();
+      expect(Handsontable.validators.ValidatorTime).toBeFunction();
+    });
+  });
+
+  describe('Names before 0.3.0', () => {
+    it('should not expose the old editor, renderer and validator names', () => {
+      ['BaseEditor', 'TextEditor', 'AutocompleteEditor', 'DateEditor', 'HandsontableEditor'].forEach((name) => {
+        expect(Handsontable.editors[name]).toBeUndefined();
+      });
+      ['BaseRenderer', 'TextRenderer', 'cellDecorator'].forEach((name) => {
+        expect(Handsontable.renderers[name]).toBeUndefined();
+      });
+      ['DateValidator', 'NumericValidator'].forEach((name) => {
+        expect(Handsontable.validators[name]).toBeUndefined();
+      });
     });
   });
 
@@ -115,41 +129,41 @@ describe('Public API', () => {
     });
 
     it('should expose all registered cell type objects', () => {
-      expect(Handsontable.cellTypes.autocomplete.editor).toBe(Handsontable.editors.AutocompleteEditor);
-      expect(Handsontable.cellTypes.autocomplete.renderer).toBe(Handsontable.renderers.AutocompleteRenderer);
-      expect(Handsontable.cellTypes.autocomplete.validator).toBe(Handsontable.validators.AutocompleteValidator);
+      expect(Handsontable.cellTypes.autocomplete.editor).toBe(Handsontable.editors.EditorAutocomplete);
+      expect(Handsontable.cellTypes.autocomplete.renderer).toBe(Handsontable.renderers.RendererAutocomplete);
+      expect(Handsontable.cellTypes.autocomplete.validator).toBe(Handsontable.validators.ValidatorAutocomplete);
 
-      expect(Handsontable.cellTypes.checkbox.editor).toBe(Handsontable.editors.CheckboxEditor);
-      expect(Handsontable.cellTypes.checkbox.renderer).toBe(Handsontable.renderers.CheckboxRenderer);
+      expect(Handsontable.cellTypes.checkbox.editor).toBe(Handsontable.editors.EditorCheckbox);
+      expect(Handsontable.cellTypes.checkbox.renderer).toBe(Handsontable.renderers.RendererCheckbox);
       expect(Handsontable.cellTypes.checkbox.validator).not.toBeDefined();
 
-      expect(Handsontable.cellTypes.date.editor).toBe(Handsontable.editors.DateEditor);
-      expect(Handsontable.cellTypes.date.renderer).toBe(Handsontable.renderers.AutocompleteRenderer);
-      expect(Handsontable.cellTypes.date.validator).toBe(Handsontable.validators.DateValidator);
+      expect(Handsontable.cellTypes.date.editor).toBe(Handsontable.editors.EditorDate);
+      expect(Handsontable.cellTypes.date.renderer).toBe(Handsontable.renderers.RendererAutocomplete);
+      expect(Handsontable.cellTypes.date.validator).toBe(Handsontable.validators.ValidatorDate);
 
-      expect(Handsontable.cellTypes.dropdown.editor).toBe(Handsontable.editors.DropdownEditor);
-      expect(Handsontable.cellTypes.dropdown.renderer).toBe(Handsontable.renderers.AutocompleteRenderer);
-      expect(Handsontable.cellTypes.dropdown.validator).toBe(Handsontable.validators.AutocompleteValidator);
+      expect(Handsontable.cellTypes.dropdown.editor).toBe(Handsontable.editors.EditorDropdown);
+      expect(Handsontable.cellTypes.dropdown.renderer).toBe(Handsontable.renderers.RendererAutocomplete);
+      expect(Handsontable.cellTypes.dropdown.validator).toBe(Handsontable.validators.ValidatorAutocomplete);
 
-      expect(Handsontable.cellTypes.handsontable.editor).toBe(Handsontable.editors.HandsontableEditor);
-      expect(Handsontable.cellTypes.handsontable.renderer).toBe(Handsontable.renderers.AutocompleteRenderer);
+      expect(Handsontable.cellTypes.handsontable.editor).toBe(Handsontable.editors.EditorHandsontable);
+      expect(Handsontable.cellTypes.handsontable.renderer).toBe(Handsontable.renderers.RendererAutocomplete);
       expect(Handsontable.cellTypes.handsontable.validator).not.toBeDefined();
 
-      expect(Handsontable.cellTypes.numeric.editor).toBe(Handsontable.editors.NumericEditor);
-      expect(Handsontable.cellTypes.numeric.renderer).toBe(Handsontable.renderers.NumericRenderer);
-      expect(Handsontable.cellTypes.numeric.validator).toBe(Handsontable.validators.NumericValidator);
+      expect(Handsontable.cellTypes.numeric.editor).toBe(Handsontable.editors.EditorNumeric);
+      expect(Handsontable.cellTypes.numeric.renderer).toBe(Handsontable.renderers.RendererNumeric);
+      expect(Handsontable.cellTypes.numeric.validator).toBe(Handsontable.validators.ValidatorNumeric);
 
-      expect(Handsontable.cellTypes.password.editor).toBe(Handsontable.editors.PasswordEditor);
-      expect(Handsontable.cellTypes.password.renderer).toBe(Handsontable.renderers.PasswordRenderer);
+      expect(Handsontable.cellTypes.password.editor).toBe(Handsontable.editors.EditorPassword);
+      expect(Handsontable.cellTypes.password.renderer).toBe(Handsontable.renderers.RendererPassword);
       expect(Handsontable.cellTypes.password.validator).not.toBeDefined();
 
-      expect(Handsontable.cellTypes.text.editor).toBe(Handsontable.editors.TextEditor);
-      expect(Handsontable.cellTypes.text.renderer).toBe(Handsontable.renderers.TextRenderer);
+      expect(Handsontable.cellTypes.text.editor).toBe(Handsontable.editors.EditorText);
+      expect(Handsontable.cellTypes.text.renderer).toBe(Handsontable.renderers.RendererText);
       expect(Handsontable.cellTypes.text.validator).not.toBeDefined();
 
-      expect(Handsontable.cellTypes.time.editor).toBe(Handsontable.editors.TextEditor);
-      expect(Handsontable.cellTypes.time.renderer).toBe(Handsontable.renderers.TextRenderer);
-      expect(Handsontable.cellTypes.time.validator).toBe(Handsontable.validators.TimeValidator);
+      expect(Handsontable.cellTypes.time.editor).toBe(Handsontable.editors.EditorText);
+      expect(Handsontable.cellTypes.time.renderer).toBe(Handsontable.renderers.RendererText);
+      expect(Handsontable.cellTypes.time.validator).toBe(Handsontable.validators.ValidatorTime);
     });
   });
 

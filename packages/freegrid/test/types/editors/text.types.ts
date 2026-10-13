@@ -1,6 +1,6 @@
 import * as Handsontable from 'handsontable';
 
-class TextEditor extends Handsontable.editors.TextEditor {
+class TextEditor extends Handsontable.editors.EditorText {
   init() {
     super.init();
   }

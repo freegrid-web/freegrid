@@ -1723,29 +1723,42 @@ declare namespace FreeGrid {
   }
 
   interface Editors {
-    AutocompleteEditor: typeof FreeGrid._editors.Autocomplete;
-    BaseEditor: typeof FreeGrid._editors.Base;
-    CheckboxEditor: typeof FreeGrid._editors.Checkbox;
-    DateEditor: typeof FreeGrid._editors.Date;
-    DropdownEditor: typeof FreeGrid._editors.Dropdown;
-    HandsontableEditor: typeof FreeGrid._editors.FreeGrid;
-    MobileEditor: typeof FreeGrid._editors.Mobile;
-    NumericEditor: typeof FreeGrid._editors.Numeric;
-    PasswordEditor: typeof FreeGrid._editors.Password;
-    SelectEditor: typeof FreeGrid._editors.Select;
-    TextEditor: typeof FreeGrid._editors.Text;
+    EditorAutocomplete: typeof FreeGrid._editors.Autocomplete;
+    EditorBase: typeof FreeGrid._editors.Base;
+    EditorCheckbox: typeof FreeGrid._editors.Checkbox;
+    EditorDate: typeof FreeGrid._editors.Date;
+    EditorDropdown: typeof FreeGrid._editors.Dropdown;
+    EditorHandsontable: typeof FreeGrid._editors.FreeGrid;
+    EditorNumeric: typeof FreeGrid._editors.Numeric;
+    EditorPassword: typeof FreeGrid._editors.Password;
+    EditorSelect: typeof FreeGrid._editors.Select;
+    EditorText: typeof FreeGrid._editors.Text;
     getEditor: (editorName: string, hotInstance: FreeGrid) => any;
     registerEditor: (editorName: string, editorClass: any) => void;
   }
 
   interface Renderers {
-    AutocompleteRenderer: renderers.Autocomplete;
-    BaseRenderer: renderers.Base;
-    CheckboxRenderer: renderers.Checkbox;
-    HtmlRenderer: renderers.Html;
-    NumericRenderer: renderers.Numeric;
-    PasswordRenderer: renderers.Password;
-    TextRenderer: renderers.Text;
+    RendererAutocomplete: renderers.Autocomplete;
+    RendererBase: renderers.Base;
+    RendererCheckbox: renderers.Checkbox;
+    RendererHtml: renderers.Html;
+    RendererNumeric: renderers.Numeric;
+    RendererPassword: renderers.Password;
+    RendererText: renderers.Text;
+    getRenderer: (rendererName: string) => renderers.Base;
+    registerRenderer: (rendererName: string, renderer: renderers.Base) => void;
+  }
+
+  /** Checks a value; `this` is the cell's settings. */
+  type Validator = (this: GridSettings, value: any, callback: (valid: boolean) => void) => void;
+
+  interface Validators {
+    ValidatorAutocomplete: Validator;
+    ValidatorDate: Validator;
+    ValidatorNumeric: Validator;
+    ValidatorTime: Validator;
+    getValidator: (validatorName: string) => Validator;
+    registerValidator: (validatorName: string, validator: Validator) => void;
   }
 
   interface Helper {
@@ -2063,6 +2076,7 @@ declare class FreeGrid extends _FreeGrid.Core {
   static hooks: FreeGrid.Hooks;
   static plugins: FreeGrid.Plugins;
   static renderers: FreeGrid.Renderers;
+  static validators: FreeGrid.Validators;
 }
 
 export = FreeGrid;

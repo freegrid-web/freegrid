@@ -83,7 +83,7 @@ describe('Core_getCellMeta', () => {
         return {
           renderer(instance, td, ...args) {
             // taken from demo/renderers.html
-            Handsontable.renderers.TextRenderer.apply(this, [instance, td, ...args]);
+            Handsontable.renderers.RendererText.apply(this, [instance, td, ...args]);
             $(td).css({
               background: 'yellow'
             });
@@ -112,7 +112,7 @@ describe('Core_getCellMeta', () => {
             type: 'checkbox',
             renderer(instance, td, ...args) {
               // taken from demo/renderers.html
-              Handsontable.renderers.TextRenderer.apply(this, [instance, td, ...args]);
+              Handsontable.renderers.RendererText.apply(this, [instance, td, ...args]);
 
               td.style.backgroundColor = 'yellow';
             }

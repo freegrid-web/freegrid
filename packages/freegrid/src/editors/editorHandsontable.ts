@@ -3,17 +3,17 @@ import { KEY_CODES } from './../helpers/unicode';
 import { extend } from './../helpers/object';
 import { setCaretPosition } from './../helpers/dom/element';
 import { stopImmediatePropagation, isImmediatePropagationStopped } from './../helpers/dom/event';
-import TextEditor from './textEditor';
-import type { EditorGrid } from './_baseEditor';
+import EditorText from './editorText';
+import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
 
 // A grid hook: `this` is the grid. The arrow keys move the selection in the list while the focus stays in the
 // editor's textarea.
-const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: KeyboardEvent) {
+const onBeforeKeyDown = function onBeforeKeyDown(this: EditorHost, event: KeyboardEvent) {
   if (isImmediatePropagationStopped(event)) {
     return;
   }
-  const editor = this.getActiveEditor() as HandsontableEditor;
+  const editor = this.getActiveEditor() as EditorHandsontable;
   const innerHOT = editor.htEditor.getInstance();
   const selectedRow: number | undefined = innerHOT.getSelectedLast()?.[0];
   let rowToSelect: number | undefined;
@@ -56,14 +56,14 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
  * A text editor with a read-only grid under it (the list of the autocomplete and dropdown editors). The cell's
  * `handsontable` setting holds the inner grid's settings; clicking a row (or Enter on a selected row) takes its value.
  */
-class HandsontableEditor extends TextEditor {
+class EditorHandsontable extends EditorText {
   // Set by createElements() (inside the base constructor) and prepare().
   declare htContainer: HTMLDivElement;
 
   declare htOptions: Record<string, unknown>;
 
   /** The inner grid, while the editor is open. */
-  declare htEditor: EditorGrid;
+  declare htEditor: EditorHost;
 
   createElements(): void {
     super.createElements();
@@ -84,7 +84,7 @@ class HandsontableEditor extends TextEditor {
     super.prepare(row, col, prop, td, originalValue, cellProperties);
 
     // The inner grid calls it with itself as `this`.
-    const onCellMouseDown = (innerGrid: EditorGrid, coords: { row: number; col: number }) => {
+    const onCellMouseDown = (innerGrid: EditorHost, coords: { row: number; col: number }) => {
       const sourceValue = innerGrid.getSourceData(coords.row, coords.col);
 
       // An undefined value means: don't set the value.
@@ -106,7 +106,7 @@ class HandsontableEditor extends TextEditor {
       fillHandle: false,
       autoWrapCol: false,
       autoWrapRow: false,
-      afterOnCellMouseDown(this: EditorGrid, _event: MouseEvent, coords: { row: number; col: number }) {
+      afterOnCellMouseDown(this: EditorHost, _event: MouseEvent, coords: { row: number; col: number }) {
         onCellMouseDown(this, coords);
       },
     };
@@ -177,4 +177,4 @@ class HandsontableEditor extends TextEditor {
   }
 }
 
-export default HandsontableEditor;
+export default EditorHandsontable;

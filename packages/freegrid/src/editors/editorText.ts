@@ -13,16 +13,16 @@ import {
 } from './../helpers/dom/element';
 import autoResize from './../../lib/autoResize/autoResize';
 import { isMobileBrowser } from './../helpers/browser';
-import BaseEditor, { EditorState } from './_baseEditor';
-import type { EditorGrid } from './_baseEditor';
+import EditorBase, { EditorState } from './editorBase';
+import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
 import EventManager from './../eventManager';
 import { KEY_CODES } from './../helpers/unicode';
 import { stopPropagation, stopImmediatePropagation, isImmediatePropagationStopped } from './../helpers/dom/event';
 
 // A grid hook: `this` is the grid.
-const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: KeyboardEvent) {
-  const that = this.getActiveEditor() as TextEditor;
+const onBeforeKeyDown = function onBeforeKeyDown(this: EditorHost, event: KeyboardEvent) {
+  const that = this.getActiveEditor() as EditorText;
 
   // catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
   const ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey;
@@ -85,7 +85,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
  * The default editor: a textarea over the cell, sized to its content. It is moved off screen while the cell is only
  * selected (so that typing goes into it, also with IME), and over the cell while editing.
  */
-class TextEditor extends BaseEditor {
+class EditorText extends EditorBase {
   // Set by init() and createElements(), which run inside the base constructor: `declare` keeps these field
   // definitions from resetting them afterwards.
   declare TEXTAREA: HTMLTextAreaElement;
@@ -104,8 +104,8 @@ class TextEditor extends BaseEditor {
 
   /**
    * @private
-   * @editor TextEditor
-   * @class TextEditor
+   * @editor EditorText
+   * @class EditorText
    * @dependencies autoResize
    */
   init(): void {
@@ -436,4 +436,4 @@ class TextEditor extends BaseEditor {
   }
 }
 
-export default TextEditor;
+export default EditorText;

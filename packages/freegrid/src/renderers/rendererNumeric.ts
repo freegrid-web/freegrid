@@ -10,7 +10,7 @@ const ALIGNMENTS = ['fg-left', 'fg-center', 'fg-right', 'fg-justify'];
  * A number formatted with `numericFormat`, right-aligned unless the cell has another alignment class. Values that
  * are not numbers are shown as text.
  */
-const numericRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+const rendererNumeric: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
   let newValue = value;
 
   if (isNumeric(newValue)) {
@@ -30,4 +30,4 @@ const numericRenderer: Renderer = (instance, TD, row, col, prop, value, cellProp
   getRenderer('text')(instance, TD, row, col, prop, newValue, cellProperties);
 };
 
-export default numericRenderer;
+export default rendererNumeric;

@@ -2,9 +2,18 @@
 
 ## Unreleased
 
-- Editors: `BaseEditor` and `TextEditor` are ES classes now (TypeScript rewrite). Custom editors made with
-  `FreeGrid.editors.TextEditor.prototype.extend()` or `class MyEditor extends FreeGrid.editors.TextEditor` keep working;
-  one that calls a parent editor as a function (`TextEditor.call(this, instance)`) must use `class … extends` instead.
+- **Breaking:** editors, renderers and validators have uniform names, the kind first: `FreeGrid.editors.EditorText`,
+  `EditorAutocomplete`, `EditorDate`, …; `FreeGrid.renderers.RendererText`, `RendererNumeric`, …;
+  `FreeGrid.validators.ValidatorDate`, `ValidatorTime`, … The old names (`TextEditor`, `TextRenderer`,
+  `DateValidator`, `cellDecorator`, …) are removed. Names in settings (`type: 'date'`, `editor: 'text'`,
+  `renderer: 'numeric'`) do not change. See [Migrating from Handsontable](https://freegrid-web.github.io/freegrid/guide/migrating-from-handsontable#editor-renderer-and-validator-names).
+- Editors are ES classes now (TypeScript rewrite). Custom editors made with `FreeGrid.editors.EditorText.prototype.extend()`
+  or `class MyEditor extends FreeGrid.editors.EditorText` keep working; one that calls a parent editor as a function
+  (`EditorText.call(this, instance)`) must use `class … extends` instead.
+- The TypeScript definitions have `FreeGrid.validators` (with `Validator`), and `getRenderer`/`registerRenderer`.
+- Fixes:
+  - The date editor dropped `closeEditor`'s callback: after an async validation, the next cell's editor did not open.
+  - Case-sensitive autocomplete (`filteringCaseSensitive`) did not bold the typed text in the list.
 - Docs, API reference:
   - The right-hand lists (Related API on guide pages, and an index on each reference page) are alphabetical, one
     entry per line, in the order settings, methods, events, with plugin methods grouped by plugin. A filter box

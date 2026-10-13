@@ -5,7 +5,7 @@ import { formatDate, parseDate } from './../helpers/dateFormat';
 import EventManager from './../eventManager';
 import { isMetaKey } from './../helpers/unicode';
 import { stopPropagation } from './../helpers/dom/event';
-import TextEditor from './textEditor';
+import EditorText from './editorText';
 import { DatePicker } from './datePicker/datePicker';
 import type { DatePickerOptions } from './datePicker/datePicker';
 
@@ -13,7 +13,7 @@ import type { DatePickerOptions } from './datePicker/datePicker';
  * A text editor with a date picker under the cell. The picked day is written in the cell's `dateFormat`; the cell's
  * `datePickerConfig` holds the picker's options and `defaultDate` the day shown for an empty cell.
  */
-class DateEditor extends TextEditor {
+class EditorDate extends EditorText {
   // Set by createElements(), inside the base constructor.
   /** The picker's holder (in `<body>`). */
   declare datePicker: HTMLDivElement;
@@ -225,4 +225,4 @@ class DateEditor extends TextEditor {
   }
 }
 
-export default DateEditor;
+export default EditorDate;

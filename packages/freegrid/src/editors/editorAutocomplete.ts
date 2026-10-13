@@ -13,12 +13,12 @@ import {
   getTrimmingContainer,
   setCaretPosition,
 } from './../helpers/dom/element';
-import HandsontableEditor from './handsontableEditor';
-import type { EditorGrid } from './_baseEditor';
+import EditorHandsontable from './editorHandsontable';
+import type { EditorHost } from './editorBase';
 
 // A grid hook: `this` is the grid. Typing (or deleting) filters the list again.
-const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: KeyboardEvent) {
-  const editor = this.getActiveEditor() as AutocompleteEditor;
+const onBeforeKeyDown = function onBeforeKeyDown(this: EditorHost, event: KeyboardEvent) {
+  const editor = this.getActiveEditor() as EditorAutocomplete;
 
   if (isPrintableChar(event.keyCode) || event.keyCode === KEY_CODES.BACKSPACE ||
     event.keyCode === KEY_CODES.DELETE || event.keyCode === KEY_CODES.INSERT) {
@@ -41,7 +41,7 @@ type Relevance = { baseIndex: number; index: number; charsLeft: number };
  * text), filtered (`filter`) and sorted (`sortByRelevance`) by what is typed. With `strict`, the best matching choice
  * is selected.
  */
-class AutocompleteEditor extends HandsontableEditor {
+class EditorAutocomplete extends EditorHandsontable {
   // Set by init() (inside the base constructor) and by queryChoices().
   declare query: string | null;
 
@@ -155,7 +155,7 @@ class AutocompleteEditor extends HandsontableEditor {
     let choices = choicesList;
 
     if (sortByRelevance) {
-      orderByRelevance = AutocompleteEditor.sortByRelevance(this.stripValueIfNeeded(this.getValue()), choices,
+      orderByRelevance = EditorAutocomplete.sortByRelevance(this.stripValueIfNeeded(this.getValue()), choices,
         this.cellProperties.filteringCaseSensitive as boolean | undefined);
     }
 
@@ -350,4 +350,4 @@ class AutocompleteEditor extends HandsontableEditor {
   }
 }
 
-export default AutocompleteEditor;
+export default EditorAutocomplete;

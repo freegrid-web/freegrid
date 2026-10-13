@@ -208,8 +208,8 @@ describe('AutocompleteEditor', () => {
     });
 
     it('should NOT update choices list, after cursor leaves and enters the list (#1330)', (done) => {
-      spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'updateChoicesList').and.callThrough();
-      const updateChoicesList = Handsontable.editors.AutocompleteEditor.prototype.updateChoicesList;
+      spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'updateChoicesList').and.callThrough();
+      const updateChoicesList = Handsontable.editors.EditorAutocomplete.prototype.updateChoicesList;
 
       const hot = handsontable({
         columns: [
@@ -238,8 +238,8 @@ describe('AutocompleteEditor', () => {
     });
 
     it('should update choices list exactly once after a key is pressed (#1330)', (done) => {
-      spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'updateChoicesList').and.callThrough();
-      const updateChoicesList = Handsontable.editors.AutocompleteEditor.prototype.updateChoicesList;
+      spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'updateChoicesList').and.callThrough();
+      const updateChoicesList = Handsontable.editors.EditorAutocomplete.prototype.updateChoicesList;
 
       const hot = handsontable({
         columns: [
@@ -271,8 +271,8 @@ describe('AutocompleteEditor', () => {
     });
 
     it('should not initialize the dropdown with unneeded scrollbars (scrollbar causing a scrollbar issue)', (done) => {
-      spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'updateChoicesList').and.callThrough();
-      const updateChoicesList = Handsontable.editors.AutocompleteEditor.prototype.updateChoicesList;
+      spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'updateChoicesList').and.callThrough();
+      const updateChoicesList = Handsontable.editors.EditorAutocomplete.prototype.updateChoicesList;
 
       const hot = handsontable({
         data: [
@@ -1645,8 +1645,8 @@ describe('AutocompleteEditor', () => {
     });
 
     it('text in textarea should not be interpreted as regexp', (done) => {
-      spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'queryChoices').and.callThrough();
-      const queryChoices = Handsontable.editors.AutocompleteEditor.prototype.queryChoices;
+      spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'queryChoices').and.callThrough();
+      const queryChoices = Handsontable.editors.EditorAutocomplete.prototype.queryChoices;
 
       const hot = handsontable({
         columns: [
@@ -1722,8 +1722,8 @@ describe('AutocompleteEditor', () => {
     });
 
     it('should allow any value if filter === false and allowInvalid === true', (done) => {
-      spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'queryChoices').and.callThrough();
-      const queryChoices = Handsontable.editors.AutocompleteEditor.prototype.queryChoices;
+      spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'queryChoices').and.callThrough();
+      const queryChoices = Handsontable.editors.EditorAutocomplete.prototype.queryChoices;
 
       handsontable({
         columns: [
@@ -2128,17 +2128,17 @@ describe('AutocompleteEditor', () => {
           'Simmons'// 8
         ];
         let value = 'a';
-        let sorted = Handsontable.editors.AutocompleteEditor.sortByRelevance(value, choicesList);
+        let sorted = Handsontable.editors.EditorAutocomplete.sortByRelevance(value, choicesList);
 
         expect(sorted).toEqual([0, 2, 4, 3, 1]);
 
         value = 'o';
-        sorted = Handsontable.editors.AutocompleteEditor.sortByRelevance(value, choicesList);
+        sorted = Handsontable.editors.EditorAutocomplete.sortByRelevance(value, choicesList);
 
         expect(sorted).toEqual([6, 8]);
 
         value = 'er';
-        sorted = Handsontable.editors.AutocompleteEditor.sortByRelevance(value, choicesList);
+        sorted = Handsontable.editors.EditorAutocomplete.sortByRelevance(value, choicesList);
 
         expect(sorted).toEqual([2, 4]);
       });
@@ -2255,7 +2255,7 @@ describe('AutocompleteEditor', () => {
   });
 
   it('should handle editor if cell data is a function', (done) => {
-    spyOn(Handsontable.editors.AutocompleteEditor.prototype, 'updateChoicesList').and.callThrough();
+    spyOn(Handsontable.editors.EditorAutocomplete.prototype, 'updateChoicesList').and.callThrough();
     const afterValidateCallback = jasmine.createSpy('afterValidateCallbak');
 
     const hot = handsontable({

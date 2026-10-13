@@ -8,10 +8,10 @@ const gridSettings: Handsontable.GridSettings = {
   className: 'foo'
 };
 
-Handsontable.renderers.AutocompleteRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.BaseRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.CheckboxRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.HtmlRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.NumericRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.PasswordRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
-Handsontable.renderers.TextRenderer(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererAutocomplete(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererBase(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererCheckbox(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererHtml(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererNumeric(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererPassword(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);
+Handsontable.renderers.RendererText(hot, new HTMLTableDataCellElement(), 0, 0, 'prop', 1.235, gridSettings);

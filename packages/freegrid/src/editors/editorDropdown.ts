@@ -1,10 +1,10 @@
-import AutocompleteEditor from './autocompleteEditor';
+import EditorAutocomplete from './editorAutocomplete';
 import Hooks from './../pluginHooks';
-import type { EditorGrid } from './_baseEditor';
+import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
 
 /** An autocomplete editor that only takes a choice from the list: it shows every choice (`filter: false`, `strict`). */
-class DropdownEditor extends AutocompleteEditor {
+class EditorDropdown extends EditorAutocomplete {
   prepare(row: number, col: number, prop: string | number, td: HTMLTableCellElement, originalValue: unknown,
     cellProperties: CellProperties): void {
     super.prepare(row, col, prop, td, originalValue, cellProperties);
@@ -14,13 +14,13 @@ class DropdownEditor extends AutocompleteEditor {
 }
 
 // A cell with this editor is validated as strict, also before the editor was ever opened.
-Hooks.getSingleton().add('beforeValidate', function(this: EditorGrid, value: unknown, row: number, col: string | number) {
+Hooks.getSingleton().add('beforeValidate', function(this: EditorHost, value: unknown, row: number, col: string | number) {
   const cellMeta = this.getCellMeta(row, this.propToCol(col));
 
-  if (cellMeta.editor === DropdownEditor && cellMeta.strict === undefined) {
+  if (cellMeta.editor === EditorDropdown && cellMeta.strict === undefined) {
     cellMeta.filter = false;
     cellMeta.strict = true;
   }
 });
 
-export default DropdownEditor;
+export default EditorDropdown;

@@ -13,7 +13,7 @@ const STRICT_FORMATS = [
  * (also a Unix timestamp, an ISO date, or `13` for 13:00) is invalid, unless `correctFormat` rewrites it in
  * `timeFormat`.
  */
-export default function timeValidator(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
+export default function validatorTime(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
   const timeFormat = this.timeFormat || 'h:mm:ss a';
   let valueToValidate: unknown = value === null ? '' : value;
 
@@ -44,7 +44,7 @@ export default function timeValidator(this: ValidatorContext, value: unknown, ca
     const row = this.instance.runHooks('unmodifyRow', this.row) as number;
     const column = this.instance.runHooks('unmodifyCol', this.col) as number;
 
-    this.instance.setDataAtCell(row, column, formatDate(date, timeFormat), 'timeValidator');
+    this.instance.setDataAtCell(row, column, formatDate(date, timeFormat), 'validatorTime');
     callback(true);
 
     return;

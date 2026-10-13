@@ -17,7 +17,7 @@ describe('editors', () => {
   });
 
   it('should register custom editor', () => {
-    class MyEditor extends Handsontable.editors.BaseEditor {
+    class MyEditor extends Handsontable.editors.EditorBase {
       init() {
         this.TEXTAREA = document.createElement('TEXTAREA');
         this.TEXTAREA_PARENT = document.createElement('DIV');

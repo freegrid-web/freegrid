@@ -206,7 +206,7 @@ const listenToKeys = (instance: GridInstance): void => {
  * A checkbox: checked for `checkedTemplate` (default `true`), unchecked for `uncheckedTemplate` (default `false`),
  * hidden with `#bad-value#` for other values. `label` adds a label from a value, a function or a data property.
  */
-const checkboxRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+const rendererCheckbox: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
   getRenderer('base')(instance, TD, row, col, prop, value, cellProperties);
   registerEvents(instance);
   applyDefaultTemplates(cellProperties);
@@ -261,4 +261,4 @@ const checkboxRenderer: Renderer = (instance, TD, row, col, prop, value, cellPro
   listenToKeys(instance);
 };
 
-export default checkboxRenderer;
+export default rendererCheckbox;

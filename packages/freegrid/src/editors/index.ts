@@ -4,32 +4,32 @@
 import staticRegister from './../utils/staticRegister';
 import Hooks from './../pluginHooks';
 
-import BaseEditor from './_baseEditor';
-import type { EditorGrid } from './_baseEditor';
-import AutocompleteEditor from './autocompleteEditor';
-import CheckboxEditor from './checkboxEditor';
-import DateEditor from './dateEditor';
-import DropdownEditor from './dropdownEditor';
-import HandsontableEditor from './handsontableEditor';
-import NumericEditor from './numericEditor';
-import PasswordEditor from './passwordEditor';
-import SelectEditor from './selectEditor';
-import TextEditor from './textEditor';
+import EditorBase from './editorBase';
+import type { EditorHost } from './editorBase';
+import EditorAutocomplete from './editorAutocomplete';
+import EditorCheckbox from './editorCheckbox';
+import EditorDate from './editorDate';
+import EditorDropdown from './editorDropdown';
+import EditorHandsontable from './editorHandsontable';
+import EditorNumeric from './editorNumeric';
+import EditorPassword from './editorPassword';
+import EditorSelect from './editorSelect';
+import EditorText from './editorText';
 
-type EditorClass = new (hotInstance: EditorGrid) => BaseEditor;
+type EditorClass = new (hotInstance: EditorHost) => EditorBase;
 
 /** An editor class and its instance per grid (an editor is a singleton per grid). */
 export class RegisteredEditor {
   #editorClass: EditorClass;
 
-  #instances: Record<string, BaseEditor | null> = {};
+  #instances: Record<string, EditorBase | null> = {};
 
   constructor(editorClass: EditorClass) {
     this.#editorClass = editorClass;
     const instances = this.#instances;
 
     // A function, not an arrow: `this` is the destroyed grid.
-    Hooks.getSingleton().add('afterDestroy', function(this: EditorGrid) {
+    Hooks.getSingleton().add('afterDestroy', function(this: EditorHost) {
       instances[this.guid] = null;
     });
   }
@@ -38,12 +38,12 @@ export class RegisteredEditor {
     return this.#editorClass;
   }
 
-  getInstance(hotInstance: EditorGrid): BaseEditor {
+  getInstance(hotInstance: EditorHost): EditorBase {
     if (!(hotInstance.guid in this.#instances)) {
       this.#instances[hotInstance.guid] = new this.#editorClass(hotInstance);
     }
 
-    return this.#instances[hotInstance.guid] as BaseEditor;
+    return this.#instances[hotInstance.guid] as EditorBase;
   }
 }
 
@@ -67,19 +67,19 @@ const registerEditor = (name: string | null, editorClass: EditorClass): void => 
   registeredEditorClasses.set(editorClass, editorWrapper);
 };
 
-registerEditor('base', BaseEditor);
-registerEditor('autocomplete', AutocompleteEditor);
-registerEditor('checkbox', CheckboxEditor);
-registerEditor('date', DateEditor);
-registerEditor('dropdown', DropdownEditor);
-registerEditor('handsontable', HandsontableEditor);
-registerEditor('numeric', NumericEditor);
-registerEditor('password', PasswordEditor);
-registerEditor('select', SelectEditor);
-registerEditor('text', TextEditor);
+registerEditor('base', EditorBase);
+registerEditor('autocomplete', EditorAutocomplete);
+registerEditor('checkbox', EditorCheckbox);
+registerEditor('date', EditorDate);
+registerEditor('dropdown', EditorDropdown);
+registerEditor('handsontable', EditorHandsontable);
+registerEditor('numeric', EditorNumeric);
+registerEditor('password', EditorPassword);
+registerEditor('select', EditorSelect);
+registerEditor('text', EditorText);
 
 /** The grid's instance of an editor, given by name or by class (a class is registered on first use). */
-export const getEditorInstance = (name: string | EditorClass, hotInstance: EditorGrid): BaseEditor => {
+export const getEditorInstance = (name: string | EditorClass, hotInstance: EditorHost): EditorBase => {
   let editor: RegisteredEditor | undefined;
 
   if (typeof name === 'function') {

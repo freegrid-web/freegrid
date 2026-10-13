@@ -73,16 +73,16 @@ describe('BaseEditor', () => {
   });
 
   it('should exported all editors into Handsontable.editors object', () => {
-    expect(Handsontable.editors.AutocompleteEditor).toBeDefined();
-    expect(Handsontable.editors.BaseEditor).toBeDefined();
-    expect(Handsontable.editors.CheckboxEditor).toBeDefined();
-    expect(Handsontable.editors.DateEditor).toBeDefined();
-    expect(Handsontable.editors.DropdownEditor).toBeDefined();
-    expect(Handsontable.editors.HandsontableEditor).toBeDefined();
-    expect(Handsontable.editors.NumericEditor).toBeDefined();
-    expect(Handsontable.editors.PasswordEditor).toBeDefined();
-    expect(Handsontable.editors.SelectEditor).toBeDefined();
-    expect(Handsontable.editors.TextEditor).toBeDefined();
+    expect(Handsontable.editors.EditorAutocomplete).toBeDefined();
+    expect(Handsontable.editors.EditorBase).toBeDefined();
+    expect(Handsontable.editors.EditorCheckbox).toBeDefined();
+    expect(Handsontable.editors.EditorDate).toBeDefined();
+    expect(Handsontable.editors.EditorDropdown).toBeDefined();
+    expect(Handsontable.editors.EditorHandsontable).toBeDefined();
+    expect(Handsontable.editors.EditorNumeric).toBeDefined();
+    expect(Handsontable.editors.EditorPassword).toBeDefined();
+    expect(Handsontable.editors.EditorSelect).toBeDefined();
+    expect(Handsontable.editors.EditorText).toBeDefined();
   });
 
   describe('IME support', () => {
