@@ -48,7 +48,7 @@
 
 .fg-context-menu table tbody tr td.current,
 .fg-context-menu table tbody tr td.zeroclipboard-is-hover {
-  background: var(--fg-menu-hover-background);
+  background: var(--fg-menu-hover-background, var(--fg-style-menu-hover-background));
 }
 
 .fg-context-menu table tbody tr td.fg-separator {

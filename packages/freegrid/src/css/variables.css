@@ -4,11 +4,14 @@
  *
  * - Base variables (--fg-color-*, --fg-font-*, --fg-shadow) and component variables with their own value are defaults
  *   on :root. Override them anywhere: on :root, on an ancestor of the grid, or on the grid itself.
+ * - The colors and the font that differ between the Classic and the Modern style are not set on :root: what you or a
+ *   theme does not set comes from the style's --fg-style-* defaults (see "Style defaults"), so your values win in
+ *   both styles.
  * - Component variables that follow a base variable are declared on the grid's parts (the grid and the elements
  *   FreeGrid puts in <body>), so they always see the current base values. Override those on the grid:
  *   `.freegrid { --fg-cell-background: ... }`.
- * - --fg-color-text, --fg-font-family and --fg-font-size are not set by default: the grid inherits the page's text
- *   color and font, as before.
+ * - In Classic, --fg-color-text, --fg-font-family and --fg-font-size have no default: the grid inherits the page's
+ *   text color and font, as before.
  * - Themes: class "fg-theme-dark" / data-fg-theme="dark", "fg-theme-light" / data-fg-theme="light" (e.g. a light grid
  *   inside a dark page), and "fg-theme-auto" / data-fg-theme="auto" (follows the system's dark mode). The closest
  *   theme to the grid wins: theme classes declare every value on their own element.
@@ -17,10 +20,6 @@
 /* == Base == */
 :where(:root) {
   --fg-color-background: #fff; /* Cell, editor and menu background. */
-  --fg-color-border: #ccc; /* Grid lines and outlines. */
-  --fg-color-header-background: #f0f0f0; /* Row and column header background. */
-  --fg-color-header-text: #222; /* Header text. */
-  --fg-color-accent: #4b89ff; /* Selection border. */
   --fg-color-invalid: #ff4c42; /* Background of cells that failed validation. */
   --fg-color-readonly-text: #777; /* Text of read-only cells. */
   --fg-color-muted-text: #999; /* Placeholders and disabled menu items. */
@@ -30,6 +29,7 @@
   --fg-header-font-weight: normal; /* Header text weight. */
   --fg-radius: 0; /* Corner radius of the cell editor and the context menu. */
   --fg-menu-shadow: none; /* Context menu shadow. */
+  --fg-fill-handle-radius: 0; /* Corner radius of the fill handle (50% = round). */
 
   /* == Cells == */
   --fg-search-result-background: #fcedd9; /* Cells matched by the search plugin. */
@@ -38,20 +38,15 @@
 
   /* == Headers == */
   --fg-header-active-background: #ccc; /* Header being resized or moved. */
-  --fg-header-highlight-background: #dcdcdc; /* Headers of the selected cells. */
-  --fg-header-active-highlight-background: #8eb0e7; /* Headers of fully selected rows/columns. */
-  --fg-header-active-highlight-text: #000; /* Their text. */
   --fg-header-light-border-color: #e6e6e6; /* Light right border of some headers. */
 
   /* == Selection == */
-  --fg-selection-area-background: #005eff; /* Selected range tint (drawn with low opacity). */
   --fg-fill-border-color: #ff0000; /* Border while dragging the fill handle. */
   --fg-fill-handle-border-color: #fff; /* Outline of the fill handle square. */
   --fg-mobile-handle-background: #f5f5ff; /* Selection handles on touch devices. */
   --fg-mobile-handle-border-color: #4285c8; /* Their border. */
 
   /* == Editors == */
-  --fg-editor-border-color: #5292f7; /* Cell editor frame. */
   --fg-autocomplete-arrow-color: #eee; /* Dropdown arrow in autocomplete cells. */
   --fg-autocomplete-arrow-hover-color: #777; /* The arrow on hover. */
   --fg-autocomplete-arrow-selected-color: #d3d3d3; /* The arrow in selected cells. */
@@ -62,7 +57,6 @@
   --fg-resizer-guide-border-color: #777; /* Dashed guide line. */
 
   /* == Context menu == */
-  --fg-menu-hover-background: #f3f3f3; /* Hovered menu item. */
   --fg-menu-separator-color: #e6e6e6; /* Separator line. */
   --fg-menu-dimmed-text: #323232; /* Dimmed items. */
   --fg-menu-arrow-color: #777; /* Submenu arrow. */
@@ -93,59 +87,75 @@
   --fg-datepicker-day-background: transparent; /* Days background. */
   --fg-datepicker-selected-text: #fff; /* Selected day text. */
   --fg-datepicker-hover-text: #222; /* Hovered day text. */
-  --fg-datepicker-hover-background: #e8effd; /* Hovered day. */
+}
+
+/* == Style defaults: the colors and the font that Classic and Modern draw differently. Each base variable above
+   (--fg-color-border, …) that nobody sets, neither you nor a theme, takes its --fg-style-* value here; set the base
+   variables, not these. == */
+:where(:root, .fg-style-classic, [data-fg-style="classic"]) {
+  --fg-style-color-border: #ccc; /* Grid lines and outlines. */
+  --fg-style-color-header-background: #f0f0f0; /* Row and column header background. */
+  --fg-style-color-header-text: #222; /* Header text. */
+  --fg-style-color-accent: #4b89ff; /* Selection border, fill handle, selected day. */
+  --fg-style-header-highlight-background: #dcdcdc; /* Headers of the selected cells. */
+  --fg-style-header-active-highlight-background: #8eb0e7; /* Headers of fully selected rows/columns. */
+  --fg-style-header-active-highlight-text: #000; /* Their text. */
+  --fg-style-selection-area-background: #005eff; /* Selected range tint (drawn with low opacity). */
+  --fg-style-editor-border-color: #5292f7; /* Cell editor frame. */
+  --fg-style-menu-hover-background: #f3f3f3; /* Hovered menu item. */
+  --fg-style-datepicker-hover-background: #e8effd; /* Hovered day. */
 }
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeGrid appends to <body>) == */
 :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder) {
   /* == Cells == */
   --fg-cell-background: var(--fg-color-background); /* Cell background. */
-  --fg-cell-text: var(--fg-color-text); /* Cell text (the page's text color by default). */
-  --fg-cell-border-color: var(--fg-color-border); /* Lines between cells. */
+  --fg-cell-text: var(--fg-color-text, var(--fg-style-color-text)); /* Cell text (the page's text color by default). */
+  --fg-cell-border-color: var(--fg-color-border, var(--fg-style-color-border)); /* Lines between cells. */
   --fg-readonly-text: var(--fg-color-readonly-text); /* Read-only cell text. */
   --fg-placeholder-text: var(--fg-color-muted-text); /* Placeholder text. */
   --fg-invalid-background: var(--fg-color-invalid); /* Invalid cell background. */
 
   /* == Headers == */
-  --fg-header-background: var(--fg-color-header-background); /* Header background. */
-  --fg-header-text: var(--fg-color-header-text); /* Header text. */
+  --fg-header-background: var(--fg-color-header-background, var(--fg-style-color-header-background)); /* Header background. */
+  --fg-header-text: var(--fg-color-header-text, var(--fg-style-color-header-text)); /* Header text. */
 
   /* == Selection == */
-  --fg-selection-border-color: var(--fg-color-accent); /* Border of the current cell and the selected range. */
+  --fg-selection-border-color: var(--fg-color-accent, var(--fg-style-color-accent)); /* Border of the current cell and the selected range. */
 
   /* == Editors == */
   --fg-editor-background: var(--fg-color-background); /* Cell editor background. */
-  --fg-editor-text: var(--fg-color-text, #000); /* Cell editor text. */
+  --fg-editor-text: var(--fg-color-text, var(--fg-style-color-text, #000)); /* Cell editor text. */
   --fg-listbox-background: var(--fg-color-background); /* Autocomplete/dropdown list background. */
-  --fg-listbox-border-color: var(--fg-color-border); /* List border. */
+  --fg-listbox-border-color: var(--fg-color-border, var(--fg-style-color-border)); /* List border. */
 
   /* == Context menu == */
   --fg-menu-background: var(--fg-color-background); /* Menu background. */
-  --fg-menu-border-color: var(--fg-color-border); /* Menu border. */
+  --fg-menu-border-color: var(--fg-color-border, var(--fg-style-color-border)); /* Menu border. */
   --fg-menu-disabled-text: var(--fg-color-muted-text); /* Disabled items. */
 
   /* == Comments == */
   --fg-comment-background: var(--fg-color-background); /* Comment editor background. */
-  --fg-comment-text: var(--fg-color-text, FieldText); /* Comment editor text (a text field does not inherit it). */
-  --fg-comment-border-color: var(--fg-color-border); /* Comment editor left border. */
+  --fg-comment-text: var(--fg-color-text, var(--fg-style-color-text, FieldText)); /* Comment editor text (a text field does not inherit it). */
+  --fg-comment-border-color: var(--fg-color-border, var(--fg-style-color-border)); /* Comment editor left border. */
   --fg-comment-shadow: var(--fg-shadow); /* Comment editor shadow. */
 
   /* == Date picker == */
   --fg-datepicker-background: var(--fg-color-background); /* Calendar background. */
-  --fg-datepicker-border-color: var(--fg-color-border); /* Calendar border. */
-  --fg-datepicker-selected-background: var(--fg-color-accent); /* Selected day. */
-  --fg-datepicker-today-text: var(--fg-color-accent); /* Today. */
-  --fg-datepicker-focus-color: var(--fg-color-accent); /* Keyboard focus ring. */
+  --fg-datepicker-border-color: var(--fg-color-border, var(--fg-style-color-border)); /* Calendar border. */
+  --fg-datepicker-selected-background: var(--fg-color-accent, var(--fg-style-color-accent)); /* Selected day. */
+  --fg-datepicker-today-text: var(--fg-color-accent, var(--fg-style-color-accent)); /* Today. */
+  --fg-datepicker-focus-color: var(--fg-color-accent, var(--fg-style-color-accent)); /* Keyboard focus ring. */
   --fg-datepicker-radius: var(--fg-radius); /* Corner radius of the calendar and its days. */
 }
 
 /* == Light theme: class "fg-theme-light" or data-fg-theme="light" (a light grid inside a dark page) == */
 :where(.fg-theme-light, [data-fg-theme="light"]) {
   --fg-color-background: #fff;
-  --fg-color-border: #ccc;
-  --fg-color-header-background: #f0f0f0;
-  --fg-color-header-text: #222;
-  --fg-color-accent: #4b89ff;
+  --fg-color-border: initial;
+  --fg-color-header-background: initial;
+  --fg-color-header-text: initial;
+  --fg-color-accent: initial;
   --fg-color-invalid: #ff4c42;
   --fg-color-readonly-text: #777;
   --fg-color-muted-text: #999;
@@ -154,23 +164,23 @@
   --fg-search-result-text: #583707;
   --fg-custom-border-color: #000;
   --fg-header-active-background: #ccc;
-  --fg-header-highlight-background: #dcdcdc;
-  --fg-header-active-highlight-background: #8eb0e7;
-  --fg-header-active-highlight-text: #000;
+  --fg-header-highlight-background: initial;
+  --fg-header-active-highlight-background: initial;
+  --fg-header-active-highlight-text: initial;
   --fg-header-light-border-color: #e6e6e6;
-  --fg-selection-area-background: #005eff;
+  --fg-selection-area-background: initial;
   --fg-fill-border-color: #ff0000;
   --fg-fill-handle-border-color: #fff;
   --fg-mobile-handle-background: #f5f5ff;
   --fg-mobile-handle-border-color: #4285c8;
-  --fg-editor-border-color: #5292f7;
+  --fg-editor-border-color: initial;
   --fg-autocomplete-arrow-color: #eee;
   --fg-autocomplete-arrow-hover-color: #777;
   --fg-autocomplete-arrow-selected-color: #d3d3d3;
   --fg-listbox-hover-background: #eee;
   --fg-resizer-color: #34a9db;
   --fg-resizer-guide-border-color: #777;
-  --fg-menu-hover-background: #f3f3f3;
+  --fg-menu-hover-background: initial;
   --fg-menu-separator-color: #e6e6e6;
   --fg-menu-dimmed-text: #323232;
   --fg-menu-arrow-color: #777;
@@ -193,8 +203,9 @@
   --fg-datepicker-day-background: transparent;
   --fg-datepicker-selected-text: #fff;
   --fg-datepicker-hover-text: #222;
-  --fg-datepicker-hover-background: #e8effd;
-  --fg-color-text: #000;
+  --fg-datepicker-hover-background: initial;
+  --fg-color-text: initial;
+  --fg-style-color-text: #000; /* black text inside a dark page */
 }
 
 /* == Dark theme: class "fg-theme-dark" or data-fg-theme="dark" on the grid or any ancestor == */
@@ -258,10 +269,10 @@
 /* == Automatic theme: light, or the dark values when the system uses dark mode == */
 :where(.fg-theme-auto, [data-fg-theme="auto"]) {
   --fg-color-background: #fff;
-  --fg-color-border: #ccc;
-  --fg-color-header-background: #f0f0f0;
-  --fg-color-header-text: #222;
-  --fg-color-accent: #4b89ff;
+  --fg-color-border: initial;
+  --fg-color-header-background: initial;
+  --fg-color-header-text: initial;
+  --fg-color-accent: initial;
   --fg-color-invalid: #ff4c42;
   --fg-color-readonly-text: #777;
   --fg-color-muted-text: #999;
@@ -270,23 +281,23 @@
   --fg-search-result-text: #583707;
   --fg-custom-border-color: #000;
   --fg-header-active-background: #ccc;
-  --fg-header-highlight-background: #dcdcdc;
-  --fg-header-active-highlight-background: #8eb0e7;
-  --fg-header-active-highlight-text: #000;
+  --fg-header-highlight-background: initial;
+  --fg-header-active-highlight-background: initial;
+  --fg-header-active-highlight-text: initial;
   --fg-header-light-border-color: #e6e6e6;
-  --fg-selection-area-background: #005eff;
+  --fg-selection-area-background: initial;
   --fg-fill-border-color: #ff0000;
   --fg-fill-handle-border-color: #fff;
   --fg-mobile-handle-background: #f5f5ff;
   --fg-mobile-handle-border-color: #4285c8;
-  --fg-editor-border-color: #5292f7;
+  --fg-editor-border-color: initial;
   --fg-autocomplete-arrow-color: #eee;
   --fg-autocomplete-arrow-hover-color: #777;
   --fg-autocomplete-arrow-selected-color: #d3d3d3;
   --fg-listbox-hover-background: #eee;
   --fg-resizer-color: #34a9db;
   --fg-resizer-guide-border-color: #777;
-  --fg-menu-hover-background: #f3f3f3;
+  --fg-menu-hover-background: initial;
   --fg-menu-separator-color: #e6e6e6;
   --fg-menu-dimmed-text: #323232;
   --fg-menu-arrow-color: #777;
@@ -309,8 +320,8 @@
   --fg-datepicker-day-background: transparent;
   --fg-datepicker-selected-text: #fff;
   --fg-datepicker-hover-text: #222;
-  --fg-datepicker-hover-background: #e8effd;
-  --fg-color-text: initial; /* the page's text color, as without a theme */
+  --fg-datepicker-hover-background: initial;
+  --fg-color-text: initial;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -372,12 +383,41 @@
   }
 }
 
-/* == Modern style: class "fg-style-modern" or data-fg-style="modern" on the grid or any ancestor. Sizes, radii and
-   shadows only: the colors stay the theme's and the user's, so it works with every theme and every palette. == */
+/* == Classic style: class "fg-style-classic" or data-fg-style="classic". The default look; set it explicitly for a
+   Classic grid inside a page (or an ancestor) that uses the Modern style. Its colors are the style defaults above. == */
+:where(.fg-style-classic, [data-fg-style="classic"]) {
+  --fg-row-height: 23px;
+  --fg-cell-padding-x: 4px;
+  --fg-header-font-weight: normal;
+  --fg-radius: 0;
+  --fg-menu-shadow: none;
+  --fg-fill-handle-radius: 0;
+  --fg-style-color-text: initial;
+  --fg-style-font-family: initial;
+  --fg-style-font-size: initial;
+}
+
+/* == Modern style: class "fg-style-modern" or data-fg-style="modern" on the grid or any ancestor. Roomier sizes, round
+   corners, and its own light palette and font as style defaults: your colors and the dark theme still win. == */
 :where(.fg-style-modern, [data-fg-style="modern"]) {
   --fg-row-height: 32px;
   --fg-cell-padding-x: 8px;
-  --fg-header-font-weight: 600;
+  --fg-header-font-weight: 500;
   --fg-radius: 6px;
   --fg-menu-shadow: var(--fg-shadow);
+  --fg-fill-handle-radius: 50%;
+  --fg-style-color-text: rgba(0, 0, 0, 0.7);
+  --fg-style-font-family: Roboto, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --fg-style-font-size: 14px;
+  --fg-style-color-border: #e4e4e4;
+  --fg-style-color-header-background: #f7f7f7;
+  --fg-style-color-header-text: rgba(0, 0, 0, 0.7);
+  --fg-style-color-accent: #0287ca;
+  --fg-style-header-highlight-background: #e6e6e6;
+  --fg-style-header-active-highlight-background: #cce7f4;
+  --fg-style-header-active-highlight-text: rgba(0, 0, 0, 0.85);
+  --fg-style-selection-area-background: #0287ca;
+  --fg-style-editor-border-color: #0287ca;
+  --fg-style-menu-hover-background: #ededed;
+  --fg-style-datepicker-hover-background: #e1f1fa;
 }

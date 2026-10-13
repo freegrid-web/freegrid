@@ -28,13 +28,13 @@ export const getThemeClassName = (element: Element | null | undefined): ThemeCla
   return null;
 };
 
-const STYLES = ['fg-style-modern'] as const;
+const STYLES = ['fg-style-classic', 'fg-style-modern'] as const;
 
 export type StyleClassName = typeof STYLES[number];
 
 /**
- * The style (e.g. Modern) of the closest element with a `fg-style-*` class or a `data-fg-style` attribute; `null`
- * for the default Classic style.
+ * The style of the closest element with a `fg-style-*` class or a `data-fg-style` attribute (`classic` or `modern`);
+ * `null` when there is none (the default Classic look). An explicit Classic is for a Classic grid inside a Modern page.
  */
 export const getStyleClassName = (element: Element | null | undefined): StyleClassName | null => {
   for (let node = element ?? null; node; node = node.parentElement) {
@@ -44,8 +44,10 @@ export const getStyleClassName = (element: Element | null | undefined): StyleCla
     if (byClass) {
       return byClass;
     }
-    if (current.getAttribute('data-fg-style') === 'modern') {
-      return 'fg-style-modern';
+    const byAttribute = current.getAttribute('data-fg-style');
+
+    if (byAttribute === 'classic' || byAttribute === 'modern') {
+      return `fg-style-${byAttribute}`;
     }
   }
 

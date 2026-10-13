@@ -4,8 +4,8 @@
   box-sizing: border-box;
   width: 16.5em;
   padding: 0.5em;
-  font-family: var(--fg-font-family, inherit);
-  font-size: var(--fg-font-size, 13px);
+  font-family: var(--fg-font-family, var(--fg-style-font-family, inherit));
+  font-size: var(--fg-font-size, var(--fg-style-font-size, 13px));
   color: var(--fg-datepicker-text);
   background: var(--fg-datepicker-background);
   border: 1px solid var(--fg-datepicker-border-color);
@@ -101,7 +101,7 @@
 .fg-datepicker-next:hover,
 .fg-datepicker-day:hover {
   color: var(--fg-datepicker-hover-text);
-  background: var(--fg-datepicker-hover-background);
+  background: var(--fg-datepicker-hover-background, var(--fg-style-datepicker-hover-background));
 }
 
 .fg-datepicker-day[aria-selected="true"] {

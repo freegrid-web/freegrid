@@ -554,6 +554,71 @@ describe('Theme', () => {
       expect(header.color).toBe('rgb(208, 208, 208)');
     });
 
+    it('has its own palette: light lines, soft text, light headers, a blue accent and a round fill handle', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern"></div>');
+      await createThemeFixture();
+      const root = this.$container[0];
+      const cell = getComputedStyle(root.querySelector('.fg-master tbody tr:nth-child(2) td:not(.area):not(.current)'));
+      const header = getComputedStyle(root.querySelector('.fg-master thead th:not(.fg-highlight)'));
+
+      expect(cell.color).toBe('rgba(0, 0, 0, 0.7)');
+      expect(cell.borderBottomColor).toBe('rgb(228, 228, 228)');
+      expect(header.backgroundColor).toBe('rgb(247, 247, 247)');
+      expect(header.color).toBe('rgba(0, 0, 0, 0.7)');
+      expect(header.fontWeight).toBe('500');
+      expect(getComputedStyle(root.querySelector('.fg-master thead th.fg-highlight')).backgroundColor).toBe('rgb(230, 230, 230)');
+      expect(getComputedStyle(root.querySelector(PARTS.currentBorder[0])).backgroundColor).toBe('rgb(2, 135, 202)');
+      expect(getComputedStyle(root.querySelector(PARTS.fillHandle[0])).borderRadius).toBe('50%');
+      expect(getComputedStyle(root.querySelector(PARTS.fillHandle[0])).backgroundColor).toBe('rgb(2, 135, 202)');
+    });
+
+    it('lets base colors the user sets on :root win over its palette', async function() {
+      document.documentElement.style.setProperty('--fg-color-border', '#123456');
+      document.documentElement.style.setProperty('--fg-color-header-background', '#abcdef');
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern"></div>');
+      await createThemeFixture();
+      const root = this.$container[0];
+      // Read before cleaning up: computed styles are live.
+      const { borderBottomColor } = getComputedStyle(root.querySelector('.fg-master tbody tr:nth-child(2) td:not(.area):not(.current)'));
+      const { backgroundColor } = getComputedStyle(root.querySelector('.fg-master thead th:not(.fg-highlight)'));
+
+      document.documentElement.style.removeProperty('--fg-color-border');
+      document.documentElement.style.removeProperty('--fg-color-header-background');
+      expect(borderBottomColor).toBe('rgb(18, 52, 86)');
+      expect(backgroundColor).toBe('rgb(171, 205, 239)');
+    });
+
+    it('keeps its palette in a light grid inside a dark page', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-theme-dark"><div class="theme-wrapper fg-theme-light fg-style-modern"></div></div>');
+      await createThemeFixture();
+      const { backgroundColor, color } = getComputedStyle(this.$container[0].querySelector('.fg-master thead th:not(.fg-highlight)'));
+
+      this.$container.unwrap('.theme-wrapper'); // the inner wrapper; afterEach removes the outer one
+      expect(backgroundColor).toBe('rgb(247, 247, 247)');
+      expect(color).toBe('rgba(0, 0, 0, 0.7)');
+    });
+
+    it('can be switched back to Classic inside a Modern page with fg-style-classic', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern"><div class="theme-wrapper" data-fg-style="classic"></div></div>');
+      const hot = await createThemeFixture();
+      const root = this.$container[0];
+      const cell = root.querySelector('.fg-master tbody tr:nth-child(2) td:not(.area):not(.current)');
+      const { backgroundColor, fontWeight } = getComputedStyle(root.querySelector('.fg-master thead th:not(.fg-highlight)'));
+      const { color, borderBottomColor, fontSize } = getComputedStyle(cell);
+      const height = cell.offsetHeight;
+      const menuClassic = hot.getPlugin('contextMenu').menu.container.classList.contains('fg-style-classic');
+
+      this.$container.unwrap('.theme-wrapper'); // the inner wrapper; afterEach removes the outer one
+      expect(height).toBe(23);
+      expect(hot.view.wt.wtSettings.settings.defaultRowHeight).toBe(23);
+      expect(backgroundColor).toBe('rgb(240, 240, 240)');
+      expect(fontWeight).toBe('400');
+      expect(color).toBe('rgb(0, 0, 0)');
+      expect(borderBottomColor).toBe('rgb(204, 204, 204)');
+      expect(fontSize).toBe('16px');
+      expect(menuClassic).toBe(true);
+    });
+
     it('uses the base colors set by the user (as the playground presets do)', async function() {
       this.$container.wrap('<div class="theme-wrapper fg-style-modern" style="--fg-color-header-background: #e8f2f8; --fg-color-border: #cfe0ea; --fg-color-header-text: #0b3a53"></div>');
       await createThemeFixture();
