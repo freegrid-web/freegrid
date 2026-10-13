@@ -330,3 +330,31 @@ class DragToScroll extends BasePlugin {
   assert.deepEqual(plugin.methods.map(({ name, description }) => [name, description]),
     [['isEnabled', 'Checks if the plugin is enabled.']]);
 });
+
+test('a TypeScript parameter without a type gets it from a literal default value', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin AutoColumnSize
+ */
+class AutoColumnSize extends BasePlugin {
+  /**
+   * Gets a width.
+   *
+   * @param column Column index.
+   * @param [keepMinimum=true] Keeps the minimum.
+   * @param [step=50] A step.
+   * @param [unit='px'] A unit.
+   * @param [range] A range.
+   */
+  getColumnWidth(column: number, keepMinimum = true, step = 50, unit = 'px', range = this.defaultRange()): number {
+  }
+}`);
+
+  assert.deepEqual(plugin.methods[0].params.map(({ name, type }) => [name, type]), [
+    ['column', 'number'],
+    ['keepMinimum', 'boolean'],
+    ['step', 'number'],
+    ['unit', 'string'],
+    ['range', ''],
+  ]);
+});

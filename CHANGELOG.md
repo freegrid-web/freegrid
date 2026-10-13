@@ -20,6 +20,8 @@
   Fixes:
   - Touch screens: when one of two dragged selection handles was released, the other one stopped being dragged.
   - manualColumnResize: a column header with `colspan="1"` gets the resize handle too.
+- Plugins, part 3: autoColumnSize, autoRowSize, autofill, undoRedo (a class now; `UndoRedo.ChangeAction` and the other
+  actions stay available as static properties).
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
