@@ -25,7 +25,7 @@ export default function createGrid(container) {
       { readOnly: true },
     ],
     cell: [{ row: 0, col: 0, comment: { value: 'Seasonal: cheaper in autumn.' } }],
-    colWidths: [110, 110, 80, 110, 90],
+    colWidths: [80, 90, 60, 95, 75],
   });
 
   grid.validateCells();
