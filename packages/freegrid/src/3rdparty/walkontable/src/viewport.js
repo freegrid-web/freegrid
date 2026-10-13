@@ -332,7 +332,12 @@ class Viewport {
       height,
       pos,
       this.wot.getSetting('totalRows'),
-      sourceRow => this.wot.wtTable.getRowHeight(sourceRow),
+      // Rows without their own height use the configured default (FreeGrid's --fg-row-height), not the calculator's 23.
+      (sourceRow) => {
+        const height = this.wot.wtTable.getRowHeight(sourceRow);
+
+        return height === void 0 ? this.wot.wtSettings.settings.defaultRowHeight : height;
+      },
       visible ? null : this.wot.wtSettings.settings.viewportRowCalculatorOverride,
       visible,
       scrollbarHeight

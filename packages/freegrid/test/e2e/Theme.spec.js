@@ -498,4 +498,21 @@ describe('Theme', () => {
       expect(drawn).not.toContain('rgb(0, 0, 0)');
     });
   });
+
+  describe('size variables', () => {
+    it('uses --fg-row-height for the rows, in the CSS and in the layout', async function() {
+      this.$container[0].style.setProperty('--fg-row-height', '40px');
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(50, 3), height: 300 });
+
+      expect(document.querySelector('.fg-master tbody tr:nth-child(2) td').offsetHeight).toBe(40);
+      expect(hot.view.wt.wtSettings.settings.defaultRowHeight).toBe(40);
+
+      hot.scrollViewportTo(49, 0);
+      await sleep(100);
+      const lastRow = Array.from(document.querySelectorAll('.fg-master tbody tr')).pop();
+
+      expect(lastRow.querySelector('td').textContent).toBe('A50');
+      expect(lastRow.getBoundingClientRect().bottom).toBeLessThanOrEqual(this.$container[0].getBoundingClientRect().bottom + 1);
+    });
+  });
 });

@@ -11,7 +11,7 @@ import {
 import { arrayEach } from './../../helpers/array';
 import Cursor from './cursor';
 import EventManager from './../../eventManager';
-import { applyTheme } from './../../helpers/dom/theme';
+import { applyTheme, getRowHeight } from './../../helpers/dom/theme';
 import { mixin, hasOwnProperty } from './../../helpers/object';
 import { isUndefined, isDefined } from './../../helpers/mixed';
 import { debounce, isFunction } from './../../helpers/function';
@@ -145,7 +145,7 @@ class Menu {
           this.openSubMenu(coords.row);
         }
       },
-      rowHeights: row => (filteredItems[row].name === SEPARATOR ? 1 : 23)
+      rowHeights: row => (filteredItems[row].name === SEPARATOR ? 1 : getRowHeight(this.container))
     };
     this.origOutsideClickDeselects = this.hot.getSettings().outsideClickDeselects;
     this.hot.getSettings().outsideClickDeselects = false;

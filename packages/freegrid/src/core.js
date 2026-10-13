@@ -1,3 +1,4 @@
+import { getRowHeight } from './helpers/dom/theme';
 import { addClass, empty, isChildOfWebComponentTable, removeClass } from './helpers/dom/element';
 import { columnFactory } from './helpers/setting';
 import { isFunction } from './helpers/function';
@@ -1772,6 +1773,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
       if (instance.view) {
         instance.view.wt.wtViewport.resetHasOversizedColumnHeadersMarked();
+        // The style or the theme may have changed the row height (--fg-row-height).
+        instance.view.wt.wtSettings.update('defaultRowHeight', getRowHeight(instance.rootElement));
       }
 
       instance.runHooks('afterUpdateSettings', settings);
