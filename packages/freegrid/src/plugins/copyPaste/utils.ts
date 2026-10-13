@@ -3,91 +3,69 @@ import { isEmpty } from './../../helpers/mixed';
 /**
  * Converts javascript array into HTMLTable.
  *
- * @param {Array} input Input array which will be converted to HTMLTable
+ * @param input Input array which will be converted to HTMLTable
+ * @returns `<table><tbody><tr><td>…` with the values as text (HTML escaped).
  */
-export function arrayToTable(input) {
-  const inputLen = input.length;
+export const arrayToTable = (input: unknown[][]): string => {
   const result = ['<table>'];
-
+  // Escapes the values: an element's innerHTML after setting its innerText.
   const tempElement = document.createElement('div');
+
   document.documentElement.appendChild(tempElement);
 
-  for (let row = 0; row < inputLen; row += 1) {
-    const rowData = input[row];
-    const columnsLen = rowData.length;
-    const columnsResult = [];
-
+  input.forEach((rowData, row) => {
     if (row === 0) {
       result.push('<tbody>');
     }
+    const columnsResult = rowData.map((value) => {
+      tempElement.innerText = `${isEmpty(value) ? '' : value}`;
 
-    for (let column = 0; column < columnsLen; column += 1) {
-      tempElement.innerText = `${isEmpty(rowData[column]) ? '' : rowData[column]}`;
-
-      columnsResult.push(`<td>${tempElement.innerHTML}</td>`);
-    }
+      return `<td>${tempElement.innerHTML}</td>`;
+    });
 
     result.push('<tr>', ...columnsResult, '</tr>');
 
-    if (row + 1 === inputLen) {
+    if (row + 1 === input.length) {
       result.push('</tbody>');
     }
-  }
+  });
 
   document.documentElement.removeChild(tempElement);
 
   result.push('</table>');
 
   return result.join('');
-}
+};
 
 /**
  * Helper to verify if DOM element is an HTMLTable element.
- *
- * @param {Element} element Node element to verify if it's an HTMLTable.
  */
-function isHTMLTable(element) {
-  return (element && element.nodeName || '').toLowerCase() === 'table';
-}
+const isHTMLTable = (element: unknown): element is HTMLTableElement => (
+  ((element as Element | null)?.nodeName || '').toLowerCase() === 'table');
 
 /**
  * Converts HTMLTable or string into array.
  *
- * @param {Element|String} element Node element or string, which should contain `<table>...</table>`.
+ * @param element Node element or string, which should contain `<table>...</table>`.
+ * @returns The cells' text, by rows (a `<br>` is a new line).
  */
-export function tableToArray(element) {
-  const result = [];
-  let checkElement = element;
+export const tableToArray = (element: Element | string | null): string[][] => {
+  let checkElement: Element | null = element as Element | null;
 
-  if (typeof checkElement === 'string') {
+  if (typeof element === 'string') {
     const tempElem = document.createElement('div');
-    tempElem.innerHTML = checkElement.replace(/\n/g, '');
+
+    tempElem.innerHTML = element.replace(/\n/g, '');
     checkElement = tempElem.querySelector('table');
   }
 
-  if (checkElement && isHTMLTable(checkElement)) {
-    const rows = checkElement.rows;
-    const rowsLen = rows && rows.length;
-    const tempArray = [];
-
-    for (let row = 0; row < rowsLen; row += 1) {
-      const cells = rows[row].cells;
-      const cellsLen = cells.length;
-      const newRow = [];
-
-      for (let column = 0; column < cellsLen; column += 1) {
-        const cell = cells[column];
-        cell.innerHTML = cell.innerHTML.trim().replace(/<br(.|)>(\n?)/, '\n');
-        const cellText = cell.innerText;
-
-        newRow.push(cellText);
-      }
-
-      tempArray.push(newRow);
-    }
-
-    result.push(...tempArray);
+  if (!isHTMLTable(checkElement)) {
+    return [];
   }
 
-  return result;
-}
+  return Array.from(checkElement.rows, row => Array.from(row.cells, (cell) => {
+    cell.innerHTML = cell.innerHTML.trim().replace(/<br(.|)>(\n?)/, '\n');
+
+    return cell.innerText;
+  }));
+};

@@ -1,11 +1,12 @@
+/** A stand-in for the browser's DataTransfer, for paste events made by `paste()`. */
 export default class ClipboardData {
-  constructor() {
-    this.data = {};
-  }
-  setData(type, value) {
+  data: Record<string, string> = {};
+
+  setData(type: string, value: string): void {
     this.data[type] = value;
   }
-  getData(type) {
-    return this.data[type] || void 0;
+
+  getData(type: string): string | undefined {
+    return this.data[type] || undefined;
   }
 }

@@ -1,140 +1,41 @@
 import EventManager from './../../eventManager';
 import localHooks from './../../mixins/localHooks';
+import type { LocalHooks } from './../../mixins/localHooks';
 import { mixin } from './../../helpers/object';
 import { isMobileBrowser } from './../../helpers/browser';
 
-/**
- * @class FocusableWrapper
- *
- * @plugin CopyPaste
- */
-class FocusableWrapper {
-  constructor() {
-    /**
-     * The main/operational focusable element.
-     *
-     * @type {HTMLElement}
-     */
-    this.mainElement = null;
-    /**
-     * Instance of EventManager.
-     *
-     * @type {EventManager}
-     */
-    this.eventManager = new EventManager(this);
-    /**
-     * An object for tracking information about event listeners attached to the focusable element.
-     *
-     * @type {WeakSet}
-     */
-    this.listenersCount = new WeakSet();
-  }
+/** The element that gets the keyboard focus, so that the browser's copy, cut and paste events reach the grid. */
+type Focusable = HTMLTextAreaElement | HTMLInputElement;
 
-  /**
-   * Switch to the secondary focusable element. Used when no any main focusable element is provided.
-   */
-  useSecondaryElement() {
-    const el = createOrGetSecondaryElement();
-
-    if (!this.listenersCount.has(el)) {
-      this.listenersCount.add(el);
-      forwardEventsToLocalHooks(this.eventManager, el, this);
-    }
-
-    this.mainElement = el;
-  }
-
-  /**
-   * Switch to the main focusable element.
-   */
-  setFocusableElement(element) {
-    if (!this.listenersCount.has(element)) {
-      this.listenersCount.add(element);
-      forwardEventsToLocalHooks(this.eventManager, element, this);
-    }
-
-    this.mainElement = element;
-  }
-
-  /**
-   * Get currently set focusable element.
-   *
-   * @return {HTMLElement}
-   */
-  getFocusableElement() {
-    return this.mainElement;
-  }
-
-  /**
-   * Set focus to the focusable element.
-   */
-  focus() {
-    // Add an empty space to texarea. It is necessary for safari to enable "copy" command from menu bar.
-    this.mainElement.value = ' ';
-
-    if (!isMobileBrowser()) {
-      this.mainElement.select();
-    }
-  }
-}
-
-mixin(FocusableWrapper, localHooks);
-
+/** How many wrappers exist: the shared secondary element is removed with the last one. */
 let refCounter = 0;
 
-/**
- * Create and return the FocusableWrapper instance.
- *
- * @return {FocusableWrapper}
- */
-function createElement() {
-  const focusableWrapper = new FocusableWrapper();
+/** The shared textarea used when the grid has no element to focus. */
+let secondaryElement: HTMLTextAreaElement | null = null;
 
-  refCounter += 1;
-
-  return focusableWrapper;
-}
-
-/**
- * Deactivate the FocusableWrapper instance.
- *
- * @param {FocusableWrapper} wrapper
- */
-function deactivateElement(wrapper) {
-  wrapper.eventManager.clear();
-}
-
-const runLocalHooks = (eventName, subject) => event => subject.runLocalHooks(eventName, event);
+/** Runs the wrapper's local hook `eventName` with the event. */
+const runLocalHooks = (eventName: string, subject: FocusableWrapper) => (event: Event) => subject.runLocalHooks(eventName, event);
 
 /**
  * Register copy/cut/paste events and forward their actions to the subject local hooks system.
- *
- * @param {HTMLElement} element
- * @param {FocusableWrapper} subject
  */
-function forwardEventsToLocalHooks(eventManager, element, subject) {
-  eventManager.addEventListener(element, 'copy', runLocalHooks('copy', subject));
-  eventManager.addEventListener(element, 'cut', runLocalHooks('cut', subject));
-  eventManager.addEventListener(element, 'paste', runLocalHooks('paste', subject));
-}
-
-let secondaryElement;
+const forwardEventsToLocalHooks = (eventManager: EventManager, element: Focusable, subject: FocusableWrapper): void => {
+  ['copy', 'cut', 'paste'].forEach((eventName) => {
+    eventManager.addEventListener(element, eventName, runLocalHooks(eventName, subject));
+  });
+};
 
 /**
  * Create and attach newly created focusable element to the DOM.
- *
- * @return {HTMLElement}
  */
-function createOrGetSecondaryElement() {
+const createOrGetSecondaryElement = (): HTMLTextAreaElement => {
   if (secondaryElement) {
-
     if (!secondaryElement.parentElement) {
       document.body.appendChild(secondaryElement);
     }
 
     return secondaryElement;
   }
-
   const element = document.createElement('textarea');
 
   secondaryElement = element;
@@ -148,18 +49,103 @@ function createOrGetSecondaryElement() {
   document.body.appendChild(element);
 
   return element;
-}
+};
 
 /**
- * Destroy the FocusableWrapper instance.
+ * @class FocusableWrapper
  *
- * @param {FocusableWrapper} wrapper
+ * @plugin CopyPaste
+ *
+ * The element that gets the keyboard focus for copy and paste: the editor's textarea, or a shared hidden one. Its
+ * copy, cut and paste events run the `copy`, `cut` and `paste` local hooks.
  */
-function destroyElement(wrapper) {
+class FocusableWrapper {
+  // From the localHooks mixin (on the prototype): `declare` keeps class fields from hiding them.
+  declare addLocalHook: LocalHooks['addLocalHook'];
+
+  declare runLocalHooks: LocalHooks['runLocalHooks'];
+
+  declare clearLocalHooks: LocalHooks['clearLocalHooks'];
+
+  /**
+   * The main/operational focusable element.
+   */
+  mainElement: Focusable | null = null;
+
+  /**
+   * Instance of EventManager.
+   */
+  eventManager = new EventManager(this);
+
+  /**
+   * The elements whose events are forwarded already.
+   */
+  listenersCount = new WeakSet<Focusable>();
+
+  /**
+   * Switch to the secondary focusable element. Used when no any main focusable element is provided.
+   */
+  useSecondaryElement(): void {
+    this.setFocusableElement(createOrGetSecondaryElement());
+  }
+
+  /**
+   * Switch to the main focusable element.
+   */
+  setFocusableElement(element: Focusable): void {
+    if (!this.listenersCount.has(element)) {
+      this.listenersCount.add(element);
+      forwardEventsToLocalHooks(this.eventManager, element, this);
+    }
+
+    this.mainElement = element;
+  }
+
+  /**
+   * Get currently set focusable element.
+   */
+  getFocusableElement(): Focusable | null {
+    return this.mainElement;
+  }
+
+  /**
+   * Set focus to the focusable element.
+   */
+  focus(): void {
+    // A space in the element: Safari enables "Copy" in its menu bar only then.
+    this.mainElement!.value = ' ';
+
+    if (!isMobileBrowser()) {
+      this.mainElement!.select();
+    }
+  }
+}
+
+mixin(FocusableWrapper, localHooks);
+
+/**
+ * Create and return the FocusableWrapper instance.
+ */
+export const createElement = (): FocusableWrapper => {
+  refCounter += 1;
+
+  return new FocusableWrapper();
+};
+
+/**
+ * Deactivate the FocusableWrapper instance.
+ */
+export const deactivateElement = (wrapper: FocusableWrapper): void => {
+  wrapper.eventManager.clear();
+};
+
+/**
+ * Destroy the FocusableWrapper instance (the last one also removes the secondary element).
+ */
+export const destroyElement = (wrapper: unknown): void => {
   if (!(wrapper instanceof FocusableWrapper)) {
     return;
   }
-
   if (refCounter > 0) {
     refCounter -= 1;
   }
@@ -170,12 +156,12 @@ function destroyElement(wrapper) {
     refCounter = 0;
 
     // Detach secondary element from the DOM.
-    if (secondaryElement && secondaryElement.parentNode) {
+    if (secondaryElement?.parentNode) {
       secondaryElement.parentNode.removeChild(secondaryElement);
       secondaryElement = null;
     }
     wrapper.mainElement = null;
   }
-}
+};
 
-export { createElement, deactivateElement, destroyElement };
+export type { FocusableWrapper };

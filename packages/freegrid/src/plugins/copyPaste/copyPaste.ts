@@ -1,14 +1,14 @@
 import BasePlugin from './../_base';
 import Hooks from './../../pluginHooks';
 import SheetClip from './../../../lib/SheetClip/SheetClip';
-import { arrayEach } from './../../helpers/array';
-import { rangeEach } from './../../helpers/number';
 import { getSelectionText } from './../../helpers/dom/element';
 import { registerPlugin } from './../../plugins';
 import copyItem from './contextMenuItem/copy';
 import cutItem from './contextMenuItem/cut';
 import PasteEvent from './pasteEvent';
+import type { MenuItem } from './../contextMenu/menuItem';
 import { createElement, destroyElement } from './focusableElement';
+import type { FocusableWrapper } from './focusableElement';
 import { arrayToTable, tableToArray } from './utils';
 
 import './copyPaste.css';
@@ -24,7 +24,9 @@ Hooks.getSingleton().register('afterCopy');
 
 const ROWS_LIMIT = 1000;
 const COLUMNS_LIMIT = 1000;
-const privatePool = new WeakMap();
+
+/** Cells to copy, cut or paste over. */
+export type CopyableRange = { startRow: number; startCol: number; endRow: number; endCol: number };
 
 /**
  * @description
@@ -56,69 +58,67 @@ const privatePool = new WeakMap();
  * @plugin CopyPaste
  */
 class CopyPaste extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
-    /**
-     * Maximum number of columns than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
-     *
-     * @type {Number}
-     * @default 1000
-     */
-    this.columnsLimit = COLUMNS_LIMIT;
-    /**
-     * Ranges of the cells coordinates, which should be used to copy/cut/paste actions.
-     *
-     * @private
-     * @type {Array}
-     */
-    this.copyableRanges = [];
-    /**
-     * Defines paste (<kbd>CTRL</kbd> + <kbd>V</kbd>) behavior.
-     * * Default value `"overwrite"` will paste clipboard value over current selection.
-     * * When set to `"shift_down"`, clipboard data will be pasted in place of current selection, while all selected cells are moved down.
-     * * When set to `"shift_right"`, clipboard data will be pasted in place of current selection, while all selected cells are moved right.
-     *
-     * @type {String}
-     * @default 'overwrite'
-     */
-    this.pasteMode = 'overwrite';
-    /**
-     * Maximum number of rows than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
-     *
-     * @type {Number}
-     * @default 1000
-     */
-    this.rowsLimit = ROWS_LIMIT;
+  /**
+   * Maximum number of columns than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
+   *
+   * @default 1000
+   */
+  columnsLimit = COLUMNS_LIMIT;
 
-    privatePool.set(this, {
-      isTriggeredByCopy: false,
-      isTriggeredByCut: false,
-      isBeginEditing: false,
-      isFragmentSelectionEnabled: false,
-    });
-  }
+  /**
+   * Ranges of the cells coordinates, which should be used to copy/cut/paste actions.
+   *
+   * @private
+   */
+  copyableRanges: CopyableRange[] = [];
+
+  /**
+   * Defines paste (<kbd>CTRL</kbd> + <kbd>V</kbd>) behavior.
+   * * Default value `"overwrite"` will paste clipboard value over current selection.
+   * * When set to `"shift_down"`, clipboard data will be pasted in place of current selection, while all selected cells are moved down.
+   * * When set to `"shift_right"`, clipboard data will be pasted in place of current selection, while all selected cells are moved right.
+   *
+   * @default 'overwrite'
+   */
+  pasteMode = 'overwrite';
+
+  /**
+   * Maximum number of rows than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
+   *
+   * @default 1000
+   */
+  rowsLimit = ROWS_LIMIT;
+
+  /** The element that gets the focus for the browser's copy, cut and paste events. */
+  focusableElement?: FocusableWrapper | null;
+
+  /** Whether `copy()` started the copy event (the grid need not be listening then). */
+  #isTriggeredByCopy = false;
+
+  /** Whether `cut()` started the cut event. */
+  #isTriggeredByCut = false;
+
+  /** The `fragmentSelection` setting: selected text in cells may be copied as it is. */
+  #isFragmentSelectionEnabled = false;
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link CopyPaste#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return !!this.hot.getSettings().copyPaste;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
     const settings = this.hot.getSettings();
-    const priv = privatePool.get(this);
 
-    priv.isFragmentSelectionEnabled = settings.fragmentSelection;
+    this.#isFragmentSelectionEnabled = settings.fragmentSelection;
 
     if (typeof settings.copyPaste === 'object') {
       this.pasteMode = settings.copyPaste.pasteMode || this.pasteMode;
@@ -126,16 +126,17 @@ class CopyPaste extends BasePlugin {
       this.columnsLimit = settings.copyPaste.columnsLimit || this.columnsLimit;
     }
 
-    this.addHook('afterContextMenuDefaultOptions', options => this.onAfterContextMenuDefaultOptions(options));
+    this.addHook('afterContextMenuDefaultOptions',
+      (options: { items: MenuItem[] }) => this.onAfterContextMenuDefaultOptions(options));
     this.addHook('afterOnCellMouseUp', () => this.onAfterOnCellMouseUp());
     this.addHook('afterSelectionEnd', () => this.onAfterSelectionEnd());
     this.addHook('beforeKeyDown', () => this.onBeforeKeyDown());
 
     this.focusableElement = createElement();
     this.focusableElement
-      .addLocalHook('copy', event => this.onCopy(event))
-      .addLocalHook('cut', event => this.onCut(event))
-      .addLocalHook('paste', event => this.onPaste(event));
+      .addLocalHook('copy', (event: ClipboardEvent) => this.onCopy(event))
+      .addLocalHook('cut', (event: ClipboardEvent) => this.onCut(event))
+      .addLocalHook('paste', (event: ClipboardEvent) => this.onPaste(event));
 
     super.enablePlugin();
   }
@@ -143,7 +144,7 @@ class CopyPaste extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
     this.getOrCreateFocusableElement();
@@ -154,7 +155,7 @@ class CopyPaste extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     if (this.focusableElement) {
       destroyElement(this.focusableElement);
     }
@@ -165,113 +166,68 @@ class CopyPaste extends BasePlugin {
   /**
    * Copies the selected cell into the clipboard.
    */
-  copy() {
-    const priv = privatePool.get(this);
-    priv.isTriggeredByCopy = true;
+  copy(): void {
+    this.#isTriggeredByCopy = true;
 
     this.getOrCreateFocusableElement();
-    this.focusableElement.focus();
+    this.focusableElement!.focus();
     document.execCommand('copy');
   }
 
   /**
    * Cuts the selected cell into the clipboard.
    */
-  cut() {
-    const priv = privatePool.get(this);
-    priv.isTriggeredByCut = true;
+  cut(): void {
+    this.#isTriggeredByCut = true;
 
     this.getOrCreateFocusableElement();
-    this.focusableElement.focus();
+    this.focusableElement!.focus();
     document.execCommand('cut');
   }
 
   /**
    * Creates copyable text releated to range objects.
    *
-   * @param {Object[]} ranges Array of objects with properties `startRow`, `endRow`, `startCol` and `endCol`.
-   * @returns {String} Returns string which will be copied into clipboard.
+   * @param ranges Array of objects with properties `startRow`, `endRow`, `startCol` and `endCol`.
+   * @returns Returns string which will be copied into clipboard.
    */
-  getRangedCopyableData(ranges) {
-    const dataSet = [];
-    const copyableRows = [];
-    const copyableColumns = [];
-
-    // Count all copyable rows and columns
-    arrayEach(ranges, (range) => {
-      rangeEach(range.startRow, range.endRow, (row) => {
-        if (copyableRows.indexOf(row) === -1) {
-          copyableRows.push(row);
-        }
-      });
-      rangeEach(range.startCol, range.endCol, (column) => {
-        if (copyableColumns.indexOf(column) === -1) {
-          copyableColumns.push(column);
-        }
-      });
-    });
-    // Concat all rows and columns data defined in ranges into one copyable string
-    arrayEach(copyableRows, (row) => {
-      const rowSet = [];
-
-      arrayEach(copyableColumns, (column) => {
-        rowSet.push(this.hot.getCopyableData(row, column));
-      });
-
-      dataSet.push(rowSet);
-    });
-
-    return SheetClip.stringify(dataSet);
+  getRangedCopyableData(ranges: CopyableRange[]): string {
+    return SheetClip.stringify(this.getRangedData(ranges));
   }
 
   /**
    * Creates copyable text releated to range objects.
    *
-   * @param {Object[]} ranges Array of objects with properties `startRow`, `startCol`, `endRow` and `endCol`.
-   * @returns {Array[]} Returns array of arrays which will be copied into clipboard.
+   * @param ranges Array of objects with properties `startRow`, `startCol`, `endRow` and `endCol`.
+   * @returns Returns array of arrays which will be copied into clipboard.
    */
-  getRangedData(ranges) {
-    const dataSet = [];
-    const copyableRows = [];
-    const copyableColumns = [];
+  getRangedData(ranges: CopyableRange[]): unknown[][] {
+    const copyableRows = new Set<number>();
+    const copyableColumns = new Set<number>();
 
-    // Count all copyable rows and columns
-    arrayEach(ranges, (range) => {
-      rangeEach(range.startRow, range.endRow, (row) => {
-        if (copyableRows.indexOf(row) === -1) {
-          copyableRows.push(row);
-        }
-      });
-      rangeEach(range.startCol, range.endCol, (column) => {
-        if (copyableColumns.indexOf(column) === -1) {
-          copyableColumns.push(column);
-        }
-      });
-    });
-    // Concat all rows and columns data defined in ranges into one copyable string
-    arrayEach(copyableRows, (row) => {
-      const rowSet = [];
-
-      arrayEach(copyableColumns, (column) => {
-        rowSet.push(this.hot.getCopyableData(row, column));
-      });
-
-      dataSet.push(rowSet);
+    // The rows and columns of every range, each once, in the order they come.
+    ranges.forEach(({ startRow, endRow, startCol, endCol }) => {
+      for (let row = startRow; row <= endRow; row += 1) {
+        copyableRows.add(row);
+      }
+      for (let column = startCol; column <= endCol; column += 1) {
+        copyableColumns.add(column);
+      }
     });
 
-    return dataSet;
+    return [...copyableRows].map(row => [...copyableColumns].map(column => this.hot.getCopyableData(row, column)));
   }
 
   /**
    * Simulates the paste action.
    *
-   * @param {String} [value] Value to paste.
+   * @param [pastableText] Value to paste.
+   * @param [pastableHtml] The value as HTML (a `<table>` is pasted cell by cell).
    */
-  paste(pastableText = '', pastableHtml = pastableText) {
+  paste(pastableText = '', pastableHtml: string = pastableText): void {
     if (!pastableText && !pastableHtml) {
       return;
     }
-
     const pasteData = new PasteEvent();
 
     if (pastableText) {
@@ -288,31 +244,19 @@ class CopyPaste extends BasePlugin {
   /**
    * Prepares copyable text from the cells selection in the invisible textarea.
    */
-  setCopyableText() {
+  setCopyableText(): void {
     const selRange = this.hot.getSelectedRangeLast();
 
     if (!selRange) {
       return;
     }
-
-    const topLeft = selRange.getTopLeftCorner();
-    const bottomRight = selRange.getBottomRightCorner();
-    const startRow = topLeft.row;
-    const startCol = topLeft.col;
-    const endRow = bottomRight.row;
-    const endCol = bottomRight.col;
+    const { row: startRow, col: startCol } = selRange.getTopLeftCorner();
+    const { row: endRow, col: endCol } = selRange.getBottomRightCorner();
     const finalEndRow = Math.min(endRow, startRow + this.rowsLimit - 1);
     const finalEndCol = Math.min(endCol, startCol + this.columnsLimit - 1);
 
     this.copyableRanges.length = 0;
-
-    this.copyableRanges.push({
-      startRow,
-      startCol,
-      endRow: finalEndRow,
-      endCol: finalEndCol
-    });
-
+    this.copyableRanges.push({ startRow, startCol, endRow: finalEndRow, endCol: finalEndCol });
     this.copyableRanges = this.hot.runHooks('modifyCopyableRange', this.copyableRanges);
 
     if (endRow !== finalEndRow || endCol !== finalEndCol) {
@@ -325,14 +269,13 @@ class CopyPaste extends BasePlugin {
    *
    * @private
    */
-  getOrCreateFocusableElement() {
-    const editor = this.hot.getActiveEditor();
-    const editableElement = editor ? editor.TEXTAREA : void 0;
+  getOrCreateFocusableElement(): void {
+    const editableElement = this.hot.getActiveEditor()?.TEXTAREA;
 
     if (editableElement) {
-      this.focusableElement.setFocusableElement(editableElement);
+      this.focusableElement!.setFocusableElement(editableElement);
     } else {
-      this.focusableElement.useSecondaryElement();
+      this.focusableElement!.useSecondaryElement();
     }
   }
 
@@ -341,49 +284,33 @@ class CopyPaste extends BasePlugin {
    *
    * @private
    */
-  isEditorOpened() {
-    const editor = this.hot.getActiveEditor();
-
-    return editor && editor.isOpened();
+  isEditorOpened(): boolean {
+    return !!this.hot.getActiveEditor()?.isOpened();
   }
 
   /**
    * Prepares new values to populate them into datasource.
    *
    * @private
-   * @param {Array} inputArray
-   * @param {Array} selection
-   * @returns {Array} Range coordinates after populate data
+   * @param inputArray The pasted values.
+   * @param [selection] Where they are pasted: `[row, column, row2, column2]`.
+   * @returns Range coordinates after populate data
    */
-  populateValues(inputArray, selection = this.hot.getSelectedLast()) {
+  populateValues(inputArray: unknown[][], selection: number[] = this.hot.getSelectedLast()): number[] | undefined {
     if (!inputArray.length) {
-      return;
+      return undefined;
     }
-
-    const newValuesMaxRow = inputArray.length - 1;
-    const newValuesMaxColumn = inputArray[0].length - 1;
-
+    const valuesRows = inputArray.length;
+    const valuesColumns = inputArray[0].length;
     const startRow = Math.min(selection[0], selection[2]);
-    const endRow = Math.max(selection[0], selection[2], newValuesMaxRow + startRow);
+    const endRow = Math.max(selection[0], selection[2], valuesRows - 1 + startRow);
     const startColumn = Math.min(selection[1], selection[3]);
-    const endColumn = Math.max(selection[1], selection[3], newValuesMaxColumn + startColumn);
-    const newValues = [];
+    const endColumn = Math.max(selection[1], selection[3], valuesColumns - 1 + startColumn);
+    // The values repeat over a selection bigger than them.
+    const newValues = Array.from({ length: endRow - startRow + 1 }, (_, row) => Array.from(
+      { length: endColumn - startColumn + 1 }, (__, column) => inputArray[row % valuesRows][column % valuesColumns]));
 
-    for (let row = startRow, valuesRow = 0; row <= endRow; row += 1) {
-      const newRow = [];
-
-      for (let column = startColumn, valuesColumn = 0; column <= endColumn; column += 1) {
-        newRow.push(inputArray[valuesRow][valuesColumn]);
-
-        valuesColumn = valuesColumn === newValuesMaxColumn ? 0 : valuesColumn += 1;
-      }
-
-      newValues.push(newRow);
-
-      valuesRow = valuesRow === newValuesMaxRow ? 0 : valuesRow += 1;
-    }
-
-    this.hot.populateFromArray(startRow, startColumn, newValues, void 0, void 0, 'CopyPaste.paste', this.pasteMode);
+    this.hot.populateFromArray(startRow, startColumn, newValues, undefined, undefined, 'CopyPaste.paste', this.pasteMode);
 
     return [startRow, startColumn, endRow, endColumn];
   }
@@ -391,35 +318,20 @@ class CopyPaste extends BasePlugin {
   /**
    * `copy` event callback on textarea element.
    *
-   * @param {Event} event ClipboardEvent.
+   * @param event ClipboardEvent.
    * @private
    */
-  onCopy(event) {
-    const priv = privatePool.get(this);
-
-    if ((!this.hot.isListening() && !priv.isTriggeredByCopy) || this.isEditorOpened()) {
+  onCopy(event: ClipboardEvent): void {
+    if ((!this.hot.isListening() && !this.#isTriggeredByCopy) || this.isEditorOpened()) {
       return;
     }
-
     this.setCopyableText();
-    priv.isTriggeredByCopy = false;
+    this.#isTriggeredByCopy = false;
 
     const rangedData = this.getRangedData(this.copyableRanges);
-    const allowCopying = !!this.hot.runHooks('beforeCopy', rangedData, this.copyableRanges);
 
-    if (allowCopying) {
-      const textPlain = SheetClip.stringify(rangedData);
-
-      if (event && event.clipboardData) {
-        const textHTML = arrayToTable(rangedData);
-
-        event.clipboardData.setData('text/plain', textPlain);
-        event.clipboardData.setData('text/html', textHTML);
-
-      } else if (typeof ClipboardEvent === 'undefined') {
-        window.clipboardData.setData('Text', textPlain);
-      }
-
+    if (this.hot.runHooks('beforeCopy', rangedData, this.copyableRanges)) {
+      this.#putOnClipboard(event, rangedData);
       this.hot.runHooks('afterCopy', rangedData, this.copyableRanges);
     }
 
@@ -429,35 +341,20 @@ class CopyPaste extends BasePlugin {
   /**
    * `cut` event callback on textarea element.
    *
-   * @param {Event} event ClipboardEvent.
+   * @param event ClipboardEvent.
    * @private
    */
-  onCut(event) {
-    const priv = privatePool.get(this);
-
-    if ((!this.hot.isListening() && !priv.isTriggeredByCut) || this.isEditorOpened()) {
+  onCut(event: ClipboardEvent): void {
+    if ((!this.hot.isListening() && !this.#isTriggeredByCut) || this.isEditorOpened()) {
       return;
     }
-
     this.setCopyableText();
-    priv.isTriggeredByCut = false;
+    this.#isTriggeredByCut = false;
 
     const rangedData = this.getRangedData(this.copyableRanges);
-    const allowCuttingOut = !!this.hot.runHooks('beforeCut', rangedData, this.copyableRanges);
 
-    if (allowCuttingOut) {
-      const textPlain = SheetClip.stringify(rangedData);
-
-      if (event && event.clipboardData) {
-        const textHTML = arrayToTable(rangedData);
-
-        event.clipboardData.setData('text/plain', textPlain);
-        event.clipboardData.setData('text/html', textHTML);
-
-      } else if (typeof ClipboardEvent === 'undefined') {
-        window.clipboardData.setData('Text', textPlain);
-      }
-
+    if (this.hot.runHooks('beforeCut', rangedData, this.copyableRanges)) {
+      this.#putOnClipboard(event, rangedData);
       this.hot.emptySelectedCells();
       this.hot.runHooks('afterCut', rangedData, this.copyableRanges);
     }
@@ -468,44 +365,37 @@ class CopyPaste extends BasePlugin {
   /**
    * `paste` event callback on textarea element.
    *
-   * @param {Event} event ClipboardEvent or pseudo ClipboardEvent, if paste was called manually.
+   * @param event ClipboardEvent or pseudo ClipboardEvent, if paste was called manually.
    * @private
    */
-  onPaste(event) {
+  onPaste(event: ClipboardEvent | PasteEvent): void {
     if (!this.hot.isListening() || this.isEditorOpened()) {
       return;
     }
-
-    if (event && event.preventDefault) {
+    if ('preventDefault' in event) {
       event.preventDefault();
     }
 
-    let pastedData;
+    let pastedData: string | unknown[][] | undefined;
 
-    if (event && typeof event.clipboardData !== 'undefined') {
+    if (event?.clipboardData) {
       const textHTML = event.clipboardData.getData('text/html');
 
-      if (textHTML && /(<table)|(<TABLE)/.test(textHTML)) {
-        pastedData = tableToArray(textHTML);
-      } else {
-        pastedData = event.clipboardData.getData('text/plain');
-      }
-
-    } else if (typeof ClipboardEvent === 'undefined' && typeof window.clipboardData !== 'undefined') {
-      pastedData = window.clipboardData.getData('Text');
+      // An HTML table is pasted cell by cell.
+      pastedData = textHTML && /(<table)|(<TABLE)/.test(textHTML) ?
+        tableToArray(textHTML) : event.clipboardData.getData('text/plain');
     }
 
-    const inputArray = typeof pastedData !== 'string' ? pastedData : SheetClip.parse(pastedData);
+    const inputArray: unknown[][] = typeof pastedData === 'string' ? SheetClip.parse(pastedData) : pastedData ?? [];
 
     if (inputArray.length === 0) {
       return;
     }
-
     if (this.hot.runHooks('beforePaste', inputArray, this.copyableRanges) === false) {
       return;
     }
 
-    const [startRow, startColumn, endRow, endColumn] = this.populateValues(inputArray);
+    const [startRow, startColumn, endRow, endColumn] = this.populateValues(inputArray)!;
 
     this.hot.selectCell(
       startRow,
@@ -521,16 +411,10 @@ class CopyPaste extends BasePlugin {
    * Add copy, cut and paste options to the Context Menu.
    *
    * @private
-   * @param {Object} options Contains default added options of the Context Menu.
+   * @param options Contains default added options of the Context Menu.
    */
-  onAfterContextMenuDefaultOptions(options) {
-    options.items.push(
-      {
-        name: '---------',
-      },
-      copyItem(this),
-      cutItem(this)
-    );
+  onAfterContextMenuDefaultOptions(options: { items: MenuItem[] }): void {
+    options.items.push({ name: '---------' }, copyItem(this), cutItem(this));
   }
 
   /**
@@ -538,13 +422,13 @@ class CopyPaste extends BasePlugin {
    *
    * @private
    */
-  onAfterOnCellMouseUp() {
+  onAfterOnCellMouseUp(): void {
     if (!this.hot.isListening() || this.isEditorOpened()) {
       return;
     }
 
     this.getOrCreateFocusableElement();
-    this.focusableElement.focus();
+    this.focusableElement!.focus();
   }
 
   /**
@@ -552,21 +436,20 @@ class CopyPaste extends BasePlugin {
    *
    * @private
    */
-  onAfterSelectionEnd() {
-    const { isFragmentSelectionEnabled } = privatePool.get(this);
-
+  onAfterSelectionEnd(): void {
     if (this.isEditorOpened()) {
       return;
     }
-
     this.getOrCreateFocusableElement();
 
-    if (isFragmentSelectionEnabled && this.focusableElement.getFocusableElement() !== document.activeElement && getSelectionText()) {
+    // Text selected in a cell (fragmentSelection) stays selected.
+    if (this.#isFragmentSelectionEnabled && this.focusableElement!.getFocusableElement() !== document.activeElement &&
+      getSelectionText()) {
       return;
     }
 
     this.setCopyableText();
-    this.focusableElement.focus();
+    this.focusableElement!.focus();
   }
 
   /**
@@ -574,31 +457,40 @@ class CopyPaste extends BasePlugin {
    *
    * @private
    */
-  onBeforeKeyDown() {
+  onBeforeKeyDown(): void {
     if (!this.hot.isListening() || this.isEditorOpened()) {
       return;
     }
-    const activeElement = document.activeElement;
+    const { activeElement } = document;
     const activeEditor = this.hot.getActiveEditor();
 
-    if (!activeEditor || (activeElement !== this.focusableElement.getFocusableElement() && activeElement !== activeEditor.select)) {
+    if (!activeEditor ||
+      (activeElement !== this.focusableElement!.getFocusableElement() && activeElement !== activeEditor.select)) {
       return;
     }
 
     this.getOrCreateFocusableElement();
-    this.focusableElement.focus();
+    this.focusableElement!.focus();
   }
 
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     if (this.focusableElement) {
       destroyElement(this.focusableElement);
       this.focusableElement = null;
     }
 
     super.destroy();
+  }
+
+  /** Puts the values on the clipboard as text (tab separated) and as an HTML table. */
+  #putOnClipboard(event: ClipboardEvent, rangedData: unknown[][]): void {
+    if (event?.clipboardData) {
+      event.clipboardData.setData('text/plain', SheetClip.stringify(rangedData));
+      event.clipboardData.setData('text/html', arrayToTable(rangedData));
+    }
   }
 }
 
