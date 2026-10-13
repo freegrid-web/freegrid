@@ -49,6 +49,9 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 - **Dates:** FreeGrid no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
   rules (see [Date and time formats](./cell-types#date-and-time-formats)); use real formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Week tokens (`w`, `W`, `gggg`) and locales other than English are not supported.
+- **Numbers:** FreeGrid no longer needs numbro. `numericFormat` patterns keep numbro's syntax and give the same text;
+  the separators and the currency come from the browser, so no numbro language files are needed (see
+  [Number formats](./cell-types#number-formats)).
 - **Date picker:** FreeGrid has its own calendar instead of Pikaday (classes `fg-datepicker*` instead of `pika-*`).
   `datePickerConfig` keeps Pikaday's names for the common options (see [Date picker](./cell-types#date-picker));
   other Pikaday options are ignored. You no longer load Pikaday or its CSS.

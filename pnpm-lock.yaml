@@ -202,10 +202,6 @@ importers:
         version: 3.5.43(typescript@5.9.3)
 
   packages/freegrid:
-    dependencies:
-      numbro:
-        specifier: 2.1.1
-        version: 2.1.1
     devDependencies:
       jasmine-core:
         specifier: ^5.13.0
@@ -216,6 +212,9 @@ importers:
       moment:
         specifier: ^2.31.0
         version: 2.31.0
+      numbro:
+        specifier: 2.1.1
+        version: 2.1.1
       playwright:
         specifier: ^1.64.0
         version: 1.64.0

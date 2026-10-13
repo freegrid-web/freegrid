@@ -16,7 +16,7 @@ columns: [
 | Type | Notes |
 | --- | --- |
 | `text` | The default. |
-| `numeric` | Right-aligned. `numericFormat: { pattern, culture }` uses [numbro](https://numbrojs.com) patterns. |
+| `numeric` | Right-aligned. `numericFormat` sets the format (see [Number formats](#number-formats)). |
 | `date` | A date picker. `dateFormat` sets the format (see [Date and time formats](#date-and-time-formats)); `correctFormat: true` reformats valid input. |
 | `time` | `timeFormat` sets the format (see [Date and time formats](#date-and-time-formats)). |
 | `checkbox` | `checkedTemplate` and `uncheckedTemplate` set the stored values. |
@@ -38,6 +38,43 @@ Your own rule:
 ```
 
 See it live in the [cell types example](../examples/cell-types).
+
+## Number formats
+
+`numericFormat` changes how a number is shown, not the stored value. A `pattern` uses numbro's syntax, so patterns
+written for numbro keep working; `culture` (default `en-US`) gives the separators and the currency, from the browser,
+for any locale.
+
+```js
+columns: [
+  { type: 'numeric', numericFormat: { pattern: '0,0.00' } }, // 1,234.50
+  { type: 'numeric', numericFormat: { pattern: '$0,0.00', culture: 'en-US' } }, // $1,234.50
+  { type: 'numeric', numericFormat: { pattern: '0,0.00 $', culture: 'de-DE' } }, // 1.234,50 €
+  { type: 'numeric', numericFormat: { pattern: '0.0%' } }, // 12.5%
+  { type: 'numeric', numericFormat: { style: 'unit', unit: 'kilogram', culture: 'lt-LT' } }, // Intl options
+]
+```
+
+| Pattern part | Meaning | Example (1234.5) |
+| --- | --- | --- |
+| `0` | The number as it is (no rounding without `.00`) | `1234.5` |
+| `,` | Thousands separator | `0,0` → `1,234.5` |
+| `.00` | Fixed decimals | `0,0.00` → `1,234.50` |
+| `[.]00` | Decimals only when needed | `0[.]00` → `1234.50`, and `12` for 12 |
+| `000` | Minimum digits before the point | `00000` → `01234.5` |
+| `$` | The culture's currency, on the culture's side | `$0,0.00` → `$1,234.50` |
+| `%` | Percent (× 100) | `0.0%` for 0.125 → `12.5%` |
+| `a` | Thousands/millions/billions/trillions (`k`, `m`, `b`, `t`) | `0.0a` → `1.2k` |
+| `o` | Ordinal (English; `.` in other cultures) | `0o` for 3 → `3rd` |
+| `b`, `d`, `bd` | Bytes (KiB…, KB… by 1000, KB… by 1024) | `0.0b` → `1.2KiB` |
+| `00:00:00` | Seconds as hours:minutes:seconds | `00:00:00` → `0:20:35` |
+| `(…)`, `+` | Negative numbers in parentheses, always a sign | `(0,0)` for −5 → `(5)` |
+| `{text}` | Text before or after | `{≈ }0` → `≈ 1234.5` |
+| space | A space before the symbol or letter | `0,0.00 $` → `$ 1,234.50` |
+
+Without `pattern`, the other options go to the browser's
+[`Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options)
+(`style`, `currency`, `unit`, `notation`, `minimumFractionDigits`, …).
 
 ## Date picker
 
