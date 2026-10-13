@@ -25,6 +25,10 @@
   --fg-color-readonly-text: #777; /* Text of read-only cells. */
   --fg-color-muted-text: #999; /* Placeholders and disabled menu items. */
   --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
+  --fg-row-height: 23px; /* Row height, including the bottom border; FreeGrid reads it when the grid is created. */
+  --fg-cell-padding-x: 4px; /* Left and right cell padding. */
+  --fg-header-font-weight: normal; /* Header text weight. */
+  --fg-radius: 0; /* Corner radius of the cell editor and the context menu. */
 
   /* == Cells == */
   --fg-search-result-background: #fcedd9; /* Cells matched by the search plugin. */

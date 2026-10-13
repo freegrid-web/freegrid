@@ -238,7 +238,7 @@ class ManualRowMove extends BasePlugin {
     let height = 0;
 
     for (let i = from; i < to; i++) {
-      const rowHeight = this.hot.view.wt.wtTable.getRowHeight(i) || 23;
+      const rowHeight = this.hot.view.wt.wtTable.getRowHeight(i) || this.hot.view.wt.wtSettings.settings.defaultRowHeight;
 
       height += rowHeight;
     }

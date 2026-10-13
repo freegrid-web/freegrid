@@ -19,6 +19,7 @@
   border: 1px solid var(--fg-menu-border-color);
   border-bottom-width: 2px;
   border-right-width: 2px;
+  border-radius: var(--fg-radius);
 }
 
 .fg-context-menu .fg-selection-border {

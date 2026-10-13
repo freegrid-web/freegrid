@@ -12,6 +12,7 @@ import {
 import EventManager from './eventManager';
 import { stopPropagation, isImmediatePropagationStopped, isRightClick, isLeftClick } from './helpers/dom/event';
 import Walkontable from './3rdparty/walkontable/src';
+import { getRowHeight } from './helpers/dom/theme';
 import { handleMouseEvent } from './selection/mouseEventHandler';
 
 /**
@@ -181,6 +182,8 @@ function TableView(instance) {
 
   const walkontableConfig = {
     debug: () => that.settings.debug,
+    // From the theme (--fg-row-height); refreshed by updateSettings().
+    defaultRowHeight: getRowHeight(instance.rootElement),
     externalRowCalculator: this.instance.getPlugin('autoRowSize') && this.instance.getPlugin('autoRowSize').isEnabled(),
     table,
     preventOverflow: () => this.settings.preventOverflow,

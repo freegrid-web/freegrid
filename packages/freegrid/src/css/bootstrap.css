@@ -44,8 +44,8 @@
 .freegrid .table > tfoot > tr > th,
 .freegrid .table > thead > tr > td,
 .freegrid .table > thead > tr > th {
-  line-height: 21px;
-  padding: 0 4px;
+  line-height: calc(var(--fg-row-height) - 2px);
+  padding: 0 var(--fg-cell-padding-x);
 }
 
 .col-lg-1.freegrid, .col-lg-10.freegrid, .col-lg-11.freegrid, .col-lg-12.freegrid,

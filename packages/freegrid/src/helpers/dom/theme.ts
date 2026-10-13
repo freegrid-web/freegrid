@@ -39,3 +39,18 @@ export const applyTheme = (floating: Element, source: Element | null | undefined
     floating.classList.add(theme);
   }
 };
+
+const CLASSIC_ROW_HEIGHT = 23;
+
+/**
+ * The default row height in px from the `--fg-row-height` variable of `element` (23 when it is not set, e.g. for an
+ * element outside the document).
+ */
+export const getRowHeight = (element: Element | null | undefined): number => {
+  if (!element) {
+    return CLASSIC_ROW_HEIGHT;
+  }
+  const height = parseFloat(getComputedStyle(element).getPropertyValue('--fg-row-height'));
+
+  return height > 0 ? height : CLASSIC_ROW_HEIGHT;
+};

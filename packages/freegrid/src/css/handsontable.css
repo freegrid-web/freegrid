@@ -91,10 +91,10 @@
   border-left-width: 0;
   border-right: 1px solid var(--fg-cell-border-color);
   border-bottom: 1px solid var(--fg-cell-border-color);
-  height: 22px;
+  height: calc(var(--fg-row-height) - 1px);
   empty-cells: show;
-  line-height: 21px;
-  padding: 0 4px 0 4px;
+  line-height: calc(var(--fg-row-height) - 2px);
+  padding: 0 var(--fg-cell-padding-x);
   /* top, bottom padding different than 0 is handled poorly by FF with HTML5 doctype */
   background-color: var(--fg-cell-background);
   vertical-align: top;
@@ -160,7 +160,7 @@
   background-color: var(--fg-header-background);
   color: var(--fg-header-text);
   text-align: center;
-  font-weight: normal;
+  font-weight: var(--fg-header-font-weight);
   white-space: nowrap;
 }
 
@@ -386,7 +386,7 @@
   margin: 0;
   padding: 1px 5px 0 5px;
   font-family: inherit;
-  line-height: 21px;
+  line-height: calc(var(--fg-row-height) - 2px);
   font-size: inherit;
   box-shadow: 0 0 0 2px var(--fg-editor-border-color) inset;
   resize: none;
@@ -396,6 +396,7 @@
   border-radius: 0;
   background-color: var(--fg-editor-background);
   /*overwrite styles potentionally made by a framework*/
+  border-radius: var(--fg-radius);
 }
 
 .fg-editor-holder {
