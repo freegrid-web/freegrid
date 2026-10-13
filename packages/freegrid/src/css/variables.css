@@ -82,6 +82,7 @@
   /* == Comments == */
   --fg-comment-indicator-color: #000; /* Triangle in the corner of commented cells. */
   --fg-comment-background: var(--fg-color-background); /* Comment editor background. */
+  --fg-comment-text: var(--fg-color-text, FieldText); /* Comment editor text (a text field does not inherit it). */
   --fg-comment-border-color: var(--fg-color-border); /* Comment editor left border. */
   --fg-comment-focus-border-color: #5292f7; /* That border while editing. */
   --fg-comment-shadow: var(--fg-shadow); /* Comment editor shadow. */

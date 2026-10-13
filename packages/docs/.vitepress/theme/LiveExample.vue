@@ -9,12 +9,15 @@ const props = defineProps({
 });
 
 const { isDark } = useData();
+// Set after mount: the built HTML is rendered without knowing the reader's appearance, and hydration keeps classes.
+const mounted = ref(false);
 const examples = import.meta.glob('../../examples/*.js');
 const container = ref(null);
 const error = ref('');
 let instance = null;
 
 onMounted(async() => {
+  mounted.value = true;
   const load = examples[`../../examples/${props.name}.js`];
 
   if (!load) {
@@ -39,7 +42,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': isDark }">
+  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': mounted && isDark }">
     <div ref="container" class="live-example__grid" :style="height ? { height, overflow: 'hidden' } : null" />
     <p v-if="error" class="live-example__error">{{ error }}</p>
   </div>

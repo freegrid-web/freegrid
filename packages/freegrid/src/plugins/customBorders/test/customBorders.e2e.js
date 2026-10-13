@@ -538,7 +538,8 @@ describe('CustomBorders', () => {
       }]
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
     const customBorders = hot.getPlugin('customBorders');
 
@@ -588,7 +589,8 @@ describe('CustomBorders', () => {
       }]
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
     const customBorders = hot.getPlugin('customBorders');
 
@@ -625,7 +627,8 @@ describe('CustomBorders', () => {
       customBorders: true
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
 
     contextMenu();
@@ -653,7 +656,8 @@ describe('CustomBorders', () => {
       customBorders: true
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
 
     contextMenu();
@@ -682,7 +686,8 @@ describe('CustomBorders', () => {
       customBorders: true
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
 
     contextMenu();
@@ -711,7 +716,8 @@ describe('CustomBorders', () => {
       customBorders: true
     });
 
-    const defaultBorder = { color: '#000', width: 1 };
+    // Borders added from the context menu use the theme's custom border color (black in the light theme).
+    const defaultBorder = { color: 'var(--fg-custom-border-color)', width: 1 };
     const empty = { hide: true };
 
     contextMenu();

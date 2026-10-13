@@ -25,6 +25,7 @@
     border: none;
     border-left: 3px solid var(--fg-comment-border-color);
     background-color: var(--fg-comment-background);
+    color: var(--fg-comment-text);
     width: 215px;
     height: 90px;
     font-size: 12px;

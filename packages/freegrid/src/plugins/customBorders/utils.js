@@ -22,7 +22,7 @@ export function createId(row, col) {
 export function createDefaultCustomBorder() {
   return {
     width: 1,
-    color: '#000',
+    color: 'var(--fg-custom-border-color)', // see src/css/variables.css
   };
 }
 
@@ -43,7 +43,7 @@ export function createSingleEmptyBorder() {
 export function createDefaultHtBorder() {
   return {
     width: 1,
-    color: '#000',
+    color: 'var(--fg-custom-border-color)', // see src/css/variables.css
     cornerVisible: false,
   };
 }
