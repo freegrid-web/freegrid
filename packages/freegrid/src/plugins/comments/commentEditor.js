@@ -81,11 +81,19 @@ class CommentEditor {
   }
 
   /**
+   * Gives the editor the theme of a grid. The editor container is in <body>, outside the grid, and is shared by all
+   * grids on the page.
+   *
+   * @param {Element} themeSource The grid's root element.
+   */
+  setTheme(themeSource) {
+    applyTheme(this.editor.parentNode, themeSource);
+  }
+
+  /**
    * Show the comments editor.
    */
-  show(themeSource = null) {
-    // The editor container is in <body>, outside the grid: give it the grid's theme.
-    applyTheme(this.editor.parentNode, themeSource);
+  show() {
     this.editorStyle.display = 'block';
     this.hidden = false;
   }

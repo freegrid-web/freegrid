@@ -431,7 +431,35 @@ describe('Theme', () => {
 
   describe('dark theme', () => {
     afterEach(function() {
+      // Up to two nested wrappers.
       this.$container.unwrap('.theme-wrapper');
+      this.$container.unwrap('.theme-wrapper');
+    });
+
+    it('keeps a grid light with fg-theme-light inside a dark page', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-theme-dark"><div class="theme-wrapper fg-theme-light"></div></div>');
+      const hot = await createThemeFixture();
+      const cell = getComputedStyle(document.querySelector('.fg-master tbody td:not(.area):not(.current)'));
+
+      expect(cell.backgroundColor).toBe('rgb(255, 255, 255)');
+      expect(cell.color).toBe('rgb(0, 0, 0)');
+      // A component color with its own value (not derived from a base variable) must be the light one too.
+      expect(getComputedStyle(document.querySelector('.fg-master thead th.fg-highlight')).backgroundColor).toBe('rgb(220, 220, 220)');
+      expect(hot.getPlugin('contextMenu').menu.container.classList.contains('fg-theme-light')).toBe(true);
+    });
+
+    it('re-themes the comment editor when it is shown again while open', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-theme-dark"></div>');
+      const hot = await createThemeFixture();
+      const comments = hot.getPlugin('comments');
+
+      closeContextMenu();
+      comments.showAtCell(1, 1);
+      expect(comments.editor.editor.parentNode.classList.contains('fg-theme-dark')).toBe(true);
+
+      $('.theme-wrapper').removeClass('fg-theme-dark');
+      comments.showAtCell(1, 1);
+      expect(comments.editor.editor.parentNode.classList.contains('fg-theme-dark')).toBe(false);
     });
 
     // The E2E page has no text color of its own (black), like most pages: the dark theme must set it.

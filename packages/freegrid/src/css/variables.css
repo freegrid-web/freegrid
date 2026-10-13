@@ -2,14 +2,16 @@
  * FreeGrid theme variables. Every color, the font and the shadows of FreeGrid come from here; no other stylesheet
  * contains a color value.
  *
- * - Base variables (--fg-color-*, --fg-font-*, --fg-shadow) are defaults on :root. Override them anywhere: on :root,
- *   on an ancestor of the grid, or on the grid itself.
- * - Component variables are declared on the grid's parts (the grid and the elements FreeGrid puts in <body>), so they
- *   always follow the base variables. Override them on the grid: `.freegrid { --fg-cell-background: ... }`.
+ * - Base variables (--fg-color-*, --fg-font-*, --fg-shadow) and component variables with their own value are defaults
+ *   on :root. Override them anywhere: on :root, on an ancestor of the grid, or on the grid itself.
+ * - Component variables that follow a base variable are declared on the grid's parts (the grid and the elements
+ *   FreeGrid puts in <body>), so they always see the current base values. Override those on the grid:
+ *   `.freegrid { --fg-cell-background: ... }`.
  * - --fg-color-text, --fg-font-family and --fg-font-size are not set by default: the grid inherits the page's text
  *   color and font, as before.
- * - Themes: class "fg-theme-dark" or data-fg-theme="dark"; "fg-theme-auto" / data-fg-theme="auto" follows the
- *   system's dark mode.
+ * - Themes: class "fg-theme-dark" / data-fg-theme="dark", "fg-theme-light" / data-fg-theme="light" (e.g. a light grid
+ *   inside a dark page), and "fg-theme-auto" / data-fg-theme="auto" (follows the system's dark mode). The closest
+ *   theme to the grid wins: theme classes declare every value on their own element.
  */
 
 /* == Base == */
@@ -23,24 +25,13 @@
   --fg-color-readonly-text: #777; /* Text of read-only cells. */
   --fg-color-muted-text: #999; /* Placeholders and disabled menu items. */
   --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
-}
 
-/* == Components (declared on the grid and on the parts FreeGrid appends to <body>) == */
-:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container) {
   /* == Cells == */
-  --fg-cell-background: var(--fg-color-background); /* Cell background. */
-  --fg-cell-text: var(--fg-color-text); /* Cell text (the page's text color by default). */
-  --fg-cell-border-color: var(--fg-color-border); /* Lines between cells. */
-  --fg-readonly-text: var(--fg-color-readonly-text); /* Read-only cell text. */
-  --fg-placeholder-text: var(--fg-color-muted-text); /* Placeholder text. */
-  --fg-invalid-background: var(--fg-color-invalid); /* Invalid cell background. */
   --fg-search-result-background: #fcedd9; /* Cells matched by the search plugin. */
   --fg-search-result-text: #583707; /* Text of search matches. */
   --fg-custom-border-color: #000; /* Default color of custom borders. */
 
   /* == Headers == */
-  --fg-header-background: var(--fg-color-header-background); /* Header background. */
-  --fg-header-text: var(--fg-color-header-text); /* Header text. */
   --fg-header-active-background: #ccc; /* Header being resized or moved. */
   --fg-header-highlight-background: #dcdcdc; /* Headers of the selected cells. */
   --fg-header-active-highlight-background: #8eb0e7; /* Headers of fully selected rows/columns. */
@@ -48,7 +39,6 @@
   --fg-header-light-border-color: #e6e6e6; /* Light right border of some headers. */
 
   /* == Selection == */
-  --fg-selection-border-color: var(--fg-color-accent); /* Border of the current cell and the selected range. */
   --fg-selection-area-background: #005eff; /* Selected range tint (drawn with low opacity). */
   --fg-fill-border-color: #ff0000; /* Border while dragging the fill handle. */
   --fg-fill-handle-border-color: #fff; /* Outline of the fill handle square. */
@@ -56,14 +46,10 @@
   --fg-mobile-handle-border-color: #4285c8; /* Their border. */
 
   /* == Editors == */
-  --fg-editor-background: var(--fg-color-background); /* Cell editor background. */
-  --fg-editor-text: var(--fg-color-text, #000); /* Cell editor text. */
   --fg-editor-border-color: #5292f7; /* Cell editor frame. */
   --fg-autocomplete-arrow-color: #eee; /* Dropdown arrow in autocomplete cells. */
   --fg-autocomplete-arrow-hover-color: #777; /* The arrow on hover. */
   --fg-autocomplete-arrow-selected-color: #d3d3d3; /* The arrow in selected cells. */
-  --fg-listbox-background: var(--fg-color-background); /* Autocomplete/dropdown list background. */
-  --fg-listbox-border-color: var(--fg-color-border); /* List border. */
   --fg-listbox-hover-background: #eee; /* Hovered list item. */
 
   /* == Column and row resize == */
@@ -71,21 +57,14 @@
   --fg-resizer-guide-border-color: #777; /* Dashed guide line. */
 
   /* == Context menu == */
-  --fg-menu-background: var(--fg-color-background); /* Menu background. */
-  --fg-menu-border-color: var(--fg-color-border); /* Menu border. */
   --fg-menu-hover-background: #f3f3f3; /* Hovered menu item. */
   --fg-menu-separator-color: #e6e6e6; /* Separator line. */
   --fg-menu-dimmed-text: #323232; /* Dimmed items. */
-  --fg-menu-disabled-text: var(--fg-color-muted-text); /* Disabled items. */
   --fg-menu-arrow-color: #777; /* Submenu arrow. */
 
   /* == Comments == */
   --fg-comment-indicator-color: #000; /* Triangle in the corner of commented cells. */
-  --fg-comment-background: var(--fg-color-background); /* Comment editor background. */
-  --fg-comment-text: var(--fg-color-text, FieldText); /* Comment editor text (a text field does not inherit it). */
-  --fg-comment-border-color: var(--fg-color-border); /* Comment editor left border. */
   --fg-comment-focus-border-color: #5292f7; /* That border while editing. */
-  --fg-comment-shadow: var(--fg-shadow); /* Comment editor shadow. */
 
   /* == Row and column move == */
   --fg-move-guideline-color: #757575; /* Line where a moved row/column will drop. */
@@ -101,17 +80,8 @@
   --fg-collapsible-indicator-text: #222; /* Its text. */
   --fg-collapsible-indicator-ring: rgba(238, 238, 238, 1); /* Ring around it. */
 
-  /* == Mobile editor == */
-  --fg-mobile-editor-background: #f8f8f8; /* Mobile editor panel. */
-  --fg-mobile-editor-border-color: #ebebeb; /* Its border and pointer. */
-  --fg-mobile-editor-input-border-color: #a1a1a1; /* Its text field border. */
-  --fg-mobile-editor-button-color: #288ffe; /* Arrow buttons. */
-  --fg-mobile-editor-button-active-color: #cfcfcf; /* Pressed arrow button. */
-
   /* == Date picker (Pikaday) == */
-  --fg-datepicker-background: var(--fg-color-background); /* Calendar background. */
   --fg-datepicker-text: #333; /* Calendar text. */
-  --fg-datepicker-border-color: var(--fg-color-border); /* Calendar border. */
   --fg-datepicker-border-bottom-color: #bbb; /* Calendar bottom border. */
   --fg-datepicker-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5); /* Calendar shadow. */
   --fg-datepicker-muted-text: #999; /* Weekday names, week numbers, other months' days. */
@@ -125,6 +95,111 @@
   --fg-datepicker-startrange-background: #6cb31d; /* First day of a range. */
   --fg-datepicker-hover-text: #fff; /* Hovered day text. */
   --fg-datepicker-hover-background: #ff8000; /* Hovered day. */
+  --fg-datepicker-arrow-filter: none; /* Previous/next month arrows (images). */
+}
+
+/* == Components that follow a base variable (declared on the grid and on the parts FreeGrid appends to <body>) == */
+:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder) {
+  /* == Cells == */
+  --fg-cell-background: var(--fg-color-background); /* Cell background. */
+  --fg-cell-text: var(--fg-color-text); /* Cell text (the page's text color by default). */
+  --fg-cell-border-color: var(--fg-color-border); /* Lines between cells. */
+  --fg-readonly-text: var(--fg-color-readonly-text); /* Read-only cell text. */
+  --fg-placeholder-text: var(--fg-color-muted-text); /* Placeholder text. */
+  --fg-invalid-background: var(--fg-color-invalid); /* Invalid cell background. */
+
+  /* == Headers == */
+  --fg-header-background: var(--fg-color-header-background); /* Header background. */
+  --fg-header-text: var(--fg-color-header-text); /* Header text. */
+
+  /* == Selection == */
+  --fg-selection-border-color: var(--fg-color-accent); /* Border of the current cell and the selected range. */
+
+  /* == Editors == */
+  --fg-editor-background: var(--fg-color-background); /* Cell editor background. */
+  --fg-editor-text: var(--fg-color-text, #000); /* Cell editor text. */
+  --fg-listbox-background: var(--fg-color-background); /* Autocomplete/dropdown list background. */
+  --fg-listbox-border-color: var(--fg-color-border); /* List border. */
+
+  /* == Context menu == */
+  --fg-menu-background: var(--fg-color-background); /* Menu background. */
+  --fg-menu-border-color: var(--fg-color-border); /* Menu border. */
+  --fg-menu-disabled-text: var(--fg-color-muted-text); /* Disabled items. */
+
+  /* == Comments == */
+  --fg-comment-background: var(--fg-color-background); /* Comment editor background. */
+  --fg-comment-text: var(--fg-color-text, FieldText); /* Comment editor text (a text field does not inherit it). */
+  --fg-comment-border-color: var(--fg-color-border); /* Comment editor left border. */
+  --fg-comment-shadow: var(--fg-shadow); /* Comment editor shadow. */
+
+  /* == Date picker (Pikaday) == */
+  --fg-datepicker-background: var(--fg-color-background); /* Calendar background. */
+  --fg-datepicker-border-color: var(--fg-color-border); /* Calendar border. */
+}
+
+/* == Light theme: class "fg-theme-light" or data-fg-theme="light" (a light grid inside a dark page) == */
+:where(.fg-theme-light, [data-fg-theme="light"]) {
+  --fg-color-background: #fff;
+  --fg-color-border: #ccc;
+  --fg-color-header-background: #f0f0f0;
+  --fg-color-header-text: #222;
+  --fg-color-accent: #4b89ff;
+  --fg-color-invalid: #ff4c42;
+  --fg-color-readonly-text: #777;
+  --fg-color-muted-text: #999;
+  --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px;
+  --fg-search-result-background: #fcedd9;
+  --fg-search-result-text: #583707;
+  --fg-custom-border-color: #000;
+  --fg-header-active-background: #ccc;
+  --fg-header-highlight-background: #dcdcdc;
+  --fg-header-active-highlight-background: #8eb0e7;
+  --fg-header-active-highlight-text: #000;
+  --fg-header-light-border-color: #e6e6e6;
+  --fg-selection-area-background: #005eff;
+  --fg-fill-border-color: #ff0000;
+  --fg-fill-handle-border-color: #fff;
+  --fg-mobile-handle-background: #f5f5ff;
+  --fg-mobile-handle-border-color: #4285c8;
+  --fg-editor-border-color: #5292f7;
+  --fg-autocomplete-arrow-color: #eee;
+  --fg-autocomplete-arrow-hover-color: #777;
+  --fg-autocomplete-arrow-selected-color: #d3d3d3;
+  --fg-listbox-hover-background: #eee;
+  --fg-resizer-color: #34a9db;
+  --fg-resizer-guide-border-color: #777;
+  --fg-menu-hover-background: #f3f3f3;
+  --fg-menu-separator-color: #e6e6e6;
+  --fg-menu-dimmed-text: #323232;
+  --fg-menu-arrow-color: #777;
+  --fg-comment-indicator-color: #000;
+  --fg-comment-focus-border-color: #5292f7;
+  --fg-move-guideline-color: #757575;
+  --fg-move-backlight-background: rgba(52, 52, 52, 0.25);
+  --fg-collapse-button-background: #fff;
+  --fg-collapse-button-border-color: #f3f3f3;
+  --fg-collapse-button-line-color: #ccc;
+  --fg-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  --fg-collapsible-indicator-background: #eee;
+  --fg-collapsible-indicator-border-color: #a6a6a6;
+  --fg-collapsible-indicator-text: #222;
+  --fg-collapsible-indicator-ring: rgba(238, 238, 238, 1);
+  --fg-datepicker-text: #333;
+  --fg-datepicker-border-bottom-color: #bbb;
+  --fg-datepicker-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
+  --fg-datepicker-muted-text: #999;
+  --fg-datepicker-day-text: #666;
+  --fg-datepicker-day-background: #f5f5f5;
+  --fg-datepicker-today-text: #33aaff;
+  --fg-datepicker-selected-text: #fff;
+  --fg-datepicker-selected-background: #33aaff;
+  --fg-datepicker-selected-shadow-color: #178fe5;
+  --fg-datepicker-inrange-background: #d5e9f7;
+  --fg-datepicker-startrange-background: #6cb31d;
+  --fg-datepicker-hover-text: #fff;
+  --fg-datepicker-hover-background: #ff8000;
+  --fg-color-text: #000;
+  --fg-datepicker-arrow-filter: none;
 }
 
 /* == Dark theme: class "fg-theme-dark" or data-fg-theme="dark" on the grid or any ancestor == */
@@ -139,10 +214,6 @@
   --fg-color-readonly-text: #8a8a8a;
   --fg-color-muted-text: #9a9a9a;
   --fg-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-:where(.fg-theme-dark, [data-fg-theme="dark"]) :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container),
-:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container):where(.fg-theme-dark, [data-fg-theme="dark"]) {
   --fg-search-result-background: #4d3b1f;
   --fg-search-result-text: #f5d9a8;
   --fg-custom-border-color: #e6e6e6;
@@ -179,11 +250,6 @@
   --fg-collapsible-indicator-border-color: #555;
   --fg-collapsible-indicator-text: #ddd;
   --fg-collapsible-indicator-ring: rgba(51, 51, 51, 1);
-  --fg-mobile-editor-background: #2a2a2a;
-  --fg-mobile-editor-border-color: #3a3a3a;
-  --fg-mobile-editor-input-border-color: #555;
-  --fg-mobile-editor-button-color: #4c9aff;
-  --fg-mobile-editor-button-active-color: #555;
   --fg-datepicker-text: #e6e6e6;
   --fg-datepicker-border-bottom-color: #3a3a3a;
   --fg-datepicker-day-text: #ccc;
@@ -192,9 +258,74 @@
   --fg-datepicker-selected-background: #4c9aff;
   --fg-datepicker-selected-shadow-color: #2f6fd6;
   --fg-datepicker-inrange-background: #2f4f80;
+  --fg-datepicker-arrow-filter: invert(1);
 }
 
-/* == Automatic theme: the dark values when the system uses dark mode (same values as the dark theme) == */
+/* == Automatic theme: light, or the dark values when the system uses dark mode == */
+:where(.fg-theme-auto, [data-fg-theme="auto"]) {
+  --fg-color-background: #fff;
+  --fg-color-border: #ccc;
+  --fg-color-header-background: #f0f0f0;
+  --fg-color-header-text: #222;
+  --fg-color-accent: #4b89ff;
+  --fg-color-invalid: #ff4c42;
+  --fg-color-readonly-text: #777;
+  --fg-color-muted-text: #999;
+  --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px;
+  --fg-search-result-background: #fcedd9;
+  --fg-search-result-text: #583707;
+  --fg-custom-border-color: #000;
+  --fg-header-active-background: #ccc;
+  --fg-header-highlight-background: #dcdcdc;
+  --fg-header-active-highlight-background: #8eb0e7;
+  --fg-header-active-highlight-text: #000;
+  --fg-header-light-border-color: #e6e6e6;
+  --fg-selection-area-background: #005eff;
+  --fg-fill-border-color: #ff0000;
+  --fg-fill-handle-border-color: #fff;
+  --fg-mobile-handle-background: #f5f5ff;
+  --fg-mobile-handle-border-color: #4285c8;
+  --fg-editor-border-color: #5292f7;
+  --fg-autocomplete-arrow-color: #eee;
+  --fg-autocomplete-arrow-hover-color: #777;
+  --fg-autocomplete-arrow-selected-color: #d3d3d3;
+  --fg-listbox-hover-background: #eee;
+  --fg-resizer-color: #34a9db;
+  --fg-resizer-guide-border-color: #777;
+  --fg-menu-hover-background: #f3f3f3;
+  --fg-menu-separator-color: #e6e6e6;
+  --fg-menu-dimmed-text: #323232;
+  --fg-menu-arrow-color: #777;
+  --fg-comment-indicator-color: #000;
+  --fg-comment-focus-border-color: #5292f7;
+  --fg-move-guideline-color: #757575;
+  --fg-move-backlight-background: rgba(52, 52, 52, 0.25);
+  --fg-collapse-button-background: #fff;
+  --fg-collapse-button-border-color: #f3f3f3;
+  --fg-collapse-button-line-color: #ccc;
+  --fg-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  --fg-collapsible-indicator-background: #eee;
+  --fg-collapsible-indicator-border-color: #a6a6a6;
+  --fg-collapsible-indicator-text: #222;
+  --fg-collapsible-indicator-ring: rgba(238, 238, 238, 1);
+  --fg-datepicker-text: #333;
+  --fg-datepicker-border-bottom-color: #bbb;
+  --fg-datepicker-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.5);
+  --fg-datepicker-muted-text: #999;
+  --fg-datepicker-day-text: #666;
+  --fg-datepicker-day-background: #f5f5f5;
+  --fg-datepicker-today-text: #33aaff;
+  --fg-datepicker-selected-text: #fff;
+  --fg-datepicker-selected-background: #33aaff;
+  --fg-datepicker-selected-shadow-color: #178fe5;
+  --fg-datepicker-inrange-background: #d5e9f7;
+  --fg-datepicker-startrange-background: #6cb31d;
+  --fg-datepicker-hover-text: #fff;
+  --fg-datepicker-hover-background: #ff8000;
+  --fg-color-text: initial; /* the page's text color, as without a theme */
+  --fg-datepicker-arrow-filter: none;
+}
+
 @media (prefers-color-scheme: dark) {
   :where(.fg-theme-auto, [data-fg-theme="auto"]) {
     --fg-color-background: #1e1e1e;
@@ -207,10 +338,6 @@
     --fg-color-readonly-text: #8a8a8a;
     --fg-color-muted-text: #9a9a9a;
     --fg-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-  }
-
-  :where(.fg-theme-auto, [data-fg-theme="auto"]) :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container),
-  :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder, .fg-mobile-editor-container):where(.fg-theme-auto, [data-fg-theme="auto"]) {
     --fg-search-result-background: #4d3b1f;
     --fg-search-result-text: #f5d9a8;
     --fg-custom-border-color: #e6e6e6;
@@ -247,11 +374,6 @@
     --fg-collapsible-indicator-border-color: #555;
     --fg-collapsible-indicator-text: #ddd;
     --fg-collapsible-indicator-ring: rgba(51, 51, 51, 1);
-    --fg-mobile-editor-background: #2a2a2a;
-    --fg-mobile-editor-border-color: #3a3a3a;
-    --fg-mobile-editor-input-border-color: #555;
-    --fg-mobile-editor-button-color: #4c9aff;
-    --fg-mobile-editor-button-active-color: #555;
     --fg-datepicker-text: #e6e6e6;
     --fg-datepicker-border-bottom-color: #3a3a3a;
     --fg-datepicker-day-text: #ccc;
@@ -260,5 +382,6 @@
     --fg-datepicker-selected-background: #4c9aff;
     --fg-datepicker-selected-shadow-color: #2f6fd6;
     --fg-datepicker-inrange-background: #2f4f80;
+    --fg-datepicker-arrow-filter: invert(1);
   }
 }
