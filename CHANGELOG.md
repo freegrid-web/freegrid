@@ -1,5 +1,15 @@
 # FreeGrid changelog
 
+## Unreleased
+
+- Docs, API reference:
+  - The right-hand lists (Related API on guide pages, and an index on each reference page) are alphabetical, one
+    entry per line, in the order settings, methods, events, with plugin methods grouped by plugin. A filter box
+    narrows them while typing, and the group headings show a count.
+  - Every method, event and setting has code in a collapsible block: the source's examples ("Example"), or a usage
+    example written from its signature ("Usage").
+  - Links to entries the reference does not have (internal classes) are plain text.
+
 ## 0.2.0 (2026-10-13)
 
 FreeGrid has no runtime dependencies now: its own date and number formatting and its own date picker replace
