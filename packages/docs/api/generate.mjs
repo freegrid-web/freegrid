@@ -14,7 +14,8 @@ const HERE = new URL('.', import.meta.url);
 export const safe = text => text.split(/(`[^`]*`)/).map((part, index) => (index % 2 ? part : part
   .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;'))).join('');
 
-const cell = text => safe(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// A table cell: backslashes first, so that an escaped pipe in the text stays one character.
+const cell = text => safe(text).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 const type = (value, inTable = false) => (value ? `\`${value.replace(/\|/g, inTable ? ' \\| ' : ' | ')}\`` : '');
 // A fenced code block; a closing fence written at the end of the last code line gets its own line.
 const example = code => (code.startsWith('```') ? code.replace(/([^\n])```$/, '$1\n```') : `\`\`\`js\n${code}\n\`\`\``);

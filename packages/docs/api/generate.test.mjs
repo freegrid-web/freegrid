@@ -40,3 +40,13 @@ test('closes an example whose closing fence is on the code\'s last line', () => 
 
   assert.match(text, /```js\nfoo: \[1\]\n```/);
 });
+
+test('keeps a backslash before a pipe from breaking a table cell', () => {
+  const text = methodSection({ name: 'x', anchor: 'x', description: '', returns: undefined, examples: [],
+    params: [{ name: 'pattern', type: 'String', optional: false, description: 'Splits on `\\|` or on `,`.' }] });
+  const row = text.split('\n').find(line => line.startsWith('| `pattern`'));
+
+  // Three cells: the pipes inside the description are all escaped, and so is the backslash before one of them.
+  assert.equal(row.split(/(?<!\\)\|/).length - 2, 3);
+  assert.match(row, /Splits on `\\\\\\\|` or on `,`\./);
+});
