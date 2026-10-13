@@ -5,8 +5,8 @@
 .fg-comments-container,
 .fg-datepicker-holder {
   color: var(--fg-cell-text);
-  font-family: var(--fg-font-family);
-  font-size: var(--fg-font-size);
+  font-family: var(--fg-font-family, var(--fg-style-font-family));
+  font-size: var(--fg-font-size, var(--fg-style-font-size));
 }
 
 .freegrid {
@@ -328,7 +328,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--fg-selection-area-background);
+  background: var(--fg-selection-area-background, var(--fg-style-selection-area-background));
 }
 
 .freegrid td.area:before {
@@ -358,13 +358,13 @@
 
 .freegrid tbody th.fg-highlight,
 .freegrid thead th.fg-highlight {
-  background-color: var(--fg-header-highlight-background);
+  background-color: var(--fg-header-highlight-background, var(--fg-style-header-highlight-background));
 }
 
 .freegrid tbody th.fg-active-highlight,
 .freegrid thead th.fg-active-highlight {
-  background-color: var(--fg-header-active-highlight-background);
-  color: var(--fg-header-active-highlight-text);
+  background-color: var(--fg-header-active-highlight-background, var(--fg-style-header-active-highlight-background));
+  color: var(--fg-header-active-highlight-text, var(--fg-style-header-active-highlight-text));
 }
 
 /* fill handle */
@@ -372,6 +372,7 @@
 .freegrid .fg-selection-border.corner {
   font-size: 0;
   cursor: crosshair;
+  border-radius: var(--fg-fill-handle-radius);
 }
 
 .freegrid .fg-border.fg-fill-border {
@@ -388,7 +389,7 @@
   font-family: inherit;
   line-height: calc(var(--fg-row-height) - 2px);
   font-size: inherit;
-  box-shadow: 0 0 0 2px var(--fg-editor-border-color) inset;
+  box-shadow: 0 0 0 2px var(--fg-editor-border-color, var(--fg-style-editor-border-color)) inset;
   resize: none;
   /*below are needed to overwrite stuff added by jQuery UI Bootstrap theme*/
   display: block;
