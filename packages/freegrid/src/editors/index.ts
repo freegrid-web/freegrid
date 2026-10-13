@@ -70,8 +70,7 @@ const registerEditor = (name: string | null, editorClass: EditorClass): void => 
 registerEditor('base', BaseEditor);
 registerEditor('autocomplete', AutocompleteEditor);
 registerEditor('checkbox', CheckboxEditor);
-// The date editor is still JavaScript (its inferred method types differ from the base's); typed in a later step.
-registerEditor('date', DateEditor as unknown as EditorClass);
+registerEditor('date', DateEditor);
 registerEditor('dropdown', DropdownEditor);
 registerEditor('handsontable', HandsontableEditor);
 registerEditor('numeric', NumericEditor);

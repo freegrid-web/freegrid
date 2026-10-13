@@ -34,30 +34,12 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
 
   switch (event.keyCode) {
     case KEY_CODES.ARROW_RIGHT:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
-      }
-      break;
-
     case KEY_CODES.ARROW_LEFT:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
-      }
-      break;
-
     case KEY_CODES.ARROW_UP:
     case KEY_CODES.ARROW_DOWN:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
+      // In full edit mode the arrow keys move the caret.
+      if (that.isInFullEditMode() && !that.isWaiting() && !that.allowKeyEventPropagation(event.keyCode)) {
+        stopImmediatePropagation(event);
       }
       break;
 
@@ -120,9 +102,6 @@ class TextEditor extends BaseEditor {
 
   declare holderZIndex: number;
 
-  /** Lets some keys reach the grid while editing (set by subclasses). */
-  declare allowKeyEventPropagation?: (keyCode: number) => boolean;
-
   /**
    * @private
    * @editor TextEditor
@@ -171,6 +150,12 @@ class TextEditor extends BaseEditor {
         this.instance._registerImmediate(() => this.focus());
       }
     }
+  }
+
+  /** Whether an arrow key reaches the grid in full edit mode (instead of moving the caret). */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allowKeyEventPropagation(keyCode: number): boolean {
+    return false;
   }
 
   hideEditableElement(): void {

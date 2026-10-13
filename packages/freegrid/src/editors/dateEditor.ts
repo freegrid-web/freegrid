@@ -7,29 +7,32 @@ import { isMetaKey } from './../helpers/unicode';
 import { stopPropagation } from './../helpers/dom/event';
 import TextEditor from './textEditor';
 import { DatePicker } from './datePicker/datePicker';
+import type { DatePickerOptions } from './datePicker/datePicker';
 
 /**
- * @private
- * @editor DateEditor
- * @class DateEditor
- * @dependencies TextEditor
+ * A text editor with a date picker under the cell. The picked day is written in the cell's `dateFormat`; the cell's
+ * `datePickerConfig` holds the picker's options and `defaultDate` the day shown for an empty cell.
  */
 class DateEditor extends TextEditor {
-  /**
-   * @param {Core} hotInstance FreeGrid instance
-   * @private
-   */
-  constructor(hotInstance) {
-    super(hotInstance);
+  // Set by createElements(), inside the base constructor.
+  /** The picker's holder (in `<body>`). */
+  declare datePicker: HTMLDivElement;
 
-    // TODO: Move this option to general settings
-    this.defaultDateFormat = 'DD/MM/YYYY';
-    this.isCellEdited = false;
-    this.parentDestroyed = false;
-    this.defaultDateShown = null;
-  }
+  declare datePickerStyle: CSSStyleDeclaration;
 
-  init() {
+  declare $datePicker: DatePicker;
+
+  /** The format of cells without a `dateFormat`. */
+  defaultDateFormat = 'DD/MM/YYYY';
+
+  isCellEdited = false;
+
+  parentDestroyed = false;
+
+  /** The `defaultDate` shown for an empty cell: confirming the empty editor writes it. */
+  defaultDateShown: string | null = null;
+
+  init(): void {
     super.init();
     this.instance.addHook('afterDestroy', () => {
       this.parentDestroyed = true;
@@ -37,18 +40,15 @@ class DateEditor extends TextEditor {
     });
   }
 
-  /**
-   * Create data picker instance
-   */
-  createElements() {
+  createElements(): void {
     super.createElements();
 
-    this.datePicker = document.createElement('DIV');
+    this.datePicker = document.createElement('DIV') as HTMLDivElement;
     this.datePickerStyle = this.datePicker.style;
     this.datePickerStyle.position = 'absolute';
-    this.datePickerStyle.top = 0;
-    this.datePickerStyle.left = 0;
-    this.datePickerStyle.zIndex = 9999;
+    this.datePickerStyle.top = '0';
+    this.datePickerStyle.left = '0';
+    this.datePickerStyle.zIndex = '9999';
 
     addClass(this.datePicker, 'fg-datepicker-holder');
     document.body.appendChild(this.datePicker);
@@ -56,12 +56,10 @@ class DateEditor extends TextEditor {
     this.$datePicker = new DatePicker(this.datePicker, this.getDatePickerConfig());
     const eventManager = new EventManager(this);
 
-    /**
-     * Prevent recognizing clicking on datepicker as clicking outside of table
-     */
-    eventManager.addEventListener(this.datePicker, 'mousedown', event => stopPropagation(event));
+    // A click in the picker is not a click outside the grid.
+    eventManager.addEventListener(this.datePicker, 'mousedown', (event: Event) => stopPropagation(event));
     // Alt+Down moves the keyboard focus into the calendar.
-    eventManager.addEventListener(this.TEXTAREA, 'keydown', (event) => {
+    eventManager.addEventListener(this.TEXTAREA, 'keydown', (event: KeyboardEvent) => {
       if (event.altKey && event.key === 'ArrowDown' && this.$datePicker.isVisible()) {
         event.preventDefault();
         stopPropagation(event);
@@ -70,7 +68,7 @@ class DateEditor extends TextEditor {
     });
     // The calendar follows a date typed in the cell's format.
     eventManager.addEventListener(this.TEXTAREA, 'input', () => {
-      const date = parseDate(this.getValue(), this.cellProperties.dateFormat || this.defaultDateFormat, true);
+      const date = parseDate(this.getValue(), this.#dateFormat(), true);
 
       if (date && this.$datePicker.isVisible()) {
         this.$datePicker.setDate(date, true);
@@ -79,44 +77,19 @@ class DateEditor extends TextEditor {
     this.hideDatepicker();
   }
 
-  /**
-   * Destroy data picker instance
-   */
-  destroyElements() {
+  destroyElements(): void {
     this.$datePicker.destroy();
     this.datePicker.remove();
   }
 
-  /**
-   * Prepare editor to appear
-   *
-   * @param {Number} row Row index
-   * @param {Number} col Column index
-   * @param {String} prop Property name (passed when datasource is an array of objects)
-   * @param {HTMLTableCellElement} td Table cell element
-   * @param {*} originalValue Original value
-   * @param {Object} cellProperties Object with cell properties ({@see Core#getCellMeta})
-   */
-  prepare(row, col, prop, td, originalValue, cellProperties) {
-    super.prepare(row, col, prop, td, originalValue, cellProperties);
-  }
-
-  /**
-   * Open editor
-   *
-   * @param {Event} [event=null]
-   */
-  open(event = null) {
+  open(event: Event | null = null): void {
     super.open();
     // The date picker is in <body>, outside the grid: give it the grid's theme.
     applyTheme(this.datePicker, this.instance.rootElement);
     this.showDatepicker(event);
   }
 
-  /**
-   * Close editor
-   */
-  close() {
+  close(): void {
     this._opened = false;
     this.instance._registerTimeout(() => {
       this.instance._refreshBorders();
@@ -125,18 +98,10 @@ class DateEditor extends TextEditor {
     super.close();
   }
 
-  /**
-   * @param {Boolean} [isCancelled=false]
-   * @param {Boolean} [ctrlDown=false]
-   */
-  finishEditing(isCancelled = false, ctrlDown = false) {
-    if (isCancelled) { // pressed ESC, restore original value
-      // var value = this.instance.getDataAtCell(this.row, this.col);
-      const value = this.originalValue;
-
-      if (value !== void 0) {
-        this.setValue(value);
-      }
+  finishEditing(isCancelled = false, ctrlDown = false, callback?: (result: boolean) => void): void {
+    // Esc: the original value comes back.
+    if (isCancelled && this.originalValue !== undefined) {
+      this.setValue(this.originalValue);
     }
     // An empty cell confirmed without typing gets its defaultDate.
     if (!isCancelled && this.defaultDateShown && this.getValue() === '') {
@@ -144,59 +109,56 @@ class DateEditor extends TextEditor {
     }
     this.defaultDateShown = null;
     this.hideDatepicker();
-    super.finishEditing(isCancelled, ctrlDown);
+    super.finishEditing(isCancelled, ctrlDown, callback);
   }
 
   /**
-   * Show data picker
-   *
-   * @param {Event} event
+   * Shows the picker under the cell, at the cell's date (or its `defaultDate`, or today). Typing replaces the value
+   * unless the editor was opened with the mouse or a meta key.
    */
-  showDatepicker(event) {
+  showDatepicker(event: Event | null): void {
     this.$datePicker.config(this.getDatePickerConfig());
 
-    const offset = this.TD.getBoundingClientRect();
-    const dateFormat = this.cellProperties.dateFormat || this.defaultDateFormat;
+    const cellRect = this.TD.getBoundingClientRect();
+    const dateFormat = this.#dateFormat();
     const datePickerConfig = this.$datePicker.config();
-    let dateStr;
     const isMouseDown = this.instance.view.isMouseDown();
-    const isMeta = event ? isMetaKey(event.keyCode) : false;
+    const isMeta = event ? isMetaKey((event as KeyboardEvent).keyCode) : false;
+    const replaceValue = !isMeta && !isMouseDown;
 
     this.defaultDateShown = null;
 
-    this.datePickerStyle.top = `${window.pageYOffset + offset.top + outerHeight(this.TD)}px`;
-    this.datePickerStyle.left = `${window.pageXOffset + offset.left}px`;
+    this.datePickerStyle.top = `${window.pageYOffset + cellRect.top + outerHeight(this.TD)}px`;
+    this.datePickerStyle.left = `${window.pageXOffset + cellRect.left}px`;
 
     datePickerConfig.format = dateFormat;
 
     if (this.originalValue) {
-      dateStr = this.originalValue;
+      const dateStr = this.originalValue as string;
 
       this.selectDateInPicker(dateStr, dateFormat);
 
-      // keep the cell's value (with its time, for date-and-time formats) in the editor
+      // The editor keeps the cell's value (with its time, for date-and-time formats).
       if (this.getValue() !== this.originalValue) {
         this.setValue(this.originalValue);
       }
-
-      if (!isMeta && !isMouseDown) {
+      if (replaceValue) {
         this.setValue('');
       }
 
     } else if (this.cellProperties.defaultDate) {
-      dateStr = this.cellProperties.defaultDate;
+      const dateStr = this.cellProperties.defaultDate as string;
 
       datePickerConfig.defaultDate = dateStr;
       this.defaultDateShown = dateStr;
 
       this.selectDateInPicker(dateStr, dateFormat);
 
-      if (!isMeta && !isMouseDown) {
+      if (replaceValue) {
         this.setValue('');
       }
     } else {
-      // if a default date is not defined, set a soft-default-date: display the current day and month in the
-      // datepicker, but don't fill the editor input
+      // No default date: the picker shows today, the editor stays empty.
       this.$datePicker.gotoToday();
     }
 
@@ -204,13 +166,8 @@ class DateEditor extends TextEditor {
     this.$datePicker.show();
   }
 
-  /**
-   * Shows the day of `dateStr` in the date picker, if `dateStr` is a date in `dateFormat`.
-   *
-   * @param {String} dateStr
-   * @param {String} dateFormat
-   */
-  selectDateInPicker(dateStr, dateFormat) {
+  /** Shows the day of `dateStr` in the date picker, if `dateStr` is a date in `dateFormat`. */
+  selectDateInPicker(dateStr: string, dateFormat: string): void {
     const date = parseDate(dateStr, dateFormat, true);
 
     if (date) {
@@ -218,51 +175,38 @@ class DateEditor extends TextEditor {
     }
   }
 
-  /**
-   * Hide data picker
-   */
-  hideDatepicker() {
+  hideDatepicker(): void {
     this.datePickerStyle.display = 'none';
     this.$datePicker.hide();
   }
 
-  /**
-   * Gives the keyboard focus back to the editor after the calendar had it.
-   */
-  focusEditorIfInPicker() {
+  /** Gives the keyboard focus back to the editor after the calendar had it. */
+  focusEditorIfInPicker(): void {
     if (this.datePicker.contains(document.activeElement)) {
       this.focus();
     }
   }
 
-  /**
-   * Get date picker options.
-   *
-   * @returns {Object}
-   */
-  getDatePickerConfig() {
-    const htInput = this.TEXTAREA;
-    const options = {};
+  /** The picker's options: the cell's `datePickerConfig`, wired to the editor. */
+  getDatePickerConfig(): DatePickerOptions {
+    const options: DatePickerOptions = {};
 
-    if (this.cellProperties && this.cellProperties.datePickerConfig) {
-      deepExtend(options, this.cellProperties.datePickerConfig);
+    if (this.cellProperties?.datePickerConfig) {
+      deepExtend(options as Record<PropertyKey, unknown>, this.cellProperties.datePickerConfig as Record<PropertyKey, unknown>);
     }
-    const origOnSelect = options.onSelect;
-    const origOnClose = options.onClose;
+    const { onSelect, onClose } = options;
 
-    options.field = htInput;
-    options.trigger = htInput;
+    options.field = this.TEXTAREA;
+    options.trigger = this.TEXTAREA;
     options.container = this.datePicker;
     options.bound = false;
     options.format = options.format || this.defaultDateFormat;
-    options.onSelect = (value) => {
+    options.onSelect = (value: Date) => {
       this.focusEditorIfInPicker();
-      this.setValue(formatDate(value, this.cellProperties.dateFormat || this.defaultDateFormat));
+      this.setValue(formatDate(value, this.#dateFormat()));
       this.hideDatepicker();
-
-      if (origOnSelect) {
-        origOnSelect();
-      }
+      // Called without the date, as before.
+      (onSelect as (() => void) | undefined)?.();
     };
     options.onClose = () => {
       this.focusEditorIfInPicker();
@@ -270,12 +214,14 @@ class DateEditor extends TextEditor {
       if (!this.parentDestroyed) {
         this.finishEditing(false);
       }
-      if (origOnClose) {
-        origOnClose();
-      }
+      onClose?.();
     };
 
     return options;
+  }
+
+  #dateFormat(): string {
+    return (this.cellProperties.dateFormat as string | undefined) || this.defaultDateFormat;
   }
 }
 
