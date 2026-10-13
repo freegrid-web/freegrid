@@ -2,7 +2,7 @@
 // Live theme editor for the Theming page: a grid, a light/dark/auto switch, presets and editors for the base
 // variables. Edits go into a <style> rule for the playground grid and FreeGrid's floating elements (menus, comment
 // editor, date picker), so they apply in every theme; the panel shows the CSS to copy.
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useData } from 'vitepress';
 
 const props = defineProps({
@@ -15,6 +15,10 @@ const THEMES = [
   { value: 'light', label: 'Light', icon: 'M8 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1' },
   { value: 'dark', label: 'Dark', icon: 'M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z' },
   { value: 'auto', label: 'Auto', icon: 'M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 1.5v13' },
+];
+const STYLES = [
+  { value: 'classic', label: 'Classic' },
+  { value: 'modern', label: 'Modern' },
 ];
 const LABELS = {
   '--fg-color-background': 'Background',
@@ -68,10 +72,12 @@ const TARGETS = '.theme-playground__frame, .fg-context-menu, .fg-comments-contai
 
 const container = ref(null);
 const theme = ref('light');
+const gridStyle = ref('classic');
 const changed = reactive({});
 const copied = ref(false);
 const systemDark = ref(false);
 let grid = null;
+let createGrid = null;
 let style = null;
 let media = null;
 
@@ -126,6 +132,15 @@ const copy = async() => {
 };
 const onSystemChange = (event) => { systemDark.value = event.matches; };
 
+// A new grid for the new style, so the row height (--fg-row-height) and the column widths are measured again.
+watch(gridStyle, async() => {
+  await nextTick();
+  if (createGrid && container.value) {
+    grid?.destroy();
+    grid = createGrid(container.value);
+  }
+});
+
 watch(changed, () => {
   if (style) {
     const lines = Object.entries(changed).map(([name, value]) => `${name}: ${value};`);
@@ -146,7 +161,8 @@ onMounted(async() => {
   document.head.appendChild(style);
   const module = await import('../../examples/theming.js');
 
-  grid = module.default(container.value);
+  createGrid = module.default;
+  grid = createGrid(container.value);
 });
 
 onBeforeUnmount(() => {
@@ -167,6 +183,11 @@ onBeforeUnmount(() => {
           @click="theme = option.value">
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path :d="option.icon" /></svg>{{ option.label }}
         </button>
+      </div>
+      <div class="tp-segmented" role="radiogroup" aria-label="Style">
+        <button v-for="option in STYLES" :key="option.value" type="button" role="radio"
+          :aria-checked="gridStyle === option.value" :class="{ active: gridStyle === option.value }"
+          @click="gridStyle = option.value">{{ option.label }}</button>
       </div>
       <div class="tp-presets" aria-label="Presets">
         <span class="tp-label">Presets</span>
@@ -205,7 +226,8 @@ onBeforeUnmount(() => {
         </label>
       </div>
 
-      <div class="theme-playground__frame" :data-fg-theme="theme === 'light' ? null : theme">
+      <div class="theme-playground__frame" :data-fg-theme="theme === 'light' ? null : theme"
+        :data-fg-style="gridStyle === 'modern' ? 'modern' : null">
         <div ref="container" class="theme-playground__grid" />
       </div>
     </div>
