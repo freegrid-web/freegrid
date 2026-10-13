@@ -2,6 +2,25 @@
   "unit": {
     "Browser helper isIE should recognize browser properly": "isIE() removed with IE support (phase 2a, see CHANGELOG)",
     "Browser helper isEdge should recognize browser properly": "isEdge() removed with legacy Edge support (phase 2a, see CHANGELOG)",
-    "Browser helper isMSBrowser should recognize browser properly": "isMSBrowser() removed with IE and legacy Edge support (phase 2a, see CHANGELOG)"
+    "Browser helper isMSBrowser should recognize browser properly": "isMSBrowser() removed with IE and legacy Edge support (phase 2a, see CHANGELOG)",
+    "Node should be a constructor function": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Node should construct properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should be a constructor function": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should push properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should pop properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should shift properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should reverse properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should recursive reverse properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should unshift properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should properly check for existing cycle": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should properly check for non existing cycle": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "Linked List should inorder properly": "LinkedList removed: only mergeSort used it (utils TS conversion)",
+    "mergeSort should work with sorted arrays": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should work with empty array": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should sort properly the array containg strings": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should sort lexically the array containg numbers (by default)": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should not change the order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should sort the numbers in ascending order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
+    "mergeSort should sort the numbers in descending order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)"
   }
 }
