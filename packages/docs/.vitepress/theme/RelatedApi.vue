@@ -11,7 +11,7 @@ const props = defineProps({
   place: { type: String, default: 'aside' }, // 'aside' or 'bottom'
 });
 
-const KINDS = [['method', 'Methods'], ['event', 'Events'], ['setting', 'Settings'], ['plugin-method', 'Plugin methods']];
+const KINDS = [['setting', 'Settings'], ['method', 'Methods'], ['event', 'Events'], ['plugin-method', 'Plugin methods']];
 const { frontmatter } = useData();
 const query = ref('');
 
@@ -21,7 +21,8 @@ const title = computed(() => (index.value ? `All ${KINDS.find(([kind]) => kind =
 // The reference pages are the list themselves on narrow screens: their index is shown in the right-hand column only.
 const shown = computed(() => (index.value ? props.place === 'aside' : topics.value.length > 0));
 
-const label = entry => `${entry.name}${entry.kind.endsWith('method') ? '()' : ''}`;
+// Plugin methods are listed under their plugin, without its name.
+const label = entry => `${entry.kind === 'plugin-method' ? entry.name.split('.')[1] : entry.name}${entry.kind.endsWith('method') ? '()' : ''}`;
 const groups = computed(() => {
   const words = query.value.trim().toLowerCase();
   const entries = data.entries
@@ -29,9 +30,18 @@ const groups = computed(() => {
     .filter(entry => !words || entry.name.toLowerCase().includes(words))
     .sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
 
-  return KINDS
-    .map(([kind, name]) => ({ name, items: entries.filter(entry => entry.kind === kind) }))
-    .filter(group => group.items.length);
+  const plugins = [...new Set(entries.filter(entry => entry.kind === 'plugin-method').map(entry => entry.name.split('.')[0]))];
+
+  return [
+    ...KINDS.filter(([kind]) => kind !== 'plugin-method')
+      .map(([kind, name]) => ({ name, items: entries.filter(entry => entry.kind === kind) })),
+    // One group per plugin, in alphabetical order.
+    ...plugins.sort().map(plugin => ({
+      name: plugin,
+      plugin: true,
+      items: entries.filter(entry => entry.kind === 'plugin-method' && entry.name.startsWith(`${plugin}.`)),
+    })),
+  ].filter(group => group.items.length);
 });
 const total = computed(() => groups.value.reduce((sum, group) => sum + group.items.length, 0));
 </script>
@@ -43,7 +53,9 @@ const total = computed(() => groups.value.reduce((sum, group) => sum + group.ite
       :aria-label="`Filter ${title.toLowerCase()}`">
     <p v-if="!total" class="related-api__empty">Nothing matches “{{ query }}”.</p>
     <div v-for="group in groups" :key="group.name" class="related-api__group">
-      <div v-if="!index" class="related-api__label">{{ group.name }} <span>{{ group.items.length }}</span></div>
+      <div v-if="!index || group.plugin" class="related-api__label">
+        {{ group.name }} <span>{{ group.items.length }}</span>
+      </div>
       <ul>
         <li v-for="item in group.items" :key="item.link">
           <a :href="withBase(item.link)" :title="item.topic"><code>{{ label(item) }}</code></a>
