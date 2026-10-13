@@ -3,7 +3,7 @@ import { KEY_CODES, isMetaKey, isCtrlMetaKey } from './helpers/unicode';
 import { stopPropagation, stopImmediatePropagation, isImmediatePropagationStopped } from './helpers/dom/event';
 import { getEditorInstance } from './editors';
 import EventManager from './eventManager';
-import { EditorState } from './editors/_baseEditor';
+import { EditorState } from './editors/editorBase';
 
 function EditorManager(instance, priv, selection) {
   const _this = this;
@@ -192,7 +192,7 @@ function EditorManager(instance, priv, selection) {
           moveSelectionAfterEnter(event.shiftKey);
         }
         event.preventDefault(); // don't add newline to field
-        stopImmediatePropagation(event); // required by HandsontableEditor
+        stopImmediatePropagation(event); // required by EditorHandsontable
         break;
 
       case KEY_CODES.ESCAPE:

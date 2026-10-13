@@ -3373,7 +3373,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *
    * @memberof Core#
    * @function getActiveEditor
-   * @returns {BaseEditor} The active editor instance.
+   * @returns {EditorBase} The active editor instance.
    */
   this.getActiveEditor = function() {
     return editorManager.getActiveEditor();

@@ -387,8 +387,8 @@ describe('Core_updateSettings', () => {
     });
 
     expect(getCellMeta(0, 0).type).toEqual('text');
-    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.TextRenderer);
-    expect(getCellEditor(0, 0)).toBe(Handsontable.editors.TextEditor);
+    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.RendererText);
+    expect(getCellEditor(0, 0)).toBe(Handsontable.editors.EditorText);
 
     columns[0].type = 'date';
 
@@ -397,8 +397,8 @@ describe('Core_updateSettings', () => {
     });
 
     expect(getCellMeta(0, 0).type).toEqual('date');
-    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.AutocompleteRenderer);
-    expect(getCellEditor(0, 0)).toEqual(Handsontable.editors.DateEditor);
+    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.RendererAutocomplete);
+    expect(getCellEditor(0, 0)).toEqual(Handsontable.editors.EditorDate);
   });
 
   it('should update cell type functions, even if new type does not implement all of those functions', () => {
@@ -413,8 +413,8 @@ describe('Core_updateSettings', () => {
     });
 
     expect(getCellMeta(0, 0).type).toEqual('numeric');
-    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.NumericRenderer);
-    expect(getCellEditor(0, 0)).toBe(Handsontable.editors.NumericEditor);
+    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.RendererNumeric);
+    expect(getCellEditor(0, 0)).toBe(Handsontable.editors.EditorNumeric);
     expect(getCellValidator(0, 0)).toBe(Handsontable.cellTypes.numeric.validator);
 
     columns[0].type = 'text';
@@ -424,8 +424,8 @@ describe('Core_updateSettings', () => {
     });
 
     expect(getCellMeta(0, 0).type).toEqual('text');
-    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.TextRenderer);
-    expect(getCellEditor(0, 0)).toEqual(Handsontable.editors.TextEditor);
+    expect(getCellRenderer(0, 0)).toBe(Handsontable.renderers.RendererText);
+    expect(getCellEditor(0, 0)).toEqual(Handsontable.editors.EditorText);
     expect(Handsontable.cellTypes.text.validator).toBeUndefined();
     expect(getCellValidator(0, 0)).toBeUndefined();
   });

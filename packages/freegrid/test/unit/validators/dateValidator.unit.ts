@@ -1,4 +1,4 @@
-import { correctFormat } from '../../../src/validators/dateValidator';
+import { correctFormat } from '../../../src/validators/validatorDate';
 
 describe('dateValidator correctFormat', () => {
   it('reads a date in the format when it has no letters, also with _ or ^ as separators', () => {

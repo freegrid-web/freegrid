@@ -4,7 +4,7 @@ import type { ValidatorContext } from '../cellTypes/types';
  * Valid: with `strict` and a `source`, a value from the source (a list, or a function that gives one for the value);
  * without them, anything. An empty value is valid with `allowEmpty`.
  */
-export default function autocompleteValidator(this: ValidatorContext, value: unknown,
+export default function validatorAutocomplete(this: ValidatorContext, value: unknown,
   callback: (valid: boolean) => void): void {
   const valueToValidate = value ?? '';
 

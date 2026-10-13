@@ -1,6 +1,6 @@
 import * as Handsontable from 'handsontable';
 
-class PasswordEditor extends Handsontable.editors.TextEditor {
+class PasswordEditor extends Handsontable.editors.EditorText {
   createElements() {
     // Call the original createElements method
     super.createElements.apply(this, arguments);

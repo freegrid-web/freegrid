@@ -13,16 +13,16 @@ import {
 } from './../helpers/dom/element';
 import autoResize from './../../lib/autoResize/autoResize';
 import { isMobileBrowser } from './../helpers/browser';
-import BaseEditor, { EditorState } from './_baseEditor';
-import type { EditorGrid } from './_baseEditor';
+import EditorBase, { EditorState } from './editorBase';
+import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
 import EventManager from './../eventManager';
 import { KEY_CODES } from './../helpers/unicode';
 import { stopPropagation, stopImmediatePropagation, isImmediatePropagationStopped } from './../helpers/dom/event';
 
 // A grid hook: `this` is the grid.
-const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: KeyboardEvent) {
-  const that = this.getActiveEditor() as TextEditor;
+const onBeforeKeyDown = function onBeforeKeyDown(this: EditorHost, event: KeyboardEvent) {
+  const that = this.getActiveEditor() as EditorText;
 
   // catch CTRL but not right ALT (which in some systems triggers ALT+CTRL)
   const ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey;
@@ -34,30 +34,12 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
 
   switch (event.keyCode) {
     case KEY_CODES.ARROW_RIGHT:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
-      }
-      break;
-
     case KEY_CODES.ARROW_LEFT:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
-      }
-      break;
-
     case KEY_CODES.ARROW_UP:
     case KEY_CODES.ARROW_DOWN:
-      if (that.isInFullEditMode()) {
-        if ((!that.isWaiting() && !that.allowKeyEventPropagation) ||
-            (!that.isWaiting() && that.allowKeyEventPropagation && !that.allowKeyEventPropagation(event.keyCode))) {
-          stopImmediatePropagation(event);
-        }
+      // In full edit mode the arrow keys move the caret.
+      if (that.isInFullEditMode() && !that.isWaiting() && !that.allowKeyEventPropagation(event.keyCode)) {
+        stopImmediatePropagation(event);
       }
       break;
 
@@ -103,7 +85,7 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: EditorGrid, event: Keyboa
  * The default editor: a textarea over the cell, sized to its content. It is moved off screen while the cell is only
  * selected (so that typing goes into it, also with IME), and over the cell while editing.
  */
-class TextEditor extends BaseEditor {
+class EditorText extends EditorBase {
   // Set by init() and createElements(), which run inside the base constructor: `declare` keeps these field
   // definitions from resetting them afterwards.
   declare TEXTAREA: HTMLTextAreaElement;
@@ -120,13 +102,10 @@ class TextEditor extends BaseEditor {
 
   declare holderZIndex: number;
 
-  /** Lets some keys reach the grid while editing (set by subclasses). */
-  declare allowKeyEventPropagation?: (keyCode: number) => boolean;
-
   /**
    * @private
-   * @editor TextEditor
-   * @class TextEditor
+   * @editor EditorText
+   * @class EditorText
    * @dependencies autoResize
    */
   init(): void {
@@ -171,6 +150,12 @@ class TextEditor extends BaseEditor {
         this.instance._registerImmediate(() => this.focus());
       }
     }
+  }
+
+  /** Whether an arrow key reaches the grid in full edit mode (instead of moving the caret). */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  allowKeyEventPropagation(keyCode: number): boolean {
+    return false;
   }
 
   hideEditableElement(): void {
@@ -451,4 +436,4 @@ class TextEditor extends BaseEditor {
   }
 }
 
-export default TextEditor;
+export default EditorText;

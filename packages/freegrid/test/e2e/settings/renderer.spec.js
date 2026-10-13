@@ -27,13 +27,13 @@ describe('settings', () => {
       });
 
       it('should use renderer from predefined string', () => {
-        const originalTextRenderer = Handsontable.renderers.TextRenderer;
-        spyOn(Handsontable.renderers, 'TextRenderer');
-        Handsontable.renderers.registerRenderer('text', Handsontable.renderers.TextRenderer);
+        const originalTextRenderer = Handsontable.renderers.RendererText;
+        spyOn(Handsontable.renderers, 'RendererText');
+        Handsontable.renderers.registerRenderer('text', Handsontable.renderers.RendererText);
 
-        const originalCheckboxRenderer = Handsontable.renderers.CheckboxRenderer;
-        spyOn(Handsontable.renderers, 'CheckboxRenderer');
-        Handsontable.renderers.registerRenderer('checkbox', Handsontable.renderers.CheckboxRenderer);
+        const originalCheckboxRenderer = Handsontable.renderers.RendererCheckbox;
+        spyOn(Handsontable.renderers, 'RendererCheckbox');
+        Handsontable.renderers.registerRenderer('checkbox', Handsontable.renderers.RendererCheckbox);
 
         handsontable({
           columns: [
@@ -42,30 +42,30 @@ describe('settings', () => {
             }
           ]
         });
-        expect(Handsontable.renderers.TextRenderer).not.toHaveBeenCalled();
-        expect(Handsontable.renderers.CheckboxRenderer).toHaveBeenCalled();
+        expect(Handsontable.renderers.RendererText).not.toHaveBeenCalled();
+        expect(Handsontable.renderers.RendererCheckbox).toHaveBeenCalled();
 
         Handsontable.renderers.registerRenderer('text', originalTextRenderer);
         Handsontable.renderers.registerRenderer('checkbox', originalCheckboxRenderer);
       });
 
       it('should use renderer from predefined string when columns is a function', () => {
-        const originalTextRenderer = Handsontable.renderers.TextRenderer;
+        const originalTextRenderer = Handsontable.renderers.RendererText;
 
-        spyOn(Handsontable.renderers, 'TextRenderer');
-        Handsontable.renderers.registerRenderer('text', Handsontable.renderers.TextRenderer);
+        spyOn(Handsontable.renderers, 'RendererText');
+        Handsontable.renderers.registerRenderer('text', Handsontable.renderers.RendererText);
 
-        const originalCheckboxRenderer = Handsontable.renderers.CheckboxRenderer;
-        spyOn(Handsontable.renderers, 'CheckboxRenderer');
-        Handsontable.renderers.registerRenderer('checkbox', Handsontable.renderers.CheckboxRenderer);
+        const originalCheckboxRenderer = Handsontable.renderers.RendererCheckbox;
+        spyOn(Handsontable.renderers, 'RendererCheckbox');
+        Handsontable.renderers.registerRenderer('checkbox', Handsontable.renderers.RendererCheckbox);
 
         handsontable({
           columns(column) {
             return column === 0 ? { renderer: 'checkbox' } : null;
           }
         });
-        expect(Handsontable.renderers.TextRenderer).not.toHaveBeenCalled();
-        expect(Handsontable.renderers.CheckboxRenderer).toHaveBeenCalled();
+        expect(Handsontable.renderers.RendererText).not.toHaveBeenCalled();
+        expect(Handsontable.renderers.RendererCheckbox).toHaveBeenCalled();
 
         Handsontable.renderers.registerRenderer('text', originalTextRenderer);
         Handsontable.renderers.registerRenderer('checkbox', originalCheckboxRenderer);

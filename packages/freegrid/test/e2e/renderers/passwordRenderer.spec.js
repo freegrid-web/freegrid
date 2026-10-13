@@ -22,7 +22,7 @@ describe('passwordRenderer', () => {
       ],
       columns: [
         {
-          renderer: Handsontable.renderers.PasswordRenderer
+          renderer: Handsontable.renderers.RendererPassword
         }
       ]
     });
@@ -43,7 +43,7 @@ describe('passwordRenderer', () => {
       ],
       columns: [
         {
-          renderer: Handsontable.renderers.PasswordRenderer
+          renderer: Handsontable.renderers.RendererPassword
         }
       ]
     });
@@ -106,7 +106,7 @@ describe('passwordRenderer', () => {
       ],
       columns: [
         {
-          renderer: Handsontable.renderers.PasswordRenderer
+          renderer: Handsontable.renderers.RendererPassword
         }
       ]
     });
@@ -127,7 +127,7 @@ describe('passwordRenderer', () => {
       ],
       columns: [
         {
-          renderer: Handsontable.renderers.PasswordRenderer,
+          renderer: Handsontable.renderers.RendererPassword,
           hashLength: 10
         }
       ]
@@ -149,11 +149,11 @@ describe('passwordRenderer', () => {
       ],
       columns: [
         {
-          renderer: Handsontable.renderers.PasswordRenderer,
+          renderer: Handsontable.renderers.RendererPassword,
           hashSymbol: '#'
         },
         {
-          renderer: Handsontable.renderers.PasswordRenderer,
+          renderer: Handsontable.renderers.RendererPassword,
           hashSymbol: 'x'
         }
       ]

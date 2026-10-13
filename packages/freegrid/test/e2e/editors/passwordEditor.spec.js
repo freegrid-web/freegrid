@@ -22,7 +22,7 @@ describe('PasswordEditor', () => {
       ],
       columns: [
         {
-          editor: Handsontable.editors.PasswordEditor
+          editor: Handsontable.editors.EditorPassword
         }
       ]
     });

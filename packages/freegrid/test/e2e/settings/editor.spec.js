@@ -15,7 +15,7 @@ describe('settings', () => {
 
     describe('defined in constructor', () => {
       it('should use text editor by default', () => {
-        const textEditorPrototype = Handsontable.editors.TextEditor.prototype;
+        const textEditorPrototype = Handsontable.editors.EditorText.prototype;
 
         spyOn(textEditorPrototype, 'init').and.callThrough();
         handsontable();
@@ -24,8 +24,8 @@ describe('settings', () => {
       });
 
       it('should use editor from predefined string', () => {
-        const textEditorPrototype = Handsontable.editors.TextEditor.prototype;
-        const checkboxEditorPrototype = Handsontable.editors.CheckboxEditor.prototype;
+        const textEditorPrototype = Handsontable.editors.EditorText.prototype;
+        const checkboxEditorPrototype = Handsontable.editors.EditorCheckbox.prototype;
 
         spyOn(textEditorPrototype, 'init');
         spyOn(checkboxEditorPrototype, 'init');
@@ -42,8 +42,8 @@ describe('settings', () => {
       });
 
       it('should use editor from predefined string when columns is a function', () => {
-        const textEditorPrototype = Handsontable.editors.TextEditor.prototype;
-        const checkboxEditorPrototype = Handsontable.editors.CheckboxEditor.prototype;
+        const textEditorPrototype = Handsontable.editors.EditorText.prototype;
+        const checkboxEditorPrototype = Handsontable.editors.EditorCheckbox.prototype;
 
         spyOn(textEditorPrototype, 'init');
         spyOn(checkboxEditorPrototype, 'init');

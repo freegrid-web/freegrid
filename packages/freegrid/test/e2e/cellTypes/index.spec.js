@@ -6,7 +6,7 @@ describe('cellTypes', () => {
   } = Handsontable.cellTypes;
   const {
     getEditor,
-    BaseEditor,
+    EditorBase,
   } = Handsontable.editors;
   const {
     getRenderer,
@@ -27,7 +27,7 @@ describe('cellTypes', () => {
   });
 
   it('should register custom cell type (with custom editor, renderer and validator)', async() => {
-    class MyEditor extends BaseEditor {
+    class MyEditor extends EditorBase {
       init() {
         this.TEXTAREA = document.createElement('TEXTAREA');
         this.TEXTAREA_PARENT = document.createElement('DIV');
@@ -89,43 +89,43 @@ describe('cellTypes', () => {
   it('should retrieve predefined cell types by its names', () => {
     const { editors, renderers, validators } = Handsontable;
 
-    expect(getCellType('autocomplete').editor).toBe(editors.AutocompleteEditor);
-    expect(getCellType('autocomplete').renderer).toBe(renderers.AutocompleteRenderer);
-    expect(getCellType('autocomplete').validator).toBe(validators.AutocompleteValidator);
+    expect(getCellType('autocomplete').editor).toBe(editors.EditorAutocomplete);
+    expect(getCellType('autocomplete').renderer).toBe(renderers.RendererAutocomplete);
+    expect(getCellType('autocomplete').validator).toBe(validators.ValidatorAutocomplete);
 
-    expect(getCellType('checkbox').editor).toBe(editors.CheckboxEditor);
-    expect(getCellType('checkbox').renderer).toBe(renderers.CheckboxRenderer);
+    expect(getCellType('checkbox').editor).toBe(editors.EditorCheckbox);
+    expect(getCellType('checkbox').renderer).toBe(renderers.RendererCheckbox);
     expect(getCellType('checkbox').validator).not.toBeDefined();
 
-    expect(getCellType('date').editor).toBe(editors.DateEditor);
-    expect(getCellType('date').renderer).toBe(renderers.AutocompleteRenderer);
-    expect(getCellType('date').validator).toBe(validators.DateValidator);
+    expect(getCellType('date').editor).toBe(editors.EditorDate);
+    expect(getCellType('date').renderer).toBe(renderers.RendererAutocomplete);
+    expect(getCellType('date').validator).toBe(validators.ValidatorDate);
 
-    expect(getCellType('dropdown').editor).toBe(editors.DropdownEditor);
-    expect(getCellType('dropdown').renderer).toBe(renderers.AutocompleteRenderer);
-    expect(getCellType('dropdown').validator).toBe(validators.AutocompleteValidator);
+    expect(getCellType('dropdown').editor).toBe(editors.EditorDropdown);
+    expect(getCellType('dropdown').renderer).toBe(renderers.RendererAutocomplete);
+    expect(getCellType('dropdown').validator).toBe(validators.ValidatorAutocomplete);
 
-    expect(getCellType('handsontable').editor).toBe(editors.HandsontableEditor);
-    expect(getCellType('handsontable').renderer).toBe(renderers.AutocompleteRenderer);
+    expect(getCellType('handsontable').editor).toBe(editors.EditorHandsontable);
+    expect(getCellType('handsontable').renderer).toBe(renderers.RendererAutocomplete);
     expect(getCellType('handsontable').validator).not.toBeDefined();
 
-    expect(getCellType('numeric').editor).toBe(editors.NumericEditor);
-    expect(getCellType('numeric').renderer).toBe(renderers.NumericRenderer);
-    expect(getCellType('numeric').validator).toBe(validators.NumericValidator);
+    expect(getCellType('numeric').editor).toBe(editors.EditorNumeric);
+    expect(getCellType('numeric').renderer).toBe(renderers.RendererNumeric);
+    expect(getCellType('numeric').validator).toBe(validators.ValidatorNumeric);
     expect(getCellType('numeric').dataType).toBe('number');
 
-    expect(getCellType('password').editor).toBe(editors.PasswordEditor);
-    expect(getCellType('password').renderer).toBe(renderers.PasswordRenderer);
+    expect(getCellType('password').editor).toBe(editors.EditorPassword);
+    expect(getCellType('password').renderer).toBe(renderers.RendererPassword);
     expect(getCellType('password').validator).not.toBeDefined();
     expect(getCellType('password').copyable).toBe(false);
 
-    expect(getCellType('text').editor).toBe(editors.TextEditor);
-    expect(getCellType('text').renderer).toBe(renderers.TextRenderer);
+    expect(getCellType('text').editor).toBe(editors.EditorText);
+    expect(getCellType('text').renderer).toBe(renderers.RendererText);
     expect(getCellType('text').validator).not.toBeDefined();
 
-    expect(getCellType('time').editor).toBe(editors.TextEditor);
-    expect(getCellType('time').renderer).toBe(renderers.TextRenderer);
-    expect(getCellType('time').validator).toBe(validators.TimeValidator);
+    expect(getCellType('time').editor).toBe(editors.EditorText);
+    expect(getCellType('time').renderer).toBe(renderers.RendererText);
+    expect(getCellType('time').validator).toBe(validators.ValidatorTime);
   });
 
   it('should register custom cell type into renderers, editors and validators', () => {

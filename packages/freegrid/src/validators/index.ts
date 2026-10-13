@@ -1,10 +1,10 @@
 import staticRegister from './../utils/staticRegister';
 import type { Validator } from '../cellTypes/types';
 
-import autocompleteValidator from './autocompleteValidator';
-import dateValidator from './dateValidator';
-import numericValidator from './numericValidator';
-import timeValidator from './timeValidator';
+import validatorAutocomplete from './validatorAutocomplete';
+import validatorDate from './validatorDate';
+import validatorNumeric from './validatorNumeric';
+import validatorTime from './validatorTime';
 
 const {
   register,
@@ -14,10 +14,10 @@ const {
   getValues,
 } = staticRegister<Validator>('validators');
 
-register('autocomplete', autocompleteValidator);
-register('date', dateValidator);
-register('numeric', numericValidator);
-register('time', timeValidator);
+register('autocomplete', validatorAutocomplete);
+register('date', validatorDate);
+register('numeric', validatorNumeric);
+register('time', validatorTime);
 
 /** A registered validator by name (a function is returned as it is); throws for an unknown name. */
 const getValidatorItem = (name: string | Validator): Validator => {

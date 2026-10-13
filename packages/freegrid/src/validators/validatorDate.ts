@@ -7,7 +7,7 @@ import type { ValidatorContext } from '../cellTypes/types';
  * Valid: a date in `dateFormat` (default: the date editor's, `DD/MM/YYYY`), or an empty value with `allowEmpty`. A date
  * in another format is invalid, unless `correctFormat` rewrites it in `dateFormat`.
  */
-export default function dateValidator(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
+export default function validatorDate(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
   const dateEditor = getEditorInstance('date', this.instance) as unknown as { defaultDateFormat: string };
   const valueToValidate = value ?? '';
   const dateFormat = this.dateFormat || dateEditor.defaultDateFormat;
@@ -29,7 +29,7 @@ export default function dateValidator(this: ValidatorContext, value: unknown, ca
     const row = this.instance.runHooks('unmodifyRow', this.row) as number;
     const column = this.instance.runHooks('unmodifyCol', this.col) as number;
 
-    this.instance.setDataAtCell(row, column, correctFormat(valueToValidate as string, this.dateFormat), 'dateValidator');
+    this.instance.setDataAtCell(row, column, correctFormat(valueToValidate as string, this.dateFormat), 'validatorDate');
     callback(true);
 
     return;

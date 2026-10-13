@@ -1,14 +1,14 @@
 import { withLegacyClassNames } from './../helpers/classNames';
 import { empty } from './../helpers/dom/element';
-import TextEditor from './textEditor';
+import EditorText from './editorText';
 
 /**
  * @private
- * @editor PasswordEditor
- * @class PasswordEditor
- * @dependencies TextEditor
+ * @editor EditorPassword
+ * @class EditorPassword
+ * @dependencies EditorText
  */
-class PasswordEditor extends TextEditor {
+class EditorPassword extends EditorText {
   createElements(): void {
     super.createElements();
 
@@ -27,4 +27,4 @@ class PasswordEditor extends TextEditor {
   }
 }
 
-export default PasswordEditor;
+export default EditorPassword;

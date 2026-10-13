@@ -21,7 +21,7 @@ describe('Performance', () => {
       colWidths: 100,
       rowHeights: 23,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -35,7 +35,7 @@ describe('Performance', () => {
       data: Handsontable.helper.createSpreadsheetData(1, 1),
       rowHeights: 23,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -49,7 +49,7 @@ describe('Performance', () => {
       data: Handsontable.helper.createSpreadsheetData(1, 1),
       colWidths: 50,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -64,7 +64,7 @@ describe('Performance', () => {
       autoRowSize: true,
       autoColumnSize: true,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -199,7 +199,7 @@ describe('Performance', () => {
       rowHeights: 23,
       autoColumnSize: true,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -214,7 +214,7 @@ describe('Performance', () => {
       colWidths: 50,
       autoRowSize: true,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });
@@ -229,7 +229,7 @@ describe('Performance', () => {
       autoRowSize: true,
       autoColumnSize: true,
       renderer(...args) {
-        Handsontable.renderers.TextRenderer.apply(this, args);
+        Handsontable.renderers.RendererText.apply(this, args);
         count += 1;
       }
     });

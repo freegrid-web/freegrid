@@ -15,7 +15,7 @@ clonableARROW.appendChild(document.createTextNode(String.fromCharCode(9660)));
  * The value (as text, or as HTML with `allowHtml`) with a dropdown arrow. A mousedown on the arrow opens the cell's
  * editor.
  */
-const autocompleteRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+const rendererAutocomplete: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
   getRenderer(cellProperties.allowHtml ? 'html' : 'text')(instance, TD, row, col, prop, value, cellProperties);
 
   if (!TD.firstChild) {
@@ -41,4 +41,4 @@ const autocompleteRenderer: Renderer = (instance, TD, row, col, prop, value, cel
   }
 };
 
-export default autocompleteRenderer;
+export default rendererAutocomplete;

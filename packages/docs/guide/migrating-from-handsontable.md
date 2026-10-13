@@ -59,5 +59,46 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
   old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
   switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now
   writes `fg-` alignment classes into `getCellMeta(...).className`.
+- **Editor, renderer and validator names** have the kind first (see below).
 - **Pro features** (filters, dropdown menu, hidden rows and columns, nested headers, export, formulas)
   were never part of the MIT release. They are on the [roadmap](../project/roadmap), written from scratch.
+
+## Editor, renderer and validator names
+
+The classes and functions under `FreeGrid.editors`, `FreeGrid.renderers` and `FreeGrid.validators` have uniform
+names, the kind first. The old names are removed. Names used in settings (`type: 'date'`, `editor: 'text'`,
+`renderer: 'numeric'`, `validator: 'time'`) do not change.
+
+| Handsontable 6 | FreeGrid |
+| --- | --- |
+| `editors.BaseEditor` | `editors.EditorBase` |
+| `editors.TextEditor` | `editors.EditorText` |
+| `editors.AutocompleteEditor` | `editors.EditorAutocomplete` |
+| `editors.CheckboxEditor` | `editors.EditorCheckbox` |
+| `editors.DateEditor` | `editors.EditorDate` |
+| `editors.DropdownEditor` | `editors.EditorDropdown` |
+| `editors.HandsontableEditor` | `editors.EditorHandsontable` |
+| `editors.NumericEditor` | `editors.EditorNumeric` |
+| `editors.PasswordEditor` | `editors.EditorPassword` |
+| `editors.SelectEditor` | `editors.EditorSelect` |
+| `renderers.BaseRenderer`, `renderers.cellDecorator` | `renderers.RendererBase` |
+| `renderers.TextRenderer` | `renderers.RendererText` |
+| `renderers.AutocompleteRenderer` | `renderers.RendererAutocomplete` |
+| `renderers.CheckboxRenderer` | `renderers.RendererCheckbox` |
+| `renderers.HtmlRenderer` | `renderers.RendererHtml` |
+| `renderers.NumericRenderer` | `renderers.RendererNumeric` |
+| `renderers.PasswordRenderer` | `renderers.RendererPassword` |
+| `validators.AutocompleteValidator` | `validators.ValidatorAutocomplete` |
+| `validators.DateValidator` | `validators.ValidatorDate` |
+| `validators.NumericValidator` | `validators.ValidatorNumeric` |
+| `validators.TimeValidator` | `validators.ValidatorTime` |
+
+```js
+// before
+class UpperCaseEditor extends Handsontable.editors.TextEditor { … }
+// after
+class UpperCaseEditor extends FreeGrid.editors.EditorText { … }
+```
+
+Your own editors, renderers and validators keep the names you register them under
+(`registerEditor('upper', UpperCaseEditor)`, then `editor: 'upper'`).

@@ -116,7 +116,7 @@ FreeGrid.cellTypes.getCellType = getCellType;
 FreeGrid.editors = {};
 
 arrayHelpers.arrayEach(getRegisteredEditorNames(), (editorName) => {
-  FreeGrid.editors[`${stringHelpers.toUpperCaseFirst(editorName)}Editor`] = getEditor(editorName);
+  FreeGrid.editors[`Editor${stringHelpers.toUpperCaseFirst(editorName)}`] = getEditor(editorName);
 });
 
 FreeGrid.editors.registerEditor = registerEditor;
@@ -126,12 +126,7 @@ FreeGrid.editors.getEditor = getEditor;
 FreeGrid.renderers = {};
 
 arrayHelpers.arrayEach(getRegisteredRendererNames(), (rendererName) => {
-  const renderer = getRenderer(rendererName);
-
-  if (rendererName === 'base') {
-    FreeGrid.renderers.cellDecorator = renderer;
-  }
-  FreeGrid.renderers[`${stringHelpers.toUpperCaseFirst(rendererName)}Renderer`] = renderer;
+  FreeGrid.renderers[`Renderer${stringHelpers.toUpperCaseFirst(rendererName)}`] = getRenderer(rendererName);
 });
 
 FreeGrid.renderers.registerRenderer = registerRenderer;
@@ -141,7 +136,7 @@ FreeGrid.renderers.getRenderer = getRenderer;
 FreeGrid.validators = {};
 
 arrayHelpers.arrayEach(getRegisteredValidatorNames(), (validatorName) => {
-  FreeGrid.validators[`${stringHelpers.toUpperCaseFirst(validatorName)}Validator`] = getValidator(validatorName);
+  FreeGrid.validators[`Validator${stringHelpers.toUpperCaseFirst(validatorName)}`] = getValidator(validatorName);
 });
 
 FreeGrid.validators.registerValidator = registerValidator;
