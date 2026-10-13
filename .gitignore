@@ -8,3 +8,8 @@ packages/freegrid/test-results/
 .DS_Store
 packages/docs/.vitepress/dist/
 packages/docs/.vitepress/cache/
+# API reference pages, generated from the source code (packages/docs/api/generate.mjs)
+packages/docs/api/methods.md
+packages/docs/api/events.md
+packages/docs/api/settings.md
+packages/docs/api/plugins.md

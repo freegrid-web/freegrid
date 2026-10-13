@@ -1,3 +1,7 @@
+---
+api: [Lifecycle, Rows and columns, Rendering and scrolling]
+---
+
 # Configuration
 
 A grid is configured with one settings object, passed to the constructor:

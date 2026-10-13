@@ -1,3 +1,7 @@
+---
+api: [Data, Hooks API]
+---
+
 # Data and events
 
 ## Reading and writing data

@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev",
-    "build": "vitepress build",
+    "dev": "node api/generate.mjs && vitepress dev",
+    "build": "node api/generate.mjs && vitepress build",
     "preview": "vitepress preview",
+    "test:unit": "node --test api/*.test.mjs",
     "test:smoke": "node test/smoke.js"
   },
   "dependencies": {

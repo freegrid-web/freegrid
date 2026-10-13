@@ -1,3 +1,7 @@
+---
+api: [Plugins]
+---
+
 # Plugins
 
 Most features are plugins that you switch on with a setting. Each can be reached at runtime with
