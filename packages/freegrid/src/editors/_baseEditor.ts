@@ -1,269 +1,262 @@
 import { CellCoords } from './../3rdparty/walkontable/src';
 import { stringify } from './../helpers/mixed';
+import type { CellProperties } from '../cellTypes/types';
 
 export const EditorState = {
   VIRGIN: 'STATE_VIRGIN', // before editing
   EDITING: 'STATE_EDITING',
   WAITING: 'STATE_WAITING', // waiting for async validation
-  FINISHED: 'STATE_FINISHED'
-};
+  FINISHED: 'STATE_FINISHED',
+} as const;
+
+export type EditorStateValue = typeof EditorState[keyof typeof EditorState];
 
 /**
- * @util
- * @class BaseEditor
+ * The grid, as editors use it. src/core.js is not typed yet, and editors reach deep into it (the view, Walkontable's
+ * overlays).
  */
-function BaseEditor(instance) {
-  this.instance = instance;
-  this.state = EditorState.VIRGIN;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+export type EditorGrid = any;
 
-  this._opened = false;
-  this._fullEditMode = false;
-  this._closeCallback = null;
+/**
+ * The base of every editor. An editor edits one cell at a time: the grid calls `prepare()` for the selected cell,
+ * `beginEditing()` to open it and `finishEditing()` to save (or cancel) and close it. Subclasses implement `init()`,
+ * `getValue()`, `setValue()`, `open()`, `close()` and `focus()`.
+ *
+ * The constructor calls `init()`: fields that `init()` sets must be declared with `declare` in subclasses, or the
+ * subclass's field definitions would reset them after the constructor.
+ */
+class BaseEditor {
+  instance: EditorGrid;
 
-  this.init();
-}
+  state: EditorStateValue = EditorState.VIRGIN;
 
-BaseEditor.prototype._fireCallbacks = function(result) {
-  if (this._closeCallback) {
-    this._closeCallback(result);
-    this._closeCallback = null;
-  }
-};
+  _opened = false;
 
-BaseEditor.prototype.init = function() {};
+  _fullEditMode = false;
 
-BaseEditor.prototype.getValue = function() {
-  throw Error('Editor getValue() method unimplemented');
-};
+  _closeCallback: ((result: boolean) => void) | null = null;
 
-BaseEditor.prototype.setValue = function() {
-  throw Error('Editor setValue() method unimplemented');
-};
+  // Set by `prepare()` for the cell being edited.
+  declare TD: HTMLTableCellElement;
 
-BaseEditor.prototype.open = function() {
-  throw Error('Editor open() method unimplemented');
-};
+  declare row: number;
 
-BaseEditor.prototype.close = function() {
-  throw Error('Editor close() method unimplemented');
-};
+  declare col: number;
 
-BaseEditor.prototype.prepare = function(row, col, prop, td, originalValue, cellProperties) {
-  this.TD = td;
-  this.row = row;
-  this.col = col;
-  this.prop = prop;
-  this.originalValue = originalValue;
-  this.cellProperties = cellProperties;
-  this.state = EditorState.VIRGIN;
-};
+  declare prop: string | number;
 
-BaseEditor.prototype.extend = function() {
-  const baseClass = this.constructor;
+  declare originalValue: unknown;
 
-  function Editor(...args) {
-    baseClass.apply(this, args);
+  declare cellProperties: CellProperties;
+
+  constructor(instance: EditorGrid) {
+    this.instance = instance;
+    this.init();
   }
 
-  function inherit(Child, Parent) {
-    function Bridge() {}
-    Bridge.prototype = Parent.prototype;
-    Child.prototype = new Bridge();
-    Child.prototype.constructor = Child;
-
-    return Child;
-  }
-
-  return inherit(Editor, baseClass);
-};
-
-BaseEditor.prototype.saveValue = function(value, ctrlDown) {
-  let selection;
-  let tmp;
-
-  // if ctrl+enter and multiple cells selected, behave like Excel (finish editing and apply to all cells)
-  if (ctrlDown) {
-    selection = this.instance.getSelectedLast();
-
-    if (selection[0] > selection[2]) {
-      tmp = selection[0];
-      selection[0] = selection[2];
-      selection[2] = tmp;
+  _fireCallbacks(result: boolean): void {
+    if (this._closeCallback) {
+      this._closeCallback(result);
+      this._closeCallback = null;
     }
-    if (selection[1] > selection[3]) {
-      tmp = selection[1];
-      selection[1] = selection[3];
-      selection[3] = tmp;
+  }
+
+  /** Creates the editor's elements and listeners (once per grid). */
+  init(): void {}
+
+  getValue(): unknown {
+    throw Error('Editor getValue() method unimplemented');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setValue(newValue?: unknown): void {
+    throw Error('Editor setValue() method unimplemented');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  open(event?: Event | null): void {
+    throw Error('Editor open() method unimplemented');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  close(force?: boolean): void {
+    throw Error('Editor close() method unimplemented');
+  }
+
+  focus(): void {}
+
+  /** Points the editor at a cell (before it is opened). */
+  prepare(row: number, col: number, prop: string | number, td: HTMLTableCellElement, originalValue: unknown,
+    cellProperties: CellProperties): void {
+    this.TD = td;
+    this.row = row;
+    this.col = col;
+    this.prop = prop;
+    this.originalValue = originalValue;
+    this.cellProperties = cellProperties;
+    this.state = EditorState.VIRGIN;
+  }
+
+  /**
+   * A subclass of this editor's class, for editors written in the style of older versions:
+   * `const MyEditor = FreeGrid.editors.TextEditor.prototype.extend(); MyEditor.prototype.open = function() { … }`.
+   * (`class MyEditor extends FreeGrid.editors.TextEditor {}` does the same.)
+   */
+  extend(): typeof BaseEditor {
+    const Base = this.constructor as typeof BaseEditor;
+
+    return class Editor extends Base {};
+  }
+
+  /** Writes `value` to the cell, or with `ctrlDown` (Ctrl+Enter) to every selected cell. */
+  saveValue(value: unknown[][], ctrlDown?: boolean): void {
+    let selection: (number | null)[];
+
+    if (ctrlDown) {
+      const [rowStart, colStart, rowEnd, colEnd] = this.instance.getSelectedLast() as number[];
+
+      selection = [Math.min(rowStart, rowEnd), Math.min(colStart, colEnd), Math.max(rowStart, rowEnd),
+        Math.max(colStart, colEnd)];
+    } else {
+      selection = [this.row, this.col, null, null];
     }
-  } else {
-    selection = [this.row, this.col, null, null];
+    this.instance.populateFromArray(selection[0], selection[1], value, selection[2], selection[3], 'edit');
   }
 
-  this.instance.populateFromArray(selection[0], selection[1], value, selection[2], selection[3], 'edit');
-};
+  /**
+   * Opens the editor. In full edit mode (Enter, F2, double click) it starts with `newInitialValue` or the cell's
+   * value; otherwise empty, so that typing (and IME) replaces the value.
+   */
+  beginEditing(newInitialValue?: string, event?: Event | null): void {
+    if (this.state !== EditorState.VIRGIN) {
+      return;
+    }
+    this.instance.view.scrollViewport(new CellCoords(this.row, this.col));
+    this.state = EditorState.EDITING;
 
-BaseEditor.prototype.beginEditing = function(newInitialValue, event) {
-  if (this.state !== EditorState.VIRGIN) {
-    return;
-  }
-  this.instance.view.scrollViewport(new CellCoords(this.row, this.col));
-  this.state = EditorState.EDITING;
-
-  // Set the editor value only in the full edit mode. In other mode the focusable element has to be empty,
-  // otherwise IME (editor for Asia users) doesn't work.
-  if (this.isInFullEditMode()) {
-    const stringifiedInitialValue = typeof newInitialValue === 'string' ? newInitialValue : stringify(this.originalValue);
-
-    this.setValue(stringifiedInitialValue);
-  }
-
-  this.open(event);
-  this._opened = true;
-  this.focus();
-
-  // only rerender the selections (FillHandle should disappear when beginediting is triggered)
-  this.instance.view.render();
-
-  this.instance.runHooks('afterBeginEditing', this.row, this.col);
-};
-
-BaseEditor.prototype.finishEditing = function(restoreOriginalValue, ctrlDown, callback) {
-  const _this = this;
-  let val;
-
-  if (callback) {
-    const previousCloseCallback = this._closeCallback;
-
-    this._closeCallback = function(result) {
-      if (previousCloseCallback) {
-        previousCloseCallback(result);
-      }
-
-      callback(result);
-      _this.instance.view.render();
-    };
+    if (this.isInFullEditMode()) {
+      this.setValue(typeof newInitialValue === 'string' ? newInitialValue : stringify(this.originalValue));
+    }
+    this.open(event);
+    this._opened = true;
+    this.focus();
+    // Only re-renders the selection (the fill handle disappears while editing).
+    this.instance.view.render();
+    this.instance.runHooks('afterBeginEditing', this.row, this.col);
   }
 
-  if (this.isWaiting()) {
-    return;
-  }
+  /**
+   * Saves the value (after validation, if the cell has a validator) and closes the editor, or with
+   * `restoreOriginalValue` cancels the changes. `callback(result)` runs when the editor has closed (`false`: the value
+   * was invalid and the editor stays open).
+   */
+  finishEditing(restoreOriginalValue?: boolean, ctrlDown?: boolean, callback?: (result: boolean) => void): void {
+    if (callback) {
+      const previousCloseCallback = this._closeCallback;
 
-  if (this.state === EditorState.VIRGIN) {
-    this.instance._registerTimeout(() => {
-      _this._fireCallbacks(true);
-    });
+      this._closeCallback = (result) => {
+        previousCloseCallback?.(result);
+        callback(result);
+        this.instance.view.render();
+      };
+    }
+    if (this.isWaiting()) {
+      return;
+    }
+    if (this.state === EditorState.VIRGIN) {
+      this.instance._registerTimeout(() => {
+        this._fireCallbacks(true);
+      });
 
-    return;
-  }
-
-  if (this.state === EditorState.EDITING) {
+      return;
+    }
+    if (this.state !== EditorState.EDITING) {
+      return;
+    }
     if (restoreOriginalValue) {
       this.cancelChanges();
       this.instance.view.render();
 
       return;
     }
-
     const value = this.getValue();
-
-    if (this.instance.getSettings().trimWhitespace) {
-      // We trim only string values
-      val = [
-        [typeof value === 'string' ? String.prototype.trim.call(value || '') : value]
-      ];
-    } else {
-      val = [
-        [value]
-      ];
-    }
+    // Only strings are trimmed.
+    const val = [[this.instance.getSettings().trimWhitespace && typeof value === 'string' ? value.trim() : value]];
 
     this.state = EditorState.WAITING;
     this.saveValue(val, ctrlDown);
 
     if (this.instance.getCellValidator(this.cellProperties)) {
-      this.instance.addHookOnce('postAfterValidate', (result) => {
-        _this.state = EditorState.FINISHED;
-        _this.discardEditor(result);
+      this.instance.addHookOnce('postAfterValidate', (result: boolean) => {
+        this.state = EditorState.FINISHED;
+        this.discardEditor(result);
       });
     } else {
       this.state = EditorState.FINISHED;
       this.discardEditor(true);
     }
   }
-};
 
-BaseEditor.prototype.cancelChanges = function() {
-  this.state = EditorState.FINISHED;
-  this.discardEditor();
-};
-
-BaseEditor.prototype.discardEditor = function(result) {
-  if (this.state !== EditorState.FINISHED) {
-    return;
+  cancelChanges(): void {
+    this.state = EditorState.FINISHED;
+    this.discardEditor();
   }
 
-  // validator was defined and failed
-  if (result === false && this.cellProperties.allowInvalid !== true) {
-    this.instance.selectCell(this.row, this.col);
-    this.focus();
-    this.state = EditorState.EDITING;
-    this._fireCallbacks(false);
-
-  } else {
-    this.close();
-    this._opened = false;
-    this._fullEditMode = false;
-    this.state = EditorState.VIRGIN;
-    this._fireCallbacks(true);
-  }
-};
-
-/**
- * Switch editor into full edit mode. In this state navigation keys don't close editor. This mode is activated
- * automatically after hit ENTER or F2 key on the cell or while editing cell press F2 key.
- */
-BaseEditor.prototype.enableFullEditMode = function() {
-  this._fullEditMode = true;
-};
-
-/**
- * Checks if editor is in full edit mode.
- *
- * @returns {Boolean}
- */
-BaseEditor.prototype.isInFullEditMode = function() {
-  return this._fullEditMode;
-};
-
-BaseEditor.prototype.isOpened = function() {
-  return this._opened;
-};
-
-BaseEditor.prototype.isWaiting = function() {
-  return this.state === EditorState.WAITING;
-};
-
-BaseEditor.prototype.checkEditorSection = function() {
-  const totalRows = this.instance.countRows();
-  let section = '';
-
-  if (this.row < this.instance.getSettings().fixedRowsTop) {
-    if (this.col < this.instance.getSettings().fixedColumnsLeft) {
-      section = 'top-left-corner';
-    } else {
-      section = 'top';
+  /**
+   * Closes the editor after saving; an invalid value (`result` false) keeps it open unless the cell allows invalid
+   * values.
+   */
+  discardEditor(result?: boolean): void {
+    if (this.state !== EditorState.FINISHED) {
+      return;
     }
-  } else if (this.instance.getSettings().fixedRowsBottom && this.row >= totalRows - this.instance.getSettings().fixedRowsBottom) {
-    if (this.col < this.instance.getSettings().fixedColumnsLeft) {
-      section = 'bottom-left-corner';
+    if (result === false && this.cellProperties.allowInvalid !== true) {
+      this.instance.selectCell(this.row, this.col);
+      this.focus();
+      this.state = EditorState.EDITING;
+      this._fireCallbacks(false);
     } else {
-      section = 'bottom';
+      this.close();
+      this._opened = false;
+      this._fullEditMode = false;
+      this.state = EditorState.VIRGIN;
+      this._fireCallbacks(true);
     }
-  } else if (this.col < this.instance.getSettings().fixedColumnsLeft) {
-    section = 'left';
   }
 
-  return section;
-};
+  /** Full edit mode (Enter, F2): the arrow keys move within the editor instead of closing it. */
+  enableFullEditMode(): void {
+    this._fullEditMode = true;
+  }
+
+  isInFullEditMode(): boolean {
+    return this._fullEditMode;
+  }
+
+  isOpened(): boolean {
+    return this._opened;
+  }
+
+  isWaiting(): boolean {
+    return this.state === EditorState.WAITING;
+  }
+
+  /** The fixed part of the grid the cell is in: `top`, `left`, `bottom`, the corners, or `''` for the main part. */
+  checkEditorSection(): string {
+    const totalRows = this.instance.countRows();
+    const { fixedRowsTop, fixedRowsBottom, fixedColumnsLeft } = this.instance.getSettings();
+    const isLeft = this.col < fixedColumnsLeft;
+
+    if (this.row < fixedRowsTop) {
+      return isLeft ? 'top-left-corner' : 'top';
+    }
+    if (fixedRowsBottom && this.row >= totalRows - fixedRowsBottom) {
+      return isLeft ? 'bottom-left-corner' : 'bottom';
+    }
+
+    return isLeft ? 'left' : '';
+  }
+}
 
 export default BaseEditor;

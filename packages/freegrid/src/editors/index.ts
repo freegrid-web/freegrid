@@ -5,6 +5,7 @@ import staticRegister from './../utils/staticRegister';
 import Hooks from './../pluginHooks';
 
 import BaseEditor from './_baseEditor';
+import type { EditorGrid } from './_baseEditor';
 import AutocompleteEditor from './autocompleteEditor';
 import CheckboxEditor from './checkboxEditor';
 import DateEditor from './dateEditor';
@@ -15,7 +16,38 @@ import PasswordEditor from './passwordEditor';
 import SelectEditor from './selectEditor';
 import TextEditor from './textEditor';
 
-const registeredEditorClasses = new WeakMap();
+type EditorClass = new (hotInstance: EditorGrid) => BaseEditor;
+
+/** An editor class and its instance per grid (an editor is a singleton per grid). */
+export class RegisteredEditor {
+  #editorClass: EditorClass;
+
+  #instances: Record<string, BaseEditor | null> = {};
+
+  constructor(editorClass: EditorClass) {
+    this.#editorClass = editorClass;
+    const instances = this.#instances;
+
+    // A function, not an arrow: `this` is the destroyed grid.
+    Hooks.getSingleton().add('afterDestroy', function(this: EditorGrid) {
+      instances[this.guid] = null;
+    });
+  }
+
+  getConstructor(): EditorClass {
+    return this.#editorClass;
+  }
+
+  getInstance(hotInstance: EditorGrid): BaseEditor {
+    if (!(hotInstance.guid in this.#instances)) {
+      this.#instances[hotInstance.guid] = new this.#editorClass(hotInstance);
+    }
+
+    return this.#instances[hotInstance.guid] as BaseEditor;
+  }
+}
+
+const registeredEditorClasses = new WeakMap<EditorClass, RegisteredEditor>();
 
 const {
   register,
@@ -23,103 +55,64 @@ const {
   hasItem,
   getNames,
   getValues,
-} = staticRegister('editors');
+} = staticRegister<RegisteredEditor>('editors');
 
-_register('base', BaseEditor);
-_register('autocomplete', AutocompleteEditor);
-_register('checkbox', CheckboxEditor);
-_register('date', DateEditor);
-_register('dropdown', DropdownEditor);
-_register('handsontable', HandsontableEditor);
-_register('numeric', NumericEditor);
-_register('password', PasswordEditor);
-_register('select', SelectEditor);
-_register('text', TextEditor);
-
-export function RegisteredEditor(editorClass) {
-  const instances = {};
-  const Clazz = editorClass;
-
-  this.getConstructor = function() {
-    return editorClass;
-  };
-
-  this.getInstance = function(hotInstance) {
-    if (!(hotInstance.guid in instances)) {
-      instances[hotInstance.guid] = new Clazz(hotInstance);
-    }
-
-    return instances[hotInstance.guid];
-  };
-
-  Hooks.getSingleton().add('afterDestroy', function() {
-    instances[this.guid] = null;
-  });
-}
-
-/**
- * Returns instance (singleton) of editor class.
- *
- * @param {String} name Name of an editor under which it has been stored.
- * @param {Object} hotInstance Instance of FreeGrid.
- * @returns {Function} Returns instance of editor.
- */
-export function _getEditorInstance(name, hotInstance) {
-  let editor;
-
-  if (typeof name === 'function') {
-    if (!(registeredEditorClasses.get(name))) {
-      _register(null, name);
-    }
-    editor = registeredEditorClasses.get(name);
-
-  } else if (typeof name === 'string') {
-    editor = getItem(name);
-
-  } else {
-    throw Error('Only strings and functions can be passed as "editor" parameter');
-  }
-
-  if (!editor) {
-    throw Error(`No editor registered under name "${name}"`);
-  }
-
-  return editor.getInstance(hotInstance);
-}
-
-/**
- * Retrieve editor class.
- *
- * @param {String} name Editor identification.
- * @returns {Function} Returns editor class.
- */
-function _getItem(name) {
-  if (!hasItem(name)) {
-    throw Error(`No registered editor found under "${name}" name`);
-  }
-
-  return getItem(name).getConstructor();
-}
-
-/**
- * Register editor class under specified name.
- *
- * @param {String} name Editor identification.
- * @param {Function} editorClass Editor class.
- */
-function _register(name, editorClass) {
+/** Registers an editor class under `name` (or only as a class, for a `null` name). */
+const registerEditor = (name: string | null, editorClass: EditorClass): void => {
   const editorWrapper = new RegisteredEditor(editorClass);
 
   if (typeof name === 'string') {
     register(name, editorWrapper);
   }
   registeredEditorClasses.set(editorClass, editorWrapper);
-}
+};
+
+registerEditor('base', BaseEditor);
+registerEditor('autocomplete', AutocompleteEditor);
+registerEditor('checkbox', CheckboxEditor);
+// The date editor is still JavaScript (its inferred method types differ from the base's); typed in a later step.
+registerEditor('date', DateEditor as unknown as EditorClass);
+registerEditor('dropdown', DropdownEditor);
+registerEditor('handsontable', HandsontableEditor);
+registerEditor('numeric', NumericEditor);
+registerEditor('password', PasswordEditor);
+registerEditor('select', SelectEditor);
+registerEditor('text', TextEditor);
+
+/** The grid's instance of an editor, given by name or by class (a class is registered on first use). */
+export const getEditorInstance = (name: string | EditorClass, hotInstance: EditorGrid): BaseEditor => {
+  let editor: RegisteredEditor | undefined;
+
+  if (typeof name === 'function') {
+    if (!registeredEditorClasses.get(name)) {
+      registerEditor(null, name);
+    }
+    editor = registeredEditorClasses.get(name);
+  } else if (typeof name === 'string') {
+    editor = getItem(name);
+  } else {
+    throw Error('Only strings and functions can be passed as "editor" parameter');
+  }
+  if (!editor) {
+    throw Error(`No editor registered under name "${name}"`);
+  }
+
+  return editor.getInstance(hotInstance);
+};
+
+/** A registered editor class; throws for an unknown name. */
+const getEditor = (name: string): EditorClass => {
+  if (!hasItem(name)) {
+    throw Error(`No registered editor found under "${name}" name`);
+  }
+
+  return (getItem(name) as RegisteredEditor).getConstructor();
+};
 
 export {
-  _register as registerEditor,
-  _getItem as getEditor,
-  _getEditorInstance as getEditorInstance,
+  registerEditor,
+  getEditor,
+  getEditorInstance as _getEditorInstance,
   hasItem as hasEditor,
   getNames as getRegisteredEditorNames,
   getValues as getRegisteredEditors,

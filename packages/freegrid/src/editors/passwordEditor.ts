@@ -9,15 +9,18 @@ import TextEditor from './textEditor';
  * @dependencies TextEditor
  */
 class PasswordEditor extends TextEditor {
-  createElements() {
+  createElements(): void {
     super.createElements();
 
-    this.TEXTAREA = document.createElement('input');
-    this.TEXTAREA.setAttribute('type', 'password');
+    const input = document.createElement('input');
+
+    input.setAttribute('type', 'password');
+    // Typed as the textarea it replaces: the text editor uses only what both have.
+    this.TEXTAREA = input as unknown as HTMLTextAreaElement;
     this.TEXTAREA.className = withLegacyClassNames('fg-editor-input');
     this.textareaStyle = this.TEXTAREA.style;
-    this.textareaStyle.width = 0;
-    this.textareaStyle.height = 0;
+    this.textareaStyle.width = '0';
+    this.textareaStyle.height = '0';
 
     empty(this.TEXTAREA_PARENT);
     this.TEXTAREA_PARENT.appendChild(this.TEXTAREA);
