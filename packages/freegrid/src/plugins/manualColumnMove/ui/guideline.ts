@@ -1,21 +1,21 @@
 import BaseUI from './_base';
 import { addClass } from './../../../helpers/dom/element';
 
-const CSS_CLASSNAME = 'fg-manual-column-move--backlight';
+const CSS_CLASSNAME = 'fg-manual-column-move--guideline';
 
 /**
- * @class BacklightUI
+ * @class GuidelineUI
  * @util
  */
-class BacklightUI extends BaseUI {
+class GuidelineUI extends BaseUI {
   /**
    * Custom className on build process.
    */
-  build() {
+  build(): void {
     super.build();
 
     addClass(this._element, CSS_CLASSNAME);
   }
 }
 
-export default BacklightUI;
+export default GuidelineUI;
