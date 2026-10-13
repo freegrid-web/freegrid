@@ -31,7 +31,7 @@ class EventManager {
   /**
    * Register specified listener (`eventName`) to the element.
    *
-   * @param {Element} element Target element.
+   * @param {EventTarget} element Target element (an element, the document or the window).
    * @param {String} eventName Event name.
    * @param {Function} callback Function which will be called after event occur.
    * @returns {Function} Returns function which you can easily call to remove that event
@@ -61,7 +61,7 @@ class EventManager {
   /**
    * Remove the event listener previously registered.
    *
-   * @param {Element} element Target element.
+   * @param {EventTarget} element Target element.
    * @param {String} eventName Event name.
    * @param {Function} callback Function to remove from the event target. It must be the same as during registration listener.
    */

@@ -45,13 +45,14 @@ const prose = lines => clean(lines
   .replace(/\n{3,}/g, '\n\n')
   .trim());
 
+// `{Type} name description`, or `name description` in TypeScript (the type comes from the signature).
 const parseParam = (text) => {
-  const match = /^\{([^}]*)\}\s*(\[[^\]]*\]|\S+)\s*([\s\S]*)$/.exec(text.trim());
+  const match = /^(?:\{([^}]*)\}\s*)?(\[[^\]]*\]|\S+)\s*([\s\S]*)$/.exec(text.trim());
 
   if (!match) {
     return null;
   }
-  const [, type, rawName, description] = match;
+  const [, type = '', rawName, description] = match;
   const optional = rawName.startsWith('[');
   const [name, value] = optional ? rawName.slice(1, -1).split('=') : [rawName];
 
@@ -164,6 +165,70 @@ export const readSettings = source => [...source.matchAll(/\/\*\*([\s\S]*?)\*\/\
   })
   .filter(setting => !setting.private);
 
+const OPEN = '([{<';
+const CLOSE = ')]}>';
+
+/**
+ * Splits `text` at `separator` characters that are not inside brackets (`=>` is not a bracket).
+ */
+const splitTopLevel = (text, separator) => {
+  const parts = [''];
+  let depth = 0;
+
+  [...text].forEach((char, index) => {
+    if (OPEN.includes(char)) {
+      depth += 1;
+    } else if (CLOSE.includes(char) && !(char === '>' && text[index - 1] === '=')) {
+      depth -= 1;
+    }
+    if (char === separator && depth === 0 && !(char === '=' && text[index + 1] === '>')) {
+      parts.push('');
+    } else {
+      parts[parts.length - 1] += char;
+    }
+  });
+
+  return parts.map(part => part.trim()).filter(Boolean);
+};
+
+/**
+ * A TypeScript method's parameter types and return type, from the text after its name's `(` (empty for JavaScript).
+ */
+const readSignature = (text) => {
+  let depth = 1;
+  let end = 0;
+
+  while (end < text.length && depth > 0) {
+    if (text[end] === '(') {
+      depth += 1;
+    } else if (text[end] === ')') {
+      depth -= 1;
+    }
+    end += 1;
+  }
+  const params = splitTopLevel(text.slice(0, end - 1), ',').map((param) => {
+    const [declaration, ...value] = splitTopLevel(param, '=');
+    const [name, ...type] = splitTopLevel(declaration, ':');
+
+    return { name: name.replace(/^\.\.\.|\?$/g, ''), type: type.join(': '), default: value.join('=') || undefined };
+  });
+  const returns = /^\s*:\s*([\s\S]*?)\s*\{\s*$/m.exec(text.slice(end).split('\n').slice(0, 3).join('\n'));
+
+  return { params, returns: returns?.[1] ?? '' };
+};
+
+/** Fills the types a TypeScript method's JSDoc leaves out from its signature. */
+const withSignatureTypes = (method, signature) => ({
+  ...method,
+  params: method.params.map((param) => {
+    const typed = signature.params.find(({ name }) => name === param.name);
+
+    return param.type || !typed ? param : { ...param, type: typed.type };
+  }),
+  returns: method.returns && !method.returns.type && signature.returns ?
+    { ...method.returns, type: signature.returns } : method.returns,
+});
+
 /**
  * A plugin's file: the `@plugin` comment (name, description, examples) and the class's public methods (the comments
  * followed by `  name(…) {`). `null` when the file has no `@plugin` comment.
@@ -176,8 +241,12 @@ export const readPlugin = (source) => {
   }
   const header = parseBlock(headerText);
   const name = /@plugin\s+(\w+)/.exec(headerText)[1];
-  const methods = [...source.matchAll(/\/\*\*([\s\S]*?)\*\/\s*\n {2}(?:static\s+)?(\w+)\s*\(/g)]
-    .map(([, text, method]) => ({ ...parseBlock(text), kind: 'method', owner: name, name: method }))
+  // The comment's text has no `*/`; line comments (e.g. eslint's) may come between it and the method.
+  const methods = [...source.matchAll(/\/\*\*((?:(?!\*\/)[\s\S])*)\*\/\s*\n(?: {2}\/\/[^\n]*\n)* {2}(?:static\s+)?(\w+)\s*\(/g)]
+    .map(({ 0: match, 1: text, 2: method, index }) => withSignatureTypes(
+      { ...parseBlock(text), kind: 'method', owner: name, name: method },
+      readSignature(source.slice(index + match.length)),
+    ))
     .filter(method => !method.private && method.name !== 'constructor');
 
   return { ...header, kind: 'plugin', name, methods };

@@ -14,7 +14,12 @@
 - Fixes:
   - The date editor dropped `closeEditor`'s callback: after an async validation, the next cell's editor did not open.
   - Case-sensitive autocomplete (`filteringCaseSensitive`) did not bold the typed text in the list.
+- Plugins (TypeScript rewrite, part 1: the plugin base and registry, touchScroll, dragToScroll, persistentState,
+  search). Fix: the `persistentStateReset` hook with a key cleared every saved value; it clears only that key now.
 - Docs, API reference:
+  - Plugin methods show their TypeScript parameter and return types.
+  - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
+    (e.g. ManualColumnResize's `isEnabled` showed the plugin's description).
   - The right-hand lists (Related API on guide pages, and an index on each reference page) are alphabetical, one
     entry per line, in the order settings, methods, events, with plugin methods grouped by plugin. A filter box
     narrows them while typing, and the group headings show a count.

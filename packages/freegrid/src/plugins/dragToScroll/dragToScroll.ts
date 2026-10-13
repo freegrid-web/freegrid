@@ -1,6 +1,10 @@
 import BasePlugin from './../_base';
+import type { PluginHost } from './../_base';
 import EventManager from './../../eventManager';
 import { registerPlugin } from './../../plugins';
+
+/** Called with how far the mouse is outside the boundaries, horizontally and vertically (negative: left or above). */
+type ScrollCallback = (diffX: number, diffY: number) => void;
 
 /**
  * @description
@@ -11,52 +15,50 @@ import { registerPlugin } from './../../plugins';
  * @plugin DragToScroll
  */
 class DragToScroll extends BasePlugin {
-  constructor(hotInstance) {
+  /**
+   * Instance of {@link EventManager}.
+   *
+   * @private
+   */
+  eventManager: EventManager;
+
+  /**
+   * Size of an element and its position relative to the viewport,
+   * e.g. {bottom: 449, height: 441, left: 8, right: 814, top: 8, width: 806, x: 8, y:8}.
+   */
+  boundaries: DOMRect | null = null;
+
+  /**
+   * Callback function.
+   *
+   * @private
+   */
+  callback: ScrollCallback | null = null;
+
+  /**
+   * Flag indicates mouseDown/mouseUp.
+   *
+   * @private
+   */
+  listening = false;
+
+  constructor(hotInstance: PluginHost) {
     super(hotInstance);
-    /**
-     * Instance of {@link EventManager}.
-     *
-     * @private
-     * @type {EventManager}
-     */
     this.eventManager = new EventManager(this);
-    /**
-     * Size of an element and its position relative to the viewport,
-     * e.g. {bottom: 449, height: 441, left: 8, right: 814, top: 8, width: 806, x: 8, y:8}.
-     *
-     * @type {DOMRect}
-     */
-    this.boundaries = null;
-    /**
-     * Callback function.
-     *
-     * @private
-     * @type {Function}
-     */
-    this.callback = null;
-    /**
-     * Flag indicates mouseDown/mouseUp.
-     *
-     * @private
-     * @type {Boolean}
-     */
-    this.listening = false;
   }
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link DragToScroll#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return !!this.hot.getSettings().dragToScroll;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -72,7 +74,7 @@ class DragToScroll extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
 
@@ -82,7 +84,7 @@ class DragToScroll extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     this.unregisterEvents();
 
     super.disablePlugin();
@@ -91,18 +93,18 @@ class DragToScroll extends BasePlugin {
   /**
    * Sets the value of the visible element.
    *
-   * @param boundaries {DOMRect} An object with coordinates compatible with DOMRect.
+   * @param boundaries An object with coordinates compatible with DOMRect.
    */
-  setBoundaries(boundaries) {
+  setBoundaries(boundaries: DOMRect): void {
     this.boundaries = boundaries;
   }
 
   /**
    * Changes callback function.
    *
-   * @param callback {Function}
+   * @param callback Called with the distance of the mouse from the boundaries, horizontally and vertically.
    */
-  setCallback(callback) {
+  setCallback(callback: ScrollCallback): void {
     this.callback = callback;
   }
 
@@ -110,32 +112,27 @@ class DragToScroll extends BasePlugin {
    * Checks if the mouse position (X, Y) is outside of the viewport and fires a callback with calculated X an Y diffs
    * between passed boundaries.
    *
-   * @param {Number} x Mouse X coordinate to check.
-   * @param {Number} y Mouse Y coordinate to check.
+   * @param x Mouse X coordinate to check.
+   * @param y Mouse Y coordinate to check.
    */
-  check(x, y) {
+  check(x: number, y: number): void {
+    const { top, bottom, left, right } = this.boundaries as DOMRect;
     let diffX = 0;
     let diffY = 0;
 
-    if (y < this.boundaries.top) {
-      // y is less than top
-      diffY = y - this.boundaries.top;
-
-    } else if (y > this.boundaries.bottom) {
-      // y is more than bottom
-      diffY = y - this.boundaries.bottom;
+    if (y < top) {
+      diffY = y - top;
+    } else if (y > bottom) {
+      diffY = y - bottom;
     }
 
-    if (x < this.boundaries.left) {
-      // x is less than left
-      diffX = x - this.boundaries.left;
-
-    } else if (x > this.boundaries.right) {
-      // x is more than right
-      diffX = x - this.boundaries.right;
+    if (x < left) {
+      diffX = x - left;
+    } else if (x > right) {
+      diffX = x - right;
     }
 
-    this.callback(diffX, diffY);
+    this.callback?.(diffX, diffY);
   }
 
   /**
@@ -143,9 +140,9 @@ class DragToScroll extends BasePlugin {
    *
    * @private
    */
-  registerEvents() {
+  registerEvents(): void {
     this.eventManager.addEventListener(document, 'mouseup', () => this.onMouseUp());
-    this.eventManager.addEventListener(document, 'mousemove', event => this.onMouseMove(event));
+    this.eventManager.addEventListener(document, 'mousemove', (event: MouseEvent) => this.onMouseMove(event));
   }
 
   /**
@@ -153,38 +150,27 @@ class DragToScroll extends BasePlugin {
    *
    * @private
    */
-  unregisterEvents() {
+  unregisterEvents(): void {
     this.eventManager.clear();
   }
 
   /**
-   * On after on cell/cellCorner mouse down listener.
+   * On after on cell/cellCorner mouse down listener: scrolls the grid while the mouse is outside it.
    *
    * @private
    */
-  setupListening() {
-    const scrollHandler = this.hot.view.wt.wtTable.holder; // native scroll
+  setupListening(): void {
+    const scrollHandler: HTMLElement = this.hot.view.wt.wtTable.holder;
 
-    if (scrollHandler === window) {
-      // not much we can do currently
+    // The window scrolls: nothing to do.
+    if ((scrollHandler as unknown) === window) {
       return;
     }
 
     this.setBoundaries(scrollHandler.getBoundingClientRect());
     this.setCallback((scrollX, scrollY) => {
-      if (scrollX < 0) {
-        scrollHandler.scrollLeft -= 50;
-
-      } else if (scrollX > 0) {
-        scrollHandler.scrollLeft += 50;
-      }
-
-      if (scrollY < 0) {
-        scrollHandler.scrollTop -= 20;
-
-      } else if (scrollY > 0) {
-        scrollHandler.scrollTop += 20;
-      }
+      scrollHandler.scrollLeft += Math.sign(scrollX) * 50;
+      scrollHandler.scrollTop += Math.sign(scrollY) * 20;
     });
 
     this.listening = true;
@@ -194,9 +180,9 @@ class DragToScroll extends BasePlugin {
    * 'mouseMove' event callback.
    *
    * @private
-   * @param {MouseEvent} event `mousemove` event properties.
+   * @param event `mousemove` event properties.
    */
-  onMouseMove(event) {
+  onMouseMove(event: MouseEvent): void {
     if (this.listening) {
       this.check(event.clientX, event.clientY);
     }
@@ -207,14 +193,14 @@ class DragToScroll extends BasePlugin {
    *
    * @private
    */
-  onMouseUp() {
+  onMouseUp(): void {
     this.listening = false;
   }
 
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     super.destroy();
   }
 }

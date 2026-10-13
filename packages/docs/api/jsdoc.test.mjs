@@ -203,3 +203,105 @@ test('drops "see the docs" sentences and placeholder links to the repository, an
 
   assert.equal(block.description, 'Makes cell read only.\nUses the [type](./settings#type) key.');
 });
+
+test('takes parameter and return types of a TypeScript plugin from the signature', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin Search
+ */
+class Search extends BasePlugin {
+  /**
+   * Finds cells.
+   *
+   * @param queryStr The text to find.
+   * @param [callback] Called for each cell.
+   * @param [queryMethod=defaultQuery] Compares a cell with the text.
+   * @returns The found cells.
+   */
+  query(queryStr: string, callback?: (row: number, col: number, data: unknown, result: boolean) => void,
+    queryMethod: QueryMethod = defaultQuery): Array<{ row: number; col: number; data: unknown }> {
+  }
+
+  /**
+   * Whether the plugin is on.
+   *
+   * @returns {Boolean} JSDoc types still win.
+   */
+  isEnabled(): boolean {
+  }
+
+  /**
+   * Enables it.
+   */
+  enablePlugin(): void {
+  }
+}`);
+
+  const [query, isEnabled, enablePlugin] = plugin.methods;
+
+  assert.deepEqual(query.params.map(({ name, type, optional, default: value }) => [name, type, optional, value]), [
+    ['queryStr', 'string', false, undefined],
+    ['callback', '(row: number, col: number, data: unknown, result: boolean) => void', true, undefined],
+    ['queryMethod', 'QueryMethod', true, 'defaultQuery'],
+  ]);
+  assert.equal(query.params[0].description, 'The text to find.');
+  assert.deepEqual(query.returns, { type: 'Array<{ row: number; col: number; data: unknown }>', description: 'The found cells.' });
+  assert.equal(isEnabled.returns.type, 'Boolean');
+  assert.equal(enablePlugin.returns, undefined);
+});
+
+test('a line comment between a JSDoc comment and its method does not join it with the next method', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin Search
+ */
+class Search extends BasePlugin {
+  /**
+   * Hook callback.
+   *
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onBeforeRenderer(TD: HTMLTableCellElement): void {
+  }
+
+  /**
+   * Destroys the plugin instance.
+   */
+  destroy(): void {
+  }
+}`);
+
+  assert.deepEqual(plugin.methods.map(({ name, description }) => [name, description]),
+    [['destroy', 'Destroys the plugin instance.']]);
+});
+
+test('the JSDoc of a field set in the constructor does not take the next method', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin DragToScroll
+ */
+class DragToScroll extends BasePlugin {
+  constructor(hotInstance) {
+    super(hotInstance);
+    /**
+     * Callback function.
+     *
+     * @private
+     * @type {Function}
+     */
+    this.callback = null;
+  }
+
+  /**
+   * Checks if the plugin is enabled.
+   *
+   * @returns {Boolean}
+   */
+  isEnabled() {
+  }
+}`);
+
+  assert.deepEqual(plugin.methods.map(({ name, description }) => [name, description]),
+    [['isEnabled', 'Checks if the plugin is enabled.']]);
+});
