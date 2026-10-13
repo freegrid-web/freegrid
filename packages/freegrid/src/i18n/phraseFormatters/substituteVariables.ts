@@ -1,17 +1,10 @@
 import { substitute } from './../../helpers/string';
+import type { Phrase } from '../dictionariesManager';
 
-/**
- * Try to substitute variable inside phrase propositions.
- *
- * @param {Array} phrasePropositions List of phrases propositions.
- * @param {Object} zippedVariablesAndValues Object containing variables and corresponding values.
- *
- * @returns {String} Phrases with substituted variables if it's possible, list of unchanged phrase propositions otherwise.
- */
-export default function substituteVariables(phrasePropositions, zippedVariablesAndValues) {
-  if (Array.isArray(phrasePropositions)) {
-    return phrasePropositions.map(phraseProposition => substituteVariables(phraseProposition, zippedVariablesAndValues));
-  }
+/** The phrase (or each of its forms) with `[name]` variables replaced by the values in `zippedVariablesAndValues`. */
+const substituteVariables = (phrasePropositions: Phrase, zippedVariablesAndValues: Record<string, unknown>): Phrase => (
+  Array.isArray(phrasePropositions)
+    ? phrasePropositions.map(phrase => substitute(phrase, zippedVariablesAndValues))
+    : substitute(phrasePropositions, zippedVariablesAndValues));
 
-  return substitute(phrasePropositions, zippedVariablesAndValues);
-}
+export default substituteVariables;

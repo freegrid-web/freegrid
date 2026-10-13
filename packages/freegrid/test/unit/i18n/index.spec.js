@@ -61,7 +61,7 @@ describe('i18n', () => {
     const dictionariesValuesWithoutArrays = [].concat([], ...dictionariesValuesWithArrays);
 
     const filesInsideLanguageDictionary = fs.readdirSync('./src/i18n/languages');
-    const languagePacks = filesInsideLanguageDictionary.filter(name => name !== 'index.js');
+    const languagePacks = filesInsideLanguageDictionary.filter(name => !/^index\.(js|ts)$/.test(name));
 
     describe('with every dictionary from `src/i18n/languages` folder', () => {
       // We take all dictionaries from export inside `src/i18n/languages/index.js` file.
@@ -87,7 +87,7 @@ describe('i18n', () => {
         it('should provide export names corresponding to dictionaries file names', () => {
           // two lowercase letters, two uppercase letters, for example: `esPY`.
           expect(indexFileExportNames).toBeListFulfillingCondition(exportName =>
-            languagePacks.map(languagePack => languagePack.replace('.js', '').replace('-', '')).includes(exportName));
+            languagePacks.map(languagePack => languagePack.replace(/\.(js|ts)$/, '').replace('-', '')).includes(exportName));
         });
       });
 
@@ -99,7 +99,7 @@ describe('i18n', () => {
 
         it('should have file name corresponding to its language code', () => {
           // two lowercase letters, hyphen, two uppercase letters and JavaScript file extension, for example: `es-PY.js`.
-          expect(languagePacks).toBeListFulfillingCondition(languagePack => languageCodes.includes(languagePack.replace('.js', '')));
+          expect(languagePacks).toBeListFulfillingCondition(languagePack => languageCodes.includes(languagePack.replace(/\.(js|ts)$/, '')));
         });
 
         it('should contain only predefined keys (checking for typo)', () => {

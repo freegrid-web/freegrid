@@ -6,8 +6,9 @@
  * Description: Definition file for German - Switzerland language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'de-CH',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Zeile einfügen oberhalb',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Zeile einfügen unterhalb',

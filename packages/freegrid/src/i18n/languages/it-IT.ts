@@ -6,8 +6,9 @@
  * Description: Definition file for Italian - Italy language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'it-IT',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Inserisci riga sopra',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Inserisci riga sotto',

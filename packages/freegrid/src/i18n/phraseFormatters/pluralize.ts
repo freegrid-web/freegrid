@@ -1,17 +1,12 @@
+import type { Phrase } from '../dictionariesManager';
+
 /**
- * Try to choose plural form from available phrase propositions.
- *
- * @param {Array} phrasePropositions List of phrases propositions.
- * @param {number} pluralForm Number determining which phrase form should be used.
- *
- * @returns {String|Array} One particular phrase if it's possible, list of unchanged phrase propositions otherwise.
+ * The plural form `pluralForm` (an index into the phrase's forms), or the phrase as it is when it has no forms or
+ * `pluralForm` is not an integer.
  */
-export default function pluralize(phrasePropositions, pluralForm) {
-  const isPluralizable = Array.isArray(phrasePropositions) && Number.isInteger(pluralForm);
+const pluralize = (phrasePropositions: Phrase, pluralForm: unknown): Phrase => (
+  Array.isArray(phrasePropositions) && Number.isInteger(pluralForm)
+    ? phrasePropositions[pluralForm as number]
+    : phrasePropositions);
 
-  if (isPluralizable) {
-    return phrasePropositions[pluralForm];
-  }
-
-  return phrasePropositions;
-}
+export default pluralize;

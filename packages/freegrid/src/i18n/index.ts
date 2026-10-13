@@ -1,55 +1,36 @@
-import { arrayEach } from './../helpers/array';
 import { getLanguageDictionary } from './dictionariesManager';
+import type { Phrase } from './dictionariesManager';
 import { getPhraseFormatters } from './phraseFormatters';
-import { isUndefined } from '../helpers/mixed';
 
 /**
- * Get phrase for specified dictionary key.
+ * Applies the registered phrase formatters (e.g. plural forms) to the phrase of a dictionary key.
  *
- * @param {String} languageCode Language code for specific language i.e. 'en-US', 'pt-BR', 'de-DE'.
- * @param {String} dictionaryKey Constant which is dictionary key.
- * @param {*} argumentsForFormatters Arguments which will be handled by formatters.
- *
- * @returns {String}
+ * Each formatter receives the dictionary's phrase, not the previous formatter's result.
  */
-// eslint-disable-next-line import/prefer-default-export
-export function getTranslatedPhrase(languageCode, dictionaryKey, argumentsForFormatters) {
-  const languageDictionary = getLanguageDictionary(languageCode);
-
-  if (languageDictionary === null) {
-    return null;
-  }
-
-  const phrasePropositions = languageDictionary[dictionaryKey];
-
-  if (isUndefined(phrasePropositions)) {
-    return null;
-  }
-
-  const formattedPhrase = getFormattedPhrase(phrasePropositions, argumentsForFormatters);
-
-  if (Array.isArray(formattedPhrase)) {
-    return formattedPhrase[0];
-  }
-
-  return formattedPhrase;
-}
-
-/**
- * Get formatted phrase from phrases propositions for specified dictionary key.
- *
- * @private
- * @param {Array|string} phrasePropositions List of phrase propositions.
- * @param {*} argumentsForFormatters Arguments which will be handled by formatters.
- *
- * @returns {Array|string}
- */
-function getFormattedPhrase(phrasePropositions, argumentsForFormatters) {
+const getFormattedPhrase = (phrasePropositions: Phrase, argumentsForFormatters: unknown): Phrase => {
   let formattedPhrasePropositions = phrasePropositions;
 
-  arrayEach(getPhraseFormatters(), (formatter) => {
+  getPhraseFormatters().forEach((formatter) => {
     formattedPhrasePropositions = formatter(phrasePropositions, argumentsForFormatters);
   });
 
   return formattedPhrasePropositions;
-}
+};
+
+/**
+ * The phrase of `dictionaryKey` in `languageCode` (`null` when the language or the key is unknown), formatted with
+ * `argumentsForFormatters` (e.g. a count for plural forms).
+ */
+// eslint-disable-next-line import/prefer-default-export
+export const getTranslatedPhrase = (languageCode: string, dictionaryKey: string,
+  argumentsForFormatters?: unknown): string | null => {
+  const languageDictionary = getLanguageDictionary(languageCode);
+  const phrasePropositions = languageDictionary?.[dictionaryKey];
+
+  if (phrasePropositions === undefined) {
+    return null;
+  }
+  const formattedPhrase = getFormattedPhrase(phrasePropositions, argumentsForFormatters);
+
+  return Array.isArray(formattedPhrase) ? formattedPhrase[0] : formattedPhrase;
+};

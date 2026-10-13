@@ -5,8 +5,9 @@
  * Description: Definition file for Spanish - Mexico language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'es-MX',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Insertar fila arriba',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Insertar fila abajo',

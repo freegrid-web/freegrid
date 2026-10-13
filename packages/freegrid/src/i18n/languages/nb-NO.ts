@@ -6,8 +6,9 @@
  * Description: Definition file for Norwegian Bokmål - Norway language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'nb-NO',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Sett inn over',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Sett inn under',

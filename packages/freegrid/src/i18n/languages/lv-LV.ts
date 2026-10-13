@@ -6,8 +6,9 @@
  * Description: Definition file for Latvian - Latvia language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'lv-LV',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Ievietot rindu augšā',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Ievietot rindu apakšā',

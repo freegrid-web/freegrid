@@ -3,93 +3,55 @@ import { extendNotExistingKeys } from './utils';
 import staticRegister from '../utils/staticRegister';
 import DEFAULT_DICTIONARY from './languages/en-US';
 
+/** A phrase, or its plural forms. */
+export type Phrase = string | string[];
+
+/** The phrases of a language by dictionary key (see constants.ts), and its code such as `en-US`. */
+export type LanguageDictionary = { languageCode: string; [key: string]: Phrase };
+
 const DEFAULT_LANGUAGE_CODE = DEFAULT_DICTIONARY.languageCode;
 
 const {
   register: registerGloballyLanguageDictionary,
   getItem: getGlobalLanguageDictionary,
   hasItem: hasGlobalLanguageDictionary,
-  getValues: getGlobalLanguagesDictionaries
-} = staticRegister('languagesDictionaries');
+  getValues: getGlobalLanguagesDictionaries,
+} = staticRegister<LanguageDictionary>('languagesDictionaries');
+
+/** Fills the phrases a dictionary lacks with the default language's. */
+const extendLanguageDictionary = (languageCode: string, dictionary: LanguageDictionary): void => {
+  if (languageCode !== DEFAULT_LANGUAGE_CODE) {
+    extendNotExistingKeys(dictionary, getGlobalLanguageDictionary(DEFAULT_LANGUAGE_CODE) as LanguageDictionary);
+  }
+};
 
 /**
- * Register language dictionary for specific language code.
- *
- * @param {String|Object} languageCodeOrDictionary Language code for specific language i.e. 'en-US', 'pt-BR', 'de-DE' or object representing dictionary.
- * @param {Object} dictionary Dictionary for specific language (optional if first parameter has already dictionary).
+ * Registers a language: `registerLanguage(dictionary)` or `registerLanguage('de-DE', dictionary)`. Missing phrases
+ * come from the default language. Returns a copy (the registered dictionary is not shared by reference).
  */
-function registerLanguage(languageCodeOrDictionary, dictionary) {
-  let languageCode = languageCodeOrDictionary;
-  let dictionaryObject = dictionary;
-
-  // Dictionary passed as first argument.
-  if (isObject(languageCodeOrDictionary)) {
-    dictionaryObject = languageCodeOrDictionary;
-    languageCode = dictionaryObject.languageCode;
-  }
+const registerLanguage = (languageCodeOrDictionary: string | LanguageDictionary,
+  dictionary?: LanguageDictionary): LanguageDictionary => {
+  const dictionaryObject = (isObject(languageCodeOrDictionary) ? languageCodeOrDictionary : dictionary) as LanguageDictionary;
+  const languageCode = isObject(languageCodeOrDictionary)
+    ? dictionaryObject.languageCode
+    : languageCodeOrDictionary as string;
 
   extendLanguageDictionary(languageCode, dictionaryObject);
   registerGloballyLanguageDictionary(languageCode, deepClone(dictionaryObject));
 
-  // We do not allow user to work with dictionary by reference, it can cause lot of bugs.
   return deepClone(dictionaryObject);
-}
+};
 
-/**
- * Get language dictionary for specific language code.
- *
- * @param {String} languageCode Language code.
- * @returns {Object} Object with constants representing identifiers for translation (as keys) and corresponding translation phrases (as values).
- */
-function getLanguage(languageCode) {
-  if (!hasLanguage(languageCode)) {
-    return null;
-  }
+const hasLanguage = (languageCode: string): boolean => hasGlobalLanguageDictionary(languageCode);
 
-  return deepClone(getGlobalLanguageDictionary(languageCode));
-}
+/** A copy of a registered language, or `null`. */
+const getLanguage = (languageCode: string): LanguageDictionary | null => (hasLanguage(languageCode)
+  ? deepClone(getGlobalLanguageDictionary(languageCode)) as LanguageDictionary
+  : null);
 
-/**
- *
- * Get if language with specified language code was registered.
- *
- * @param {String} languageCode Language code for specific language i.e. 'en-US', 'pt-BR', 'de-DE'.
- * @returns {Boolean}
- */
-function hasLanguage(languageCode) {
-  return hasGlobalLanguageDictionary(languageCode);
-}
+const getDefaultLanguage = (): LanguageDictionary => DEFAULT_DICTIONARY;
 
-/**
- * Get default language dictionary.
- *
- * @returns {Object} Object with constants representing identifiers for translation (as keys) and corresponding translation phrases (as values).
- */
-function getDefaultLanguage() {
-  return DEFAULT_DICTIONARY;
-}
-
-/**
- * Extend handled dictionary by default language dictionary. As result, if any dictionary key isn't defined for specific language, it will be filled with default language value ("dictionary gaps" are supplemented).
- *
- * @private
- * @param {String} languageCode Language code.
- * @param {Object} dictionary Dictionary which is extended.
- */
-function extendLanguageDictionary(languageCode, dictionary) {
-  if (languageCode !== DEFAULT_LANGUAGE_CODE) {
-    extendNotExistingKeys(dictionary, getGlobalLanguageDictionary(DEFAULT_LANGUAGE_CODE));
-  }
-}
-
-/**
- * Get registered language dictionaries.
- *
- * @returns {Array}
- */
-function getLanguages() {
-  return getGlobalLanguagesDictionaries();
-}
+const getLanguages = (): LanguageDictionary[] => getGlobalLanguagesDictionaries();
 
 export {
   registerLanguage as registerLanguageDictionary,
@@ -97,10 +59,7 @@ export {
   hasLanguage as hasLanguageDictionary,
   getDefaultLanguage as getDefaultLanguageDictionary,
   getLanguages as getLanguagesDictionaries,
-  DEFAULT_LANGUAGE_CODE
+  DEFAULT_LANGUAGE_CODE,
 };
 
-/**
- * Automatically registers default dictionary.
- */
 registerLanguage(DEFAULT_DICTIONARY);

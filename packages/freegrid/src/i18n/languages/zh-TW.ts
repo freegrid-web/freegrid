@@ -6,8 +6,9 @@
  * Description: Definition file for Chinese - Taiwan language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'zh-TW',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: '上方插入列',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: '下方插入列',

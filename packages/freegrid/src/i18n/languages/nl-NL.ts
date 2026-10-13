@@ -6,8 +6,9 @@
  * Description: Definition file for Dutch - The Netherlands language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'nl-NL',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Rij boven invoegen',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Rij onder invoegen',
