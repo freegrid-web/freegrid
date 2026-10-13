@@ -74,9 +74,10 @@ const byTopic = (topics, entries, section) => topics
     ...list.map(section),
   ]);
 
-const page = (title, intro, body) => [
+const page = (title, intro, body, index) => [
   '---',
   'outline: [2, 2]',
+  `apiIndex: ${index}`,
   'editLink: false',
   '---',
   '',
@@ -99,16 +100,16 @@ export const generate = () => {
   const pages = {
     'methods.md': page('Methods', 'Every method of a grid (`const grid = new FreeGrid(element, settings)`, then '
       + '`grid.getData()`), by topic. Row and column numbers are visual indexes unless a description says otherwise.',
-    byTopic(reference.topics, reference.methods, entry => methodSection(entry))),
+    byTopic(reference.topics, reference.methods, entry => methodSection(entry)), 'method'),
     'events.md': page('Events', 'Every event (hook), by topic. Listen to an event with a setting of the same name '
       + '(`new FreeGrid(element, { afterChange(changes, source) { … } })`) or with `grid.addHook(\'afterChange\', '
       + 'callback)`; see [Data and events](../guide/data-and-events#events-hooks). Events whose name starts with '
       + '`before` can cancel the action by returning `false` where their description says so.',
-    byTopic(reference.topics, reference.events, eventSection)),
+    byTopic(reference.topics, reference.events, eventSection), 'event'),
     'settings.md': page('Settings', 'Every setting, by topic. Settings go to the constructor '
       + '(`new FreeGrid(element, { colHeaders: true })`), to `grid.updateSettings({ … })`, and most of them also to '
       + '`columns`, `cells` and `cell` for some cells only; see [Configuration](../guide/configuration).',
-    byTopic(reference.topics, reference.settings, settingSection)),
+    byTopic(reference.topics, reference.settings, settingSection), 'setting'),
     'plugins.md': page('Plugins', 'The built-in plugins. Each is switched on by its setting; its methods are '
       + 'called on the plugin object: `grid.getPlugin(\'columnSorting\').sort({ column: 0, sortOrder: \'asc\' })`.',
     reference.plugins.flatMap((plugin) => {
@@ -124,7 +125,7 @@ export const generate = () => {
         ...examples(plugin),
         ...plugin.methods.map(method => methodSection(method, `${plugin.name}.${method.name}`)),
       ];
-    })),
+    }), 'plugin-method'),
   };
 
   Object.entries(pages).forEach(([file, text]) => writeFileSync(fileURLToPath(new URL(file, HERE)), text));
