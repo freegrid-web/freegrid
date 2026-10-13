@@ -225,8 +225,15 @@ const withSignatureTypes = (method, signature) => ({
 
     return param.type || !typed ? param : { ...param, type: typed.type };
   }),
-  returns: method.returns && !method.returns.type && signature.returns ?
-    { ...method.returns, type: signature.returns } : method.returns,
+  returns: (() => {
+    const type = signature.returns === 'void' ? '' : signature.returns;
+
+    if (!method.returns) {
+      return type ? { type, description: '' } : undefined;
+    }
+
+    return !method.returns.type && type ? { ...method.returns, type } : method.returns;
+  })(),
 });
 
 /**
