@@ -1,5 +1,10 @@
-import { arrayEach } from './../../helpers/array';
 import { hasOwnProperty } from './../../helpers/object';
+import type { MenuItem } from './menuItem';
+import type { PluginHost } from './../_base';
+
+/** The item of a submenu with the key `<command>:<subCommandName>`. */
+const findSubCommand = (subCommandName: string, subCommands: MenuItem[]): MenuItem | undefined => subCommands
+  .find(cmd => cmd.key?.split(':')[1] === subCommandName);
 
 /**
  * Command executor for ContextMenu.
@@ -8,44 +13,49 @@ import { hasOwnProperty } from './../../helpers/object';
  * @plugin ContextMenu
  */
 class CommandExecutor {
-  constructor(hotInstance) {
+  hot: PluginHost;
+
+  /** The commands (menu items) by key. */
+  commands: Record<string, MenuItem> = {};
+
+  /** Called after every command (with the same arguments). */
+  commonCallback: ((...params: unknown[]) => void) | null = null;
+
+  constructor(hotInstance: PluginHost) {
     this.hot = hotInstance;
-    this.commands = {};
-    this.commonCallback = null;
   }
 
   /**
    * Register command.
    *
-   * @param {String} name Command name.
-   * @param {Object} commandDescriptor Command descriptor object with properties like `key` (command id),
-   *                                   `callback` (task to execute), `name` (command name), `disabled` (command availability).
+   * @param name Command name.
+   * @param commandDescriptor Command descriptor object with properties like `key` (command id),
+   *                          `callback` (task to execute), `name` (command name), `disabled` (command availability).
    */
-  registerCommand(name, commandDescriptor) {
+  registerCommand(name: string, commandDescriptor: MenuItem): void {
     this.commands[name] = commandDescriptor;
   }
 
   /**
    * Set common callback which will be trigger on every executed command.
    *
-   * @param {Function} callback Function which will be fired on every command execute.
+   * @param callback Function which will be fired on every command execute.
    */
-  setCommonCallback(callback) {
+  setCommonCallback(callback: (...params: unknown[]) => void): void {
     this.commonCallback = callback;
   }
 
   /**
-   * Execute command by its name.
+   * Execute command by its name (`command` or `command:subCommand`), unless it is disabled or has a submenu.
    *
-   * @param {String} commandName Command id.
-   * @param {*} params Arguments passed to command task.
+   * @param commandName Command id.
+   * @param params Arguments passed to command task (after the command id).
    */
-  execute(commandName, ...params) {
+  execute(commandName: string, ...params: unknown[]): void {
     const commandSplit = commandName.split(':');
-    const commandNamePrimary = commandSplit[0];
-
+    const [commandNamePrimary] = commandSplit;
     const subCommandName = commandSplit.length === 2 ? commandSplit[1] : null;
-    let command = this.commands[commandNamePrimary];
+    let command: MenuItem | undefined = this.commands[commandNamePrimary];
 
     if (!command) {
       throw new Error(`Menu command '${commandNamePrimary}' not exists.`);
@@ -53,42 +63,19 @@ class CommandExecutor {
     if (subCommandName && command.submenu) {
       command = findSubCommand(subCommandName, command.submenu.items);
     }
-    if (command.disabled === true) {
-      return;
-    }
-    if (typeof command.disabled === 'function' && command.disabled.call(this.hot) === true) {
-      return;
-    }
-    if (hasOwnProperty(command, 'submenu')) {
-      return;
-    }
-    const callbacks = [];
+    const { disabled } = command!;
 
-    if (typeof command.callback === 'function') {
-      callbacks.push(command.callback);
+    if (disabled === true || (typeof disabled === 'function' && disabled.call(this.hot) === true)) {
+      return;
     }
-    if (typeof this.commonCallback === 'function') {
-      callbacks.push(this.commonCallback);
+    if (hasOwnProperty(command!, 'submenu')) {
+      return;
     }
-    params.unshift(commandSplit.join(':'));
-    arrayEach(callbacks, callback => callback.apply(this.hot, params));
+    const callbacks = [command!.callback, this.commonCallback]
+      .filter((callback): callback is (...args: unknown[]) => void => typeof callback === 'function');
+
+    callbacks.forEach(callback => callback.apply(this.hot, [commandSplit.join(':'), ...params]));
   }
-}
-
-function findSubCommand(subCommandName, subCommands) {
-  let command;
-
-  arrayEach(subCommands, (cmd) => {
-    const cmds = cmd.key ? cmd.key.split(':') : null;
-
-    if (Array.isArray(cmds) && cmds[1] === subCommandName) {
-      command = cmd;
-
-      return false;
-    }
-  });
-
-  return command;
 }
 
 export default CommandExecutor;

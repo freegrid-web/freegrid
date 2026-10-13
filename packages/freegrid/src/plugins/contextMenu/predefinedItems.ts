@@ -1,4 +1,4 @@
-import { objectEach } from './../../helpers/object';
+import type { MenuItem } from './menuItem';
 import alignmentItem, { KEY as ALIGNMENT } from './predefinedItems/alignment';
 import clearColumnItem, { KEY as CLEAR_COLUMN } from './predefinedItems/clearColumn';
 import columnLeftItem, { KEY as COLUMN_LEFT } from './predefinedItems/columnLeft';
@@ -27,10 +27,13 @@ export { KEY as UNDO } from './predefinedItems/undo';
 
 export const ITEMS = [
   ROW_ABOVE, ROW_BELOW, COLUMN_LEFT, COLUMN_RIGHT, CLEAR_COLUMN, REMOVE_ROW, REMOVE_COLUMN, UNDO, REDO, READ_ONLY,
-  ALIGNMENT, SEPARATOR
+  ALIGNMENT, SEPARATOR,
 ];
 
-const _predefinedItems = {
+/** Makes a menu item (a new object each time). */
+type ItemFactory = () => MenuItem;
+
+const _predefinedItems: Record<string, ItemFactory> = {
   [SEPARATOR]: separatorItem,
   [ROW_ABOVE]: rowAboveItem,
   [ROW_BELOW]: rowBelowItem,
@@ -47,27 +50,18 @@ const _predefinedItems = {
 
 /**
  * Gets new object with all predefined menu items.
- *
- * @returns {Object}
  */
-export function predefinedItems() {
-  const items = {};
-
-  objectEach(_predefinedItems, (itemFactory, key) => {
-    items[key] = itemFactory();
-  });
-
-  return items;
-}
+export const predefinedItems = (): Record<string, MenuItem> => Object.fromEntries(
+  Object.entries(_predefinedItems).map(([key, itemFactory]) => [key, itemFactory()]));
 
 /**
- * Add new predefined menu item to the collection.
+ * Add new predefined menu item to the collection (not over a built-in one).
  *
- * @param {String} key Menu command id.
- * @param {Object} item Object command descriptor.
+ * @param key Menu command id.
+ * @param item Makes the item.
  */
-export function addItem(key, item) {
-  if (ITEMS.indexOf(key) === -1) {
+export const addItem = (key: string, item: ItemFactory): void => {
+  if (!ITEMS.includes(key)) {
     _predefinedItems[key] = item;
   }
-}
+};

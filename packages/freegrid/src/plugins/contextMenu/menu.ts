@@ -8,8 +8,8 @@ import {
   isChildOf,
   removeClass,
 } from './../../helpers/dom/element';
-import { arrayEach } from './../../helpers/array';
 import Cursor from './cursor';
+import type { CursorSource } from './cursor';
 import EventManager from './../../eventManager';
 import { applyTheme, getRowHeight } from './../../helpers/dom/theme';
 import { mixin, hasOwnProperty } from './../../helpers/object';
@@ -18,17 +18,72 @@ import { debounce, isFunction } from './../../helpers/function';
 import { filterSeparators, hasSubMenu, isDisabled, isItemHidden, isSeparator, isSelectionDisabled, normalizeSelection } from './utils';
 import { KEY_CODES } from './../../helpers/unicode';
 import localHooks from './../../mixins/localHooks';
+import type { LocalHooks } from './../../mixins/localHooks';
+import type { MenuItem } from './menuItem';
+import type { PluginHost } from './../_base';
 import { SEPARATOR } from './predefinedItems';
 import { stopImmediatePropagation } from './../../helpers/dom/event';
 
 const MIN_WIDTH = 215;
+
+/** A menu's options. */
+export type MenuOptions = {
+  parent?: Menu | null;
+  name?: string | ((this: PluginHost) => unknown) | null;
+  className?: string;
+  keepInViewport?: boolean;
+  standalone?: boolean;
+  minWidth?: number;
+};
+
+/** The menu's own grid (the list of items). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+type MenuGrid = any;
 
 /**
  * @class Menu
  * @plugin ContextMenu
  */
 class Menu {
-  constructor(hotInstance, options) {
+  // From the localHooks mixin (on the prototype): `declare` keeps class fields from hiding them.
+  declare addLocalHook: LocalHooks['addLocalHook'];
+
+  declare runLocalHooks: LocalHooks['runLocalHooks'];
+
+  declare clearLocalHooks: LocalHooks['clearLocalHooks'];
+
+  /** The grid the menu belongs to. */
+  hot: PluginHost;
+
+  options: MenuOptions;
+
+  eventManager: EventManager;
+
+  /** The menu's element (in `<body>`). */
+  container: HTMLElement;
+
+  /** The menu's grid, while it is open. */
+  hotMenu: MenuGrid = null;
+
+  /** The open submenus, by item key. */
+  hotSubMenus: Record<string, Menu> = {};
+
+  parentMenu: Menu | null;
+
+  menuItems: MenuItem[] | null = null;
+
+  /** The grid's `outsideClickDeselects` while the menu is closed. */
+  origOutsideClickDeselects: unknown = null;
+
+  /** Whether a key press is being handled. */
+  keyEvent = false;
+
+  /** Offsets of the menu's position, per side. */
+  offset: Record<'above' | 'below' | 'left' | 'right', number> = { above: 0, below: 0, left: 0, right: 0 };
+
+  _afterScrollCallback: (() => void) | null = null;
+
+  constructor(hotInstance: PluginHost, options?: MenuOptions) {
     this.hot = hotInstance;
     this.options = options || {
       parent: null,
@@ -40,20 +95,7 @@ class Menu {
     };
     this.eventManager = new EventManager(this);
     this.container = this.createContainer(this.options.name);
-    this.hotMenu = null;
-    this.hotSubMenus = {};
     this.parentMenu = this.options.parent || null;
-    this.menuItems = null;
-    this.origOutsideClickDeselects = null;
-    this.keyEvent = false;
-
-    this.offset = {
-      above: 0,
-      below: 0,
-      left: 0,
-      right: 0
-    };
-    this._afterScrollCallback = null;
 
     this.registerEvents();
   }
@@ -63,35 +105,34 @@ class Menu {
    *
    * @private
    */
-  registerEvents() {
-    this.eventManager.addEventListener(document.documentElement, 'mousedown', event => this.onDocumentMouseDown(event));
+  registerEvents(): void {
+    this.eventManager.addEventListener(document.documentElement, 'mousedown', (event: MouseEvent) => this.onDocumentMouseDown(event));
   }
 
   /**
    * Set array of objects which defines menu items.
    *
-   * @param {Array} menuItems Menu items to display.
+   * @param menuItems Menu items to display.
    */
-  setMenuItems(menuItems) {
+  setMenuItems(menuItems: MenuItem[]): void {
     this.menuItems = menuItems;
   }
 
   /**
    * Set offset menu position for specified area (`above`, `below`, `left` or `right`).
    *
-   * @param {String} area Specified area name (`above`, `below`, `left` or `right`).
-   * @param {Number} offset Offset value.
+   * @param area Specified area name (`above`, `below`, `left` or `right`).
+   * @param offset Offset value.
    */
-  setOffset(area, offset = 0) {
+  setOffset(area: keyof Menu['offset'], offset = 0): void {
     this.offset[area] = offset;
   }
 
   /**
    * Check if menu is using as sub-menu.
    *
-   * @returns {Boolean}
    */
-  isSubMenu() {
+  isSubMenu(): boolean {
     return this.parentMenu !== null;
   }
 
@@ -101,18 +142,18 @@ class Menu {
    * @fires Hooks#beforeContextMenuShow
    * @fires Hooks#afterContextMenuShow
    */
-  open() {
+  open(): void {
     this.runLocalHooks('beforeOpen');
 
     this.container.removeAttribute('style');
     this.container.style.display = 'block';
     applyTheme(this.container, this.hot.rootElement);
 
-    const delayedOpenSubMenu = debounce(row => this.openSubMenu(row), 300);
+    const delayedOpenSubMenu = debounce((row: number) => this.openSubMenu(row), 300);
     const minWidthOfMenu = this.options.minWidth || MIN_WIDTH;
 
     // Submenu `items` come straight from the settings and may be an object; such a submenu stays empty.
-    let filteredItems = Array.from(this.menuItems).filter(item => isItemHidden(item, this.hot));
+    let filteredItems = Array.from(this.menuItems!).filter(item => isItemHidden(item, this.hot));
 
     filteredItems = filterSeparators(filteredItems, SEPARATOR);
 
@@ -120,7 +161,7 @@ class Menu {
       data: filteredItems,
       colHeaders: false,
       autoColumnSize: true,
-      modifyColWidth(width) {
+      modifyColWidth(width?: number) {
         if (isDefined(width) && width < minWidthOfMenu) {
           return minWidthOfMenu;
         }
@@ -132,26 +173,26 @@ class Menu {
       copyPaste: false,
       columns: [{
         data: 'name',
-        renderer: (hot, TD, row, col, prop, value) => this.menuItemRenderer(hot, TD, row, col, prop, value)
+        renderer: (...args: Parameters<Menu['menuItemRenderer']>) => this.menuItemRenderer(...args),
       }],
       renderAllRows: true,
       fragmentSelection: 'cell',
       disableVisualSelection: 'area',
-      beforeKeyDown: event => this.onBeforeKeyDown(event),
-      afterOnCellMouseOver: (event, coords) => {
+      beforeKeyDown: (event: KeyboardEvent) => this.onBeforeKeyDown(event),
+      afterOnCellMouseOver: (event: MouseEvent, coords: { row: number }) => {
         if (this.isAllSubMenusClosed()) {
           delayedOpenSubMenu(coords.row);
         } else {
           this.openSubMenu(coords.row);
         }
       },
-      rowHeights: row => (filteredItems[row].name === SEPARATOR ? 1 : getRowHeight(this.container))
+      rowHeights: (row: number) => (filteredItems[row].name === SEPARATOR ? 1 : getRowHeight(this.container)),
     };
     this.origOutsideClickDeselects = this.hot.getSettings().outsideClickDeselects;
     this.hot.getSettings().outsideClickDeselects = false;
     this.hotMenu = new Core(this.container, settings);
     this.hotMenu.addHook('afterInit', () => this.onAfterInit());
-    this.hotMenu.addHook('afterSelection', (...args) => this.onAfterSelection(...args));
+    this.hotMenu.addHook('afterSelection', (...args: Parameters<Menu['onAfterSelection']>) => this.onAfterSelection(...args));
     this.hotMenu.init();
     this.hotMenu.listen();
     this.blockMainTableCallbacks();
@@ -161,9 +202,9 @@ class Menu {
   /**
    * Close menu.
    *
-   * @param {Boolean} [closeParent=false] if `true` try to close parent menu if exists.
+   * @param [closeParent=false] if `true` try to close parent menu if exists.
    */
-  close(closeParent = false) {
+  close(closeParent = false): void {
     if (!this.isOpened()) {
       return;
     }
@@ -187,10 +228,10 @@ class Menu {
   /**
    * Open sub menu at the provided row index.
    *
-   * @param {Number} row Row index.
-   * @returns {Menu|Boolean} Returns created menu or `false` if no one menu was created.
+   * @param row Row index.
+   * @returns Returns created menu or `false` if no one menu was created.
    */
-  openSubMenu(row) {
+  openSubMenu(row: number): Menu | false {
     if (!this.hotMenu) {
       return false;
     }
@@ -219,9 +260,9 @@ class Menu {
   /**
    * Close sub menu at row index.
    *
-   * @param {Number} row Row index.
+   * @param row Row index.
    */
-  closeSubMenu(row) {
+  closeSubMenu(row: number): void {
     const dataItem = this.hotMenu.getSourceDataAtRow(row);
     const menus = this.hotSubMenus[dataItem.key];
 
@@ -234,23 +275,22 @@ class Menu {
   /**
    * Close all opened sub menus.
    */
-  closeAllSubMenus() {
-    arrayEach(this.hotMenu.getData(), (value, row) => this.closeSubMenu(row));
+  closeAllSubMenus(): void {
+    this.hotMenu.getData().forEach((value: unknown, row: number) => this.closeSubMenu(row));
   }
 
   /**
    * Checks if all created and opened sub menus are closed.
    *
-   * @returns {Boolean}
    */
-  isAllSubMenusClosed() {
+  isAllSubMenusClosed(): boolean {
     return Object.keys(this.hotSubMenus).length === 0;
   }
 
   /**
    * Destroy instance.
    */
-  destroy() {
+  destroy(): void {
     this.clearLocalHooks();
     this.close();
     this.parentMenu = null;
@@ -260,22 +300,22 @@ class Menu {
   /**
    * Checks if menu was opened.
    *
-   * @returns {Boolean} Returns `true` if menu was opened.
+   * @returns Returns `true` if menu was opened.
    */
-  isOpened() {
+  isOpened(): boolean {
     return this.hotMenu !== null;
   }
 
   /**
    * Execute menu command.
    *
-   * @param {Event} [event]
+   * @param [event]
    */
-  executeCommand(event) {
+  executeCommand(event?: Event): void {
     if (!this.isOpened() || !this.hotMenu.getSelectedLast()) {
       return;
     }
-    const selectedItem = this.hotMenu.getSourceDataAtRow(this.hotMenu.getSelectedLast()[0]);
+    const selectedItem: MenuItem = this.hotMenu.getSourceDataAtRow(this.hotMenu.getSelectedLast()[0]);
 
     this.runLocalHooks('select', selectedItem, event);
 
@@ -296,7 +336,7 @@ class Menu {
     this.runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
 
     if (this.isSubMenu()) {
-      this.parentMenu.runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
+      this.parentMenu!.runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
     }
 
     if (autoClose) {
@@ -307,10 +347,10 @@ class Menu {
   /**
    * Set menu position based on dom event or based on literal object.
    *
-   * @param {Event|Object} coords Event or literal Object with coordinates.
+   * @param coords Event or literal Object with coordinates.
    */
-  setPosition(coords) {
-    const cursor = new Cursor(coords);
+  setPosition(coords: CursorSource | DOMRect): void {
+    const cursor = new Cursor(coords as CursorSource);
 
     if (this.options.keepInViewport) {
       if (cursor.fitsBelow(this.container)) {
@@ -336,9 +376,9 @@ class Menu {
   /**
    * Set menu position above cursor object.
    *
-   * @param {Cursor} cursor `Cursor` object.
+   * @param cursor `Cursor` object.
    */
-  setPositionAboveCursor(cursor) {
+  setPositionAboveCursor(cursor: Cursor): void {
     let top = this.offset.above + cursor.top - this.container.offsetHeight;
 
     if (this.isSubMenu()) {
@@ -350,9 +390,9 @@ class Menu {
   /**
    * Set menu position below cursor object.
    *
-   * @param {Cursor} cursor `Cursor` object.
+   * @param cursor `Cursor` object.
    */
-  setPositionBelowCursor(cursor) {
+  setPositionBelowCursor(cursor: Cursor): void {
     let top = this.offset.below + cursor.top;
 
     if (this.isSubMenu()) {
@@ -364,10 +404,10 @@ class Menu {
   /**
    * Set menu position on the right of cursor object.
    *
-   * @param {Cursor} cursor `Cursor` object.
+   * @param cursor `Cursor` object.
    */
-  setPositionOnRightOfCursor(cursor) {
-    let left;
+  setPositionOnRightOfCursor(cursor: Cursor): void {
+    let left: number;
 
     if (this.isSubMenu()) {
       left = 1 + cursor.left + cursor.cellWidth;
@@ -381,9 +421,9 @@ class Menu {
   /**
    * Set menu position on the left of cursor object.
    *
-   * @param {Cursor} cursor `Cursor` object.
+   * @param cursor `Cursor` object.
    */
-  setPositionOnLeftOfCursor(cursor) {
+  setPositionOnLeftOfCursor(cursor: Cursor): void {
     const left = this.offset.left + cursor.left - this.container.offsetWidth + getScrollbarWidth() + 4;
 
     this.container.style.left = `${left}px`;
@@ -392,7 +432,7 @@ class Menu {
   /**
    * Select first cell in opened menu.
    */
-  selectFirstCell() {
+  selectFirstCell(): void {
     const cell = this.hotMenu.getCell(0, 0);
 
     if (isSeparator(cell) || isDisabled(cell) || isSelectionDisabled(cell)) {
@@ -405,7 +445,7 @@ class Menu {
   /**
    * Select last cell in opened menu.
    */
-  selectLastCell() {
+  selectLastCell(): void {
     const lastRow = this.hotMenu.countRows() - 1;
     const cell = this.hotMenu.getCell(lastRow, 0);
 
@@ -419,10 +459,10 @@ class Menu {
   /**
    * Select next cell in opened menu.
    *
-   * @param {Number} row Row index.
-   * @param {Number} col Column index.
+   * @param row Row index.
+   * @param col Column index.
    */
-  selectNextCell(row, col) {
+  selectNextCell(row: number, col: number): void {
     const nextRow = row + 1;
     const cell = nextRow < this.hotMenu.countRows() ? this.hotMenu.getCell(nextRow, col) : null;
 
@@ -439,10 +479,10 @@ class Menu {
   /**
    * Select previous cell in opened menu.
    *
-   * @param {Number} row Row index.
-   * @param {Number} col Column index.
+   * @param row Row index.
+   * @param col Column index.
    */
-  selectPrevCell(row, col) {
+  selectPrevCell(row: number, col: number): void {
     const prevRow = row - 1;
     const cell = prevRow >= 0 ? this.hotMenu.getCell(prevRow, col) : null;
 
@@ -461,14 +501,16 @@ class Menu {
    *
    * @private
    */
-  menuItemRenderer(hot, TD, row, col, prop, value) {
-    const item = hot.getSourceDataAtRow(row);
+  menuItemRenderer(hot: MenuGrid, TD: HTMLTableCellElement, row: number, col: number, prop: string | number,
+    value: unknown): void {
+    const item: MenuItem = hot.getSourceDataAtRow(row);
     const wrapper = document.createElement('div');
 
-    const isSubMenu = itemToTest => hasOwnProperty(itemToTest, 'submenu');
-    const itemIsSeparator = itemToTest => new RegExp(SEPARATOR, 'i').test(itemToTest.name);
-    const itemIsDisabled = itemToTest => itemToTest.disabled === true || (typeof itemToTest.disabled === 'function' && itemToTest.disabled.call(this.hot) === true);
-    const itemIsSelectionDisabled = itemToTest => itemToTest.disableSelection;
+    const isSubMenu = (itemToTest: MenuItem) => hasOwnProperty(itemToTest, 'submenu');
+    const itemIsSeparator = (itemToTest: MenuItem) => new RegExp(SEPARATOR, 'i').test(itemToTest.name as string);
+    const itemIsDisabled = (itemToTest: MenuItem) => itemToTest.disabled === true ||
+      (typeof itemToTest.disabled === 'function' && itemToTest.disabled.call(this.hot) === true);
+    const itemIsSelectionDisabled = (itemToTest: MenuItem) => itemToTest.disableSelection;
     let itemValue = value;
 
     if (typeof itemValue === 'function') {
@@ -486,7 +528,7 @@ class Menu {
       TD.appendChild(item.renderer(hot, wrapper, row, col, prop, itemValue));
 
     } else {
-      fastInnerHTML(wrapper, itemValue);
+      fastInnerHTML(wrapper, itemValue as string);
     }
     if (itemIsDisabled(item)) {
       addClass(TD, 'fg-disabled');
@@ -502,7 +544,7 @@ class Menu {
       if (itemIsSelectionDisabled(item)) {
         this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
       } else {
-        this.eventManager.addEventListener(TD, 'mouseenter', () => hot.selectCell(row, col, void 0, void 0, false, false));
+        this.eventManager.addEventListener(TD, 'mouseenter', () => hot.selectCell(row, col, undefined, undefined, false, false));
       }
     } else {
       removeClass(TD, 'fg-submenu');
@@ -511,7 +553,7 @@ class Menu {
       if (itemIsSelectionDisabled(item)) {
         this.eventManager.addEventListener(TD, 'mouseenter', () => hot.deselectCell());
       } else {
-        this.eventManager.addEventListener(TD, 'mouseenter', () => hot.selectCell(row, col, void 0, void 0, false, false));
+        this.eventManager.addEventListener(TD, 'mouseenter', () => hot.selectCell(row, col, undefined, undefined, false, false));
       }
     }
   }
@@ -520,27 +562,26 @@ class Menu {
    * Create container/wrapper for handsontable.
    *
    * @private
-   * @param {String} [name] Class name.
-   * @returns {HTMLElement}
+   * @param [name] Class name.
    */
-  createContainer(name = null) {
-    let className = name;
-    let container;
+  createContainer(name: MenuOptions['name'] = null): HTMLElement {
+    let className: unknown = name;
+    let container: HTMLElement | null;
 
     if (className) {
       if (isFunction(className)) {
-        className = className.call(this.hot);
+        className = (className as (this: PluginHost) => unknown).call(this.hot);
 
         if (className === null || isUndefined(className)) {
           className = '';
 
         } else {
-          className = className.toString();
+          className = (className as object).toString();
         }
       }
 
-      const name = className.replace(/[^A-z0-9]/g, '_');
-      const baseClassName = this.options.className;
+      const name = (className as string).replace(/[^A-Za-z0-9]/g, '_');
+      const baseClassName = this.options.className!;
       const legacyBaseClassName = toLegacyClassName(baseClassName);
 
       // e.g. fg-context-menu-sub_Alignment, plus the legacy htContextMenuSub_Alignment during 0.x
@@ -549,7 +590,7 @@ class Menu {
         className += ` ${legacyBaseClassName}Sub_${name}`;
       }
 
-      container = document.querySelector(`.${baseClassName}.${className.split(' ')[0]}`);
+      container = document.querySelector(`.${baseClassName}.${(className as string).split(' ')[0]}`);
 
     } else {
       container = document.querySelector(`.${this.options.className}`);
@@ -561,7 +602,7 @@ class Menu {
       addClass(container, `fg-menu ${this.options.className}`);
 
       if (className) {
-        addClass(container, className);
+        addClass(container, className as string);
       }
       document.getElementsByTagName('body')[0].appendChild(container);
     }
@@ -572,8 +613,8 @@ class Menu {
   /**
    * @private
    */
-  blockMainTableCallbacks() {
-    this._afterScrollCallback = function() {};
+  blockMainTableCallbacks(): void {
+    this._afterScrollCallback = () => {};
     this.hot.addHook('afterScrollVertically', this._afterScrollCallback);
     this.hot.addHook('afterScrollHorizontally', this._afterScrollCallback);
   }
@@ -581,7 +622,7 @@ class Menu {
   /**
    * @private
    */
-  releaseMainTableCallbacks() {
+  releaseMainTableCallbacks(): void {
     if (this._afterScrollCallback) {
       this.hot.removeHook('afterScrollVertically', this._afterScrollCallback);
       this.hot.removeHook('afterScrollHorizontally', this._afterScrollCallback);
@@ -593,9 +634,9 @@ class Menu {
    * On before key down listener.
    *
    * @private
-   * @param {Event} event
+   * @param event
    */
-  onBeforeKeyDown(event) {
+  onBeforeKeyDown(event: KeyboardEvent): void {
     const selection = this.hotMenu.getSelectedLast();
     let stopEvent = false;
     this.keyEvent = true;
@@ -673,8 +714,8 @@ class Menu {
    *
    * @private
    */
-  onAfterInit() {
-    const data = this.hotMenu.getSettings().data;
+  onAfterInit(): void {
+    const data: MenuItem[] = this.hotMenu.getSettings().data;
     const hiderStyle = this.hotMenu.view.wt.wtTable.hider.style;
     const holderStyle = this.hotMenu.view.wt.wtTable.holder.style;
     const currentHiderWidth = parseInt(hiderStyle.width, 10);
@@ -689,14 +730,15 @@ class Menu {
   /**
    * On after selection listener.
    *
-   * @param {Number} r Selection start row index.
-   * @param {Number} c Selection start column index.
-   * @param {Number} r2 Selection end row index.
-   * @param {Number} c2 Selection end column index.
-   * @param {Object} preventScrolling Object with `value` property where its value change will be observed.
-   * @param {Number} selectionLayerLevel The number which indicates what selection layer is currently modified.
+   * @param r Selection start row index.
+   * @param c Selection start column index.
+   * @param r2 Selection end row index.
+   * @param c2 Selection end column index.
+   * @param preventScrolling Object with `value` property where its value change will be observed.
+   * @param selectionLayerLevel The number which indicates what selection layer is currently modified.
    */
-  onAfterSelection(r, c, r2, c2, preventScrolling) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onAfterSelection(r: number, c: number, r2: number, c2: number, preventScrolling: { value: boolean }): void {
     if (this.keyEvent === false) {
       preventScrolling.value = true;
     }
@@ -706,22 +748,22 @@ class Menu {
    * Document mouse down listener.
    *
    * @private
-   * @param {Event} event
+   * @param event
    */
-  onDocumentMouseDown(event) {
+  onDocumentMouseDown(event: MouseEvent): void {
     if (!this.isOpened()) {
       return;
     }
-    if (this.container && isChildOf(event.target, this.container)) {
+    if (this.container && isChildOf(event.target as Node, this.container)) {
       this.executeCommand(event);
     }
     // Close menu when clicked element is not belongs to menu itself
-    if (this.options.standalone && this.hotMenu && !isChildOf(event.target, this.hotMenu.rootElement)) {
+    if (this.options.standalone && this.hotMenu && !isChildOf(event.target as Node, this.hotMenu.rootElement)) {
       this.close(true);
 
     // Automatically close menu when clicked element is not belongs to menu or submenu (not necessarily to itself)
     } else if ((this.isAllSubMenusClosed() || this.isSubMenu()) &&
-        (!isChildOf(event.target, '.fg-menu') && isChildOf(event.target, document))) {
+        (!isChildOf(event.target as Node, '.fg-menu') && isChildOf(event.target as Node, document))) {
       this.close(true);
     }
   }

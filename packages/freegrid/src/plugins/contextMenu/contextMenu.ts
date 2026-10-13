@@ -1,6 +1,6 @@
 import BasePlugin from './../_base';
+import type { PluginHost } from './../_base';
 import Hooks from './../../pluginHooks';
-import { arrayEach } from './../../helpers/array';
 import CommandExecutor from './commandExecutor';
 import EventManager from './../../eventManager';
 import ItemsFactory from './itemsFactory';
@@ -22,7 +22,15 @@ import {
   SEPARATOR
 } from './predefinedItems';
 
+import type { ItemsPattern } from './itemsFactory';
+
 import './contextMenu.css';
+
+/** The `contextMenu` setting: `true`, item keys, or `{ items, callback }`. */
+type ContextMenuSettings = ItemsPattern & { callback?: (...params: unknown[]) => void };
+
+/** Where to open the menu: page or viewport coordinates (a mouse event works too). */
+type MenuPosition = { pageX?: number; pageY?: number; clientX?: number; clientY?: number };
 
 Hooks.getSingleton().register('afterContextMenuDefaultOptions');
 Hooks.getSingleton().register('beforeContextMenuShow');
@@ -70,9 +78,8 @@ class ContextMenu extends BasePlugin {
   /**
    * Context menu default items order when `contextMenu` options is set as `true`.
    *
-   * @returns {String[]}
    */
-  static get DEFAULT_ITEMS() {
+  static get DEFAULT_ITEMS(): string[] {
     return [
       ROW_ABOVE, ROW_BELOW,
       SEPARATOR,
@@ -88,63 +95,68 @@ class ContextMenu extends BasePlugin {
     ];
   }
 
-  constructor(hotInstance) {
+  /** A separator item, for `contextMenu.items`. */
+  static SEPARATOR = { name: SEPARATOR };
+
+  /**
+   * Instance of {@link EventManager}.
+   *
+   * @private
+   */
+  eventManager: EventManager;
+
+  /**
+   * Instance of {@link CommandExecutor}.
+   *
+   * @private
+   */
+  commandExecutor: CommandExecutor;
+
+  /**
+   * Instance of {@link ItemsFactory}.
+   *
+   * @private
+   */
+  itemsFactory: ItemsFactory | null = null;
+
+  /**
+   * Instance of {@link Menu}.
+   *
+   * @private
+   */
+  menu: Menu | null = null;
+
+  constructor(hotInstance: PluginHost) {
     super(hotInstance);
-    /**
-     * Instance of {@link EventManager}.
-     *
-     * @private
-     * @type {EventManager}
-     */
     this.eventManager = new EventManager(this);
-    /**
-     * Instance of {@link CommandExecutor}.
-     *
-     * @private
-     * @type {CommandExecutor}
-     */
     this.commandExecutor = new CommandExecutor(this.hot);
-    /**
-     * Instance of {@link ItemsFactory}.
-     *
-     * @private
-     * @type {ItemsFactory}
-     */
-    this.itemsFactory = null;
-    /**
-     * Instance of {@link Menu}.
-     *
-     * @private
-     * @type {Menu}
-     */
-    this.menu = null;
   }
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ContextMenu#enablePlugin} method is called.
    *
-   * @returns {Boolean}
    */
-  isEnabled() {
-    return this.hot.getSettings().contextMenu;
+  isEnabled(): boolean {
+    return !!this.hot.getSettings().contextMenu;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
-    this.itemsFactory = new ItemsFactory(this.hot, ContextMenu.DEFAULT_ITEMS);
-
-    const settings = this.hot.getSettings().contextMenu;
+    const itemsFactory = new ItemsFactory(this.hot, ContextMenu.DEFAULT_ITEMS);
+    const settings: ContextMenuSettings = this.hot.getSettings().contextMenu;
     const predefinedItems = {
-      items: this.itemsFactory.getItems(settings)
+      items: itemsFactory.getItems(settings),
     };
 
-    if (typeof settings.callback === 'function') {
+    this.itemsFactory = itemsFactory;
+
+    if (typeof settings?.callback === 'function') {
       this.commandExecutor.setCommonCallback(settings.callback);
     }
     super.enablePlugin();
@@ -156,26 +168,27 @@ class ContextMenu extends BasePlugin {
 
       this.hot.runHooks('afterContextMenuDefaultOptions', predefinedItems);
 
-      this.itemsFactory.setPredefinedItems(predefinedItems.items);
-      const menuItems = this.itemsFactory.getItems(settings);
-
-      this.menu = new Menu(this.hot, {
+      this.itemsFactory!.setPredefinedItems(predefinedItems.items);
+      const menuItems = this.itemsFactory!.getItems(settings);
+      const menu = new Menu(this.hot, {
         className: 'fg-context-menu',
-        keepInViewport: true
+        keepInViewport: true,
       });
+
+      this.menu = menu;
       this.hot.runHooks('beforeContextMenuSetItems', menuItems);
 
-      this.menu.setMenuItems(menuItems);
+      menu.setMenuItems(menuItems);
 
-      this.menu.addLocalHook('beforeOpen', () => this.onMenuBeforeOpen());
-      this.menu.addLocalHook('afterOpen', () => this.onMenuAfterOpen());
-      this.menu.addLocalHook('afterClose', () => this.onMenuAfterClose());
-      this.menu.addLocalHook('executeCommand', (...params) => this.executeCommand.call(this, ...params));
+      menu.addLocalHook('beforeOpen', () => this.onMenuBeforeOpen());
+      menu.addLocalHook('afterOpen', () => this.onMenuAfterOpen());
+      menu.addLocalHook('afterClose', () => this.onMenuAfterClose());
+      menu.addLocalHook('executeCommand', (commandName: string, ...params: unknown[]) => this.executeCommand(commandName, ...params));
 
-      this.addHook('afterOnCellContextMenu', event => this.onAfterOnCellContextMenu(event));
+      this.addHook('afterOnCellContextMenu', (event: MouseEvent & { realTarget: HTMLElement }) => this.onAfterOnCellContextMenu(event));
 
       // Register all commands. Predefined and added by user or by plugins
-      arrayEach(menuItems, command => this.commandExecutor.registerCommand(command.key, command));
+      menuItems.forEach(command => this.commandExecutor.registerCommand(command.key!, command));
     };
 
     this.callOnPluginsReady(() => {
@@ -190,7 +203,7 @@ class ContextMenu extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
 
@@ -200,7 +213,7 @@ class ContextMenu extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     this.close();
 
     if (this.menu) {
@@ -213,20 +226,20 @@ class ContextMenu extends BasePlugin {
   /**
    * Opens menu and re-position it based on the passed coordinates.
    *
-   * @param {Object|Event} position An object with `pageX` and `pageY` properties which contains values relative to
+   * @param position An object with `pageX` and `pageY` properties which contains values relative to
    *                                the top left of the fully rendered content area in the browser or with `clientX`
    *                                and `clientY`  properties which contains values relative to the upper left edge
    *                                of the content area (the viewport) of the browser window. This object is structurally
    *                                compatible with native mouse event so it can be used either.
    */
-  open(event) {
+  open(position: MenuPosition): void {
     if (!this.menu) {
       return;
     }
     this.menu.open();
     this.menu.setPosition({
-      top: parseInt(pageY(event), 10) - getWindowScrollTop(),
-      left: parseInt(pageX(event), 10) - getWindowScrollLeft(),
+      top: parseInt(String(pageY(position as MouseEvent)), 10) - getWindowScrollTop(),
+      left: parseInt(String(pageX(position as MouseEvent)), 10) - getWindowScrollLeft(),
     });
 
     // ContextMenu is not detected HotTableEnv correctly because is injected outside hot-table
@@ -237,7 +250,7 @@ class ContextMenu extends BasePlugin {
   /**
    * Closes the menu.
    */
-  close() {
+  close(): void {
     if (!this.menu) {
       return;
     }
@@ -267,10 +280,10 @@ class ContextMenu extends BasePlugin {
    *
    * Or you can execute command registered in settings where `key` is your command name.
    *
-   * @param {String} commandName The command name to be executed.
-   * @param {...*} params
+   * @param commandName The command name to be executed.
+   * @param params Arguments of the command.
    */
-  executeCommand(commandName, ...params) {
+  executeCommand(commandName: string, ...params: unknown[]): void {
     this.commandExecutor.execute(commandName, ...params);
   }
 
@@ -278,16 +291,13 @@ class ContextMenu extends BasePlugin {
    * On contextmenu listener.
    *
    * @private
-   * @param {Event} event
+   * @param event The `contextmenu` event.
    */
-  onAfterOnCellContextMenu(event) {
+  onAfterOnCellContextMenu(event: MouseEvent & { realTarget: HTMLElement }): void {
     const settings = this.hot.getSettings();
     const showRowHeaders = settings.rowHeaders;
     const showColHeaders = settings.colHeaders;
-
-    function isValidElement(element) {
-      return element.nodeName === 'TD' || element.parentNode.nodeName === 'TD';
-    }
+    const isValidElement = (element: HTMLElement) => element.nodeName === 'TD' || element.parentNode!.nodeName === 'TD';
     // if event is from hot-table we must get web component element not element inside him
     const element = event.realTarget;
     this.close();
@@ -313,7 +323,7 @@ class ContextMenu extends BasePlugin {
    *
    * @private
    */
-  onMenuBeforeOpen() {
+  onMenuBeforeOpen(): void {
     this.hot.runHooks('beforeContextMenuShow', this);
   }
 
@@ -322,7 +332,7 @@ class ContextMenu extends BasePlugin {
    *
    * @private
    */
-  onMenuAfterOpen() {
+  onMenuAfterOpen(): void {
     this.hot.runHooks('afterContextMenuShow', this);
   }
 
@@ -331,7 +341,7 @@ class ContextMenu extends BasePlugin {
    *
    * @private
    */
-  onMenuAfterClose() {
+  onMenuAfterClose(): void {
     this.hot.listen();
     this.hot.runHooks('afterContextMenuHide', this);
   }
@@ -339,19 +349,12 @@ class ContextMenu extends BasePlugin {
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     this.close();
-
-    if (this.menu) {
-      this.menu.destroy();
-    }
+    this.menu?.destroy();
     super.destroy();
   }
 }
-
-ContextMenu.SEPARATOR = {
-  name: SEPARATOR
-};
 
 registerPlugin('contextMenu', ContextMenu);
 

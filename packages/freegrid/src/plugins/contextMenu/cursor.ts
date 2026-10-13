@@ -1,6 +1,9 @@
 import { getWindowScrollLeft, getWindowScrollTop } from './../../helpers/dom/element';
 import { pageX, pageY } from './../../helpers/dom/event';
 
+/** Where to open a menu: a mouse event, or coordinates (relative to the viewport) with the cell's size. */
+export type CursorSource = MouseEvent | { top: number | string; left: number | string; width?: number; height?: number };
+
 /**
  * Helper class for checking if element will fit at the desired side of cursor.
  *
@@ -8,102 +11,102 @@ import { pageX, pageY } from './../../helpers/dom/event';
  * @plugin ContextMenu
  */
 class Cursor {
-  constructor(object) {
+  type: 'literal' | 'event';
+
+  /** The position in the page. */
+  top: number;
+
+  left: number;
+
+  /** The position in the viewport. */
+  topRelative: number;
+
+  leftRelative: number;
+
+  scrollTop: number;
+
+  scrollLeft: number;
+
+  /** The size of the cell the menu opens at. */
+  cellHeight: number;
+
+  cellWidth: number;
+
+  constructor(object: CursorSource) {
     const windowScrollTop = getWindowScrollTop();
     const windowScrollLeft = getWindowScrollLeft();
-    let top;
-    let topRelative;
-    let left;
-    let leftRelative;
-    let cellHeight;
-    let cellWidth;
 
     this.type = this.getSourceType(object);
-
-    if (this.type === 'literal') {
-      top = parseInt(object.top, 10);
-      left = parseInt(object.left, 10);
-      cellHeight = object.height || 0;
-      cellWidth = object.width || 0;
-      topRelative = top;
-      leftRelative = left;
-      top += windowScrollTop;
-      left += windowScrollLeft;
-
-    } else if (this.type === 'event') {
-      top = parseInt(pageY(object), 10);
-      left = parseInt(pageX(object), 10);
-      cellHeight = object.target.clientHeight;
-      cellWidth = object.target.clientWidth;
-      topRelative = top - windowScrollTop;
-      leftRelative = left - windowScrollLeft;
-    }
-
-    this.top = top;
-    this.topRelative = topRelative;
-    this.left = left;
-    this.leftRelative = leftRelative;
     this.scrollTop = windowScrollTop;
     this.scrollLeft = windowScrollLeft;
-    this.cellHeight = cellHeight;
-    this.cellWidth = cellWidth;
+
+    if (this.type === 'event') {
+      const event = object as MouseEvent;
+      const target = event.target as HTMLElement;
+
+      this.top = parseInt(String(pageY(event)), 10);
+      this.left = parseInt(String(pageX(event)), 10);
+      this.cellHeight = target.clientHeight;
+      this.cellWidth = target.clientWidth;
+      this.topRelative = this.top - windowScrollTop;
+      this.leftRelative = this.left - windowScrollLeft;
+    } else {
+      const literal = object as Exclude<CursorSource, MouseEvent>;
+
+      this.topRelative = parseInt(String(literal.top), 10);
+      this.leftRelative = parseInt(String(literal.left), 10);
+      this.cellHeight = literal.height || 0;
+      this.cellWidth = literal.width || 0;
+      this.top = this.topRelative + windowScrollTop;
+      this.left = this.leftRelative + windowScrollLeft;
+    }
   }
 
   /**
    * Get source type name.
    *
-   * @param {*} object Event or Object with coordinates.
-   * @returns {String} Returns one of this values: `'literal'`, `'event'`.
+   * @param object Event or Object with coordinates.
+   * @returns Returns one of this values: `'literal'`, `'event'`.
    */
-  getSourceType(object) {
-    let type = 'literal';
-
-    if (object instanceof Event) {
-      type = 'event';
-    }
-
-    return type;
+  getSourceType(object: unknown): 'literal' | 'event' {
+    return object instanceof Event ? 'event' : 'literal';
   }
 
   /**
    * Checks if element can be placed above the cursor.
    *
-   * @param {HTMLElement} element Element to check if it's size will fit above the cursor.
-   * @returns {Boolean}
+   * @param element Element to check if it's size will fit above the cursor.
    */
-  fitsAbove(element) {
+  fitsAbove(element: HTMLElement): boolean {
     return this.topRelative >= element.offsetHeight;
   }
 
   /**
    * Checks if element can be placed below the cursor.
    *
-   * @param {HTMLElement} element Element to check if it's size will fit below the cursor.
-   * @param {Number} [viewportHeight] The viewport height.
-   * @returns {Boolean}
+   * @param element Element to check if it's size will fit below the cursor.
+   * @param [viewportHeight] The viewport height.
    */
-  fitsBelow(element, viewportHeight = window.innerHeight) {
+  fitsBelow(element: HTMLElement, viewportHeight = window.innerHeight): boolean {
     return this.topRelative + element.offsetHeight <= viewportHeight;
   }
 
   /**
    * Checks if element can be placed on the right of the cursor.
    *
-   * @param {HTMLElement} element Element to check if it's size will fit on the right of the cursor.
-   * @param {Number} [viewportWidth] The viewport width.
-   * @returns {Boolean}
+   * @param element Element to check if it's size will fit on the right of the cursor.
+   * @param [viewportWidth] The viewport width.
    */
-  fitsOnRight(element, viewportWidth = window.innerWidth) {
+  fitsOnRight(element: HTMLElement, viewportWidth = window.innerWidth): boolean {
     return this.leftRelative + this.cellWidth + element.offsetWidth <= viewportWidth;
   }
 
   /**
    * Checks if element can be placed on the left on the cursor.
    *
-   * @param {HTMLElement} element Element to check if it's size will fit on the left of the cursor.
-   * @returns {Boolean}
+   * @param element Element to check if it's size will fit on the left of the cursor.
    */
-  fitsOnLeft(element) {
+  fitsOnLeft(element: HTMLElement): boolean {
     return this.leftRelative >= element.offsetWidth;
   }
 }

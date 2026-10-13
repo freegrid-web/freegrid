@@ -1,7 +1,8 @@
+import type { MenuItem } from './../menuItem';
 export const KEY = '---------';
 
-export default function separatorItem() {
-  return {
-    name: KEY
-  };
-}
+const separatorItem = (): MenuItem => ({
+  name: KEY,
+});
+
+export default separatorItem;
