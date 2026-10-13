@@ -1,6 +1,3 @@
-import Pikaday from 'pikaday';
-import 'pikaday/css/pikaday.css';
-import './pikaday-theme.css';
 import { addClass, outerHeight } from './../helpers/dom/element';
 import { applyTheme } from './../helpers/dom/theme';
 import { deepExtend } from './../helpers/object';
@@ -9,6 +6,7 @@ import EventManager from './../eventManager';
 import { isMetaKey } from './../helpers/unicode';
 import { stopPropagation } from './../helpers/dom/event';
 import TextEditor from './textEditor';
+import { DatePicker } from './datePicker/datePicker';
 
 /**
  * @private
@@ -31,9 +29,6 @@ class DateEditor extends TextEditor {
   }
 
   init() {
-    if (typeof Pikaday !== 'function') {
-      throw new Error('You need to include Pikaday to your project.');
-    }
     super.init();
     this.instance.addHook('afterDestroy', () => {
       this.parentDestroyed = true;
@@ -57,41 +52,30 @@ class DateEditor extends TextEditor {
     addClass(this.datePicker, 'fg-datepicker-holder');
     document.body.appendChild(this.datePicker);
 
-    this.$datePicker = new Pikaday(this.getDatePickerConfig());
-    this.useDateFormatInPicker();
+    this.$datePicker = new DatePicker(this.datePicker, this.getDatePickerConfig());
     const eventManager = new EventManager(this);
 
     /**
      * Prevent recognizing clicking on datepicker as clicking outside of table
      */
     eventManager.addEventListener(this.datePicker, 'mousedown', event => stopPropagation(event));
+    // Alt+Down moves the keyboard focus into the calendar.
+    eventManager.addEventListener(this.TEXTAREA, 'keydown', (event) => {
+      if (event.altKey && event.key === 'ArrowDown' && this.$datePicker.isVisible()) {
+        event.preventDefault();
+        stopPropagation(event);
+        this.$datePicker.focus();
+      }
+    });
+    // The calendar follows a date typed in the cell's format.
+    eventManager.addEventListener(this.TEXTAREA, 'input', () => {
+      const date = parseDate(this.getValue(), this.cellProperties.dateFormat || this.defaultDateFormat, true);
+
+      if (date && this.$datePicker.isVisible()) {
+        this.$datePicker.setDate(date, true);
+      }
+    });
     this.hideDatepicker();
-  }
-
-  /**
-   * Pikaday writes and reads its field with moment only (otherwise with the browser's date strings); make it use
-   * FreeGrid's date format instead.
-   */
-  useDateFormatInPicker() {
-    const picker = this.$datePicker;
-    const { field } = picker._o;
-
-    picker.toString = format => (picker._d instanceof Date ? formatDate(picker._d, format || picker._o.format) : '');
-    field.removeEventListener('change', picker._onInputChange);
-    picker._onInputChange = (event) => {
-      if (event.firedBy === picker) {
-        return;
-      }
-      const date = parseDate(field.value, picker._o.format, picker._o.formatStrict);
-
-      if (date) {
-        picker.setDate(date);
-      }
-      if (!picker._v) {
-        picker.show();
-      }
-    };
-    field.addEventListener('change', picker._onInputChange);
   }
 
   /**
@@ -99,6 +83,7 @@ class DateEditor extends TextEditor {
    */
   destroyElements() {
     this.$datePicker.destroy();
+    this.datePicker.remove();
   }
 
   /**
@@ -174,7 +159,6 @@ class DateEditor extends TextEditor {
     this.datePickerStyle.top = `${window.pageYOffset + offset.top + outerHeight(this.TD)}px`;
     this.datePickerStyle.left = `${window.pageXOffset + offset.left}px`;
 
-    this.$datePicker._onInputFocus = function() {};
     datePickerConfig.format = dateFormat;
 
     if (this.originalValue) {
@@ -182,7 +166,7 @@ class DateEditor extends TextEditor {
 
       this.selectDateInPicker(dateStr, dateFormat);
 
-      // workaround for date/time cells - pikaday resets the cell value to 12:00 AM by default, this will overwrite the value.
+      // keep the cell's value (with its time, for date-and-time formats) in the editor
       if (this.getValue() !== this.originalValue) {
         this.setValue(this.originalValue);
       }
@@ -234,6 +218,15 @@ class DateEditor extends TextEditor {
   }
 
   /**
+   * Gives the keyboard focus back to the editor after the calendar had it.
+   */
+  focusEditorIfInPicker() {
+    if (this.datePicker.contains(document.activeElement)) {
+      this.focus();
+    }
+  }
+
+  /**
    * Get date picker options.
    *
    * @returns {Object}
@@ -253,14 +246,9 @@ class DateEditor extends TextEditor {
     options.container = this.datePicker;
     options.bound = false;
     options.format = options.format || this.defaultDateFormat;
-    options.reposition = options.reposition || false;
     options.onSelect = (value) => {
-      let dateStr = value;
-
-      if (!isNaN(dateStr.getTime())) {
-        dateStr = formatDate(dateStr, this.cellProperties.dateFormat || this.defaultDateFormat);
-      }
-      this.setValue(dateStr);
+      this.focusEditorIfInPicker();
+      this.setValue(formatDate(value, this.cellProperties.dateFormat || this.defaultDateFormat));
       this.hideDatepicker();
 
       if (origOnSelect) {
@@ -268,6 +256,8 @@ class DateEditor extends TextEditor {
       }
     };
     options.onClose = () => {
+      this.focusEditorIfInPicker();
+
       if (!this.parentDestroyed) {
         this.finishEditing(false);
       }

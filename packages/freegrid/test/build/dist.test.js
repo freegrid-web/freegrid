@@ -67,9 +67,9 @@ describe('dist outputs', () => {
     expect(windowWith(read('freegrid.full.js')).moment).toBeUndefined();
   });
 
-  it('plain UMD keeps numbro/pikaday external and registers all 6.2.2 plugins', () => {
+  it('plain UMD keeps numbro external and registers all 6.2.2 plugins', () => {
     const code = read('freegrid.js');
-    const w = windowWith(nm('numbro/dist/numbro.js'), nm('pikaday/pikaday.js'), code);
+    const w = windowWith(nm('numbro/dist/numbro.js'), code);
 
     expect(typeof w.FreeGrid).toBe('function');
     expect(w.FreeGrid.packageName).toBe('@freegrid/core');
@@ -129,9 +129,11 @@ describe('dist outputs', () => {
     expect(css).toMatch(/\[data-fg-theme=["']?auto["']?\]/);
   });
 
-  it('the date picker takes its colors from variables', () => {
-    expect(read('freegrid.full.css')).toMatch(/\.pika-single[^{]*\{[^}]*var\(--fg-datepicker-/);
-    expect(read('freegrid.full.css')).toMatch(/\.pika-next[^{]*\{[^}]*filter: ?var\(--fg-datepicker-arrow-filter\)/);
+  it('every CSS build has the date picker, colored by variables', () => {
+    ['freegrid.css', 'freegrid.min.css', 'freegrid.full.css', 'esm/freegrid.css'].forEach((f) => {
+      expect(read(f), f).toMatch(/\.fg-datepicker\{|\.fg-datepicker \{/);
+      expect(read(f), f).toMatch(/\.fg-datepicker-day[^{]*\{[^}]*var\(--fg-datepicker-/);
+    });
   });
 
   it('CSS has no IE hacks', () => {
@@ -162,10 +164,8 @@ describe('dist outputs', () => {
     expect(compat).toMatch(/Handsontable/);
   });
 
-  it('CSS keeps legacy class names; only the full CSS contains Pikaday styles', () => {
+  it('CSS keeps legacy class names', () => {
     expect(read('freegrid.css')).toMatch(/\.handsontable/);
-    expect(read('freegrid.css')).not.toMatch(/\.pika-single/);
-    expect(read('freegrid.full.css')).toMatch(/\.pika-single/);
   });
 
   it('does not depend on a global setImmediate (upstream got it from @babel/polyfill)', async() => {
@@ -180,8 +180,9 @@ describe('dist outputs', () => {
     expect(() => hot.destroy()).not.toThrow();
   });
 
-  it('no build keeps an import of the Pikaday CSS (upstream replaced it with an empty module)', () => {
-    ['freegrid.js', 'freegrid.min.js', 'esm/index.js'].forEach(f => expect(read(f), f).not.toMatch(/pikaday\/css/));
+  it('no build contains or needs Pikaday', () => {
+    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js', 'freegrid.full.css']
+      .forEach(f => expect(read(f), f).not.toMatch(/pikaday|pika-single/i));
   });
 
   it('minified CSS is built for the same browsers as the JS (it may use `inset`, Chrome 87+)', () => {

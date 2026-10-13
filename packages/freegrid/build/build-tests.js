@@ -2,7 +2,7 @@
 import { build } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { browserTarget, defineConstants } from './constants.js';
-import { commonjsOptions, ignorePikadayCss, windowModule } from './plugins.js';
+import { commonjsOptions, windowModule } from './plugins.js';
 
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const suite = process.argv[2];
@@ -21,7 +21,7 @@ async function bundle(entry, name) {
     configFile: false,
     logLevel: 'warn',
     define: defineConstants(),
-    plugins: [windowModule(), ignorePikadayCss()],
+    plugins: [windowModule()],
     resolve: { alias: [{ find: /^handsontable(.*)$/, replacement: `${r('src')}$1` }] },
     build: {
       target: browserTarget, commonjsOptions, outDir: r(cfg.out), emptyOutDir: false, minify: false, sourcemap: 'inline',
