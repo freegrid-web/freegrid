@@ -28,15 +28,43 @@ export const getThemeClassName = (element: Element | null | undefined): ThemeCla
   return null;
 };
 
+const STYLES = ['fg-style-modern'] as const;
+
+export type StyleClassName = typeof STYLES[number];
+
 /**
- * Gives `floating` the theme of `source` (usually the grid's root element), replacing any theme it had.
+ * The style (e.g. Modern) of the closest element with a `fg-style-*` class or a `data-fg-style` attribute; `null`
+ * for the default Classic style.
+ */
+export const getStyleClassName = (element: Element | null | undefined): StyleClassName | null => {
+  for (let node = element ?? null; node; node = node.parentElement) {
+    const current = node;
+    const byClass = STYLES.find(style => current.classList.contains(style));
+
+    if (byClass) {
+      return byClass;
+    }
+    if (current.getAttribute('data-fg-style') === 'modern') {
+      return 'fg-style-modern';
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Gives `floating` the theme and the style of `source` (usually the grid's root element), replacing any it had.
  */
 export const applyTheme = (floating: Element, source: Element | null | undefined): void => {
-  floating.classList.remove(...THEMES);
+  floating.classList.remove(...THEMES, ...STYLES);
   const theme = getThemeClassName(source);
+  const style = getStyleClassName(source);
 
   if (theme) {
     floating.classList.add(theme);
+  }
+  if (style) {
+    floating.classList.add(style);
   }
 };
 

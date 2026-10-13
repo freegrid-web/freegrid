@@ -515,4 +515,41 @@ describe('Theme', () => {
       expect(lastRow.getBoundingClientRect().bottom).toBeLessThanOrEqual(this.$container[0].getBoundingClientRect().bottom + 1);
     });
   });
+
+  describe('Modern style', () => {
+    afterEach(function() {
+      this.$container.unwrap('.theme-wrapper');
+    });
+
+    it('makes rows 32px with 8px cell padding, on the grid and in its popups', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern"></div>');
+      const hot = await createThemeFixture();
+      // The second row: the first one also has the table's top border.
+      const cell = this.$container[0].querySelector('.fg-master tbody tr:nth-child(2) td:not(.area):not(.current)');
+
+      expect(cell.offsetHeight).toBe(32);
+      expect(getComputedStyle(cell).paddingLeft).toBe('8px');
+      expect(hot.view.wt.wtSettings.settings.defaultRowHeight).toBe(32);
+      expect(hot.getPlugin('contextMenu').menu.container.classList.contains('fg-style-modern')).toBe(true);
+      // The third item (the second one is a separator). Menu cells add a 4px top padding, as in Classic (26px there).
+      expect(document.querySelector('.fg-context-menu .fg-master tbody tr:nth-child(3) td').offsetHeight).toBeGreaterThanOrEqual(32);
+
+      closeContextMenu();
+      selectCell(1, 0);
+      keyDownUp('enter');
+      await sleep(50);
+      // The editor overlaps the cell's bottom border, so it is at most 1px taller.
+      expect(Math.abs(getActiveEditor().TEXTAREA.offsetHeight - getCell(1, 0).offsetHeight)).toBeLessThanOrEqual(1);
+      keyDownUp('esc');
+    });
+
+    it('works with the dark theme: headers on the cell background', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern fg-theme-dark"></div>');
+      await createThemeFixture();
+      const cellBackground = getComputedStyle(document.querySelector('.fg-master tbody td:not(.area):not(.current)')).backgroundColor;
+
+      expect(cellBackground).toBe('rgb(30, 30, 30)');
+      expect(getComputedStyle(document.querySelector('.fg-master thead th:not(.fg-highlight)')).backgroundColor).toBe(cellBackground);
+    });
+  });
 });
