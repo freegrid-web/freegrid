@@ -36,11 +36,16 @@ export default {
     const rules = [...css.matchAll(/([^{}]*)\{([^{}]*)\}/g)]
       .map(([, selector, body]) => ({ selector: selector.replace(/\/\*[\s\S]*?\*\//g, '').trim(), body }));
     const find = predicate => declarations(rules.find(predicate)?.body || '');
-    const lightBase = find(({ selector }) => selector.includes(':where(:root)'));
-    const lightComponents = find(({ selector }) => selector.startsWith(':where(.freegrid'));
-    const darkBase = find(({ selector }) => selector.includes('fg-theme-dark') && !selector.includes('.freegrid'));
-    const darkComponents = find(({ selector }) => selector.includes('fg-theme-dark') && selector.includes('.freegrid'));
-    const dark = new Map([...darkBase, ...darkComponents].map(({ name, value }) => [name, value]));
+    // :root has the base variables (before the first group heading) and the component variables with their own
+    // value; the grid's parts have the component variables that follow a base variable.
+    const root = find(({ selector }) => selector.includes(':where(:root)'));
+    const lightBase = root.filter(({ group }) => !group);
+    const lightComponents = [
+      ...root.filter(({ group }) => group),
+      ...find(({ selector }) => selector.startsWith(':where(.freegrid')),
+    ];
+    const dark = new Map(find(({ selector }) => selector.includes('fg-theme-dark'))
+      .map(({ name, value }) => [name, value]));
     const row = ({ name, value, description }) => ({ name, description, light: value, dark: dark.get(name) || '' });
     const unsetBase = ['--fg-color-text', '--fg-font-family', '--fg-font-size']
       .filter(name => !lightBase.some(declaration => declaration.name === name))

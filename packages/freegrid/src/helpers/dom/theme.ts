@@ -2,13 +2,13 @@
  * Themes for the parts FreeGrid appends to <body> (context menu, comment editor, date picker): they are outside the
  * grid, so they get the grid's theme class explicitly. See src/css/variables.css.
  */
-const THEMES = ['fg-theme-dark', 'fg-theme-auto'] as const;
+const THEMES = ['fg-theme-light', 'fg-theme-dark', 'fg-theme-auto'] as const;
 
 export type ThemeClassName = typeof THEMES[number];
 
 /**
  * The theme of the closest element (the element itself or an ancestor) with a `fg-theme-*` class or a
- * `data-fg-theme` attribute; `null` when there is none (light theme).
+ * `data-fg-theme` attribute; `null` when there is none (the default light look).
  */
 export const getThemeClassName = (element: Element | null | undefined): ThemeClassName | null => {
   for (let node = element ?? null; node; node = node.parentElement) {
@@ -20,7 +20,7 @@ export const getThemeClassName = (element: Element | null | undefined): ThemeCla
     }
     const byAttribute = current.getAttribute('data-fg-theme');
 
-    if (byAttribute === 'dark' || byAttribute === 'auto') {
+    if (byAttribute === 'light' || byAttribute === 'dark' || byAttribute === 'auto') {
       return `fg-theme-${byAttribute}`;
     }
   }

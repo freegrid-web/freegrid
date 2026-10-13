@@ -127,6 +127,7 @@ describe('dist outputs', () => {
 
   it('the date picker takes its colors from variables', () => {
     expect(read('freegrid.full.css')).toMatch(/\.pika-single[^{]*\{[^}]*var\(--fg-datepicker-/);
+    expect(read('freegrid.full.css')).toMatch(/\.pika-next[^{]*\{[^}]*filter: ?var\(--fg-datepicker-arrow-filter\)/);
   });
 
   it('CSS has no IE hacks', () => {

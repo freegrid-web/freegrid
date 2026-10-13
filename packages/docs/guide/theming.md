@@ -21,8 +21,8 @@ Set base variables anywhere: on `:root` for the whole page, or on an element aro
 ```
 
 Base variables restyle everything that uses them: `--fg-color-accent`, for example, colors the selection border.
-For finer control, every part has its own component variable (see the tables below). Set component variables on the
-grid itself:
+For finer control, every part has its own component variable (see the tables below). Setting component variables on
+the grid itself always works:
 
 ```css
 .freegrid {
@@ -53,6 +53,14 @@ it, such as `<html>` or `<body>`:
 
 `fg-theme-auto` (or `data-fg-theme="auto"`) follows the system setting: dark when the operating system or the
 browser uses dark mode, light otherwise. Without a theme class the grid is light.
+
+`fg-theme-light` (or `data-fg-theme="light"`) keeps a grid light inside a dark page: the closest theme to the grid
+wins.
+
+::: info Date picker
+`freegrid.full.css` themes the date picker (Pikaday) too. With `freegrid.css` you bring Pikaday's own styles, which
+stay light in the dark theme.
+:::
 
 ## Playground
 

@@ -6,8 +6,9 @@
   `src/css/variables.css`). Override base variables such as `--fg-color-accent` on `:root`, or component variables on
   `.freegrid`. The default look is unchanged.
 - Dark theme: class `fg-theme-dark` or `data-fg-theme="dark"` on the grid or any ancestor; `fg-theme-auto` /
-  `data-fg-theme="auto"` follows the system setting. The context menu, the comment editor and the date picker follow
-  the grid's theme.
+  `data-fg-theme="auto"` follows the system setting; `fg-theme-light` keeps a grid light inside a dark page (the
+  closest theme wins). The context menu, the comment editor and the date picker follow the grid's theme.
+- Removed the unused styles of the mobile text editor (`.htMobileEditorContainer`); no FreeGrid code creates it.
 - The selection border, fill border and fill handle colors are CSS variables instead of fixed colors in JavaScript.
 - Borders added from the context menu (Borders > Top/Right/Bottom/Left) use `--fg-custom-border-color` (black in the
   light theme); `getBorders()` reports their color as `var(--fg-custom-border-color)` instead of `#000`.

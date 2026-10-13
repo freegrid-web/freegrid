@@ -54,3 +54,8 @@
   color: var(--fg-datepicker-hover-text);
   background: var(--fg-datepicker-hover-background);
 }
+
+.pika-prev,
+.pika-next {
+  filter: var(--fg-datepicker-arrow-filter);
+}

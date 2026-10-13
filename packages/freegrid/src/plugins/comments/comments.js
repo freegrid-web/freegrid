@@ -352,8 +352,11 @@ class Comments extends BasePlugin {
     this.refreshEditor(true);
     this.editor.setValue(meta[META_COMMENT] ? meta[META_COMMENT][META_COMMENT_VALUE] : null || '');
 
+    // Every time: the editor may already be open for another cell or grid, and the theme may have changed.
+    this.editor.setTheme(this.hot.rootElement);
+
     if (this.editor.hidden) {
-      this.editor.show(this.hot.rootElement);
+      this.editor.show();
     }
 
     return true;
