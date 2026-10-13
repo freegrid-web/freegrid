@@ -26,6 +26,7 @@ class DateEditor extends TextEditor {
     this.defaultDateFormat = 'DD/MM/YYYY';
     this.isCellEdited = false;
     this.parentDestroyed = false;
+    this.defaultDateShown = null;
   }
 
   init() {
@@ -137,6 +138,11 @@ class DateEditor extends TextEditor {
         this.setValue(value);
       }
     }
+    // An empty cell confirmed without typing gets its defaultDate.
+    if (!isCancelled && this.defaultDateShown && this.getValue() === '') {
+      this.setValue(this.defaultDateShown);
+    }
+    this.defaultDateShown = null;
     this.hideDatepicker();
     super.finishEditing(isCancelled, ctrlDown);
   }
@@ -155,6 +161,8 @@ class DateEditor extends TextEditor {
     let dateStr;
     const isMouseDown = this.instance.view.isMouseDown();
     const isMeta = event ? isMetaKey(event.keyCode) : false;
+
+    this.defaultDateShown = null;
 
     this.datePickerStyle.top = `${window.pageYOffset + offset.top + outerHeight(this.TD)}px`;
     this.datePickerStyle.left = `${window.pageXOffset + offset.left}px`;
@@ -179,6 +187,7 @@ class DateEditor extends TextEditor {
       dateStr = this.cellProperties.defaultDate;
 
       datePickerConfig.defaultDate = dateStr;
+      this.defaultDateShown = dateStr;
 
       this.selectDateInPicker(dateStr, dateFormat);
 
