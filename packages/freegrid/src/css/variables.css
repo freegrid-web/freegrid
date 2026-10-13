@@ -29,6 +29,7 @@
   --fg-cell-padding-x: 4px; /* Left and right cell padding. */
   --fg-header-font-weight: normal; /* Header text weight. */
   --fg-radius: 0; /* Corner radius of the cell editor and the context menu. */
+  --fg-menu-shadow: none; /* Context menu shadow. */
 
   /* == Cells == */
   --fg-search-result-background: #fcedd9; /* Cells matched by the search plugin. */
@@ -388,4 +389,21 @@
     --fg-datepicker-inrange-background: #2f4f80;
     --fg-datepicker-arrow-filter: invert(1);
   }
+}
+
+/* == Modern style: class "fg-style-modern" or data-fg-style="modern" on the grid or any ancestor. Sizes, radii,
+   shadows and which base color a part uses; no colors of its own, so it works with every color theme. == */
+:where(.fg-style-modern, [data-fg-style="modern"]) {
+  --fg-row-height: 32px;
+  --fg-cell-padding-x: 8px;
+  --fg-header-font-weight: 600;
+  --fg-radius: 6px;
+  --fg-menu-shadow: var(--fg-shadow);
+}
+
+:where(.fg-style-modern, [data-fg-style="modern"]) :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder),
+:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder):where(.fg-style-modern, [data-fg-style="modern"]) {
+  --fg-header-background: var(--fg-color-background);
+  --fg-header-text: var(--fg-color-muted-text);
+  --fg-cell-border-color: var(--fg-color-header-background);
 }
