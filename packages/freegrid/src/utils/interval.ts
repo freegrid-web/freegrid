@@ -1,118 +1,76 @@
 /**
- * @class Interval
- * @util
+ * Calls a function repeatedly on animation frames, at most once per `delay` (milliseconds, or a frame rate such as
+ * `'15fps'`).
  */
 class Interval {
-  static create(func, delay) {
+  static create(func: () => void, delay?: number | string): Interval {
     return new Interval(func, delay);
   }
 
-  constructor(func, delay) {
-    /**
-     * Animation frame request id.
-     *
-     * @type {Number}
-     */
-    this.timer = null;
-    /**
-     * Function to invoke repeatedly.
-     *
-     * @type {Function}
-     */
-    this.func = func;
-    /**
-     * Number of milliseconds that function should wait before next call.
-     */
+  /** Milliseconds between two calls (0: every animation frame). */
+  readonly delay: number;
+
+  #func: () => void;
+
+  #timer: number | null = null;
+
+  #stopped = true;
+
+  /** Time of the last call. */
+  #then = 0;
+
+  constructor(func: () => void, delay?: number | string) {
+    this.#func = func;
     this.delay = parseDelay(delay);
-    /**
-     * Flag which indicates if interval object was stopped.
-     *
-     * @type {Boolean}
-     * @default true
-     */
-    this.stopped = true;
-    /**
-     * Interval time (in milliseconds) of the last callback call.
-     *
-     * @private
-     * @type {Number}
-     */
-    this._then = null;
-    /**
-     * Bounded function `func`.
-     *
-     * @private
-     * @type {Function}
-     */
-    this._callback = () => this.__callback();
   }
 
-  /**
-   * Start loop.
-   *
-   * @returns {Interval}
-   */
-  start() {
-    if (this.stopped) {
-      this._then = Date.now();
-      this.stopped = false;
-      this.timer = requestAnimationFrame(this._callback);
+  start(): this {
+    if (this.#stopped) {
+      this.#then = Date.now();
+      this.#stopped = false;
+      this.#timer = requestAnimationFrame(this.#tick);
     }
 
     return this;
   }
 
-  /**
-   * Stop looping.
-   *
-   * @returns {Interval}
-   */
-  stop() {
-    if (!this.stopped) {
-      this.stopped = true;
-      cancelAnimationFrame(this.timer);
-      this.timer = null;
+  stop(): this {
+    if (!this.#stopped) {
+      this.#stopped = true;
+      cancelAnimationFrame(this.#timer as number);
+      this.#timer = null;
     }
 
     return this;
   }
 
-  /**
-   * Loop callback, fired on every animation frame.
-   *
-   * @private
-   */
-  __callback() {
-    this.timer = requestAnimationFrame(this._callback);
+  #tick = (): void => {
+    this.#timer = requestAnimationFrame(this.#tick);
 
-    if (this.delay) {
-      const now = Date.now();
-      const elapsed = now - this._then;
+    if (!this.delay) {
+      this.#func();
 
-      if (elapsed > this.delay) {
-        this._then = now - (elapsed % this.delay);
-        this.func();
-      }
-    } else {
-      this.func();
+      return;
     }
-  }
+    const now = Date.now();
+    const elapsed = now - this.#then;
+
+    if (elapsed > this.delay) {
+      this.#then = now - (elapsed % this.delay);
+      this.#func();
+    }
+  };
 }
 
 export default Interval;
 
 /**
- * Convert delay from string format to milliseconds.
- *
- * @param {Number|String} delay
- * @returns {Number}
+ * A delay in milliseconds: a number as it is, a frame rate such as `'60fps'` as 1000 / 60.
  */
-export function parseDelay(delay) {
-  let result = delay;
-
-  if (typeof result === 'string' && /fps$/.test(result)) {
-    result = 1000 / parseInt(result.replace('fps', '') || 0, 10);
+export const parseDelay = (delay?: number | string): number => {
+  if (typeof delay === 'string' && /fps$/.test(delay)) {
+    return 1000 / parseInt(delay.replace('fps', '') || '0', 10);
   }
 
-  return result;
-}
+  return delay as number;
+};

@@ -1,95 +1,65 @@
-import EventManager from '../eventManager';
 import { isCtrlMetaKey, isKey } from '../helpers/unicode';
 
-const eventManager = new EventManager();
-const pressedKeys = new Set();
+/**
+ * Which keyboard keys are held down, for all grids on the page. Grids call `startObserving()` when they are created
+ * and `stopObserving()` when they are destroyed; the document listeners exist while at least one grid observes.
+ */
+
+// Aborting it removes all the document listeners at once.
+let listeners: AbortController | null = null;
+const pressedKeys = new Set<number>();
 let refCount = 0;
 
-/**
- * Begins observing keyboard keys states.
- */
-function startObserving() {
+/** Begins observing (or adds an observer). */
+export const startObserving = (): void => {
   if (refCount === 0) {
-    eventManager.addEventListener(document, 'keydown', (event) => {
-      if (!pressedKeys.has(event.keyCode)) {
-        pressedKeys.add(event.keyCode);
-      }
-    });
-    eventManager.addEventListener(document, 'keyup', (event) => {
-      if (pressedKeys.has(event.keyCode)) {
-        pressedKeys.delete(event.keyCode);
-      }
-    });
-    eventManager.addEventListener(document, 'visibilitychange', () => {
+    listeners = new AbortController();
+    const { signal } = listeners;
+
+    document.addEventListener('keydown', (event) => {
+      pressedKeys.add(event.keyCode);
+    }, { signal });
+    document.addEventListener('keyup', (event) => {
+      pressedKeys.delete(event.keyCode);
+    }, { signal });
+    document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         pressedKeys.clear();
       }
-    });
-    eventManager.addEventListener(window, 'blur', () => {
+    }, { signal });
+    window.addEventListener('blur', () => {
       pressedKeys.clear();
-    });
+    }, { signal });
   }
 
   refCount += 1;
-}
+};
 
-/**
- * Stops observing keyboard keys states and clear all previously saved states.
- */
-function stopObserving() {
+/** Removes the listeners and the saved states. */
+export const _resetState = (): void => {
+  listeners?.abort();
+  listeners = null;
+  pressedKeys.clear();
+  refCount = 0;
+};
+
+/** Removes an observer; the last one stops observing. */
+export const stopObserving = (): void => {
   if (refCount > 0) {
     refCount -= 1;
   }
-
   if (refCount === 0) {
     _resetState();
   }
-}
-
-/**
- * Remove all listeners attached to the DOM and clear all previously saved states.
- */
-function _resetState() {
-  eventManager.clearEvents();
-  pressedKeys.clear();
-  refCount = 0;
-}
-
-/**
- * Checks if provided keyCode or keyCodes are pressed.
- *
- * @param {String} keyCodes The key codes passed as a string defined in helpers/unicode.js file delimited with '|'.
- * @return {Boolean}
- */
-function isPressed(keyCodes) {
-  return Array.from(pressedKeys.values()).some(_keyCode => isKey(_keyCode, keyCodes));
-}
-
-/**
- * Checks if ctrl keys are pressed.
- *
- * @return {Boolean}
- */
-function isPressedCtrlKey() {
-  const values = Array.from(pressedKeys.values());
-
-  return values.some(_keyCode => isCtrlMetaKey(_keyCode));
-}
-
-/**
- * Returns reference count. Useful for debugging and testing purposes.
- *
- * @return {Number}
- */
-function _getRefCount() {
-  return refCount;
-}
-
-export {
-  _getRefCount,
-  _resetState,
-  isPressed,
-  isPressedCtrlKey,
-  startObserving,
-  stopObserving,
 };
+
+/**
+ * Whether one of `keyCodes` (names from helpers/unicode, separated by `|`, e.g. `'SHIFT|CONTROL'`) is pressed.
+ */
+export const isPressed = (keyCodes: string): boolean => [...pressedKeys].some(keyCode => isKey(keyCode, keyCodes));
+
+/** Whether Ctrl (or Cmd on macOS) is pressed. */
+export const isPressedCtrlKey = (): boolean => [...pressedKeys].some(keyCode => isCtrlMetaKey(keyCode));
+
+/** The number of observers (for tests). */
+export const _getRefCount = (): number => refCount;

@@ -1,32 +1,16 @@
-export const holder = new WeakMap();
+/**
+ * Marks the grid instances created by users (root instances), as opposed to the grids FreeGrid creates inside its
+ * own UI (e.g. the context menu).
+ */
+export const holder = new WeakMap<object, true>();
 
 export const rootInstanceSymbol = Symbol('rootInstance');
 
-/**
- * Register an object as a root instance.
- *
- * @param  {Object} object An object to associate with root instance flag.
- */
-export function registerAsRootInstance(object) {
+export const registerAsRootInstance = (object: object): void => {
   holder.set(object, true);
-}
+};
 
-/**
- * Check if the source of the root indication call is valid.
- *
- * @param  {Symbol} rootSymbol A symbol as a source of truth.
- * @return {Boolean}
- */
-export function hasValidParameter(rootSymbol) {
-  return rootSymbol === rootInstanceSymbol;
-}
+/** Whether `rootSymbol` is the symbol that may mark a root instance. */
+export const hasValidParameter = (rootSymbol: unknown): boolean => rootSymbol === rootInstanceSymbol;
 
-/**
- * Check if passed an object was flagged as a root instance.
- *
- * @param  {Object} object An object to check.
- * @return {Boolean}
- */
-export function isRootInstance(object) {
-  return holder.has(object);
-}
+export const isRootInstance = (object: object): boolean => holder.has(object);

@@ -1,146 +1,89 @@
 import Core from './../core';
 import { isObject } from './../helpers/object';
 
+/** What the translator needs from a grid: its index hooks. */
+type HooksRunner = { runHooks(name: string, index: number): number };
+type Coords = { row: number; column: number };
+
 /**
- * @class RecordTranslator
- * @util
+ * Translates between visual indexes (what the user sees, e.g. after sorting) and physical indexes (the data source).
  */
 export class RecordTranslator {
-  constructor(hot) {
+  hot: HooksRunner;
+
+  constructor(hot: HooksRunner) {
     this.hot = hot;
   }
 
-  /**
-   * Translate physical row index into visual.
-   *
-   * @param {Number} row Physical row index.
-   * @returns {Number} Returns visual row index.
-   */
-  toVisualRow(row) {
+  toVisualRow(row: number): number {
     return this.hot.runHooks('unmodifyRow', row);
   }
 
-  /**
-   * Translate physical column index into visual.
-   *
-   * @param {Number} column Physical column index.
-   * @returns {Number} Returns visual column index.
-   */
-  toVisualColumn(column) {
+  toVisualColumn(column: number): number {
     return this.hot.runHooks('unmodifyCol', column);
   }
 
   /**
-   * Translate physical coordinates into visual. Can be passed as separate 2 arguments (row, column) or as an object in first
-   * argument with `row` and `column` keys.
-   *
-   * @param {Number|Object} row Physical coordinates or row index.
-   * @param {Number} [column] Physical column index.
-   * @returns {Object|Array} Returns an object with visual records or an array if coordinates passed as separate arguments.
+   * Physical coordinates to visual: `{ row, column }` gives an object, `(row, column)` an array.
    */
-  toVisual(row, column) {
-    let result;
-
+  toVisual(row: number | Coords, column?: number): Coords | [number, number] {
     if (isObject(row)) {
-      result = {
-        row: this.toVisualRow(row.row),
-        column: this.toVisualColumn(row.column),
-      };
-    } else {
-      result = [this.toVisualRow(row), this.toVisualColumn(column)];
+      const coords = row as Coords;
+
+      return { row: this.toVisualRow(coords.row), column: this.toVisualColumn(coords.column) };
     }
 
-    return result;
+    return [this.toVisualRow(row as number), this.toVisualColumn(column as number)];
   }
 
-  /**
-   * Translate visual row index into physical.
-   *
-   * @param {Number} row Visual row index.
-   * @returns {Number} Returns physical row index.
-   */
-  toPhysicalRow(row) {
+  toPhysicalRow(row: number): number {
     return this.hot.runHooks('modifyRow', row);
   }
 
-  /**
-   * Translate visual column index into physical.
-   *
-   * @param {Number} column Visual column index.
-   * @returns {Number} Returns physical column index.
-   */
-  toPhysicalColumn(column) {
+  toPhysicalColumn(column: number): number {
     return this.hot.runHooks('modifyCol', column);
   }
 
   /**
-   * Translate visual coordinates into physical. Can be passed as separate 2 arguments (row, column) or as an object in first
-   * argument with `row` and `column` keys.
-   *
-   * @param {Number|Object} row Visual coordinates or row index.
-   * @param {Number} [column] Visual column index.
-   * @returns {Object|Array} Returns an object with physical records or an array if coordinates passed as separate arguments.
+   * Visual coordinates to physical: `{ row, column }` gives an object, `(row, column)` an array.
    */
-  toPhysical(row, column) {
-    let result;
-
+  toPhysical(row: number | Coords, column?: number): Coords | [number, number] {
     if (isObject(row)) {
-      result = {
-        row: this.toPhysicalRow(row.row),
-        column: this.toPhysicalColumn(row.column),
-      };
-    } else {
-      result = [this.toPhysicalRow(row), this.toPhysicalColumn(column)];
+      const coords = row as Coords;
+
+      return { row: this.toPhysicalRow(coords.row), column: this.toPhysicalColumn(coords.column) };
     }
 
-    return result;
+    return [this.toPhysicalRow(row as number), this.toPhysicalColumn(column as number)];
   }
 }
 
-const identities = new WeakMap();
-const translatorSingletons = new WeakMap();
+const identities = new WeakMap<object, HooksRunner>();
+const translatorSingletons = new WeakMap<object, RecordTranslator>();
 
-/**
- * Allows to register custom identity manually.
- *
- * @param {*} identity
- * @param {*} hot
- */
-export function registerIdentity(identity, hot) {
+/** Lets an object (e.g. a plugin) use the translator of `hot`. */
+export const registerIdentity = (identity: object, hot: HooksRunner): void => {
   identities.set(identity, hot);
-}
+};
 
-/**
- * Returns a cached instance of RecordTranslator or create the new one for given identity.
- *
- * @param {*} identity
- * @returns {RecordTranslator}
- */
-export function getTranslator(identity) {
-  const instance = identity instanceof Core ? identity : getIdentity(identity);
-  let singleton;
-
-  if (translatorSingletons.has(instance)) {
-    singleton = translatorSingletons.get(instance);
-
-  } else {
-    singleton = new RecordTranslator(instance);
-    translatorSingletons.set(instance, singleton);
-  }
-
-  return singleton;
-}
-
-/**
- * Returns mapped identity.
- *
- * @param {*} identity
- * @returns {*}
- */
-export function getIdentity(identity) {
+/** The grid registered for `identity`; throws when there is none. */
+export const getIdentity = (identity: object): HooksRunner => {
   if (!identities.has(identity)) {
     throw Error('Record translator was not registered for this object identity');
   }
 
-  return identities.get(identity);
-}
+  return identities.get(identity) as HooksRunner;
+};
+
+/** The translator of a grid, or of the grid registered for `identity` (one translator per grid). */
+export const getTranslator = (identity: object): RecordTranslator => {
+  const instance = identity instanceof Core ? identity as unknown as HooksRunner : getIdentity(identity);
+  let translator = translatorSingletons.get(instance);
+
+  if (!translator) {
+    translator = new RecordTranslator(instance);
+    translatorSingletons.set(instance, translator);
+  }
+
+  return translator;
+};
