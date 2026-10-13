@@ -330,7 +330,6 @@ DefaultSettings.prototype = {
    *
    * __Note:__ Using this option sets a fixed number of columns (options `startCols`, `minCols`, `maxCols` will be ignored).
    *
-   * See [documentation -> datasources.html](https://github.com/freegrid-web/freegrid) for examples.
    *
    * @type {Object[]|Function}
    * @default undefined
@@ -374,8 +373,8 @@ DefaultSettings.prototype = {
    * operations based on the __visual__ representation of FreeGrid.
    *
    * Possible values of `prop`:
-   * - property name for column's data source object, when dataset is an [array of objects](/tutorial-data-sources.html#page-object)
-   * - the same number as `col`, when dataset is an [array of arrays](/tutorial-data-sources.html#page-array)
+   * - property name for column's data source object, when dataset is an array of objects
+   * - the same number as `col`, when dataset is an array of arrays
    *
    * @type {Function}
    * @default undefined
@@ -663,8 +662,7 @@ DefaultSettings.prototype = {
    *  * `'range'` Multiple cells within a single range can be selected.
    *  * `'multiple'` Multiple ranges of cells can be selected.
    *
-   * To see how to interact with selection by getting selected data or change styles of the selected cells go to
-   * [https://github.com/freegrid-web/freegrid](https://github.com/freegrid-web/freegrid).
+   * To read or change the selection, see the {@link Core#getSelected} and {@link Core#selectCell} methods.
    *
    * @type {String}
    * @default 'multiple'
@@ -1319,7 +1317,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Setting to `true` enables the {@link Search} plugin (see [demo](https://github.com/freegrid-web/freegrid)).
+   * Setting to `true` enables the [Search plugin](./plugins#search).
    *
    * @type {Boolean}
    * @default false
@@ -1667,7 +1665,8 @@ DefaultSettings.prototype = {
    *       // Some value comparisons which will return -1, 0 or 1...
    *     }
    *   }
-   * }```
+   * }
+   * ```
    */
   columnSorting: void 0,
 
@@ -1749,7 +1748,7 @@ DefaultSettings.prototype = {
   /**
    * @description
    * If set to `true`, it enables a possibility to merge cells. If set to an array of objects, it merges the cells provided
-   * in the objects (see the example below). More information on [the demo page](https://github.com/freegrid-web/freegrid).
+   * in the objects (see the example below).
    *
    * @type {Boolean|Object[]}
    * @default false
@@ -1819,7 +1818,8 @@ DefaultSettings.prototype = {
    *       // Some value comparisons which will return -1, 0 or 1...
    *     }
    *   }
-   * }```
+   * }
+   * ```
    */
   multiColumnSorting: void 0,
   /**
@@ -2655,7 +2655,7 @@ DefaultSettings.prototype = {
    * Enables the {@link ObserveChanges} plugin switches table into one-way data binding where changes are applied into
    * data source (from outside table) will be automatically reflected in the table.
    *
-   * For every data change [afterChangesObserved](Hooks.html#event:afterChangesObserved) hook will be fired.
+   * For every data change, the {@link Hooks#afterChangesObserved} hook is fired.
    *
    * @type {Boolean}
    * @default undefined

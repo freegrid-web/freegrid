@@ -1,3 +1,7 @@
+---
+api: [Cell types and meta, Editing and validation]
+---
+
 # Cell types
 
 A cell type bundles a renderer (how a value looks), an editor (how it is edited) and a validator (what is

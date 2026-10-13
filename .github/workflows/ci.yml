@@ -31,6 +31,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @freegrid/docs exec playwright install --with-deps chromium
       - run: pnpm build
+      - run: pnpm --filter @freegrid/docs test:unit
       - run: pnpm --filter @freegrid/docs build
       - run: pnpm --filter @freegrid/docs test:smoke
 

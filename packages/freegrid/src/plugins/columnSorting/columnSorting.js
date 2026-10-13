@@ -65,7 +65,6 @@ Hooks.getSingleton().register('afterColumnSort');
  * }
  *
  * // as an object passed to the `column` property, allows specifying a custom options for the desired column.
- * // please take a look at documentation of `column` property: https://github.com/freegrid-web/freegrid
  * columns: [{
  *   columnSorting: {
  *     indicator: false, // disable indicator for the first column,
@@ -77,7 +76,8 @@ Hooks.getSingleton().register('afterColumnSort');
  *       }
  *     }
  *   }
- * }]```
+ * }]
+ * ```
  *
  * @dependencies ObserveChanges
  */
@@ -297,7 +297,8 @@ class ColumnSorting extends BasePlugin {
    *   // this.loadData(newData); // Load new data set.
    *
    *   return false; // The blockade for the default sort action.
-   * }```
+   * }
+   * ```
    *
    * @param {undefined|Object|Array} sortConfig Single column sort configuration or full sort configuration (for all sorted columns).
    * The configuration object contains `column` and `sortOrder` properties. First of them contains visual column index, the second one contains

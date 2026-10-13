@@ -18,7 +18,14 @@ const PAGES = [
   { path: 'examples/large-data.html', grids: 1 },
   { path: 'examples/search-and-languages.html', grids: 1 },
   { path: 'guide/theming.html', grids: 1 },
+  { path: 'guide/data-and-events.html', grids: 0 },
+  { path: 'api/methods.html', grids: 0 },
+  { path: 'api/events.html', grids: 0 },
+  { path: 'api/settings.html', grids: 0 },
+  { path: 'api/plugins.html', grids: 0 },
 ];
+// The API reference must be complete (it is generated from the source code; a broken parser would give empty pages).
+const API_ENTRIES = { 'api/methods.html': 90, 'api/events.html': 120, 'api/settings.html': 100, 'api/plugins.html': 150 };
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2' };
 
 if (!existsSync(dist)) {
@@ -106,6 +113,24 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     return problems;
   }));
 
+  if (API_ENTRIES[path]) {
+    const entries = await page.locator('.vp-doc h3[id]').count();
+
+    if (entries < API_ENTRIES[path]) failures.push(`${path}: ${entries} entries, expected at least ${API_ENTRIES[path]}`);
+  }
+  if (path === 'guide/data-and-events.html') {
+    // Every "Related API" link leads to an entry of the reference.
+    const links = await page.locator('.related-api--aside a').evaluateAll(els => els.map(el => el.getAttribute('href')));
+
+    if (links.length < 30) failures.push(`${path}: "Related API" has ${links.length} links`);
+    for (const href of links.slice(0, 5).concat(links.slice(-5))) {
+      const target = await browser.newPage();
+
+      await target.goto(`${origin}${href}`);
+      if (!await target.locator(`[id="${href.split('#')[1]}"]`).count()) failures.push(`${path}: dead link ${href}`);
+      await target.close();
+    }
+  }
   if (path === 'guide/theming.html') {
     const rows = await page.locator('table.theming-variables tbody tr').count();
 
