@@ -4,143 +4,113 @@ import { CellCoords } from './../../3rdparty/walkontable/src';
 
 export const DIRECTIONS = {
   horizontal: 'horizontal',
-  vertical: 'vertical'
+  vertical: 'vertical',
+} as const;
+
+/** The `fillHandle` setting. */
+export type FillHandleSetting = boolean | string | { direction?: string; autoInsertRow?: boolean } | undefined;
+
+/** Where the selection was dragged, and the cells it was dragged over. */
+export type DragDirectionAndRange = {
+  directionOfDrag?: 'left' | 'right' | 'up' | 'down';
+  startOfDragCoords?: CellCoords;
+  endOfDragCoords?: CellCoords;
 };
 
 /**
- * Get deltas array.
- *
- * @param {CellCoords} start
- * @param {CellCoords} end
- * @param {Array} data
- * @param {String} direction
- * @returns {Array}
+ * The step between the numbers of each column (dragging down or up) or row (right or left) of `data`: the difference
+ * between the first and the last number, divided by the gaps between them (`0` where they are not numbers). One array
+ * for down and up; an array per row for right and left.
  */
-export function getDeltas(start, end, data, direction) {
+export const getDeltas = (start: CellCoords, end: CellCoords, data: unknown[][], direction: string): number[][] => {
   const rowsLength = data.length;
   const columnsLength = data ? data[0].length : 0;
-  const deltas = [];
-  const diffRow = end.row - start.row;
-  const diffCol = end.col - start.col;
+  const deltas: number[][] = [];
+  const toNumber = (value: unknown) => parseInt(value as string, 10);
 
-  if (['down', 'up'].indexOf(direction) !== -1) {
-    const arr = [];
+  if (direction === 'down' || direction === 'up') {
+    const columnDeltas: number[] = [];
 
-    for (let col = 0; col <= diffCol; col++) {
-      const startValue = parseInt(data[0][col], 10);
-      const endValue = parseInt(data[rowsLength - 1][col], 10);
-      const delta = (direction === 'down' ? (endValue - startValue) : (startValue - endValue)) / (rowsLength - 1) || 0;
+    for (let col = 0; col <= end.col - start.col; col += 1) {
+      const startValue = toNumber(data[0][col]);
+      const endValue = toNumber(data[rowsLength - 1][col]);
 
-      arr.push(delta);
+      columnDeltas.push((direction === 'down' ? endValue - startValue : startValue - endValue) / (rowsLength - 1) || 0);
     }
-
-    deltas.push(arr);
+    deltas.push(columnDeltas);
   }
 
-  if (['right', 'left'].indexOf(direction) !== -1) {
-    for (let row = 0; row <= diffRow; row++) {
-      const startValue = parseInt(data[row][0], 10);
-      const endValue = parseInt(data[row][columnsLength - 1], 10);
-      const delta = (direction === 'right' ? (endValue - startValue) : (startValue - endValue)) / (columnsLength - 1) || 0;
+  if (direction === 'right' || direction === 'left') {
+    for (let row = 0; row <= end.row - start.row; row += 1) {
+      const startValue = toNumber(data[row][0]);
+      const endValue = toNumber(data[row][columnsLength - 1]);
 
-      deltas.push([delta]);
+      deltas.push([(direction === 'right' ? endValue - startValue : startValue - endValue) / (columnsLength - 1) || 0]);
     }
   }
 
   return deltas;
-}
+};
 
 /**
- * Get direction between positions and cords of selections difference (drag area)
- *
- * @param {Array} startSelection
- * @param {Array} endSelection
- * @returns {{direction: String, start: CellCoords, end: CellCoords}}
+ * The direction the selection `startSelection` was dragged in to become `endSelection` (both
+ * `[row, column, row2, column2]`), and the cells it was dragged over. Nothing for no or a diagonal drag.
  */
-export function getDragDirectionAndRange(startSelection, endSelection) {
-  let startOfDragCoords;
-  let endOfDragCoords;
-  let directionOfDrag;
+export const getDragDirectionAndRange = (startSelection: number[], endSelection: number[]): DragDirectionAndRange => {
+  const [startRow, startColumn, startRow2, startColumn2] = startSelection;
+  const [endRow, endColumn, endRow2, endColumn2] = endSelection;
 
-  if (endSelection[0] === startSelection[0] && endSelection[1] < startSelection[1]) {
-    directionOfDrag = 'left';
-
-    startOfDragCoords = new CellCoords(endSelection[0], endSelection[1]);
-    endOfDragCoords = new CellCoords(endSelection[2], startSelection[1] - 1);
-
-  } else if (endSelection[2] === startSelection[2] && endSelection[0] === startSelection[0] && endSelection[3] > startSelection[3]) {
-    directionOfDrag = 'right';
-
-    startOfDragCoords = new CellCoords(endSelection[0], startSelection[3] + 1);
-    endOfDragCoords = new CellCoords(endSelection[2], endSelection[3]);
-
-  } else if (endSelection[0] < startSelection[0] && endSelection[1] === startSelection[1]) {
-    directionOfDrag = 'up';
-
-    startOfDragCoords = new CellCoords(endSelection[0], endSelection[1]);
-    endOfDragCoords = new CellCoords(startSelection[0] - 1, endSelection[3]);
-
-  } else if (endSelection[2] > startSelection[2] &&
-    endSelection[1] === startSelection[1]) {
-    directionOfDrag = 'down';
-
-    startOfDragCoords = new CellCoords(startSelection[2] + 1, endSelection[1]);
-    endOfDragCoords = new CellCoords(endSelection[2], endSelection[3]);
+  if (endRow === startRow && endColumn < startColumn) {
+    return {
+      directionOfDrag: 'left',
+      startOfDragCoords: new CellCoords(endRow, endColumn),
+      endOfDragCoords: new CellCoords(endRow2, startColumn - 1),
+    };
+  }
+  if (endRow2 === startRow2 && endRow === startRow && endColumn2 > startColumn2) {
+    return {
+      directionOfDrag: 'right',
+      startOfDragCoords: new CellCoords(endRow, startColumn2 + 1),
+      endOfDragCoords: new CellCoords(endRow2, endColumn2),
+    };
+  }
+  if (endRow < startRow && endColumn === startColumn) {
+    return {
+      directionOfDrag: 'up',
+      startOfDragCoords: new CellCoords(endRow, endColumn),
+      endOfDragCoords: new CellCoords(startRow - 1, endColumn2),
+    };
+  }
+  if (endRow2 > startRow2 && endColumn === startColumn) {
+    return {
+      directionOfDrag: 'down',
+      startOfDragCoords: new CellCoords(startRow2 + 1, endColumn),
+      endOfDragCoords: new CellCoords(endRow2, endColumn2),
+    };
   }
 
-  return {
-    directionOfDrag,
-    startOfDragCoords,
-    endOfDragCoords
-  };
-}
+  return { directionOfDrag: undefined, startOfDragCoords: undefined, endOfDragCoords: undefined };
+};
 
 /**
- * Get mapped FillHandle setting containing information about
- * allowed FillHandle directions and if allowed is automatic insertion of rows on drag
- *
- * @param {Boolean|Object} fillHandle property of FreeGrid settings
- * @returns {{directions: Array, autoInsertRow: Boolean}} object allowing access to information
- * about FillHandle in more useful way
+ * The `fillHandle` setting as the directions the fill handle may be dragged in (`horizontal`, `vertical`) and whether
+ * dragging past the last row adds rows (never for horizontal only).
  */
-export function getMappedFillHandleSetting(fillHandle) {
-  const mappedSettings = {};
-
+export const getMappedFillHandleSetting = (fillHandle: FillHandleSetting): { directions: string[]; autoInsertRow: boolean } => {
   if (fillHandle === true) {
-    mappedSettings.directions = Object.keys(DIRECTIONS);
-    mappedSettings.autoInsertRow = true;
+    return { directions: Object.keys(DIRECTIONS), autoInsertRow: true };
+  }
+  if (isObject(fillHandle)) {
+    const { direction, autoInsertRow } = fillHandle as { direction?: string; autoInsertRow?: boolean };
 
-  } else if (isObject(fillHandle)) {
-    if (isDefined(fillHandle.autoInsertRow)) {
-
-      // autoInsertRow for horizontal direction will be always false
-
-      if (fillHandle.direction === DIRECTIONS.horizontal) {
-        mappedSettings.autoInsertRow = false;
-
-      } else {
-        mappedSettings.autoInsertRow = fillHandle.autoInsertRow;
-      }
-
-    } else {
-      mappedSettings.autoInsertRow = false;
-    }
-
-    if (isDefined(fillHandle.direction)) {
-      mappedSettings.directions = [fillHandle.direction];
-
-    } else {
-      mappedSettings.directions = Object.keys(DIRECTIONS);
-    }
-
-  } else if (typeof fillHandle === 'string') {
-    mappedSettings.directions = [fillHandle];
-    mappedSettings.autoInsertRow = true;
-
-  } else {
-    mappedSettings.directions = [];
-    mappedSettings.autoInsertRow = false;
+    return {
+      directions: isDefined(direction) ? [direction as string] : Object.keys(DIRECTIONS),
+      autoInsertRow: isDefined(autoInsertRow) && direction !== DIRECTIONS.horizontal ? autoInsertRow as boolean : false,
+    };
+  }
+  if (typeof fillHandle === 'string') {
+    return { directions: [fillHandle], autoInsertRow: true };
   }
 
-  return mappedSettings;
-}
+  return { directions: [], autoInsertRow: false };
+};

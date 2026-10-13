@@ -1,10 +1,14 @@
 import BasePlugin from './../_base';
+import type { PluginHost } from './../_base';
 import Hooks from './../../pluginHooks';
 import { offset, outerHeight, outerWidth } from './../../helpers/dom/element';
 import EventManager from './../../eventManager';
 import { registerPlugin } from './../../plugins';
 import { CellCoords } from './../../3rdparty/walkontable/src';
 import { getDeltas, getDragDirectionAndRange, DIRECTIONS, getMappedFillHandleSetting } from './utils';
+
+/** Selection corners: `[row, column, row2, column2]`. */
+type Corners = [number, number, number, number];
 
 Hooks.getSingleton().register('modifyAutofillRange');
 Hooks.getSingleton().register('beforeAutofill');
@@ -25,71 +29,69 @@ const INTERVAL_FOR_ADDING_ROW = 200;
  */
 
 class Autofill extends BasePlugin {
-  constructor(hotInstance) {
+  /**
+   * Event manager instance.
+   *
+   * @private
+   */
+  eventManager: EventManager;
+
+  /**
+   * Specifies if adding new row started.
+   *
+   * @private
+   */
+  addingStarted = false;
+
+  /**
+   * Specifies if there was mouse down on the cell corner.
+   *
+   * @private
+   */
+  mouseDownOnCellCorner = false;
+
+  /**
+   * Specifies if mouse was dragged outside FreeGrid.
+   *
+   * @private
+   */
+  mouseDragOutside = false;
+
+  /**
+   * Specifies how many cell levels were dragged using the handle.
+   *
+   * @private
+   */
+  handleDraggedCells = 0;
+
+  /**
+   * Specifies allowed directions of drag (`'horizontal'` or '`vertical`').
+   *
+   * @private
+   */
+  directions: string[] = [];
+
+  /**
+   * Specifies if can insert new rows if needed.
+   */
+  autoInsertRow = false;
+
+  constructor(hotInstance: PluginHost) {
     super(hotInstance);
-    /**
-     * Event manager instance.
-     *
-     * @private
-     * @type {EventManager}
-     */
     this.eventManager = new EventManager(this);
-    /**
-     * Specifies if adding new row started.
-     *
-     * @private
-     * @type {Boolean}
-     */
-    this.addingStarted = false;
-    /**
-     * Specifies if there was mouse down on the cell corner.
-     *
-     * @private
-     * @type {Boolean}
-     */
-    this.mouseDownOnCellCorner = false;
-    /**
-     * Specifies if mouse was dragged outside FreeGrid.
-     *
-     * @private
-     * @type {Boolean}
-     */
-    this.mouseDragOutside = false;
-    /**
-     * Specifies how many cell levels were dragged using the handle.
-     *
-     * @private
-     * @type {Boolean}
-     */
-    this.handleDraggedCells = 0;
-    /**
-     * Specifies allowed directions of drag (`'horizontal'` or '`vertical`').
-     *
-     * @private
-     * @type {String[]}
-     */
-    this.directions = [];
-    /**
-     * Specifies if can insert new rows if needed.
-     *
-     * @type {Boolean}
-     */
-    this.autoInsertRow = false;
   }
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
-    return this.hot.getSettings().fillHandle;
+  isEnabled(): boolean {
+    return !!this.hot.getSettings().fillHandle;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -97,9 +99,9 @@ class Autofill extends BasePlugin {
     this.mapSettings();
     this.registerEvents();
 
-    this.addHook('afterOnCellCornerMouseDown', event => this.onAfterCellCornerMouseDown(event));
-    this.addHook('afterOnCellCornerDblClick', event => this.onCellCornerDblClick(event));
-    this.addHook('beforeOnCellMouseOver', (event, coords) => this.onBeforeCellMouseOver(coords));
+    this.addHook('afterOnCellCornerMouseDown', () => this.onAfterCellCornerMouseDown());
+    this.addHook('afterOnCellCornerDblClick', () => this.onCellCornerDblClick());
+    this.addHook('beforeOnCellMouseOver', (event: MouseEvent, coords: CellCoords) => this.onBeforeCellMouseOver(coords));
 
     super.enablePlugin();
   }
@@ -107,7 +109,7 @@ class Autofill extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
     super.updatePlugin();
@@ -116,7 +118,7 @@ class Autofill extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     this.clearMappedSettings();
     super.disablePlugin();
   }
@@ -125,32 +127,29 @@ class Autofill extends BasePlugin {
    * Gets selection data
    *
    * @private
-   * @returns {Array} Array with the data.
+   * @returns Array with the data.
    */
-  getSelectionData() {
-    const selRange = {
-      from: this.hot.getSelectedRangeLast().from,
-      to: this.hot.getSelectedRangeLast().to,
-    };
+  getSelectionData(): unknown[][] {
+    const { from, to } = this.hot.getSelectedRangeLast();
 
-    return this.hot.getData(selRange.from.row, selRange.from.col, selRange.to.row, selRange.to.col);
+    return this.hot.getData(from.row, from.col, to.row, to.col);
   }
 
   /**
    * Try to apply fill values to the area in fill border, omitting the selection border.
    *
    * @private
-   * @returns {Boolean} reports if fill was applied.
+   * @returns reports if fill was applied.
    *
    * @fires Hooks#modifyAutofillRange
    * @fires Hooks#beforeAutofill
    */
-  fillIn() {
+  fillIn(): boolean {
     if (this.hot.selection.highlight.getFill().isEmpty()) {
       return false;
     }
 
-    let cornersOfSelectionAndDragAreas = this.hot.selection.highlight.getFill().getCorners();
+    let cornersOfSelectionAndDragAreas: Corners = this.hot.selection.highlight.getFill().getCorners();
 
     this.resetSelectionOfDraggedArea();
 
@@ -164,42 +163,32 @@ class Autofill extends BasePlugin {
 
       this.hot.runHooks('beforeAutofill', startOfDragCoords, endOfDragCoords, selectionData);
 
-      const deltas = getDeltas(startOfDragCoords, endOfDragCoords, selectionData, directionOfDrag);
+      const endCoords = endOfDragCoords!;
+      const deltas = getDeltas(startOfDragCoords, endCoords, selectionData, directionOfDrag!);
       let fillData = selectionData;
 
-      if (['up', 'left'].indexOf(directionOfDrag) > -1) {
-        fillData = [];
+      // Dragging up or left repeats the selection backwards from its first row or column.
+      if (directionOfDrag === 'up') {
+        const dragLength = endCoords.row - startOfDragCoords.row + 1;
+        const fillOffset = dragLength % selectionData.length;
 
-        let dragLength = null;
-        let fillOffset = null;
+        fillData = Array.from({ length: dragLength },
+          (_, i) => selectionData[(i + (selectionData.length - fillOffset)) % selectionData.length]);
 
-        if (directionOfDrag === 'up') {
-          dragLength = endOfDragCoords.row - startOfDragCoords.row + 1;
-          fillOffset = dragLength % selectionData.length;
+      } else if (directionOfDrag === 'left') {
+        const dragLength = endCoords.col - startOfDragCoords.col + 1;
+        const fillOffset = dragLength % selectionData[0].length;
 
-          for (let i = 0; i < dragLength; i++) {
-            fillData.push(selectionData[(i + (selectionData.length - fillOffset)) % selectionData.length]);
-          }
-
-        } else {
-          dragLength = endOfDragCoords.col - startOfDragCoords.col + 1;
-          fillOffset = dragLength % selectionData[0].length;
-
-          for (let i = 0; i < selectionData.length; i++) {
-            fillData.push([]);
-            for (let j = 0; j < dragLength; j++) {
-              fillData[i].push(selectionData[i][(j + (selectionData[i].length - fillOffset)) % selectionData[i].length]);
-            }
-          }
-        }
+        fillData = selectionData.map(row => Array.from({ length: dragLength },
+          (_, j) => row[(j + (row.length - fillOffset)) % row.length]));
       }
 
       this.hot.populateFromArray(
         startOfDragCoords.row,
         startOfDragCoords.col,
         fillData,
-        endOfDragCoords.row,
-        endOfDragCoords.col,
+        endCoords.row,
+        endCoords.col,
         `${this.pluginName}.fill`,
         null,
         directionOfDrag,
@@ -220,10 +209,9 @@ class Autofill extends BasePlugin {
    * Reduces the selection area if the handle was dragged outside of the table or on headers.
    *
    * @private
-   * @param {CellCoords} coords indexes of selection corners.
-   * @returns {CellCoords}
+   * @param coords indexes of selection corners.
    */
-  reduceSelectionAreaIfNeeded(coords) {
+  reduceSelectionAreaIfNeeded(coords: CellCoords): CellCoords {
     if (coords.row < 0) {
       coords.row = 0;
     }
@@ -238,10 +226,9 @@ class Autofill extends BasePlugin {
    * Gets the coordinates of the drag & drop borders.
    *
    * @private
-   * @param {CellCoords} coordsOfSelection `CellCoords` coord object.
-   * @returns {Array}
+   * @param coordsOfSelection `CellCoords` coord object.
    */
-  getCoordsOfDragAndDropBorders(coordsOfSelection) {
+  getCoordsOfDragAndDropBorders(coordsOfSelection: CellCoords): CellCoords | undefined {
     const topLeftCorner = this.hot.getSelectedRangeLast().getTopLeftCorner();
     const bottomRightCorner = this.hot.getSelectedRangeLast().getBottomRightCorner();
     let coords;
@@ -265,9 +252,9 @@ class Autofill extends BasePlugin {
    * Show the fill border.
    *
    * @private
-   * @param {CellCoords} coordsOfSelection `CellCoords` coord object.
+   * @param coordsOfSelection `CellCoords` coord object.
    */
-  showBorder(coordsOfSelection) {
+  showBorder(coordsOfSelection: CellCoords): void {
     const coordsOfDragAndDropBorders = this.getCoordsOfDragAndDropBorders(coordsOfSelection);
 
     if (coordsOfDragAndDropBorders) {
@@ -280,9 +267,9 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  addRow() {
+  addRow(): void {
     this.hot._registerTimeout(setTimeout(() => {
-      this.hot.alter(INSERT_ROW_ALTER_ACTION_NAME, void 0, 1, `${this.pluginName}.fill`);
+      this.hot.alter(INSERT_ROW_ALTER_ACTION_NAME, undefined, 1, `${this.pluginName}.fill`);
 
       this.addingStarted = false;
     }, INTERVAL_FOR_ADDING_ROW));
@@ -293,7 +280,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  addNewRowIfNeeded() {
+  addNewRowIfNeeded(): void {
     if (this.hot.selection.highlight.getFill().cellRange && this.addingStarted === false && this.autoInsertRow) {
       const cornersOfSelectedCells = this.hot.getSelectedLast();
       const cornersOfSelectedDragArea = this.hot.selection.highlight.getFill().getCorners();
@@ -311,37 +298,32 @@ class Autofill extends BasePlugin {
    * Get corners of selected cells.
    *
    * @private
-   * @returns {Array}
    */
-  getCornersOfSelectedCells() {
+  getCornersOfSelectedCells(): Corners {
     if (this.hot.selection.isMultiple()) {
       return this.hot.selection.highlight.createOrGetArea().getCorners();
-
     }
-    return this.hot.selection.highlight.getCell().getCorners();
 
+    return this.hot.selection.highlight.getCell().getCorners();
   }
 
   /**
    * Get index of last adjacent filled in row
    *
    * @private
-   * @param {Array} cornersOfSelectedCells indexes of selection corners.
-   * @returns {Number} gives number greater than or equal to zero when selection adjacent can be applied.
-   * or -1 when selection adjacent can't be applied
+   * @param cornersOfSelectedCells indexes of selection corners.
+   * @returns gives number greater than or equal to zero when selection adjacent can be applied.
+   * or -1 when selection adjacent can't be applied (`undefined` when no row has a filled neighbour)
    */
-  getIndexOfLastAdjacentFilledInRow(cornersOfSelectedCells) {
-    const data = this.hot.getData();
-    const nrOfTableRows = this.hot.countRows();
-    let lastFilledInRowIndex;
+  getIndexOfLastAdjacentFilledInRow(cornersOfSelectedCells: Corners): number | undefined {
+    const data: unknown[][] = this.hot.getData();
+    const nrOfTableRows: number = this.hot.countRows();
+    let lastFilledInRowIndex: number | undefined;
 
-    for (let rowIndex = cornersOfSelectedCells[2] + 1; rowIndex < nrOfTableRows; rowIndex++) {
-      for (let columnIndex = cornersOfSelectedCells[1]; columnIndex <= cornersOfSelectedCells[3]; columnIndex++) {
-        const dataInCell = data[rowIndex][columnIndex];
-
-        if (dataInCell) {
-          return -1;
-        }
+    for (let rowIndex = cornersOfSelectedCells[2] + 1; rowIndex < nrOfTableRows; rowIndex += 1) {
+      // A filled cell below the selection stops the fill.
+      if (data[rowIndex].slice(cornersOfSelectedCells[1], cornersOfSelectedCells[3] + 1).some(Boolean)) {
+        return -1;
       }
 
       const dataInNextLeftCell = data[rowIndex][cornersOfSelectedCells[1] - 1];
@@ -359,10 +341,10 @@ class Autofill extends BasePlugin {
    * Adds a selection from the start area to the specific row index.
    *
    * @private
-   * @param {Array} selectStartArea selection area from which we start to create more comprehensive selection.
-   * @param {Number} rowIndex
+   * @param selectStartArea selection area from which we start to create more comprehensive selection.
+   * @param rowIndex The last row of the new selection.
    */
-  addSelectionFromStartAreaToSpecificRowIndex(selectStartArea, rowIndex) {
+  addSelectionFromStartAreaToSpecificRowIndex(selectStartArea: Corners, rowIndex: number): void {
     this.hot.selection.highlight.getFill()
       .clear()
       .add(new CellCoords(
@@ -379,9 +361,9 @@ class Autofill extends BasePlugin {
    * Sets selection based on passed corners.
    *
    * @private
-   * @param {Array} cornersOfArea
+   * @param cornersOfArea The corners of the new selection.
    */
-  setSelection(cornersOfArea) {
+  setSelection(cornersOfArea: Corners): void {
     this.hot.selectCell(...cornersOfArea, false, false);
   }
 
@@ -389,20 +371,18 @@ class Autofill extends BasePlugin {
    * Try to select cells down to the last row in the left column and then returns if selection was applied.
    *
    * @private
-   * @returns {Boolean}
    */
-  selectAdjacent() {
+  selectAdjacent(): boolean {
     const cornersOfSelectedCells = this.getCornersOfSelectedCells();
     const lastFilledInRowIndex = this.getIndexOfLastAdjacentFilledInRow(cornersOfSelectedCells);
 
-    if (lastFilledInRowIndex === -1 || lastFilledInRowIndex === void 0) {
+    if (lastFilledInRowIndex === -1 || lastFilledInRowIndex === undefined) {
       return false;
     }
 
     this.addSelectionFromStartAreaToSpecificRowIndex(cornersOfSelectedCells, lastFilledInRowIndex);
 
     return true;
-
   }
 
   /**
@@ -410,7 +390,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  resetSelectionOfDraggedArea() {
+  resetSelectionOfDraggedArea(): void {
     this.handleDraggedCells = 0;
 
     this.hot.selection.highlight.getFill().clear();
@@ -420,9 +400,9 @@ class Autofill extends BasePlugin {
    * Redraws borders.
    *
    * @private
-   * @param {CellCoords} coords `CellCoords` coord object.
+   * @param coords `CellCoords` coord object.
    */
-  redrawBorders(coords) {
+  redrawBorders(coords: CellCoords): void {
     this.hot.selection.highlight.getFill()
       .clear()
       .add(this.hot.getSelectedRangeLast().from)
@@ -436,10 +416,9 @@ class Autofill extends BasePlugin {
    * Get if mouse was dragged outside.
    *
    * @private
-   * @param {MouseEvent} event `mousemove` event properties.
-   * @returns {Boolean}
+   * @param event `mousemove` event properties.
    */
-  getIfMouseWasDraggedOutside(event) {
+  getIfMouseWasDraggedOutside(event: MouseEvent): boolean {
     const tableBottom = offset(this.hot.table).top - (window.pageYOffset ||
       document.documentElement.scrollTop) + outerHeight(this.hot.table);
     const tableRight = offset(this.hot.table).left - (window.pageXOffset ||
@@ -453,9 +432,9 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  registerEvents() {
+  registerEvents(): void {
     this.eventManager.addEventListener(document.documentElement, 'mouseup', () => this.onMouseUp());
-    this.eventManager.addEventListener(document.documentElement, 'mousemove', event => this.onMouseMove(event));
+    this.eventManager.addEventListener(document.documentElement, 'mousemove', (event: MouseEvent) => this.onMouseMove(event));
   }
 
   /**
@@ -463,7 +442,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  onCellCornerDblClick() {
+  onCellCornerDblClick(): void {
     const selectionApplied = this.selectAdjacent();
 
     if (selectionApplied) {
@@ -476,7 +455,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  onAfterCellCornerMouseDown() {
+  onAfterCellCornerMouseDown(): void {
     this.handleDraggedCells = 1;
     this.mouseDownOnCellCorner = true;
   }
@@ -485,9 +464,9 @@ class Autofill extends BasePlugin {
    * On before cell mouse over listener.
    *
    * @private
-   * @param {CellCoords} coords `CellCoords` coord object.
+   * @param coords `CellCoords` coord object.
    */
-  onBeforeCellMouseOver(coords) {
+  onBeforeCellMouseOver(coords: CellCoords): void {
     if (this.mouseDownOnCellCorner && !this.hot.view.isMouseDown() && this.handleDraggedCells) {
       this.handleDraggedCells += 1;
 
@@ -501,7 +480,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  onMouseUp() {
+  onMouseUp(): void {
     if (this.handleDraggedCells) {
       if (this.handleDraggedCells > 1) {
         this.fillIn();
@@ -516,9 +495,9 @@ class Autofill extends BasePlugin {
    * On mouse move listener.
    *
    * @private
-   * @param {MouseEvent} event `mousemove` event properties.
+   * @param event `mousemove` event properties.
    */
-  onMouseMove(event) {
+  onMouseMove(event: MouseEvent): void {
     const mouseWasDraggedOutside = this.getIfMouseWasDraggedOutside(event);
 
     if (this.addingStarted === false && this.handleDraggedCells > 0 && mouseWasDraggedOutside) {
@@ -539,7 +518,7 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  clearMappedSettings() {
+  clearMappedSettings(): void {
     this.directions.length = 0;
     this.autoInsertRow = false;
   }
@@ -549,8 +528,9 @@ class Autofill extends BasePlugin {
    *
    * @private
    */
-  mapSettings() {
+  mapSettings(): void {
     const mappedSettings = getMappedFillHandleSetting(this.hot.getSettings().fillHandle);
+
     this.directions = mappedSettings.directions;
     this.autoInsertRow = mappedSettings.autoInsertRow;
   }
@@ -558,7 +538,7 @@ class Autofill extends BasePlugin {
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     super.destroy();
   }
 }

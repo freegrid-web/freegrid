@@ -191,6 +191,18 @@ const splitTopLevel = (text, separator) => {
   return parts.map(part => part.trim()).filter(Boolean);
 };
 
+/** The type TypeScript infers from a literal default value (`true`, `50`, `'px'`), or `''`. */
+const literalType = (value) => {
+  if (/^(true|false)$/.test(value)) {
+    return 'boolean';
+  }
+  if (/^-?\d+(\.\d+)?$/.test(value)) {
+    return 'number';
+  }
+
+  return /^(['"`]).*\1$/.test(value) ? 'string' : '';
+};
+
 /**
  * A TypeScript method's parameter types and return type, from the text after its name's `(` (empty for JavaScript).
  */
@@ -210,7 +222,13 @@ const readSignature = (text) => {
     const [declaration, ...value] = splitTopLevel(param, '=');
     const [name, ...type] = splitTopLevel(declaration, ':');
 
-    return { name: name.replace(/^\.\.\.|\?$/g, ''), type: type.join(': '), default: value.join('=') || undefined };
+    const defaultValue = value.join('=') || undefined;
+
+    return {
+      name: name.replace(/^\.\.\.|\?$/g, ''),
+      type: type.join(': ') || literalType(defaultValue),
+      default: defaultValue,
+    };
   });
   const returns = /^\s*:\s*([\s\S]*?)\s*\{\s*$/m.exec(text.slice(end).split('\n').slice(0, 3).join('\n'));
 
