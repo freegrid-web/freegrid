@@ -6,8 +6,9 @@
  * Description: Definition file for Russian - Russia language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'ru-RU',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Вставить строку выше',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Вставить строку ниже',

@@ -6,8 +6,9 @@
  * Description: Definition file for Japanese - Japan language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'ja-JP',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: '行を上に挿入',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: '行を下に挿入',

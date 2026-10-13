@@ -6,8 +6,9 @@
  * Description: Definition file for French - France language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'fr-FR',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Insérer une ligne en haut',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Insérer une ligne en bas',

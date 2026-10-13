@@ -45,16 +45,16 @@ async function umd({ full, minify }) {
 
 async function locales({ minify }) {
   const dir = r('src/i18n/languages');
-  const files = readdirSync(dir).filter(f => f.endsWith('.js'));
+  const files = readdirSync(dir).filter(f => /\.(js|ts)$/.test(f));
   // Vite resolves lib entries as file paths, so each locale gets a tiny side-effect-only entry file.
   const entryDir = mkdtempSync(join(tmpdir(), 'freegrid-locales-'));
 
   try {
     for (const file of files) {
-      const code = file === 'index.js' ? 'all' : file.replace(/\.js$/, '');
+      const code = /^index\./.test(file) ? 'all' : file.replace(/\.(js|ts)$/, '');
       const entry = join(entryDir, `${code}.js`);
-      const imports = file === 'index.js'
-        ? files.filter(f => f !== 'index.js').map(f => `import '${dir}/${f}';`).join('\n')
+      const imports = code === 'all'
+        ? files.filter(f => !/^index\./.test(f)).map(f => `import '${dir}/${f}';`).join('\n')
         : `import '${dir}/${file}';`;
 
       writeFileSync(entry, `${imports}\n`);
@@ -76,7 +76,7 @@ async function locales({ minify }) {
 /** ESM locale modules for bundlers: `import '@freegrid/core/languages/de-DE'` registers on the imported FreeGrid. */
 async function esmLocales() {
   const dir = r('src/i18n/languages');
-  const files = readdirSync(dir).filter(f => /^[a-z]{2}-[A-Z]{2}\.js$/.test(f));
+  const files = readdirSync(dir).filter(f => /^[a-z]{2}-[A-Z]{2}\.(js|ts)$/.test(f));
   const entryDir = mkdtempSync(join(tmpdir(), 'freegrid-esm-locales-'));
   const allEntry = join(entryDir, 'all.js');
 
@@ -91,7 +91,7 @@ async function esmLocales() {
       build: {
         target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm/languages'), emptyOutDir: false, minify: false,
         lib: {
-          entry: Object.fromEntries([['all', allEntry], ...files.map(f => [f.replace(/\.js$/, ''), join(dir, f)])]),
+          entry: Object.fromEntries([['all', allEntry], ...files.map(f => [f.replace(/\.(js|ts)$/, ''), join(dir, f)])]),
           formats: ['es'],
         },
         rollupOptions: { external: ['@freegrid/core'], output: { chunkFileNames: '[name].js' } },

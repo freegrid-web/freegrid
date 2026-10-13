@@ -6,8 +6,9 @@
  * Description: Definition file for Portuguese - Brazil language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'pt-BR',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: 'Inserir linha acima',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: 'Inserir linha abaixo',

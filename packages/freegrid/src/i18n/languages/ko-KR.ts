@@ -6,8 +6,9 @@
  * Description: Definition file for Korean - Korea language-country.
  */
 import * as C from '../constants';
+import type { LanguageDictionary } from '../dictionariesManager';
 
-const dictionary = {
+const dictionary: LanguageDictionary = {
   languageCode: 'ko-KR',
   [C.CONTEXTMENU_ITEMS_ROW_ABOVE]: '위쪽에 행 삽입',
   [C.CONTEXTMENU_ITEMS_ROW_BELOW]: '아래쪽에 행 삽입',
