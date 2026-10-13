@@ -55,9 +55,11 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
 const failures = [];
 
-for (const { path, grids } of PAGES) {
-  // Dark mode is the harder case: the grid is light-only, so it must not inherit the theme's light text.
-  const page = await browser.newPage({ colorScheme: 'dark', viewport: { width: 1600, height: 900 } });
+// Every page in the docs' dark and light appearance: live examples follow it (fg-theme-dark in dark only).
+for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES) {
+  const page = await browser.newPage({ colorScheme: appearance, viewport: { width: 1600, height: 900 } });
+
+  await page.addInitScript(value => localStorage.setItem('vitepress-theme-appearance', value), appearance);
   const errors = [];
 
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
@@ -101,6 +103,10 @@ for (const { path, grids } of PAGES) {
 
     if (rows < 50) failures.push(`${path}: the variable tables have ${rows} rows`);
   }
+  const wrongTheme = await page.locator('.live-example').evaluateAll((els, dark) => els
+    .filter(el => el.classList.contains('fg-theme-dark') !== dark).length, appearance === 'dark');
+
+  if (wrongTheme) failures.push(`${path || '/'} (${appearance}): ${wrongTheme} live example(s) with the wrong theme`);
   // The isolation of theme styles must not break the theme itself, e.g. the home page content width.
   if (path === '') {
     const contentWidth = await page.evaluate(() => document.querySelector('.VPHomeContent .vp-doc')?.getBoundingClientRect().width);
@@ -110,7 +116,7 @@ for (const { path, grids } of PAGES) {
   if (rendered < grids) failures.push(`${path || '/'}: expected ${grids} live grid(s), found ${rendered}`);
   layoutProblems.forEach(p => failures.push(`${path || '/'}: ${p}`));
   errors.forEach(e => failures.push(`${path || '/'}: ${e}`));
-  console.log(`${failures.length ? '…' : '✓'} ${path || '/'} (${rendered} grid(s))`);
+  console.log(`${failures.length ? '…' : '✓'} ${path || '/'} [${appearance}] (${rendered} grid(s))`);
   await page.close();
 }
 

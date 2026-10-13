@@ -9,6 +9,8 @@
   `data-fg-theme="auto"` follows the system setting. The context menu, the comment editor and the date picker follow
   the grid's theme.
 - The selection border, fill border and fill handle colors are CSS variables instead of fixed colors in JavaScript.
+- Borders added from the context menu (Borders > Top/Right/Bottom/Left) use `--fg-custom-border-color` (black in the
+  light theme); `getBorders()` reports their color as `var(--fg-custom-border-color)` instead of `#000`.
 
 ## 0.1.0 (2026-10-12)
 

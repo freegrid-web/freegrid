@@ -18,8 +18,9 @@ const THEMES = [
 const TARGETS = '.theme-playground, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder';
 
 const container = ref(null);
-// Start in the docs' own mode.
-const theme = ref(useData().isDark.value ? 'dark' : 'light');
+const { isDark: docsDark } = useData();
+// Light in the built HTML; switched to the docs' own mode after mount (hydration would keep a server value).
+const theme = ref('light');
 const changed = reactive({});
 let grid = null;
 let style = null;
@@ -69,6 +70,7 @@ watch(changed, () => {
 }, { deep: true });
 
 onMounted(async() => {
+  theme.value = docsDark.value ? 'dark' : 'light';
   style = document.createElement('style');
   document.head.appendChild(style);
   const module = await import('../../examples/theming.js');
