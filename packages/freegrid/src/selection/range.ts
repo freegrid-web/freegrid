@@ -1,124 +1,64 @@
 import { CellRange } from './../3rdparty/walkontable/src';
+import type { CellCoords } from './../3rdparty/walkontable/src';
 
 /**
- * The SelectionRange class is a simple CellRanges collection designed for easy manipulation of the multiple
- * consecutive and non-consecutive selections.
- *
- * @class SelectionRange
- * @util
+ * The ranges of a selection, oldest first: one for a simple selection, several for a non-consecutive one (with Ctrl).
  */
 class SelectionRange {
-  constructor() {
-    /**
-     * List of all CellRanges added to the class instance.
-     *
-     * @type {CellRange[]}
-     */
-    this.ranges = [];
-  }
+  ranges: CellRange[] = [];
 
-  /**
-   * Check if selected range is empty.
-   *
-   * @return {Boolean}
-   */
-  isEmpty() {
+  isEmpty(): boolean {
     return this.size() === 0;
   }
 
-  /**
-   * Set coordinates to the class instance. It clears all previously added coordinates and push `coords`
-   * to the collection.
-   *
-   * @param {CellCoords} coords The CellCoords instance with defined visual coordinates.
-   * @returns {SelectionRange}
-   */
-  set(coords) {
+  /** Replaces the ranges with one starting at `coords`. */
+  set(coords: CellCoords): this {
     this.clear();
     this.ranges.push(new CellRange(coords));
 
     return this;
   }
 
-  /**
-   * Add coordinates to the class instance. The new coordinates are added to the end of the range collection.
-   *
-   * @param {CellCoords} coords The CellCoords instance with defined visual coordinates.
-   * @returns {SelectionRange}
-   */
-  add(coords) {
+  /** Adds a range starting at `coords`. */
+  add(coords: CellCoords): this {
     this.ranges.push(new CellRange(coords));
 
     return this;
   }
 
-  /**
-   * Get last added coordinates from ranges, it returns a CellRange instance.
-   *
-   * @return {CellRange|undefined}
-   */
-  current() {
+  /** The last added range. */
+  current(): CellRange | undefined {
     return this.peekByIndex(0);
   }
 
-  /**
-   * Get previously added coordinates from ranges, it returns a CellRange instance.
-   *
-   * @return {CellRange|undefined}
-   */
-  previous() {
+  /** The range added before the last one. */
+  previous(): CellRange | undefined {
     return this.peekByIndex(-1);
   }
 
-  /**
-   * Returns `true` if coords is within selection coords. This method iterates through all selection layers to check if
-   * the coords object is within selection range.
-   *
-   * @param {CellCoords} coords The CellCoords instance with defined visual coordinates.
-   * @returns {Boolean}
-   */
-  includes(coords) {
+  /** Whether `coords` is in any range. */
+  includes(coords: CellCoords): boolean {
     return this.ranges.some(cellRange => cellRange.includes(coords));
   }
 
-  /**
-   * Clear collection.
-   *
-   * @return {SelectionRange}
-   */
-  clear() {
+  clear(): this {
     this.ranges.length = 0;
 
     return this;
   }
 
-  /**
-   * Get count of added all coordinates added to the selection.
-   *
-   * @return {Number}
-   */
-  size() {
+  size(): number {
     return this.ranges.length;
   }
 
-  /**
-   * Peek the coordinates based on the offset where that coordinate resides in the collection.
-   *
-   * @param {Number} [offset=0] An offset where the coordinate will be retrieved from.
-   * @return {CellRange|undefined}
-   */
-  peekByIndex(offset = 0) {
+  /** The range `offset` places before the last one (0: the last). */
+  peekByIndex(offset = 0): CellRange | undefined {
     const rangeIndex = this.size() + offset - 1;
-    let cellRange;
 
-    if (rangeIndex >= 0) {
-      cellRange = this.ranges[rangeIndex];
-    }
-
-    return cellRange;
+    return rangeIndex >= 0 ? this.ranges[rangeIndex] : undefined;
   }
 
-  [Symbol.iterator]() {
+  [Symbol.iterator](): Iterator<CellRange> {
     return this.ranges[Symbol.iterator]();
   }
 }

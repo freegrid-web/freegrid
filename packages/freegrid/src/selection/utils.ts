@@ -1,6 +1,4 @@
 import { CellRange } from './../3rdparty/walkontable/src';
-import { arrayEach } from './../helpers/array';
-import { isUndefined } from './../helpers/mixed';
 
 export const SELECTION_TYPE_UNRECOGNIZED = 0;
 export const SELECTION_TYPE_EMPTY = 1;
@@ -10,75 +8,68 @@ export const SELECTION_TYPES = [
   SELECTION_TYPE_OBJECT,
   SELECTION_TYPE_ARRAY,
 ];
+
+/** `[rowStart, columnStart, rowEnd?, columnEnd?]`; columns may be props. */
+export type SelectionArray = [number, number | string, number?, (number | string)?];
+export type SelectionInput = SelectionArray | CellRange;
+/** `[rowStart, columnStart, rowEnd, columnEnd]`. */
+export type NormalizedSelection = [number, number, number, number];
+
 const ARRAY_TYPE_PATTERN = [['number'], ['number', 'string'], ['number', 'undefined'], ['number', 'string', 'undefined']];
 const rootCall = Symbol('root');
 const childCall = Symbol('child');
 
 /**
- * Detect selection schema structure.
- *
- * @param {*} selectionRanges The selected range or and array of selected ranges. This type of data is produced by
- *                            `hot.getSelected()`, `hot.getSelectedLast()`, `hot.getSelectedRange()`
- *                            and `hot.getSelectedRangeLast()` methods.
- * @returns {Number} Returns a number that specifies the type of detected selection schema. If selection schema type
- *                   is unrecognized than it returns `0`.
+ * The format of selection ranges (as `getSelected()` and `getSelectedRange()` give them): empty, a list of
+ * `[row, column, row2, column2]` arrays, a list of CellRanges, or unrecognized (`SELECTION_TYPE_*`).
  */
-export function detectSelectionType(selectionRanges, _callSymbol = rootCall) {
+export const detectSelectionType = (selectionRanges: unknown, _callSymbol: symbol = rootCall): number => {
   if (_callSymbol !== rootCall && _callSymbol !== childCall) {
     throw new Error('The second argument is used internally only and cannot be overwritten.');
   }
-
-  const isArray = Array.isArray(selectionRanges);
+  if (!Array.isArray(selectionRanges)) {
+    return SELECTION_TYPE_UNRECOGNIZED;
+  }
   const isRootCall = _callSymbol === rootCall;
-  let result = SELECTION_TYPE_UNRECOGNIZED;
+  const [firstItem] = selectionRanges;
 
-  if (isArray) {
-    const firstItem = selectionRanges[0];
-
-    if (selectionRanges.length === 0) {
-      result = SELECTION_TYPE_EMPTY;
-
-    } else if (isRootCall && firstItem instanceof CellRange) {
-      result = SELECTION_TYPE_OBJECT;
-
-    } else if (isRootCall && Array.isArray(firstItem)) {
-      result = detectSelectionType(firstItem, childCall);
-
-    } else if (selectionRanges.length >= 2 && selectionRanges.length <= 4) {
-      const isArrayType = !selectionRanges.some((value, index) => !ARRAY_TYPE_PATTERN[index].includes(typeof value));
-
-      if (isArrayType) {
-        result = SELECTION_TYPE_ARRAY;
-      }
-    }
+  if (selectionRanges.length === 0) {
+    return SELECTION_TYPE_EMPTY;
+  }
+  if (isRootCall && firstItem instanceof CellRange) {
+    return SELECTION_TYPE_OBJECT;
+  }
+  if (isRootCall && Array.isArray(firstItem)) {
+    return detectSelectionType(firstItem, childCall);
+  }
+  if (selectionRanges.length >= 2 && selectionRanges.length <= 4
+    && selectionRanges.every((value, index) => ARRAY_TYPE_PATTERN[index].includes(typeof value))) {
+    return SELECTION_TYPE_ARRAY;
   }
 
-  return result;
-}
+  return SELECTION_TYPE_UNRECOGNIZED;
+};
+
+type NormalizeOptions = { keepDirection?: boolean; propToCol?: (prop: string) => number };
 
 /**
- * Factory function designed for normalization data schema from different data structures of the selection ranges.
- *
- * @param {String} type Selection type which will be processed.
- * @param {Object} [options]
- * @param {Boolean} [options.keepDirection=false] If `true`, the coordinates which contain the direction of the
- *                                                selected cells won't be changed. Otherwise, the selection will be
- *                                                normalized to values starting from top-left to bottom-right.
- * @param {Function} [options.propToCol] Pass the converting function (usually `datamap.propToCol`) if the column
- *                                       defined as props should be normalized to the numeric values.
- * @returns {Number[]} Returns normalized data about selected range as an array (`[rowStart, columnStart, rowEnd, columnEnd]`).
+ * A function that turns one selection range of `type` into `[rowStart, columnStart, rowEnd, columnEnd]`: a missing
+ * end is the start, column props become indexes (with `propToCol`), and without `keepDirection` the range runs from
+ * top-left to bottom-right.
  */
-export function normalizeSelectionFactory(type, { keepDirection = false, propToCol } = {}) {
+export const normalizeSelectionFactory = (type: number, { keepDirection = false, propToCol }: NormalizeOptions = {}) => {
   if (!SELECTION_TYPES.includes(type)) {
     throw new Error('Unsupported selection ranges schema type was provided.');
   }
 
-  return function(selection) {
+  return (selection: SelectionInput): NormalizedSelection => {
     const isObjectType = type === SELECTION_TYPE_OBJECT;
-    let rowStart = isObjectType ? selection.from.row : selection[0];
-    let columnStart = isObjectType ? selection.from.col : selection[1];
-    let rowEnd = isObjectType ? selection.to.row : selection[2];
-    let columnEnd = isObjectType ? selection.to.col : selection[3];
+    const range = selection as CellRange;
+    const array = selection as SelectionArray;
+    let rowStart = isObjectType ? range.from.row : array[0];
+    let columnStart = isObjectType ? range.from.col : array[1];
+    let rowEnd = isObjectType ? range.to.row : array[2];
+    let columnEnd = isObjectType ? range.to.col : array[3];
 
     if (typeof propToCol === 'function') {
       if (typeof columnStart === 'string') {
@@ -88,138 +79,65 @@ export function normalizeSelectionFactory(type, { keepDirection = false, propToC
         columnEnd = propToCol(columnEnd);
       }
     }
-
-    if (isUndefined(rowEnd)) {
+    if (rowEnd === undefined) {
       rowEnd = rowStart;
     }
-    if (isUndefined(columnEnd)) {
+    if (columnEnd === undefined) {
       columnEnd = columnStart;
     }
 
     if (!keepDirection) {
-      const origRowStart = rowStart;
-      const origColumnStart = columnStart;
-      const origRowEnd = rowEnd;
-      const origColumnEnd = columnEnd;
-
-      rowStart = Math.min(origRowStart, origRowEnd);
-      columnStart = Math.min(origColumnStart, origColumnEnd);
-      rowEnd = Math.max(origRowStart, origRowEnd);
-      columnEnd = Math.max(origColumnStart, origColumnEnd);
+      [rowStart, rowEnd] = [Math.min(rowStart, rowEnd), Math.max(rowStart, rowEnd)];
+      [columnStart, columnEnd] = [Math.min(columnStart as number, columnEnd as number),
+        Math.max(columnStart as number, columnEnd as number)];
     }
 
-    return [rowStart, columnStart, rowEnd, columnEnd];
+    return [rowStart, columnStart as number, rowEnd, columnEnd as number];
   };
-}
+};
 
 /**
- * Function transform selection ranges (produced by `hot.getSelected()` and `hot.getSelectedRange()`) to normalized
- * data structure. It merges repeated ranges into consecutive coordinates. The returned structure
- * contains an array of arrays. The single item contains at index 0 visual column index from the selection was
- * started and at index 1 distance as a count of selected columns.
- *
- * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by FreeGrid.
- * @return {Array[]} Returns an array of arrays with ranges defines in that schema:
- *                   `[[visualColumnStart, distance], [visualColumnStart, distance], ...]`.
- *                   The column distances are always created starting from the left (zero index) to the
- *                   right (the latest column index).
+ * The selected rows or columns (`axis` 0 or 1 of the normalized range) as consecutive runs, smallest first:
+ * `[[start, count], …]`. Ranges that overlap are merged.
  */
-export function transformSelectionToColumnDistance(selectionRanges) {
+const transformSelectionToDistance = (selectionRanges: SelectionInput[], axis: 0 | 1): [number, number][] => {
   const selectionType = detectSelectionType(selectionRanges);
 
   if (selectionType === SELECTION_TYPE_UNRECOGNIZED || selectionType === SELECTION_TYPE_EMPTY) {
     return [];
   }
-
   const selectionSchemaNormalizer = normalizeSelectionFactory(selectionType);
-  const unorderedIndexes = new Set();
+  const indexes = new Set<number>();
 
-  // Iterate through all ranges and collect all column indexes which are not saved yet.
-  arrayEach(selectionRanges, (selection) => {
-    const [, columnStart,, columnEnd] = selectionSchemaNormalizer(selection);
-    const amount = columnEnd - columnStart + 1;
+  selectionRanges.forEach((selection) => {
+    const normalized = selectionSchemaNormalizer(selection);
+    const start = normalized[axis];
+    const end = normalized[axis + 2];
 
-    arrayEach(Array.from(new Array(amount), (_, i) => columnStart + i), (index) => {
-      if (!unorderedIndexes.has(index)) {
-        unorderedIndexes.add(index);
-      }
-    });
+    for (let index = start; index <= end; index += 1) {
+      indexes.add(index);
+    }
   });
 
-  // Sort indexes in ascending order to easily detecting non-consecutive columns.
-  const orderedIndexes = Array.from(unorderedIndexes).sort((a, b) => a - b);
-  const normalizedColumnRanges = orderedIndexes.reduce((acc, visualColumnIndex, index, array) => {
-    if (index !== 0 && visualColumnIndex === array[index - 1] + 1) {
-      acc[acc.length - 1][1] += 1;
-
+  return [...indexes].sort((a, b) => a - b).reduce<[number, number][]>((runs, index, position, sorted) => {
+    if (position !== 0 && index === sorted[position - 1] + 1) {
+      runs[runs.length - 1][1] += 1;
     } else {
-      acc.push([visualColumnIndex, 1]);
+      runs.push([index, 1]);
     }
 
-    return acc;
+    return runs;
   }, []);
+};
 
-  return normalizedColumnRanges;
-}
+/** The selected columns as `[[visualColumnStart, count], …]`, left to right. */
+export const transformSelectionToColumnDistance = (selectionRanges: SelectionInput[]): [number, number][] => (
+  transformSelectionToDistance(selectionRanges, 1));
 
-/**
- * Function transform selection ranges (produced by `hot.getSelected()` and `hot.getSelectedRange()`) to normalized
- * data structure. It merges repeated ranges into consecutive coordinates. The returned structure
- * contains an array of arrays. The single item contains at index 0 visual column index from the selection was
- * started and at index 1 distance as a count of selected columns.
- *
- * @param {Array[]|CellRange[]} selectionRanges Selection ranges produced by FreeGrid.
- * @return {Array[]} Returns an array of arrays with ranges defines in that schema:
- *                   `[[visualColumnStart, distance], [visualColumnStart, distance], ...]`.
- *                   The column distances are always created starting from the left (zero index) to the
- *                   right (the latest column index).
- */
-export function transformSelectionToRowDistance(selectionRanges) {
-  const selectionType = detectSelectionType(selectionRanges);
+/** The selected rows as `[[visualRowStart, count], …]`, top to bottom. */
+export const transformSelectionToRowDistance = (selectionRanges: SelectionInput[]): [number, number][] => (
+  transformSelectionToDistance(selectionRanges, 0));
 
-  if (selectionType === SELECTION_TYPE_UNRECOGNIZED || selectionType === SELECTION_TYPE_EMPTY) {
-    return [];
-  }
-
-  const selectionSchemaNormalizer = normalizeSelectionFactory(selectionType);
-  const unorderedIndexes = new Set();
-
-  // Iterate through all ranges and collect all column indexes which are not saved yet.
-  arrayEach(selectionRanges, (selection) => {
-    const [rowStart,, rowEnd] = selectionSchemaNormalizer(selection);
-    const amount = rowEnd - rowStart + 1;
-
-    arrayEach(Array.from(new Array(amount), (_, i) => rowStart + i), (index) => {
-      if (!unorderedIndexes.has(index)) {
-        unorderedIndexes.add(index);
-      }
-    });
-  });
-
-  // Sort indexes in ascending order to easily detecting non-consecutive columns.
-  const orderedIndexes = Array.from(unorderedIndexes).sort((a, b) => a - b);
-  const normalizedRowRanges = orderedIndexes.reduce((acc, rowIndex, index, array) => {
-    if (index !== 0 && rowIndex === array[index - 1] + 1) {
-      acc[acc.length - 1][1] += 1;
-
-    } else {
-      acc.push([rowIndex, 1]);
-    }
-
-    return acc;
-  }, []);
-
-  return normalizedRowRanges;
-}
-
-/**
- * Check if passed value can be treated as valid cell coordinate. The second argument is
- * used to check if the value doesn't exceed the defined max table rows/columns count.
- *
- * @param {*} coord
- * @param {Number} maxTableItemsCount The value that declares the maximum coordinate that is still validatable.
- * @return {Boolean}
- */
-export function isValidCoord(coord, maxTableItemsCount = Infinity) {
-  return typeof coord === 'number' && coord >= 0 && coord < maxTableItemsCount;
-}
+/** Whether `coord` is an index of a table with `maxTableItemsCount` rows or columns. */
+export const isValidCoord = (coord: unknown, maxTableItemsCount = Infinity): boolean => typeof coord === 'number'
+  && coord >= 0 && coord < maxTableItemsCount;

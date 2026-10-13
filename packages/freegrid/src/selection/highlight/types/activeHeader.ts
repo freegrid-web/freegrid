@@ -1,14 +1,9 @@
 import { Selection } from './../../../3rdparty/walkontable/src';
+import type { HighlightOptions } from './options';
 
-/**
- * @return {Selection}
- */
-function createHighlight({ activeHeaderClassName }) {
-  const s = new Selection({
-    highlightHeaderClassName: activeHeaderClassName,
-  });
-
-  return s;
-}
+/** Highlights the headers of fully selected rows and columns. */
+const createHighlight = ({ activeHeaderClassName }: HighlightOptions): Selection => new Selection({
+  highlightHeaderClassName: activeHeaderClassName,
+});
 
 export default createHighlight;

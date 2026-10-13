@@ -1,11 +1,12 @@
 import Highlight, { AREA_TYPE, HEADER_TYPE, CELL_TYPE } from './highlight/highlight';
 import SelectionRange from './range';
 import { CellCoords } from './../3rdparty/walkontable/src';
+import type { CellRange } from './../3rdparty/walkontable/src';
 import { isPressedCtrlKey } from './../utils/keyStateObserver';
 import { createObjectPropListener, mixin } from './../helpers/object';
 import { isUndefined } from './../helpers/mixed';
-import { arrayEach } from './../helpers/array';
 import localHooks from './../mixins/localHooks';
+import type { LocalHooks } from './../mixins/localHooks';
 import Transformation from './transformation';
 import {
   detectSelectionType,
@@ -14,14 +15,64 @@ import {
   SELECTION_TYPE_EMPTY,
   SELECTION_TYPE_UNRECOGNIZED,
 } from './utils';
+import type { SelectionInput } from './utils';
 import { toSingleLine } from './../helpers/templateLiteralTag';
 
+/** The grid settings Selection reads (the grid's live settings object). */
+export type SelectionSettings = {
+  selectionMode?: 'single' | 'range' | 'multiple';
+  fillHandle?: unknown;
+  disableVisualSelection?: boolean | string | string[];
+  currentHeaderClassName?: string;
+  activeHeaderClassName?: string;
+  currentRowClassName?: string;
+  currentColClassName?: string;
+  fixedRowsBottom?: number;
+  minSpareRows?: number;
+  minSpareCols?: number;
+  autoWrapRow?: boolean;
+  autoWrapCol?: boolean;
+};
+
+/** The table state Selection asks for when it needs it. */
+export type TableProps = {
+  countRows(): number;
+  countCols(): number;
+  propToCol(prop: string): number;
+  isEditorOpened(): boolean;
+};
+
 /**
- * @class Selection
- * @util
+ * The selection of a grid: its ranges (one per layer of a non-consecutive selection), how it was made (by headers,
+ * by the corner), and its highlights. Local hooks tell the grid about every change.
  */
 class Selection {
-  constructor(settings, tableProps) {
+  // From the localHooks mixin (on the prototype): `declare` keeps class fields from hiding them.
+  declare addLocalHook: LocalHooks['addLocalHook'];
+
+  declare runLocalHooks: LocalHooks['runLocalHooks'];
+
+  declare clearLocalHooks: LocalHooks['clearLocalHooks'];
+
+  settings: SelectionSettings;
+
+  tableProps: TableProps;
+
+  inProgress: boolean;
+
+  selectedByCorner: boolean;
+
+  selectedByRowHeader: Set<number>;
+
+  selectedByColumnHeader: Set<number>;
+
+  selectedRange: SelectionRange;
+
+  highlight: Highlight;
+
+  transformation: Transformation;
+
+  constructor(settings: SelectionSettings, tableProps: TableProps) {
     /**
      * FreeGrid settings instance.
      *
@@ -75,8 +126,8 @@ class Selection {
       rowClassName: settings.currentRowClassName,
       columnClassName: settings.currentColClassName,
       disableHighlight: this.settings.disableVisualSelection,
-      cellCornerVisible: (...args) => this.isCellCornerVisible(...args),
-      areaCornerVisible: (...args) => this.isAreaCornerVisible(...args),
+      cellCornerVisible: () => this.isCellCornerVisible(),
+      areaCornerVisible: (layerLevel?: number) => this.isAreaCornerVisible(layerLevel),
     });
     /**
      * The module for modifying coordinates.
@@ -86,11 +137,11 @@ class Selection {
     this.transformation = new Transformation(this.selectedRange, {
       countRows: () => this.tableProps.countRows(),
       countCols: () => this.tableProps.countCols(),
-      fixedRowsBottom: () => settings.fixedRowsBottom,
-      minSpareRows: () => settings.minSpareRows,
-      minSpareCols: () => settings.minSpareCols,
-      autoWrapRow: () => settings.autoWrapRow,
-      autoWrapCol: () => settings.autoWrapCol,
+      fixedRowsBottom: () => settings.fixedRowsBottom as number,
+      minSpareRows: () => settings.minSpareRows as number,
+      minSpareCols: () => settings.minSpareCols as number,
+      autoWrapRow: () => !!settings.autoWrapRow,
+      autoWrapCol: () => !!settings.autoWrapCol,
     });
 
     this.transformation.addLocalHook('beforeTransformStart', (...args) => this.runLocalHooks('beforeModifyTransformStart', ...args));
@@ -106,21 +157,21 @@ class Selection {
    *
    * @return {SelectionRange}
    */
-  getSelectedRange() {
+  getSelectedRange(): SelectionRange {
     return this.selectedRange;
   }
 
   /**
    * Indicate that selection process began. It sets internaly `.inProgress` property to `true`.
    */
-  begin() {
+  begin(): void {
     this.inProgress = true;
   }
 
   /**
    * Indicate that selection process finished. It sets internaly `.inProgress` property to `false`.
    */
-  finish() {
+  finish(): void {
     this.runLocalHooks('afterSelectionFinished', Array.from(this.selectedRange));
     this.inProgress = false;
   }
@@ -130,7 +181,7 @@ class Selection {
    *
    * @returns {Boolean}
    */
-  isInProgress() {
+  isInProgress(): boolean {
     return this.inProgress;
   }
 
@@ -144,7 +195,7 @@ class Selection {
    * @param {Boolean} [fragment=false] If `true`, the selection will be treated as a partial selection where the
    *                                   `setRangeEnd` method won't be called on every `setRangeStart` call.
    */
-  setRangeStart(coords, multipleSelection, fragment = false) {
+  setRangeStart(coords: CellCoords, multipleSelection?: boolean, fragment = false): void {
     const isMultipleMode = this.settings.selectionMode === 'multiple';
     const isMultipleSelection = isUndefined(multipleSelection) ? isPressedCtrlKey() : multipleSelection;
     const isRowNegative = coords.row < 0;
@@ -192,7 +243,7 @@ class Selection {
    *                                      only when 'selectionMode' is set as 'multiple'. If the argument is not defined
    *                                      the default trigger will be used (isPressedCtrlKey() helper).
    */
-  setRangeStartOnly(coords, multipleSelection) {
+  setRangeStartOnly(coords: CellCoords, multipleSelection?: boolean): void {
     this.setRangeStart(coords, multipleSelection, true);
   }
 
@@ -201,7 +252,7 @@ class Selection {
    *
    * @param {CellCoords} coords Visual coords.
    */
-  setRangeEnd(coords) {
+  setRangeEnd(coords: CellCoords): void {
     if (this.selectedRange.isEmpty()) {
       return;
     }
@@ -209,7 +260,7 @@ class Selection {
     this.runLocalHooks('beforeSetRangeEnd', coords);
     this.begin();
 
-    const cellRange = this.selectedRange.current();
+    const cellRange = this.selectedRange.current() as CellRange;
 
     if (this.settings.selectionMode !== 'single') {
       cellRange.setTo(new CellCoords(coords.row, coords.col));
@@ -219,7 +270,7 @@ class Selection {
     this.highlight.getCell().clear();
 
     if (this.highlight.isEnabledFor(CELL_TYPE)) {
-      this.highlight.getCell().add(this.selectedRange.current().highlight);
+      this.highlight.getCell().add(cellRange.highlight);
     }
 
     const layerLevel = this.getLayerLevel();
@@ -227,9 +278,8 @@ class Selection {
     // If the next layer level is lower than previous then clear all area and header highlights. This is the
     // indication that the new selection is performing.
     if (layerLevel < this.highlight.layerLevel) {
-      arrayEach(this.highlight.getAreas(), highlight => void highlight.clear());
-      arrayEach(this.highlight.getHeaders(), highlight => void highlight.clear());
-      arrayEach(this.highlight.getActiveHeaders(), highlight => void highlight.clear());
+      [...this.highlight.getAreas(), ...this.highlight.getHeaders(), ...this.highlight.getActiveHeaders()]
+        .forEach(highlight => highlight.clear());
     }
 
     this.highlight.useLayerLevel(layerLevel);
@@ -254,7 +304,7 @@ class Selection {
         this.highlight
           .useLayerLevel(layerLevel - 1)
           .createOrGetArea()
-          .add(this.selectedRange.previous().from);
+          .add((this.selectedRange.previous() as CellRange).from);
 
         this.highlight.useLayerLevel(layerLevel);
       }
@@ -302,12 +352,12 @@ class Selection {
    *
    * @returns {Boolean}
    */
-  isMultiple() {
-    const isMultipleListener = createObjectPropListener(!this.selectedRange.current().isSingle());
+  isMultiple(): boolean {
+    const isMultipleListener = createObjectPropListener(!(this.selectedRange.current() as CellRange).isSingle());
 
     this.runLocalHooks('afterIsMultipleSelection', isMultipleListener);
 
-    return isMultipleListener.value;
+    return isMultipleListener.value as boolean;
   }
 
   /**
@@ -318,7 +368,7 @@ class Selection {
    * @param {Boolean} force If `true` the new rows/columns will be created if necessary. Otherwise, row/column will
    *                        be created according to `minSpareRows/minSpareCols` settings of FreeGrid.
    */
-  transformStart(rowDelta, colDelta, force) {
+  transformStart(rowDelta: number, colDelta: number, force?: boolean): void {
     this.setRangeStart(this.transformation.transformStart(rowDelta, colDelta, force));
   }
 
@@ -328,7 +378,7 @@ class Selection {
    * @param {Number} rowDelta Rows number to move, value can be passed as negative number.
    * @param {Number} colDelta Columns number to move, value can be passed as negative number.
    */
-  transformEnd(rowDelta, colDelta) {
+  transformEnd(rowDelta: number, colDelta: number): void {
     this.setRangeEnd(this.transformation.transformEnd(rowDelta, colDelta));
   }
 
@@ -337,7 +387,7 @@ class Selection {
    *
    * @return {Number} Returns layer level starting from 0. If no selection was added to the table -1 is returned.
    */
-  getLayerLevel() {
+  getLayerLevel(): number {
     return this.selectedRange.size() - 1;
   }
 
@@ -346,7 +396,7 @@ class Selection {
    *
    * @returns {Boolean}
    */
-  isSelected() {
+  isSelected(): boolean {
     return !this.selectedRange.isEmpty();
   }
 
@@ -358,7 +408,7 @@ class Selection {
    * @param {Number} [layerLevel=this.getLayerLevel()] Selection layer level to check.
    * @return {Boolean}
    */
-  isSelectedByRowHeader(layerLevel = this.getLayerLevel()) {
+  isSelectedByRowHeader(layerLevel = this.getLayerLevel()): boolean {
     return layerLevel === -1 ? this.selectedByRowHeader.size > 0 : this.selectedByRowHeader.has(layerLevel);
   }
 
@@ -370,7 +420,7 @@ class Selection {
    * @param {Number} [layerLevel=this.getLayerLevel()] Selection layer level to check.
    * @return {Boolean}
    */
-  isSelectedByColumnHeader(layerLevel = this.getLayerLevel()) {
+  isSelectedByColumnHeader(layerLevel = this.getLayerLevel()): boolean {
     return layerLevel === -1 ? this.selectedByColumnHeader.size > 0 : this.selectedByColumnHeader.has(layerLevel);
   }
 
@@ -379,7 +429,7 @@ class Selection {
    *
    * @return {Boolean}
    */
-  isSelectedByAnyHeader() {
+  isSelectedByAnyHeader(): boolean {
     return this.isSelectedByRowHeader(-1) || this.isSelectedByColumnHeader(-1);
   }
 
@@ -388,7 +438,7 @@ class Selection {
    *
    * @return {Boolean}
    */
-  isSelectedByCorner() {
+  isSelectedByCorner(): boolean {
     return this.selectedByCorner;
   }
 
@@ -399,7 +449,7 @@ class Selection {
    * @param {CellCoords} coords The CellCoords instance with defined visual coordinates.
    * @returns {Boolean}
    */
-  inInSelection(coords) {
+  inInSelection(coords: CellCoords): boolean {
     return this.selectedRange.includes(coords);
   }
 
@@ -409,8 +459,8 @@ class Selection {
    * @private
    * @return {Boolean} `true` if the corner element has to be visible, `false` otherwise.
    */
-  isCellCornerVisible() {
-    return this.settings.fillHandle && !this.tableProps.isEditorOpened() && !this.isMultiple();
+  isCellCornerVisible(): boolean {
+    return !!this.settings.fillHandle && !this.tableProps.isEditorOpened() && !this.isMultiple();
   }
 
   /**
@@ -419,18 +469,18 @@ class Selection {
    * @param {Number} layerLevel The layer level.
    * @return {Boolean} `true` if the corner element has to be visible, `false` otherwise.
    */
-  isAreaCornerVisible(layerLevel) {
+  isAreaCornerVisible(layerLevel?: number): boolean {
     if (Number.isInteger(layerLevel) && layerLevel !== this.getLayerLevel()) {
       return false;
     }
 
-    return this.settings.fillHandle && !this.tableProps.isEditorOpened() && this.isMultiple();
+    return !!this.settings.fillHandle && !this.tableProps.isEditorOpened() && this.isMultiple();
   }
 
   /**
    * Clear the selection by resetting the collected ranges and highlights.
    */
-  clear() {
+  clear(): void {
     this.selectedRange.clear();
     this.highlight.clear();
   }
@@ -438,7 +488,7 @@ class Selection {
   /**
    * Deselects all selected cells.
    */
-  deselect() {
+  deselect(): void {
     if (!this.isSelected()) {
       return;
     }
@@ -451,7 +501,7 @@ class Selection {
   /**
    * Select all cells.
    */
-  selectAll() {
+  selectAll(): void {
     this.clear();
     this.setRangeStart(new CellCoords(-1, -1));
     this.selectedByRowHeader.add(this.getLayerLevel());
@@ -468,7 +518,7 @@ class Selection {
    * @param {Array[]|CellRange[]} selectionRanges The coordinates which define what the cells should be selected.
    * @return {Boolean} Returns `true` if selection was successful, `false` otherwise.
    */
-  selectCells(selectionRanges) {
+  selectCells(selectionRanges: SelectionInput[]): boolean {
     const selectionType = detectSelectionType(selectionRanges);
 
     if (selectionType === SELECTION_TYPE_EMPTY) {
@@ -481,7 +531,7 @@ class Selection {
     }
 
     const selectionSchemaNormalizer = normalizeSelectionFactory(selectionType, {
-      propToCol: prop => this.tableProps.propToCol(prop),
+      propToCol: (prop: string) => this.tableProps.propToCol(prop),
       keepDirection: true,
     });
     const countRows = this.tableProps.countRows();
@@ -501,7 +551,7 @@ class Selection {
     if (isValid) {
       this.clear();
 
-      arrayEach(selectionRanges, (selection) => {
+      selectionRanges.forEach((selection) => {
         const [rowStart, columnStart, rowEnd, columnEnd] = selectionSchemaNormalizer(selection);
 
         this.setRangeStartOnly(new CellCoords(rowStart, columnStart), false);
@@ -520,7 +570,7 @@ class Selection {
    * @param {Number|String} [endColumn] Visual column index or column property from to the selection finishes.
    * @returns {Boolean} Returns `true` if selection was successful, `false` otherwise.
    */
-  selectColumns(startColumn, endColumn = startColumn) {
+  selectColumns(startColumn: number | string, endColumn: number | string = startColumn): boolean {
     const start = typeof startColumn === 'string' ? this.tableProps.propToCol(startColumn) : startColumn;
     const end = typeof endColumn === 'string' ? this.tableProps.propToCol(endColumn) : endColumn;
 
@@ -543,7 +593,7 @@ class Selection {
    * @param {Number} [endRow] Visual row index from to the selection finishes.
    * @returns {Boolean} Returns `true` if selection was successful, `false` otherwise.
    */
-  selectRows(startRow, endRow = startRow) {
+  selectRows(startRow: number, endRow = startRow): boolean {
     const countRows = this.tableProps.countRows();
     const isValid = isValidCoord(startRow, countRows) && isValidCoord(endRow, countRows);
 
