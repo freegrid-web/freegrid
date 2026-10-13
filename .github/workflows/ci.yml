@@ -1,8 +1,24 @@
 name: CI
+
+# Fast checks (lint, types, unit, build, dist, docs) run on every pull request push. The browser tests (E2E in
+# Chromium, Firefox and WebKit, about 5–10 minutes) run in the merge queue, right before a pull request is merged into
+# main, and when started by hand (Actions → CI → Run workflow). The `e2e` job sums them up for the branch rules: it
+# passes when the browser tests passed, or when they were not needed (a pull request push, or docs-only changes).
 on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
+  workflow_dispatch:
+
+# The jobs only read the repository.
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the runs of its earlier pushes.
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -35,8 +51,35 @@ jobs:
       - run: pnpm --filter @freegrid/docs build
       - run: pnpm --filter @freegrid/docs test:smoke
 
+  # Whether the browser tests are needed: in the merge queue and by hand, unless only docs and Markdown files changed.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      browser: ${{ steps.decide.outputs.browser }}
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.merge_group.base_sha }}
+          HEAD: ${{ github.event.merge_group.head_sha }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            browser=true
+          elif [ "$EVENT" = merge_group ]; then
+            git diff --name-only "$BASE" "$HEAD" > changed.txt
+            cat changed.txt
+            # Anything outside the docs site, the plans/specs and Markdown files needs the browser tests.
+            if grep -qvE '^(packages/docs/|docs/|[^/]+\.md$)' changed.txt; then browser=true; else browser=false; fi
+          else
+            browser=false
+          fi
+          echo "browser=$browser" >> "$GITHUB_OUTPUT"
+
   browser:
-    needs: checks
+    needs: [checks, changes]
+    if: needs.changes.outputs.browser == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -65,3 +108,18 @@ jobs:
         with:
           name: results-${{ matrix.name }}
           path: packages/freegrid/test-results
+
+  # The one browser-test check the branch rules require.
+  e2e:
+    needs: [changes, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          CHANGES: ${{ needs.changes.result }}
+          NEEDED: ${{ needs.changes.outputs.browser }}
+          BROWSER: ${{ needs.browser.result }}
+        run: |
+          echo "changes: $CHANGES, browser tests needed: $NEEDED, browser tests: $BROWSER"
+          if [ "$CHANGES" != success ]; then exit 1; fi
+          if [ "$NEEDED" = true ] && [ "$BROWSER" != success ]; then exit 1; fi
