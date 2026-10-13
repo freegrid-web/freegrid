@@ -62,6 +62,26 @@ wins.
 stay light in the dark theme.
 :::
 
+## Styles
+
+Two looks, independent of the color theme:
+
+- **Classic** (the default): compact rows, as in Handsontable 6.
+- **Modern**: roomier 32px rows and 8px cell padding, flat headers on the cell background, lighter grid lines, a
+  rounded editor and context menu. Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any element
+  around it, together with any theme:
+
+```html
+<div class="fg-style-modern fg-theme-dark">
+  <div id="grid"></div>
+</div>
+```
+
+Sizes are variables too (`--fg-row-height`, `--fg-cell-padding-x`, `--fg-radius`, `--fg-header-font-weight`), so you
+can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeGrid reads `--fg-row-height` when the
+grid is created; after changing it later, call `updateSettings({})`. Modern's wider padding needs a little more
+column width: with fixed `colWidths`, add about 8px per column so that text does not wrap.
+
 ## Playground
 
 Switch the theme and change the base variables; the CSS to copy appears below the grid. Right-click a cell for the
