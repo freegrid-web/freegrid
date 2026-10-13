@@ -1,4 +1,9 @@
 import { CellCoords, CellRange } from './../../../3rdparty/walkontable/src';
+import type MergeCells from './../mergeCells';
+import type MergedCellCoords from './../cellCoords';
+
+/** A change of the selection: rows and columns. */
+type Delta = { row: number; col: number };
 
 /**
  * Class responsible for all of the Selection-related operations on merged cells.
@@ -8,31 +13,29 @@ import { CellCoords, CellRange } from './../../../3rdparty/walkontable/src';
  * @util
  */
 class SelectionCalculations {
-  constructor(plugin) {
-    /**
-     * Reference to the Merge Cells plugin.
-     *
-     * @type {MergeCells}
-     */
-    this.plugin = plugin;
-    /**
-     * Class name used for fully selected merged cells.
-     *
-     * @type {String}
-     */
-    this.fullySelectedMergedCellClassName = 'fullySelectedMergedCell';
+  /**
+   * Reference to the Merge Cells plugin.
+   */
+  plugin: MergeCells;
 
+  /**
+   * Class name used for fully selected merged cells.
+   */
+  fullySelectedMergedCellClassName = 'fullySelectedMergedCell';
+
+  constructor(plugin: MergeCells) {
+    this.plugin = plugin;
   }
 
   /**
    * "Snap" the delta value according to defined merged cells. (In other words, compensate the rowspan -
    * e.g. going up with `delta.row = -1` over a merged cell with `rowspan = 3`, `delta.row` should change to `-3`.)
    *
-   * @param {Object} delta The delta object containing `row` and `col` properties.
-   * @param {CellRange} selectionRange The selection range.
-   * @param {Object} mergedCell A merged cell object.
+   * @param delta The delta object containing `row` and `col` properties.
+   * @param selectionRange The selection range.
+   * @param mergedCell A merged cell object.
    */
-  snapDelta(delta, selectionRange, mergedCell) {
+  snapDelta(delta: Delta, selectionRange: CellRange, mergedCell: MergedCellCoords): void {
     const cellCoords = selectionRange.to;
     const newRow = cellCoords.row + delta.row;
     const newColumn = cellCoords.col + delta.col;
@@ -49,15 +52,15 @@ class SelectionCalculations {
    * "Jump" over the merged cell (compensate for the indexes within the merged cell to get past it)
    *
    * @private
-   * @param {Object} delta The delta object.
-   * @param {MergedCellCoords} mergedCell The merge cell object.
-   * @param {Number} newIndex New row/column index, created with the delta.
+   * @param delta The delta object.
+   * @param mergedCell The merge cell object.
+   * @param newIndex New row/column index, created with the delta.
    */
-  jumpOverMergedCell(delta, mergedCell, newIndex) {
+  jumpOverMergedCell(delta: Delta, mergedCell: MergedCellCoords, newIndex: number): void {
     let flatDelta = delta.row || delta.col;
-    let includesIndex = null;
-    let firstIndex = null;
-    let lastIndex = null;
+    let includesIndex: boolean | null = null;
+    let firstIndex = 0;
+    let lastIndex = 0;
 
     if (delta.row) {
       includesIndex = mergedCell.includesVertically(newIndex);
@@ -92,28 +95,29 @@ class SelectionCalculations {
   /**
    * Get a selection range with `to` property incremented by the provided delta.
    *
-   * @param {CellRange} oldSelectionRange The base selection range.
-   * @param {Object} delta The delta object with `row` and `col` properties.
-   * @returns {CellRange} A new `CellRange` object.
+   * @param oldSelectionRange The base selection range.
+   * @param delta The delta object with `row` and `col` properties.
+   * @returns A new `CellRange` object.
    */
-  getUpdatedSelectionRange(oldSelectionRange, delta) {
+  getUpdatedSelectionRange(oldSelectionRange: CellRange, delta: Delta): CellRange {
     return new CellRange(oldSelectionRange.highlight, oldSelectionRange.from, new CellCoords(oldSelectionRange.to.row + delta.row, oldSelectionRange.to.col + delta.col));
   }
 
   /**
    * Generate an additional class name for the entirely-selected merged cells.
    *
-   * @param {Number} currentRow Row index of the currently processed cell.
-   * @param {Number} currentColumn Column index of the currently cell.
-   * @param {Array} cornersOfSelection Array of the current selection in a form of `[startRow, startColumn, endRow, endColumn]`.
-   * @param {Number|undefined} layerLevel Number indicating which layer of selection is currently processed.
-   * @returns {String|undefined} A `String`, which will act as an additional `className` to be added to the currently processed cell.
+   * @param currentRow Row index of the currently processed cell.
+   * @param currentColumn Column index of the currently cell.
+   * @param cornersOfSelection Array of the current selection in a form of `[startRow, startColumn, endRow, endColumn]`.
+   * @param layerLevel Number indicating which layer of selection is currently processed.
+   * @returns A `String`, which will act as an additional `className` to be added to the currently processed cell.
    */
-  getSelectedMergedCellClassName(currentRow, currentColumn, cornersOfSelection, layerLevel) {
+  getSelectedMergedCellClassName(currentRow: number, currentColumn: number, cornersOfSelection: number[],
+    layerLevel?: number): string | undefined {
     const [startRow, startColumn, endRow, endColumn] = cornersOfSelection;
 
-    if (layerLevel === void 0) {
-      return;
+    if (layerLevel === undefined) {
+      return undefined;
     }
 
     if (currentRow >= startRow &&
@@ -124,13 +128,13 @@ class SelectionCalculations {
       const isMergedCellParent = this.plugin.mergedCellsCollection.isMergedParent(currentRow, currentColumn);
 
       if (!isMergedCellParent) {
-        return;
+        return undefined;
       }
 
       const mergedCell = this.plugin.mergedCellsCollection.get(currentRow, currentColumn);
 
       if (!mergedCell) {
-        return;
+        return undefined;
       }
 
       if (mergedCell.row + mergedCell.rowspan - 1 <= endRow && mergedCell.col + mergedCell.colspan - 1 <= endColumn) {
@@ -140,17 +144,18 @@ class SelectionCalculations {
         return `${this.fullySelectedMergedCellClassName}-multiple`;
       }
     }
+
+    return undefined;
   }
 
   /**
    * Check if the provided merged cell is fully selected (by one or many layers of selection)
    *
-   * @param {MergedCellCoords} mergedCell The merged cell to be processed.
-   * @param {CellRange[]} selectionRangesArray Array of selection ranges.
-   * @returns {Boolean}
+   * @param mergedCell The merged cell to be processed.
+   * @param selectionRangesArray Array of selection ranges.
    */
-  isMergeCellFullySelected(mergedCell, selectionRangesArray) {
-    const mergedCellIndividualCoords = [];
+  isMergeCellFullySelected(mergedCell: MergedCellCoords | false | null, selectionRangesArray?: CellRange[]): boolean {
+    const mergedCellIndividualCoords: CellCoords[] = [];
 
     if (!selectionRangesArray || !mergedCell) {
       return false;
@@ -163,7 +168,7 @@ class SelectionCalculations {
     }
 
     for (let i = 0; i < mergedCellIndividualCoords.length; i += 1) {
-      const insideSelections = [];
+      const insideSelections: boolean[] = [];
 
       for (let s = 0; s < selectionRangesArray.length; s += 1) {
         insideSelections[s] = selectionRangesArray[s].includes(mergedCellIndividualCoords[i]);
@@ -180,9 +185,9 @@ class SelectionCalculations {
   /**
    * Generate an array of the entirely-selected merged cells' class names.
    *
-   * @returns {String[]} An `Array` of `String`s. Each of these strings will act like class names to be removed from all the cells in the table.
+   * @returns An `Array` of `String`s. Each of these strings will act like class names to be removed from all the cells in the table.
    */
-  getSelectedMergedCellClassNameToRemove() {
+  getSelectedMergedCellClassNameToRemove(): string[] {
     const classNames = [];
 
     for (let i = 0; i <= 7; i += 1) {
