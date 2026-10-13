@@ -54,7 +54,16 @@ export default defineConfigWithTheme({
         },
       ],
       '/api/': [
-        { text: 'API', items: [{ text: 'Overview', link: '/api/' }] },
+        {
+          text: 'API reference',
+          items: [
+            { text: 'Overview', link: '/api/' },
+            { text: 'Methods', link: '/api/methods' },
+            { text: 'Events', link: '/api/events' },
+            { text: 'Settings', link: '/api/settings' },
+            { text: 'Plugins', link: '/api/plugins' },
+          ],
+        },
       ],
       '/project/': [
         {

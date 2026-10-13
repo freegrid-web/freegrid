@@ -1,3 +1,7 @@
+---
+api: [Lifecycle]
+---
+
 # Getting started
 
 ## Install
