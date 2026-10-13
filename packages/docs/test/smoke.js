@@ -55,11 +55,15 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
 const failures = [];
 
-// Every page in the docs' dark and light appearance: live examples follow it (fg-theme-dark in dark only).
-for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES) {
+// Every page in the docs' dark and light appearance (live examples follow it: fg-theme-dark in dark only), with the
+// Modern and the Classic grid style (the Grid switch in the top bar).
+for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES) {
   const page = await browser.newPage({ colorScheme: appearance, viewport: { width: 1600, height: 900 } });
 
-  await page.addInitScript(value => localStorage.setItem('vitepress-theme-appearance', value), appearance);
+  await page.addInitScript(([value, gridStyle]) => {
+    localStorage.setItem('vitepress-theme-appearance', value);
+    localStorage.setItem('freegrid-docs-grid-style', gridStyle);
+  }, [appearance, style]);
   const errors = [];
 
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
@@ -69,8 +73,8 @@ for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES)
     await page.waitForSelector('.live-example .handsontable .htCore', { timeout: 10000 }).catch(() => {});
   }
   const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
-  // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeGrid's height and
-  // the grid's viewport shows more than a sliver.
+  // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeGrid's height
+  // (--fg-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
   const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {
     const table = el.querySelector('.ht_master table.htCore');
     const cell = el.querySelector('.ht_master td');
@@ -80,7 +84,11 @@ for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES)
     const problems = [];
 
     if (getComputedStyle(table).display !== 'table') problems.push(`table display is ${getComputedStyle(table).display}`);
-    if (cell.getBoundingClientRect().height > 30) problems.push(`row height is ${cell.getBoundingClientRect().height}px`);
+    const rowHeight = parseInt(getComputedStyle(cell).getPropertyValue('--fg-row-height'), 10);
+
+    if (Math.abs(cell.getBoundingClientRect().height - rowHeight) > 1) {
+      problems.push(`row height is ${cell.getBoundingClientRect().height}px, --fg-row-height is ${rowHeight}px`);
+    }
     if (holder.getBoundingClientRect().height < 80) problems.push(`grid viewport is ${holder.getBoundingClientRect().height}px tall`);
     // Text must stay readable on the cell background in the light and the dark theme (WCAG AA: 4.5:1).
     const luminance = (color) => {
@@ -107,6 +115,10 @@ for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES)
     .filter(el => el.classList.contains('fg-theme-dark') !== dark).length, appearance === 'dark');
 
   if (wrongTheme) failures.push(`${path || '/'} (${appearance}): ${wrongTheme} live example(s) with the wrong theme`);
+  const wrongStyle = await page.locator('.live-example').evaluateAll((els, gridStyle) => els
+    .filter(el => el.getAttribute('data-fg-style') !== gridStyle).length, style);
+
+  if (wrongStyle) failures.push(`${path || '/'} (${style}): ${wrongStyle} live example(s) without the ${style} style`);
   // The isolation of theme styles must not break the theme itself, e.g. the home page content width.
   if (path === '') {
     const contentWidth = await page.evaluate(() => document.querySelector('.VPHomeContent .vp-doc')?.getBoundingClientRect().width);
@@ -116,7 +128,7 @@ for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES)
   if (rendered < grids) failures.push(`${path || '/'}: expected ${grids} live grid(s), found ${rendered}`);
   layoutProblems.forEach(p => failures.push(`${path || '/'}: ${p}`));
   errors.forEach(e => failures.push(`${path || '/'}: ${e}`));
-  console.log(`${failures.length ? '…' : '✓'} ${path || '/'} [${appearance}] (${rendered} grid(s))`);
+  console.log(`${failures.length ? '…' : '✓'} ${path || '/'} [${style}, ${appearance}] (${rendered} grid(s))`);
   await page.close();
 }
 
