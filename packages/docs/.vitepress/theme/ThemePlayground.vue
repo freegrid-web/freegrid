@@ -422,8 +422,9 @@ onBeforeUnmount(() => {
 }
 
 .theme-playground__frame {
+  /* The page around the grid keeps the docs' background: the variables style the grid only, as on a real page. */
   padding: 16px;
-  background: var(--fg-color-background);
+  background: var(--vp-c-bg);
   color: var(--fg-color-text, #222);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 13px;
