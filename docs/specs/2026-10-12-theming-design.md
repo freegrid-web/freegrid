@@ -158,10 +158,10 @@ color theme (light, dark, auto).
   element and gives it to Walkontable as the default row height. Every hard-coded `23` (context menu rows, autocomplete
   list, row move) uses that value. A style switched after the grid was created takes effect after
   `updateSettings({})`.
-- **Modern** sets: row height `32px`, cell padding `8px`, `system-ui` font at `13px`, headers on the cell background
-  with muted text, lighter grid lines, rounded editor and menu (`--fg-radius: 6px`) with a soft shadow. It changes
-  only sizes, fonts, radii and which base color a component uses — never a color literal — so it works with every color
-  theme.
+- **Modern** sets: row height `32px`, cell padding `8px`, semibold headers, rounded editor and menu
+  (`--fg-radius: 6px`) with a soft shadow. It changes no colors (an earlier draft mapped headers and grid lines to
+  other base colors; that lowered the header contrast and ignored the user's palette), so every color theme and every
+  palette applies unchanged. It keeps the page's font.
 - Floating elements get the grid's style class too (`applyTheme` copies `fg-style-*` as well as `fg-theme-*`).
 - Tests: Classic snapshots unchanged; Modern: rendered row height 32px, Walkontable's default row height 32, scrolling
   to the last row shows it, the editor and the context menu line up with their cell; works with the dark theme.

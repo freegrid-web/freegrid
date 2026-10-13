@@ -543,13 +543,26 @@ describe('Theme', () => {
       keyDownUp('esc');
     });
 
-    it('works with the dark theme: headers on the cell background', async function() {
+    it('works with the dark theme: headers keep the theme\'s header colors', async function() {
       this.$container.wrap('<div class="theme-wrapper fg-style-modern fg-theme-dark"></div>');
       await createThemeFixture();
-      const cellBackground = getComputedStyle(document.querySelector('.fg-master tbody td:not(.area):not(.current)')).backgroundColor;
+      const header = getComputedStyle(this.$container[0].querySelector('.fg-master thead th:not(.fg-highlight)'));
 
-      expect(cellBackground).toBe('rgb(30, 30, 30)');
-      expect(getComputedStyle(document.querySelector('.fg-master thead th:not(.fg-highlight)')).backgroundColor).toBe(cellBackground);
+      expect(getComputedStyle(this.$container[0].querySelector('.fg-master tbody tr:nth-child(2) td')).backgroundColor)
+        .toBe('rgb(30, 30, 30)');
+      expect(header.backgroundColor).toBe('rgb(42, 42, 42)');
+      expect(header.color).toBe('rgb(208, 208, 208)');
+    });
+
+    it('uses the base colors set by the user (as the playground presets do)', async function() {
+      this.$container.wrap('<div class="theme-wrapper fg-style-modern" style="--fg-color-header-background: #e8f2f8; --fg-color-border: #cfe0ea; --fg-color-header-text: #0b3a53"></div>');
+      await createThemeFixture();
+      const header = getComputedStyle(this.$container[0].querySelector('.fg-master thead th:not(.fg-highlight)'));
+      const cell = getComputedStyle(this.$container[0].querySelector('.fg-master tbody tr:nth-child(2) td'));
+
+      expect(header.backgroundColor).toBe('rgb(232, 242, 248)');
+      expect(header.color).toBe('rgb(11, 58, 83)');
+      expect(cell.borderBottomColor).toBe('rgb(207, 224, 234)');
     });
   });
 });

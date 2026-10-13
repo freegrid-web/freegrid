@@ -391,19 +391,12 @@
   }
 }
 
-/* == Modern style: class "fg-style-modern" or data-fg-style="modern" on the grid or any ancestor. Sizes, radii,
-   shadows and which base color a part uses; no colors of its own, so it works with every color theme. == */
+/* == Modern style: class "fg-style-modern" or data-fg-style="modern" on the grid or any ancestor. Sizes, radii and
+   shadows only: the colors stay the theme's and the user's, so it works with every theme and every palette. == */
 :where(.fg-style-modern, [data-fg-style="modern"]) {
   --fg-row-height: 32px;
   --fg-cell-padding-x: 8px;
   --fg-header-font-weight: 600;
   --fg-radius: 6px;
   --fg-menu-shadow: var(--fg-shadow);
-}
-
-:where(.fg-style-modern, [data-fg-style="modern"]) :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder),
-:where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder):where(.fg-style-modern, [data-fg-style="modern"]) {
-  --fg-header-background: var(--fg-color-background);
-  --fg-header-text: var(--fg-color-muted-text);
-  --fg-cell-border-color: var(--fg-color-header-background);
 }
