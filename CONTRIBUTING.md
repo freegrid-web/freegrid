@@ -16,6 +16,9 @@ them will be closed.
   `// FG-SKIP: <specific reason> — <issue URL>`.
 - `pnpm test` must pass before a PR is merged. It compares results with the upstream baseline in
   `docs/baseline/`.
+- CI runs the fast checks (lint, types, unit, build, dist, docs) on every push to a PR. The browser tests
+  (Chromium, Firefox, WebKit) run when the PR is merged through the merge queue ("Merge when ready"), and by hand
+  from Actions → CI → Run workflow. A PR that changes only the docs site or Markdown files skips them.
 - A test is removed only together with the public behavior it checks, when that removal is deliberate and
   listed in the CHANGELOG. Add the test's full name and the reason to `docs/baseline/retired.json`, and say so
   in the PR.
