@@ -1,6 +1,6 @@
 import BasePlugin from './../_base';
+import type { PluginHost } from './../_base';
 import Hooks from './../../pluginHooks';
-import { arrayEach } from './../../helpers/array';
 import { addClass, removeClass, offset } from './../../helpers/dom/element';
 import { rangeEach } from './../../helpers/number';
 import EventManager from './../../eventManager';
@@ -8,6 +8,7 @@ import { registerPlugin } from './../../plugins';
 import RowsMapper from './rowsMapper';
 import BacklightUI from './ui/backlight';
 import GuidelineUI from './ui/guideline';
+import type { CellCoords } from './../../3rdparty/walkontable/src';
 
 import './manualRowMove.css';
 
@@ -15,7 +16,26 @@ Hooks.getSingleton().register('beforeRowMove');
 Hooks.getSingleton().register('afterRowMove');
 Hooks.getSingleton().register('unmodifyRow');
 
-const privatePool = new WeakMap();
+/** The state of a drag of row headers. */
+type MoveState = {
+  rowsToMove: number[];
+  countRows?: number;
+  fixedRows?: number;
+  pressed?: boolean;
+  disallowMoving?: boolean;
+  coordsRow?: number;
+  hasColHeaders?: boolean;
+  rootElementOffset?: number;
+  backlightHeight?: number;
+  target: { eventPageY?: number; coords?: CellCoords; TD?: HTMLTableCellElement; row?: number };
+  [key: string]: unknown;
+};
+
+/** Which selection changes a mouse action may make (set by hook listeners). */
+type BlockCalculations = { row?: boolean; column?: boolean; cell?: boolean };
+
+/** A mouse event, with the cell or header it happened on (set by EventManager). */
+type GridMouseEvent = MouseEvent & { realTarget: HTMLElement; layerX: number; layerY: number };
 const CSS_PLUGIN = 'fg-manual-row-move';
 const CSS_SHOW_UI = 'show-ui';
 const CSS_ON_MOVING = 'on-moving--rows';
@@ -42,75 +62,73 @@ const CSS_AFTER_SELECTION = 'after-selection--rows';
  * @plugin ManualRowMove
  */
 class ManualRowMove extends BasePlugin {
-  constructor(hotInstance) {
+  /**
+   * List of last removed row indexes.
+   *
+   * @private
+   */
+  removedRows: number[] = [];
+
+  /**
+   * Object containing visual row indexes mapped to data source indexes.
+   *
+   * @private
+   */
+  rowsMapper: RowsMapper;
+
+  /**
+   * Event Manager object.
+   *
+   * @private
+   */
+  eventManager: EventManager;
+
+  /**
+   * Backlight UI object.
+   *
+   * @private
+   */
+  backlight: BacklightUI;
+
+  /**
+   * Guideline UI object.
+   *
+   * @private
+   */
+  guideline: GuidelineUI;
+
+  #priv: MoveState = {
+    rowsToMove: [],
+    pressed: undefined,
+    disallowMoving: undefined,
+    target: {
+      eventPageY: undefined,
+      coords: undefined,
+      TD: undefined,
+      row: undefined
+    }
+  };
+
+  constructor(hotInstance: PluginHost) {
     super(hotInstance);
-
-    /**
-     * Set up WeakMap of plugin to sharing private parameters;
-     */
-    privatePool.set(this, {
-      rowsToMove: [],
-      pressed: void 0,
-      disallowMoving: void 0,
-      target: {
-        eventPageY: void 0,
-        coords: void 0,
-        TD: void 0,
-        row: void 0
-      }
-    });
-
-    /**
-     * List of last removed row indexes.
-     *
-     * @private
-     * @type {Array}
-     */
-    this.removedRows = [];
-    /**
-     * Object containing visual row indexes mapped to data source indexes.
-     *
-     * @private
-     * @type {RowsMapper}
-     */
     this.rowsMapper = new RowsMapper(this);
-    /**
-     * Event Manager object.
-     *
-     * @private
-     * @type {Object}
-     */
     this.eventManager = new EventManager(this);
-    /**
-     * Backlight UI object.
-     *
-     * @private
-     * @type {Object}
-     */
     this.backlight = new BacklightUI(hotInstance);
-    /**
-     * Guideline UI object.
-     *
-     * @private
-     * @type {Object}
-     */
     this.guideline = new GuidelineUI(hotInstance);
   }
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ManualRowMove#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
+  isEnabled(): boolean {
     return !!this.hot.getSettings().manualRowMove;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -137,7 +155,7 @@ class ManualRowMove extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     this.disablePlugin();
     this.enablePlugin();
 
@@ -149,7 +167,7 @@ class ManualRowMove extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     const pluginSettings = this.hot.getSettings().manualRowMove;
 
     if (Array.isArray(pluginSettings)) {
@@ -168,39 +186,39 @@ class ManualRowMove extends BasePlugin {
   /**
    * Moves a single row.
    *
-   * @param {Number} row Visual row index to be moved.
-   * @param {Number} target Visual row index being a target for the moved row.
+   * @param row Visual row index to be moved.
+   * @param target Visual row index being a target for the moved row.
    * @fires Hooks#beforeRowMove
    * @fires Hooks#afterRowMove
    */
-  moveRow(row, target) {
+  moveRow(row: number, target: number): void {
     this.moveRows([row], target);
   }
 
   /**
    * Moves a multiple rows.
    *
-   * @param {Array} rows Array of visual row indexes to be moved.
-   * @param {Number} target Visual row index being a target for the moved rows.
+   * @param rows Array of visual row indexes to be moved.
+   * @param target Visual row index being a target for the moved rows.
    * @fires Hooks#beforeRowMove
    * @fires Hooks#afterRowMove
    */
-  moveRows(rows, target) {
+  moveRows(rows: number[], target: number): void {
     const visualRows = [...rows];
-    const priv = privatePool.get(this);
+    const priv = this.#priv;
     const beforeMoveHook = this.hot.runHooks('beforeRowMove', visualRows, target);
 
     priv.disallowMoving = beforeMoveHook === false;
 
     if (!priv.disallowMoving) {
       // first we need to rewrite an visual indexes to physical for save reference after move
-      arrayEach(rows, (row, index, array) => {
-        array[index] = this.rowsMapper.getValueByIndex(row);
+      rows.forEach((row, index, array) => {
+        array[index] = this.rowsMapper.getValueByIndex(row)!;
       });
 
       // next, when we have got an physical indexes, we can move rows
-      arrayEach(rows, (row, index) => {
-        const actualPosition = this.rowsMapper.getIndexByValue(row);
+      rows.forEach((row, index) => {
+        const actualPosition = this.rowsMapper.getIndexByValue(row)!;
 
         if (actualPosition !== target) {
           this.rowsMapper.moveRow(actualPosition, target + index);
@@ -219,10 +237,10 @@ class ManualRowMove extends BasePlugin {
    * That means that changing the row order using the API won't correct the selection.
    *
    * @private
-   * @param {Number} startRow Visual row index for the start of the selection.
-   * @param {Number} endRow Visual row index for the end of the selection.
+   * @param startRow Visual row index for the start of the selection.
+   * @param endRow Visual row index for the end of the selection.
    */
-  changeSelection(startRow, endRow) {
+  changeSelection(startRow: number, endRow: number): void {
     this.hot.selectRows(startRow, endRow);
   }
 
@@ -230,11 +248,10 @@ class ManualRowMove extends BasePlugin {
    * Gets the sum of the heights of rows in the provided range.
    *
    * @private
-   * @param {Number} from Visual row index.
-   * @param {Number} to Visual row index.
-   * @returns {Number}
+   * @param from Visual row index.
+   * @param to Visual row index.
    */
-  getRowsHeight(from, to) {
+  getRowsHeight(from: number, to: number): number {
     let height = 0;
 
     for (let i = from; i < to; i++) {
@@ -251,13 +268,13 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  initialSettings() {
+  initialSettings(): void {
     const pluginSettings = this.hot.getSettings().manualRowMove;
 
     if (Array.isArray(pluginSettings)) {
       this.moveRows(pluginSettings, 0);
 
-    } else if (pluginSettings !== void 0) {
+    } else if (pluginSettings !== undefined) {
       const persistentState = this.persistentStateLoad();
 
       if (persistentState.length) {
@@ -270,10 +287,9 @@ class ManualRowMove extends BasePlugin {
    * Checks if the provided row is in the fixedRowsTop section.
    *
    * @private
-   * @param {Number} row Visual row index to check.
-   * @returns {Boolean}
+   * @param row Visual row index to check.
    */
-  isFixedRowTop(row) {
+  isFixedRowTop(row: number): boolean {
     return row < this.hot.getSettings().fixedRowsTop;
   }
 
@@ -281,10 +297,9 @@ class ManualRowMove extends BasePlugin {
    * Checks if the provided row is in the fixedRowsBottom section.
    *
    * @private
-   * @param {Number} row Visual row index to check.
-   * @returns {Boolean}
+   * @param row Visual row index to check.
    */
-  isFixedRowBottom(row) {
+  isFixedRowBottom(row: number): boolean {
     return row > this.hot.getSettings().fixedRowsBottom;
   }
 
@@ -294,20 +309,20 @@ class ManualRowMove extends BasePlugin {
    * @fires Hooks#persistentStateSave
    * @fires Hooks#manualRowMove
    */
-  persistentStateSave() {
+  persistentStateSave(): void {
     this.hot.runHooks('persistentStateSave', 'manualRowMove', this.rowsMapper._arrayMap);
   }
 
   /**
    * Loads the manual row positions from the persistent state (the {@link Options#persistentState} option has to be enabled).
    *
-   * @returns {Array} Stored state.
+   * @returns Stored state.
    *
    * @fires Hooks#persistentStateLoad
    * @fires Hooks#manualRowMove
    */
-  persistentStateLoad() {
-    const storedState = {};
+  persistentStateLoad(): number[] {
+    const storedState: { value?: number[] } = {};
 
     this.hot.runHooks('persistentStateLoad', 'manualRowMove', storedState);
 
@@ -318,11 +333,10 @@ class ManualRowMove extends BasePlugin {
    * Prepare array of indexes based on actual selection.
    *
    * @private
-   * @returns {Array}
    */
-  prepareRowsToMoving() {
+  prepareRowsToMoving(): number[] {
     const selection = this.hot.getSelectedRangeLast();
-    const selectedRows = [];
+    const selectedRows: number[] = [];
 
     if (!selection) {
       return selectedRows;
@@ -344,8 +358,9 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  refreshPositions() {
-    const priv = privatePool.get(this);
+  refreshPositions(): void {
+    // Set by mousedown and mouseover before this runs.
+    const priv = this.#priv as Required<MoveState> & { target: Required<MoveState['target']> };
     const coords = priv.target.coords;
     const firstVisible = this.hot.view.wt.wtTable.getFirstVisibleRow();
     const lastVisible = this.hot.view.wt.wtTable.getLastVisibleRow();
@@ -427,7 +442,7 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  updateRowsMapper() {
+  updateRowsMapper(): void {
     const countRows = this.hot.countSourceRows();
     const rowsMapperLen = this.rowsMapper._arrayMap.length;
 
@@ -441,9 +456,9 @@ class ManualRowMove extends BasePlugin {
 
     } else if (rowsMapperLen > countRows) {
       const maxIndex = countRows - 1;
-      const rowsToRemove = [];
+      const rowsToRemove: number[] = [];
 
-      arrayEach(this.rowsMapper._arrayMap, (value, index) => {
+      this.rowsMapper._arrayMap.forEach((value, index) => {
         if (value > maxIndex) {
           rowsToRemove.push(index);
         }
@@ -458,8 +473,8 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  registerEvents() {
-    this.eventManager.addEventListener(document.documentElement, 'mousemove', event => this.onMouseMove(event));
+  registerEvents(): void {
+    this.eventManager.addEventListener(document.documentElement, 'mousemove', (event: MouseEvent) => this.onMouseMove(event));
     this.eventManager.addEventListener(document.documentElement, 'mouseup', () => this.onMouseUp());
   }
 
@@ -468,7 +483,7 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  unregisterEvents() {
+  unregisterEvents(): void {
     this.eventManager.clear();
   }
 
@@ -476,29 +491,30 @@ class ManualRowMove extends BasePlugin {
    * `beforeColumnSort` hook callback. If user uses the sorting, manual row moving is disabled.
    *
    * @private
-   * @param {Number} column Column index where soring is present
-   * @param {*} order State of sorting. ASC/DESC/None
+   * @param column Column index where soring is present
+   * @param order State of sorting. ASC/DESC/None
    */
-  onBeforeColumnSort(column, order) {
-    const priv = privatePool.get(this);
+  onBeforeColumnSort(column: number, order: unknown): void {
+    const priv = this.#priv;
 
-    priv.disallowMoving = order !== void 0;
+    priv.disallowMoving = order !== undefined;
   }
 
   /**
    * Changes the behavior of selection / dragging.
    *
    * @private
-   * @param {MouseEvent} event
-   * @param {CellCoords} coords Visual coordinates.
-   * @param {HTMLElement} TD
-   * @param {Object} blockCalculations
+   * @param event
+   * @param coords Visual coordinates.
+   * @param TD
+   * @param blockCalculations
    */
-  onBeforeOnCellMouseDown(event, coords, TD, blockCalculations) {
+  onBeforeOnCellMouseDown(event: GridMouseEvent, coords: CellCoords, TD: HTMLTableCellElement,
+    blockCalculations: BlockCalculations): void {
     const wtTable = this.hot.view.wt.wtTable;
     const isHeaderSelection = this.hot.selection.isSelectedByRowHeader();
     const selection = this.hot.getSelectedRangeLast();
-    const priv = privatePool.get(this);
+    const priv = this.#priv;
 
     if (!selection || !isHeaderSelection || priv.pressed || event.button !== 0) {
       priv.pressed = false;
@@ -529,9 +545,9 @@ class ManualRowMove extends BasePlugin {
 
       const leftPos = wtTable.holder.scrollLeft + this.hot.view.wt.wtViewport.getRowHeaderWidth();
 
-      this.backlight.setPosition(null, leftPos);
+      this.backlight.setPosition(undefined, leftPos);
       this.backlight.setSize(wtTable.hider.offsetWidth - leftPos, this.getRowsHeight(start, end + 1));
-      this.backlight.setOffset((this.getRowsHeight(start, coords.row) + event.layerY) * -1, null);
+      this.backlight.setOffset((this.getRowsHeight(start, coords.row) + event.layerY) * -1, undefined);
 
       addClass(this.hot.rootElement, CSS_ON_MOVING);
 
@@ -548,24 +564,15 @@ class ManualRowMove extends BasePlugin {
    * 'mouseMove' event callback. Fired when pointer move on document.documentElement.
    *
    * @private
-   * @param {MouseEvent} event `mousemove` event properties.
+   * @param event `mousemove` event properties.
    */
-  onMouseMove(event) {
-    const priv = privatePool.get(this);
+  onMouseMove(event: MouseEvent): void {
+    const priv = this.#priv;
 
     if (!priv.pressed) {
       return;
     }
 
-    // callback for browser which doesn't supports CSS pointer-event: none
-    if (event.realTarget === this.backlight.element) {
-      const height = this.backlight.getSize().height;
-      this.backlight.setSize(null, 0);
-
-      setTimeout(function() {
-        this.backlight.setPosition(null, height);
-      });
-    }
 
     priv.target.eventPageY = event.pageY;
     this.refreshPositions();
@@ -575,14 +582,15 @@ class ManualRowMove extends BasePlugin {
    * 'beforeOnCellMouseOver' hook callback. Fired when pointer was over cell.
    *
    * @private
-   * @param {MouseEvent} event `mouseover` event properties.
-   * @param {CellCoords} coords Visual cell coordinates where was fired event.
-   * @param {HTMLElement} TD Cell represented as HTMLElement.
-   * @param {Object} blockCalculations Object which contains information about blockCalculation for row, column or cells.
+   * @param event `mouseover` event properties.
+   * @param coords Visual cell coordinates where was fired event.
+   * @param TD Cell represented as HTMLElement.
+   * @param blockCalculations Object which contains information about blockCalculation for row, column or cells.
    */
-  onBeforeOnCellMouseOver(event, coords, TD, blockCalculations) {
+  onBeforeOnCellMouseOver(event: GridMouseEvent, coords: CellCoords, TD: HTMLTableCellElement,
+    blockCalculations: BlockCalculations): void {
     const selectedRange = this.hot.getSelectedRangeLast();
-    const priv = privatePool.get(this);
+    const priv = this.#priv;
 
     if (!selectedRange || !priv.pressed) {
       return;
@@ -607,8 +615,8 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  onMouseUp() {
-    const priv = privatePool.get(this);
+  onMouseUp(): void {
+    const priv = this.#priv;
     const target = priv.target.row;
     const rowsLen = priv.rowsToMove.length;
 
@@ -621,7 +629,7 @@ class ManualRowMove extends BasePlugin {
       addClass(this.hot.rootElement, CSS_AFTER_SELECTION);
     }
 
-    if (rowsLen < 1 || target === void 0 || priv.rowsToMove.indexOf(target) > -1 ||
+    if (rowsLen < 1 || target === undefined || priv.rowsToMove.indexOf(target) > -1 ||
         (priv.rowsToMove[rowsLen - 1] === target - 1)) {
       return;
     }
@@ -632,8 +640,8 @@ class ManualRowMove extends BasePlugin {
     this.hot.render();
 
     if (!priv.disallowMoving) {
-      const selectionStart = this.rowsMapper.getIndexByValue(priv.rowsToMove[0]);
-      const selectionEnd = this.rowsMapper.getIndexByValue(priv.rowsToMove[rowsLen - 1]);
+      const selectionStart = this.rowsMapper.getIndexByValue(priv.rowsToMove[0])!;
+      const selectionEnd = this.rowsMapper.getIndexByValue(priv.rowsToMove[rowsLen - 1])!;
       this.changeSelection(selectionStart, selectionEnd);
     }
 
@@ -645,13 +653,13 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  onAfterScrollHorizontally() {
+  onAfterScrollHorizontally(): void {
     const wtTable = this.hot.view.wt.wtTable;
     const headerWidth = this.hot.view.wt.wtViewport.getRowHeaderWidth();
     const scrollLeft = wtTable.holder.scrollLeft;
     const posLeft = headerWidth + scrollLeft;
 
-    this.backlight.setPosition(null, posLeft);
+    this.backlight.setPosition(undefined, posLeft);
     this.backlight.setSize(wtTable.hider.offsetWidth - posLeft);
   }
 
@@ -659,10 +667,10 @@ class ManualRowMove extends BasePlugin {
    * `afterCreateRow` hook callback.
    *
    * @private
-   * @param {Number} index Visual index of the created row.
-   * @param {Number} amount Amount of created rows.
+   * @param index Visual index of the created row.
+   * @param amount Amount of created rows.
    */
-  onAfterCreateRow(index, amount) {
+  onAfterCreateRow(index: number, amount: number): void {
     this.rowsMapper.shiftItems(index, amount);
   }
 
@@ -670,10 +678,10 @@ class ManualRowMove extends BasePlugin {
    * On before remove row listener.
    *
    * @private
-   * @param {Number} index Visual row index.
-   * @param {Number} amount Defines how many rows removed.
+   * @param index Visual row index.
+   * @param amount Defines how many rows removed.
    */
-  onBeforeRemoveRow(index, amount) {
+  onBeforeRemoveRow(index: number | false, amount: number): void {
     this.removedRows.length = 0;
 
     if (index !== false) {
@@ -689,7 +697,7 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  onAfterRemoveRow() {
+  onAfterRemoveRow(): void {
     this.rowsMapper.unshiftItems(this.removedRows);
   }
 
@@ -698,7 +706,7 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  onAfterLoadData() {
+  onAfterLoadData(): void {
     this.updateRowsMapper();
   }
 
@@ -706,10 +714,10 @@ class ManualRowMove extends BasePlugin {
    * 'modifyRow' hook callback.
    *
    * @private
-   * @param {Number} row Visual Row index.
-   * @returns {Number} Physical row index.
+   * @param row Visual Row index.
+   * @returns Physical row index.
    */
-  onModifyRow(row, source) {
+  onModifyRow(row: number, source?: string): number {
     let physicalRow = row;
 
     if (source !== this.pluginName) {
@@ -724,11 +732,11 @@ class ManualRowMove extends BasePlugin {
    * 'unmodifyRow' hook callback.
    *
    * @private
-   * @param {Number} row Physical row index.
-   * @returns {Number} Visual row index.
+   * @param row Physical row index.
+   * @returns Visual row index.
    */
-  onUnmodifyRow(row) {
-    const indexInMapper = this.rowsMapper.getIndexByValue(row);
+  onUnmodifyRow(row: number): number {
+    const indexInMapper = this.rowsMapper.getIndexByValue(row)!;
 
     return indexInMapper === null ? row : indexInMapper;
   }
@@ -738,7 +746,7 @@ class ManualRowMove extends BasePlugin {
    *
    * @private
    */
-  onAfterPluginsInitialized() {
+  onAfterPluginsInitialized(): void {
     this.updateRowsMapper();
     this.initialSettings();
     this.backlight.build();
@@ -748,7 +756,7 @@ class ManualRowMove extends BasePlugin {
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     this.backlight.destroy();
     this.guideline.destroy();
     this.rowsMapper.destroy();

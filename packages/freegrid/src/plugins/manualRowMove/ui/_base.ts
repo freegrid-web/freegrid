@@ -1,3 +1,5 @@
+import type { PluginHost } from './../../_base';
+
 const STATE_INITIALIZED = 0;
 const STATE_BUILT = 1;
 const STATE_APPENDED = 2;
@@ -8,34 +10,33 @@ const UNIT = 'px';
  * @private
  */
 class BaseUI {
-  constructor(hotInstance) {
-    /**
-     * Instance of FreeGrid.
-     *
-     * @type {Core}
-     */
+  /**
+   * Instance of FreeGrid.
+   */
+  hot: PluginHost;
+
+  /**
+   * DOM element representing the ui element (after `build()`).
+   *
+   * @private
+   */
+  _element: HTMLDivElement = null!;
+
+  /**
+   * Build state of the element: initialized, built or appended.
+   */
+  state = STATE_INITIALIZED;
+
+  constructor(hotInstance: PluginHost) {
     this.hot = hotInstance;
-    /**
-     * DOM element representing the ui element.
-     *
-     * @type {HTMLElement}
-     * @private
-     */
-    this._element = null;
-    /**
-     * Flag which determines build state of element.
-     *
-     * @type {Boolean}
-     */
-    this.state = STATE_INITIALIZED;
   }
 
   /**
    * Add created UI elements to table.
    *
-   * @param {HTMLElement} wrapper Element which are parent for our UI element.
+   * @param wrapper Element which are parent for our UI element.
    */
-  appendTo(wrapper) {
+  appendTo(wrapper: HTMLElement): void {
     wrapper.appendChild(this._element);
 
     this.state = STATE_APPENDED;
@@ -44,7 +45,7 @@ class BaseUI {
   /**
    * Method for create UI element. Only create, without append to table.
    */
-  build() {
+  build(): void {
     this._element = document.createElement('div');
     this.state = STATE_BUILT;
   }
@@ -52,54 +53,50 @@ class BaseUI {
   /**
    * Method for remove UI element.
    */
-  destroy() {
+  destroy(): void {
     if (this.isAppended()) {
-      this._element.parentElement.removeChild(this._element);
+      this._element.remove();
     }
 
-    this._element = null;
+    this._element = null!;
     this.state = STATE_INITIALIZED;
   }
 
   /**
    * Check if UI element are appended.
-   *
-   * @returns {Boolean}
    */
-  isAppended() {
+  isAppended(): boolean {
     return this.state === STATE_APPENDED;
   }
 
   /**
    * Check if UI element are built.
-   *
-   * @returns {Boolean}
    */
-  isBuilt() {
+  isBuilt(): boolean {
     return this.state >= STATE_BUILT;
   }
 
   /**
    * Setter for position.
    *
-   * @param {Number} top New top position of the element.
-   * @param {Number} left New left position of the element.
+   * @param [top] New top position of the element.
+   * @param [left] New left position of the element.
    */
-  setPosition(top, left) {
-    if (top !== void 0) {
-      this._element.style.top = top + UNIT;
+  setPosition(top?: number, left?: number): void {
+    if (top !== undefined) {
+      this._element.style.top = `${top}${UNIT}`;
     }
-    if (left !== void 0) {
-      this._element.style.left = left + UNIT;
+    if (left !== undefined) {
+      this._element.style.left = `${left}${UNIT}`;
     }
   }
 
   /**
    * Getter for the element position.
    *
-   * @returns {Object} Object contains left and top position of the element.
+   * @returns Object contains left and top position of the element.
    */
-  getPosition() {
+  getPosition(): { top: number; left: number } {
     return {
       top: this._element.style.top ? parseInt(this._element.style.top, 10) : 0,
       left: this._element.style.left ? parseInt(this._element.style.left, 10) : 0
@@ -109,24 +106,24 @@ class BaseUI {
   /**
    * Setter for the element size.
    *
-   * @param {Number} width New width of the element.
-   * @param {Number} height New height of the element.
+   * @param [width] New width of the element.
+   * @param [height] New height of the element.
    */
-  setSize(width, height) {
+  setSize(width?: number, height?: number): void {
     if (width) {
-      this._element.style.width = width + UNIT;
+      this._element.style.width = `${width}${UNIT}`;
     }
     if (height) {
-      this._element.style.height = height + UNIT;
+      this._element.style.height = `${height}${UNIT}`;
     }
   }
 
   /**
    * Getter for the element position.
    *
-   * @returns {Object} Object contains height and width of the element.
+   * @returns Object contains height and width of the element.
    */
-  getSize() {
+  getSize(): { width: number; height: number } {
     return {
       width: this._element.style.width ? parseInt(this._element.style.width, 10) : 0,
       height: this._element.style.height ? parseInt(this._element.style.height, 10) : 0
@@ -136,24 +133,24 @@ class BaseUI {
   /**
    * Setter for the element offset. Offset means marginTop and marginLeft of the element.
    *
-   * @param {Number} top New margin top of the element.
-   * @param {Number} left New margin left of the element.
+   * @param [top] New margin top of the element.
+   * @param [left] New margin left of the element.
    */
-  setOffset(top, left) {
+  setOffset(top?: number, left?: number): void {
     if (top) {
-      this._element.style.marginTop = top + UNIT;
+      this._element.style.marginTop = `${top}${UNIT}`;
     }
     if (left) {
-      this._element.style.marginLeft = left + UNIT;
+      this._element.style.marginLeft = `${left}${UNIT}`;
     }
   }
 
   /**
    * Getter for the element offset.
    *
-   * @returns {Object} Object contains top and left offset of the element.
+   * @returns Object contains top and left offset of the element.
    */
-  getOffset() {
+  getOffset(): { top: number; left: number } {
     return {
       top: this._element.style.marginTop ? parseInt(this._element.style.marginTop, 10) : 0,
       left: this._element.style.marginLeft ? parseInt(this._element.style.marginLeft, 10) : 0
