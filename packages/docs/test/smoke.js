@@ -117,6 +117,17 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     const entries = await page.locator('.vp-doc h3[id]').count();
 
     if (entries < API_ENTRIES[path]) failures.push(`${path}: ${entries} entries, expected at least ${API_ENTRIES[path]}`);
+    // The right-hand index lists every entry of the page, alphabetically in each group (plugin methods by plugin).
+    const groups = await page.locator('.related-api--aside .related-api__group')
+      .evaluateAll(els => els.map(el => [...el.querySelectorAll('li')].map(li => li.textContent.trim())));
+    const listed = groups.flat().length;
+
+    if (listed < entries) failures.push(`${path}: the index lists ${listed} of ${entries} entries`);
+    groups.forEach((group) => {
+      const sorted = [...group].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+
+      if (group.join() !== sorted.join()) failures.push(`${path}: an index group is not in alphabetical order`);
+    });
   }
   if (path === 'guide/data-and-events.html') {
     // Every "Related API" link leads to an entry of the reference.
