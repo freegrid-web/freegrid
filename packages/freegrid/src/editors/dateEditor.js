@@ -58,6 +58,7 @@ class DateEditor extends TextEditor {
     document.body.appendChild(this.datePicker);
 
     this.$datePicker = new Pikaday(this.getDatePickerConfig());
+    this.useDateFormatInPicker();
     const eventManager = new EventManager(this);
 
     /**
@@ -65,6 +66,32 @@ class DateEditor extends TextEditor {
      */
     eventManager.addEventListener(this.datePicker, 'mousedown', event => stopPropagation(event));
     this.hideDatepicker();
+  }
+
+  /**
+   * Pikaday writes and reads its field with moment only (otherwise with the browser's date strings); make it use
+   * FreeGrid's date format instead.
+   */
+  useDateFormatInPicker() {
+    const picker = this.$datePicker;
+    const { field } = picker._o;
+
+    picker.toString = format => (picker._d instanceof Date ? formatDate(picker._d, format || picker._o.format) : '');
+    field.removeEventListener('change', picker._onInputChange);
+    picker._onInputChange = (event) => {
+      if (event.firedBy === picker) {
+        return;
+      }
+      const date = parseDate(field.value, picker._o.format, picker._o.formatStrict);
+
+      if (date) {
+        picker.setDate(date);
+      }
+      if (!picker._v) {
+        picker.show();
+      }
+    };
+    field.addEventListener('change', picker._onInputChange);
   }
 
   /**
