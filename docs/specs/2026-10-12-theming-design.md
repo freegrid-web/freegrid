@@ -143,3 +143,26 @@ updated) moves below the page outline in the right column, so "On this page" com
 
 The legacy class names stay styled: the CSS build already emits each FreeGrid selector with its legacy counterpart,
 and the variables apply to both. No public JavaScript API changes.
+
+## 9. Styles: Classic and Modern (added 2026-10-13)
+
+A second axis next to the color theme. **Classic** (the default) is today's look, unchanged. **Modern** is a roomier,
+flatter look: `class="fg-style-modern"` or `data-fg-style="modern"` on the grid or any ancestor, combinable with any
+color theme (light, dark, auto).
+
+- **Size variables** in `variables.css`: `--fg-row-height` (Classic `23px`, the row's total height including its
+  bottom border), `--fg-cell-padding-x` (Classic `4px`), plus `--fg-radius` (editor and menu corners) and
+  `--fg-header-font-weight`. The cell CSS uses them (`height: calc(var(--fg-row-height) - 1px)`, line height and
+  horizontal padding).
+- **JavaScript reads the row height**: when the grid is created, FreeGrid reads `--fg-row-height` from its root
+  element and gives it to Walkontable as the default row height. Every hard-coded `23` (context menu rows, autocomplete
+  list, row move) uses that value. A style switched after the grid was created takes effect after
+  `updateSettings({})`.
+- **Modern** sets: row height `32px`, cell padding `8px`, `system-ui` font at `13px`, headers on the cell background
+  with muted text, lighter grid lines, rounded editor and menu (`--fg-radius: 6px`) with a soft shadow. It changes
+  only sizes, fonts, radii and which base color a component uses — never a color literal — so it works with every color
+  theme.
+- Floating elements get the grid's style class too (`applyTheme` copies `fg-style-*` as well as `fg-theme-*`).
+- Tests: Classic snapshots unchanged; Modern: rendered row height 32px, Walkontable's default row height 32, scrolling
+  to the last row shows it, the editor and the context menu line up with their cell; works with the dark theme.
+- Docs: a Classic / Modern switch in the playground and a "Styles" section on the Theming page.
