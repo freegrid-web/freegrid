@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Docs: a complete API reference, generated from the source code at every docs build:
+  - [Methods](https://freegrid-web.github.io/freegrid/api/methods): every method, with parameters, return value and
+    examples.
+  - Events: every event, with its arguments.
+  - Settings: every setting, with its type and default.
+  - Plugins: each plugin's setting and methods.
+
+  Entries are grouped by topic and searchable. Guide pages list every related method, event and setting in a
+  "Related API" column: on the right on wide screens, at the end of the page on narrow ones. Settings and events of
+  features FreeGrid does not have (filters, formulas, nested headers, hidden rows/columns, …) are not listed.
+  Outdated links and wording in the source code's comments were fixed.
 - Modern style has its own look, inspired by modern spreadsheet apps:
   - light grid lines, soft text and light headers in medium weight;
   - a blue accent and a round fill handle;

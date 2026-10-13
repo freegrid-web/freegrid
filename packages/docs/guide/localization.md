@@ -1,3 +1,7 @@
+---
+api: [Localization]
+---
+
 # Localization
 
 The built-in UI (for example the context menu) is in English (`en-US`) by default. FreeGrid includes 15 more
