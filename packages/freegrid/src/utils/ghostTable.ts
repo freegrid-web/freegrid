@@ -1,395 +1,273 @@
 import { addClass, outerHeight, outerWidth } from './../helpers/dom/element';
-import { arrayEach } from './../helpers/array';
+import type { Samples } from './samplesGenerator';
+
+type CellProperties = Record<string, unknown> & { row?: number; col?: number };
+type Renderer = (hot: Grid, td: HTMLTableCellElement, row: number, column: number, prop: unknown, value: unknown,
+  cellProperties: CellProperties) => void;
+
+/** What GhostTable needs from a grid. */
+type Grid = {
+  rootElement: HTMLElement;
+  table: HTMLTableElement;
+  getColHeader(column: number): unknown;
+  hasRowHeaders(): boolean;
+  getCellMeta(row: number, column: number): CellProperties;
+  getCellRenderer(cellProperties: CellProperties): Renderer;
+  colToProp(column: number): unknown;
+  view: {
+    appendColHeader(column: number, th: HTMLTableCellElement): void;
+    appendRowHeader(row: number, th: HTMLTableCellElement): void;
+    wt: { wtTable: { getStretchedColumnWidth(column: number): number } };
+  };
+};
+
+type TableParts = {
+  fragment: DocumentFragment;
+  table: HTMLTableElement;
+  tHead: HTMLTableSectionElement;
+  tBody: HTMLTableSectionElement;
+  colGroup: HTMLTableColElement;
+  tr: HTMLTableRowElement;
+  th: HTMLTableCellElement;
+};
+type Container = { fragment: DocumentFragment; container: HTMLDivElement };
+type MeasuredRow = { row: number; table?: HTMLTableElement };
+type MeasuredColumn = { col: number; table?: HTMLTableElement };
+type Settings = Record<string, unknown>;
 
 /**
- * @class GhostTable
- * @util
+ * Renders sample cells of some rows or columns in a hidden table, with the grid's renderers and classes, to measure
+ * their natural height or width (for the auto-size plugins). One instance measures either rows or columns.
  */
 class GhostTable {
-  constructor(hotInstance) {
-    /**
-     * FreeGrid instance.
-     *
-     * @type {Core}
-     */
+  hot: Grid;
+
+  /** Wraps every measured table; in the grid's root element while measuring. */
+  container: Container | null = null;
+
+  /** Whether the tables are in the document. */
+  injected = false;
+
+  rows: MeasuredRow[] = [];
+
+  columns: MeasuredColumn[] = [];
+
+  /** Samples of the row or column being added. */
+  samples: Samples | null = null;
+
+  #settings: Settings | null = { useHeaders: true };
+
+  constructor(hotInstance: Grid) {
     this.hot = hotInstance;
-    /**
-     * Container element where every table will be injected.
-     *
-     * @type {HTMLElement|null}
-     */
-    this.container = null;
-    /**
-     * Flag which determine is table was injected to DOM.
-     *
-     * @type {Boolean}
-     */
-    this.injected = false;
-    /**
-     * Added rows collection.
-     *
-     * @type {Array}
-     */
-    this.rows = [];
-    /**
-     * Added columns collection.
-     *
-     * @type {Array}
-     */
-    this.columns = [];
-    /**
-     * Samples prepared for calculations.
-     *
-     * @type {Map}
-     * @default {null}
-     */
-    this.samples = null;
-    /**
-     * Ghost table settings.
-     *
-     * @type {Object}
-     * @default {Object}
-     */
-    this.settings = {
-      useHeaders: true
-    };
   }
 
-  /**
-   * Add row.
-   *
-   * @param {Number} row Row index.
-   * @param {Map} samples Samples Map object.
-   */
-  addRow(row, samples) {
+  /** Adds a row to measure, with its sample cells. */
+  addRow(row: number, samples: Samples): void {
     if (this.columns.length) {
       throw new Error('Doesn\'t support multi-dimensional table');
     }
     if (!this.rows.length) {
       this.container = this.createContainer(this.hot.rootElement.className);
     }
-    const rowObject = { row };
+    const rowObject: MeasuredRow = { row };
+
     this.rows.push(rowObject);
-
     this.samples = samples;
-    this.table = this.createTable(this.hot.table.className);
-    this.table.colGroup.appendChild(this.createColGroupsCol());
-    this.table.tr.appendChild(this.createRow(row));
-    this.container.container.appendChild(this.table.fragment);
+    const table = this.createTable(this.hot.table.className);
 
-    rowObject.table = this.table.table;
+    table.colGroup.appendChild(this.createColGroupsCol());
+    table.tr.appendChild(this.createRow(row));
+    this.container!.container.appendChild(table.fragment);
+    rowObject.table = table.table;
   }
 
-  /**
-   * Add a row consisting of the column headers.
-   */
-  addColumnHeadersRow(samples) {
+  /** Adds the row of column headers (row -1) to measure. */
+  addColumnHeadersRow(samples: Samples): void {
     const colHeader = this.hot.getColHeader(0);
 
-    if (colHeader !== null && colHeader !== void 0) {
-      const rowObject = { row: -1 };
-
-      this.rows.push(rowObject);
-
-      this.container = this.createContainer(this.hot.rootElement.className);
-      this.samples = samples;
-      this.table = this.createTable(this.hot.table.className);
-
-      this.table.colGroup.appendChild(this.createColGroupsCol());
-      this.table.tHead.appendChild(this.createColumnHeadersRow());
-      this.container.container.appendChild(this.table.fragment);
-
-      rowObject.table = this.table.table;
+    if (colHeader === null || colHeader === undefined) {
+      return;
     }
+    const rowObject: MeasuredRow = { row: -1 };
+
+    this.rows.push(rowObject);
+    this.container = this.createContainer(this.hot.rootElement.className);
+    this.samples = samples;
+    const table = this.createTable(this.hot.table.className);
+
+    table.colGroup.appendChild(this.createColGroupsCol());
+    table.tHead.appendChild(this.createColumnHeadersRow());
+    this.container.container.appendChild(table.fragment);
+    rowObject.table = table.table;
   }
 
-  /**
-   * Add column.
-   *
-   * @param {Number} column Column index.
-   * @param {Map} samples Samples Map object.
-   */
-  addColumn(column, samples) {
+  /** Adds a column to measure, with its sample cells (and its header, unless `useHeaders` is off). */
+  addColumn(column: number, samples: Samples): void {
     if (this.rows.length) {
       throw new Error('Doesn\'t support multi-dimensional table');
     }
     if (!this.columns.length) {
       this.container = this.createContainer(this.hot.rootElement.className);
     }
-    const columnObject = { col: column };
-    this.columns.push(columnObject);
+    const columnObject: MeasuredColumn = { col: column };
 
+    this.columns.push(columnObject);
     this.samples = samples;
-    this.table = this.createTable(this.hot.table.className);
+    const table = this.createTable(this.hot.table.className);
 
     if (this.getSetting('useHeaders') && this.hot.getColHeader(column) !== null) {
-      this.hot.view.appendColHeader(column, this.table.th);
+      this.hot.view.appendColHeader(column, table.th);
     }
-    this.table.tBody.appendChild(this.createCol(column));
-    this.container.container.appendChild(this.table.fragment);
-
-    columnObject.table = this.table.table;
+    table.tBody.appendChild(this.createCol(column));
+    this.container!.container.appendChild(table.fragment);
+    columnObject.table = table.table;
   }
 
-  /**
-   * Get calculated heights.
-   *
-   * @param {Function} callback Callback which will be fired for each calculated row.
-   */
-  getHeights(callback) {
+  /** Measures the rows: `callback(row, height)` for each. */
+  getHeights(callback: (row: number, height: number) => void): void {
     if (!this.injected) {
       this.injectTable();
     }
-    arrayEach(this.rows, (row) => {
-      // -1 <- reduce border-top from table
-      callback(row.row, outerHeight(row.table) - 1);
-    });
+    // -1: without the table's top border.
+    this.rows.forEach(({ row, table }) => callback(row, outerHeight(table as HTMLElement) - 1));
   }
 
-  /**
-   * Get calculated widths.
-   *
-   * @param {Function} callback Callback which will be fired for each calculated column.
-   */
-  getWidths(callback) {
+  /** Measures the columns: `callback(column, width)` for each. */
+  getWidths(callback: (column: number, width: number) => void): void {
     if (!this.injected) {
       this.injectTable();
     }
-    arrayEach(this.columns, (column) => {
-      callback(column.col, outerWidth(column.table));
-    });
+    this.columns.forEach(({ col, table }) => callback(col, outerWidth(table as HTMLElement)));
   }
 
-  /**
-   * Set the Ghost Table settings to the provided object.
-   *
-   * @param {Object} settings New Ghost Table Settings
-   */
-  setSettings(settings) {
-    this.settings = settings;
+  setSettings(settings: Settings | null): void {
+    this.#settings = settings;
   }
 
-  /**
-   * Set a single setting of the Ghost Table.
-   *
-   * @param {String} name Setting name.
-   * @param {*} value Setting value.
-   */
-  setSetting(name, value) {
-    if (!this.settings) {
-      this.settings = {};
-    }
-
-    this.settings[name] = value;
+  setSetting(name: string, value: unknown): void {
+    this.#settings ??= {};
+    this.#settings[name] = value;
   }
 
-  /**
-   * Get the Ghost Table settings.
-   *
-   * @returns {Object|null}
-   */
-  getSettings() {
-    return this.settings;
+  getSettings(): Settings | null {
+    return this.#settings;
   }
 
-  /**
-   * Get a single Ghost Table setting.
-   *
-   * @param {String} name
-   * @returns {Boolean|null}
-   */
-  getSetting(name) {
-    if (this.settings) {
-      return this.settings[name];
-    }
-    return null;
-
+  getSetting(name: string): unknown {
+    return this.#settings ? this.#settings[name] : null;
   }
 
-  /**
-   * Create colgroup col elements.
-   *
-   * @returns {DocumentFragment}
-   */
-  createColGroupsCol() {
-    const d = document;
-    const fragment = d.createDocumentFragment();
+  /** The `<col>`s of a row table: the row header's and one per sample cell. */
+  createColGroupsCol(): DocumentFragment {
+    const fragment = document.createDocumentFragment();
 
     if (this.hot.hasRowHeaders()) {
       fragment.appendChild(this.createColElement(-1));
     }
-
-    this.samples.forEach((sample) => {
-      arrayEach(sample.strings, (string) => {
-        fragment.appendChild(this.createColElement(string.col));
-      });
-    });
+    this.#sampled().forEach(({ col }) => fragment.appendChild(this.createColElement(col as number)));
 
     return fragment;
   }
 
-  /**
-   * Create table row element.
-   *
-   * @param {Number} row Row index.
-   * @returns {DocumentFragment} Returns created table row elements.
-   */
-  createRow(row) {
-    const d = document;
-    const fragment = d.createDocumentFragment();
-    const th = d.createElement('th');
+  /** The cells of a row: its header and one rendered cell per sample. */
+  createRow(row: number): DocumentFragment {
+    const fragment = document.createDocumentFragment();
 
     if (this.hot.hasRowHeaders()) {
-      this.hot.view.appendRowHeader(row, th);
+      const th = document.createElement('th');
 
+      this.hot.view.appendRowHeader(row, th);
       fragment.appendChild(th);
     }
-
-    this.samples.forEach((sample) => {
-      arrayEach(sample.strings, (string) => {
-        const column = string.col;
-        const cellProperties = this.hot.getCellMeta(row, column);
-
-        cellProperties.col = column;
-        cellProperties.row = row;
-
-        const renderer = this.hot.getCellRenderer(cellProperties);
-        const td = d.createElement('td');
-
-        renderer(this.hot, td, row, column, this.hot.colToProp(column), string.value, cellProperties);
-        fragment.appendChild(td);
-      });
+    this.#sampled().forEach(({ col, value }) => {
+      fragment.appendChild(this.#renderCell(row, col as number, value));
     });
 
     return fragment;
   }
 
-  createColumnHeadersRow() {
-    const d = document;
-    const fragment = d.createDocumentFragment();
+  /** The column headers of the sampled columns (and the corner, with row headers). */
+  createColumnHeadersRow(): DocumentFragment {
+    const fragment = document.createDocumentFragment();
 
     if (this.hot.hasRowHeaders()) {
-      const th = d.createElement('th');
+      const th = document.createElement('th');
+
       this.hot.view.appendColHeader(-1, th);
       fragment.appendChild(th);
     }
+    this.#sampled().forEach(({ col }) => {
+      const th = document.createElement('th');
 
-    this.samples.forEach((sample) => {
-      arrayEach(sample.strings, (string) => {
-        const column = string.col;
-
-        const th = d.createElement('th');
-
-        this.hot.view.appendColHeader(column, th);
-        fragment.appendChild(th);
-      });
+      this.hot.view.appendColHeader(col as number, th);
+      fragment.appendChild(th);
     });
 
     return fragment;
   }
 
-  /**
-   * Create table column elements.
-   *
-   * @param {Number} column Column index.
-   * @returns {DocumentFragment} Returns created column table column elements.
-   */
-  createCol(column) {
-    const d = document;
-    const fragment = d.createDocumentFragment();
+  /** The rows of a column table: one rendered cell per sample. */
+  createCol(column: number): DocumentFragment {
+    const fragment = document.createDocumentFragment();
 
-    this.samples.forEach((sample) => {
-      arrayEach(sample.strings, (string) => {
-        const row = string.row;
-        const cellProperties = this.hot.getCellMeta(row, column);
+    this.#sampled().forEach(({ row, value }) => {
+      const td = document.createElement('td');
+      const tr = document.createElement('tr');
 
-        cellProperties.col = column;
-        cellProperties.row = row;
-
-        const renderer = this.hot.getCellRenderer(cellProperties);
-        const td = d.createElement('td');
-        const tr = d.createElement('tr');
-
-        // Indicate that this element is created and supported by GhostTable. It can be useful to
-        // exclude rendering performance costly logic or exclude logic which doesn't work within a hidden table.
-        td.setAttribute('ghost-table', 1);
-        renderer(this.hot, td, row, column, this.hot.colToProp(column), string.value, cellProperties);
-        tr.appendChild(td);
-        fragment.appendChild(tr);
-      });
+      // Marks cells of the ghost table before rendering, so that renderers can skip logic that is costly or does not
+      // work in a hidden table.
+      td.setAttribute('ghost-table', '1');
+      this.#renderCell(row as number, column, value, td);
+      tr.appendChild(td);
+      fragment.appendChild(tr);
     });
 
     return fragment;
   }
 
-  /**
-   * Remove table from document and reset internal state.
-   */
-  clean() {
+  /** Removes the tables and forgets what was measured. */
+  clean(): void {
     this.rows.length = 0;
-    this.rows[-1] = void 0;
+    (this.rows as unknown as Record<number, undefined>)[-1] = undefined;
     this.columns.length = 0;
-
-    if (this.samples) {
-      this.samples.clear();
-    }
+    this.samples?.clear();
     this.samples = null;
     this.removeTable();
   }
 
-  /**
-   * Inject generated table into document.
-   *
-   * @param {HTMLElement} [parent=null]
-   */
-  injectTable(parent = null) {
+  /** Puts the tables into the document (into the grid's root element by default), to measure them. */
+  injectTable(parent: HTMLElement | null = null): void {
     if (!this.injected) {
-      (parent || this.hot.rootElement).appendChild(this.container.fragment);
+      (parent || this.hot.rootElement).appendChild(this.container!.fragment);
       this.injected = true;
     }
   }
 
-  /**
-   * Remove table from document.
-   */
-  removeTable() {
-    if (this.injected && this.container.container.parentNode) {
-      this.container.container.parentNode.removeChild(this.container.container);
+  removeTable(): void {
+    if (this.injected && this.container?.container.parentNode) {
+      this.container.container.remove();
       this.container = null;
       this.injected = false;
     }
   }
 
-  /**
-   * Create col element.
-   *
-   * @param {Number} column Column index.
-   * @returns {HTMLElement}
-   */
-  createColElement(column) {
-    const d = document;
-    const col = d.createElement('col');
+  /** A `<col>` as wide as the grid's column. */
+  createColElement(column: number): HTMLTableColElement {
+    const col = document.createElement('col');
 
     col.style.width = `${this.hot.view.wt.wtTable.getStretchedColumnWidth(column)}px`;
 
     return col;
   }
 
-  /**
-   * Create table element.
-   *
-   * @param {String} className
-   * @returns {Object}
-   */
-  createTable(className = '') {
-    const d = document;
-    const fragment = d.createDocumentFragment();
-    const table = d.createElement('table');
-    const tHead = d.createElement('thead');
-    const tBody = d.createElement('tbody');
-    const colGroup = d.createElement('colgroup');
-    const tr = d.createElement('tr');
-    const th = d.createElement('th');
+  createTable(className = ''): TableParts {
+    const fragment = document.createDocumentFragment();
+    const table = document.createElement('table');
+    const tHead = document.createElement('thead');
+    const tBody = document.createElement('tbody');
+    const colGroup = document.createElement('colgroup');
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
 
     if (this.isVertical()) {
       table.appendChild(colGroup);
@@ -412,40 +290,41 @@ class GhostTable {
     return { fragment, table, tHead, tBody, colGroup, tr, th };
   }
 
-  /**
-   * Create container for tables.
-   *
-   * @param {String} className
-   * @returns {Object}
-   */
-  createContainer(className = '') {
-    const d = document;
-    const fragment = d.createDocumentFragment();
-    const container = d.createElement('div');
-    const containerClassName = `fg-ghost-table fg-auto-size ${className.trim()}`;
+  createContainer(className = ''): Container {
+    const fragment = document.createDocumentFragment();
+    const container = document.createElement('div');
 
-    addClass(container, containerClassName);
+    addClass(container, `fg-ghost-table fg-auto-size ${className.trim()}`);
     fragment.appendChild(container);
 
     return { fragment, container };
   }
 
-  /**
-   * Checks if table is raised vertically (checking rows).
-   *
-   * @returns {Boolean}
-   */
-  isVertical() {
+  /** Whether rows are measured. */
+  isVertical(): boolean {
     return !!(this.rows.length && !this.columns.length);
   }
 
-  /**
-   * Checks if table is raised horizontally (checking columns).
-   *
-   * @returns {Boolean}
-   */
-  isHorizontal() {
+  /** Whether columns are measured. */
+  isHorizontal(): boolean {
     return !!(this.columns.length && !this.rows.length);
+  }
+
+  /** Every sampled value of the current samples, in order. */
+  #sampled() {
+    return [...(this.samples as Samples).values()].flatMap(sample => sample.strings);
+  }
+
+  /** A cell (a new one or `td`) rendered by the grid's renderer for that cell. */
+  #renderCell(row: number, column: number, value: unknown, td = document.createElement('td')): HTMLTableCellElement {
+    const cellProperties = this.hot.getCellMeta(row, column);
+
+    cellProperties.col = column;
+    cellProperties.row = row;
+
+    this.hot.getCellRenderer(cellProperties)(this.hot, td, row, column, this.hot.colToProp(column), value, cellProperties);
+
+    return td;
   }
 }
 

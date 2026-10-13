@@ -2,175 +2,106 @@ import { isObject } from './../helpers/object';
 import { rangeEach } from './../helpers/number';
 import { stringify } from './../helpers/mixed';
 
+/** A cell value to sample, and a length to add to the value's own (e.g. for a dropdown arrow). */
+export type SampleData = { value: unknown; bundleCountSeed?: number };
+export type DataFactory = (row: number, column: number) => SampleData;
+export type IndexRange = { from: number; to: number };
+/** A sampled value and where it is (`row` for column samples, `col` for row samples). */
+export type SampledValue = { value: unknown; row?: number; col?: number };
+export type Sample = { needed: number; strings: SampledValue[] };
+/** Samples of one row or column, by value length. */
+export type Samples = Map<number, Sample>;
+
 /**
- * @class SamplesGenerator
- * @util
+ * Picks, for each row or column, a few values of each length: the size of the longest values is what the auto-size
+ * plugins measure, without rendering every cell.
  */
 class SamplesGenerator {
-  /**
-   * Number of samples to take of each value length.
-   *
-   * @type {Number}
-   */
-  static get SAMPLE_COUNT() {
+  /** Values taken of each length, unless set with `setSampleCount`. */
+  static get SAMPLE_COUNT(): number {
     return 3;
   }
 
-  constructor(dataFactory) {
-    /**
-     * Samples prepared for calculations.
-     *
-     * @type {Map}
-     * @default {null}
-     */
-    this.samples = null;
-    /**
-     * Function which give the data to collect samples.
-     *
-     * @type {Function}
-     */
+  /** Gives the value of a cell. */
+  dataFactory: DataFactory;
+
+  #customSampleCount: number | null = null;
+
+  #allowDuplicates = false;
+
+  constructor(dataFactory: DataFactory) {
     this.dataFactory = dataFactory;
-    /**
-     * Custom number of samples to take of each value length.
-     *
-     * @type {Number}
-     * @default {null}
-     */
-    this.customSampleCount = null;
-    /**
-     * `true` if duplicate samples collection should be allowed, `false` otherwise.
-     *
-     * @type {Boolean}
-     * @default {false}
-     */
-    this.allowDuplicates = false;
   }
 
-  /**
-   * Get the sample count for this instance.
-   *
-   * @returns {Number}
-   */
-  getSampleCount() {
-    if (this.customSampleCount) {
-      return this.customSampleCount;
-    }
-    return SamplesGenerator.SAMPLE_COUNT;
+  getSampleCount(): number {
+    return this.#customSampleCount || SamplesGenerator.SAMPLE_COUNT;
   }
 
-  /**
-   * Set the sample count.
-   *
-   * @param {Number} sampleCount Number of samples to be collected.
-   */
-  setSampleCount(sampleCount) {
-    this.customSampleCount = sampleCount;
+  setSampleCount(sampleCount: number | null): void {
+    this.#customSampleCount = sampleCount;
   }
 
-  /**
-   * Set if the generator should accept duplicate values.
-   *
-   * @param {Boolean} allowDuplicates `true` to allow duplicate values.
-   */
-  setAllowDuplicates(allowDuplicates) {
-    this.allowDuplicates = allowDuplicates;
+  /** Whether the same value may be taken more than once. */
+  setAllowDuplicates(allowDuplicates: boolean): void {
+    this.#allowDuplicates = allowDuplicates;
   }
 
-  /**
-   * Generate samples for row. You can control which area should be sampled by passing `rowRange` object and `colRange` object.
-   *
-   * @param {Object|Number} rowRange
-   * @param {Object} colRange
-   * @returns {Object}
-   */
-  generateRowSamples(rowRange, colRange) {
+  /** Samples of rows `rowRange` (one row or a range), from the columns of `colRange`. */
+  generateRowSamples(rowRange: IndexRange | number, colRange: IndexRange): Map<number, Samples> {
     return this.generateSamples('row', colRange, rowRange);
   }
 
-  /**
-   * Generate samples for column. You can control which area should be sampled by passing `colRange` object and `rowRange` object.
-   *
-   * @param {Object} colRange Column index.
-   * @param {Object} rowRange Column index.
-   * @returns {Object}
-   */
-  generateColumnSamples(colRange, rowRange) {
+  /** Samples of columns `colRange` (one column or a range), from the rows of `rowRange`. */
+  generateColumnSamples(colRange: IndexRange | number, rowRange: IndexRange): Map<number, Samples> {
     return this.generateSamples('col', rowRange, colRange);
   }
 
-  /**
-   * Generate collection of samples.
-   *
-   * @param {String} type Type to generate. Can be `col` or `row`.
-   * @param {Object} range
-   * @param {Object|Number} specifierRange
-   * @returns {Map}
-   */
-  generateSamples(type, range, specifierRange) {
-    const samples = new Map();
+  generateSamples(type: 'row' | 'col', range: IndexRange, specifierRange: IndexRange | number): Map<number, Samples> {
+    const samples = new Map<number, Samples>();
     const { from, to } = typeof specifierRange === 'number' ? { from: specifierRange, to: specifierRange } : specifierRange;
 
     rangeEach(from, to, (index) => {
-      const sample = this.generateSample(type, range, index);
-
-      samples.set(index, sample);
+      samples.set(index, this.generateSample(type, range, index));
     });
 
     return samples;
   }
 
-  /**
-   * Generate sample for specified type (`row` or `col`).
-   *
-   * @param {String} type Samples type `row` or `col`.
-   * @param {Object} range
-   * @param {Number} specifierValue
-   * @returns {Map}
-   */
-  generateSample(type, range, specifierValue) {
+  /** Samples of one row or column (`specifierValue`), taken from the cells in `range`. */
+  generateSample(type: 'row' | 'col', range: IndexRange, specifierValue: number): Samples {
     if (type !== 'row' && type !== 'col') {
       throw new Error('Unsupported sample type');
     }
-
-    const samples = new Map();
+    const samples: Samples = new Map();
     const computedKey = type === 'row' ? 'col' : 'row';
-    const sampledValues = [];
+    const sampledValues: unknown[] = [];
 
     rangeEach(range.from, range.to, (index) => {
-      const { value, bundleCountSeed } = type === 'row' ? this.dataFactory(specifierValue, index) : this.dataFactory(index, specifierValue);
+      const { value, bundleCountSeed = 0 } = type === 'row'
+        ? this.dataFactory(specifierValue, index)
+        : this.dataFactory(index, specifierValue);
       const hasCustomBundleSeed = bundleCountSeed > 0;
-      let length;
+      let length: number;
 
       if (isObject(value)) {
-        length = Object.keys(value).length;
-
+        length = Object.keys(value as object).length;
       } else if (Array.isArray(value)) {
         length = value.length;
-
       } else {
         length = stringify(value).length;
       }
-
       if (hasCustomBundleSeed) {
         length += bundleCountSeed;
       }
-
       if (!samples.has(length)) {
-        samples.set(length, {
-          needed: this.getSampleCount(),
-          strings: [],
-        });
+        samples.set(length, { needed: this.getSampleCount(), strings: [] });
       }
-      const sample = samples.get(length);
+      const sample = samples.get(length) as Sample;
 
-      if (sample.needed) {
-        const duplicate = sampledValues.indexOf(value) > -1;
-
-        if (!duplicate || this.allowDuplicates || hasCustomBundleSeed) {
-          sample.strings.push({ value, [computedKey]: index });
-          sampledValues.push(value);
-          sample.needed -= 1;
-        }
+      if (sample.needed && (sampledValues.indexOf(value) === -1 || this.#allowDuplicates || hasCustomBundleSeed)) {
+        sample.strings.push({ value, [computedKey]: index });
+        sampledValues.push(value);
+        sample.needed -= 1;
       }
     });
 
