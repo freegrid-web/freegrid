@@ -1,6 +1,10 @@
 import { debounce } from '../../helpers/function';
 import { mixin } from '../../helpers/object';
 import localHooks from '../../mixins/localHooks';
+import type { LocalHooks } from '../../mixins/localHooks';
+
+/** A cell, as a range. */
+type CellRangeLike = { from: { row: number; col: number } };
 
 const DEFAULT_DISPLAY_DELAY = 250;
 const DEFAULT_HIDE_DELAY = 250;
@@ -12,34 +16,37 @@ const DEFAULT_HIDE_DELAY = 250;
  * @plugin Comments
  */
 class DisplaySwitch {
-  constructor(displayDelay) {
-    /**
-     * Flag to determine if comment can be showed or hidden. State `true` mean that last performed action
-     * was an attempt to show comment element. State `false` mean that it was attempt to hide comment element.
-     *
-     * @type {Boolean}
-     */
-    this.wasLastActionShow = true;
-    /**
-     * Show comment after predefined delay. It keeps reference to immutable `debounce` function.
-     *
-     * @type {Function}
-     */
-    this.showDebounced = null;
-    /**
-     * Reference to timer, run by `setTimeout`, which is hiding comment
-     *
-     * @type {Number}
-     */
-    this.hidingTimer = null;
+  // From the localHooks mixin (on the prototype): `declare` keeps class fields from hiding them.
+  declare addLocalHook: LocalHooks['addLocalHook'];
 
+  declare runLocalHooks: LocalHooks['runLocalHooks'];
+
+  declare clearLocalHooks: LocalHooks['clearLocalHooks'];
+
+  /**
+   * Flag to determine if comment can be showed or hidden. State `true` mean that last performed action
+   * was an attempt to show comment element. State `false` mean that it was attempt to hide comment element.
+   */
+  wasLastActionShow = true;
+
+  /**
+   * Show comment after predefined delay. It keeps reference to immutable `debounce` function.
+   */
+  showDebounced: (range: CellRangeLike) => void = () => {};
+
+  /**
+   * Reference to timer, run by `setTimeout`, which is hiding comment
+   */
+  hidingTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(displayDelay?: number) {
     this.updateDelay(displayDelay);
   }
 
   /**
    * Responsible for hiding comment after proper delay.
    */
-  hide() {
+  hide(): void {
     this.wasLastActionShow = false;
 
     this.hidingTimer = setTimeout(() => {
@@ -52,9 +59,9 @@ class DisplaySwitch {
   /**
    * Responsible for showing comment after proper delay.
    *
-   * @param {Object} range Coordinates of selected cell.
+   * @param range Coordinates of selected cell.
    */
-  show(range) {
+  show(range: CellRangeLike): void {
     this.wasLastActionShow = true;
     this.showDebounced(range);
   }
@@ -62,20 +69,20 @@ class DisplaySwitch {
   /**
    * Cancel hiding comment.
    */
-  cancelHiding() {
+  cancelHiding(): void {
     this.wasLastActionShow = true;
 
-    clearTimeout(this.hidingTimer);
+    clearTimeout(this.hidingTimer!);
     this.hidingTimer = null;
   }
 
   /**
    * Update the switch settings.
    *
-   * @param {Number} displayDelay Delay of showing the comments (in milliseconds).
+   * @param [displayDelay] Delay of showing the comments (in milliseconds).
    */
-  updateDelay(displayDelay = DEFAULT_DISPLAY_DELAY) {
-    this.showDebounced = debounce((range) => {
+  updateDelay(displayDelay = DEFAULT_DISPLAY_DELAY): void {
+    this.showDebounced = debounce((range: CellRangeLike) => {
       if (this.wasLastActionShow) {
         this.runLocalHooks('show', range.from.row, range.from.col);
       }
@@ -85,7 +92,7 @@ class DisplaySwitch {
   /**
    * Destroy the switcher.
    */
-  destroy() {
+  destroy(): void {
     this.clearLocalHooks();
   }
 }

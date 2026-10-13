@@ -8,27 +8,32 @@ import { addClass } from './../../helpers/dom/element';
  * @plugin Comments
  */
 class CommentEditor {
-  static get CLASS_EDITOR_CONTAINER() {
+  static get CLASS_EDITOR_CONTAINER(): string {
     return 'fg-comments-container';
   }
 
-  static get CLASS_EDITOR() {
+  static get CLASS_EDITOR(): string {
     return 'fg-comments';
   }
 
-  static get CLASS_INPUT() {
+  static get CLASS_INPUT(): string {
     return 'fg-comment-text-area';
   }
 
-  static get CLASS_CELL() {
+  static get CLASS_CELL(): string {
     return 'fg-comment-cell';
   }
+
+  /** The editor's element (in a container in `<body>`, shared by the grids). */
+  editor: HTMLDivElement;
+
+  editorStyle: CSSStyleDeclaration;
+
+  hidden = true;
 
   constructor() {
     this.editor = this.createEditor();
     this.editorStyle = this.editor.style;
-
-    this.hidden = true;
 
     this.hide();
   }
@@ -36,10 +41,10 @@ class CommentEditor {
   /**
    * Set position of the comments editor according to the  provided x and y coordinates.
    *
-   * @param {Number} x X position (in pixels).
-   * @param {Number} y Y position (in pixels).
+   * @param x X position (in pixels).
+   * @param y Y position (in pixels).
    */
-  setPosition(x, y) {
+  setPosition(x: number, y: number): void {
     this.editorStyle.left = `${x}px`;
     this.editorStyle.top = `${y}px`;
   }
@@ -47,10 +52,10 @@ class CommentEditor {
   /**
    * Set the editor size according to the provided arguments.
    *
-   * @param {Number} width Width in pixels.
-   * @param {Number} height Height in pixels.
+   * @param [width] Width in pixels.
+   * @param [height] Height in pixels.
    */
-  setSize(width, height) {
+  setSize(width?: number, height?: number): void {
     if (width && height) {
       const input = this.getInputElement();
 
@@ -62,7 +67,7 @@ class CommentEditor {
   /**
    * Reset the editor size to its initial state.
    */
-  resetSize() {
+  resetSize(): void {
     const input = this.getInputElement();
 
     input.style.width = '';
@@ -72,9 +77,9 @@ class CommentEditor {
   /**
    * Set the read-only state for the comments editor.
    *
-   * @param {Boolean} state The new read only state.
+   * @param state The new read only state.
    */
-  setReadOnlyState(state) {
+  setReadOnlyState(state: boolean): void {
     const input = this.getInputElement();
 
     input.readOnly = state;
@@ -84,16 +89,16 @@ class CommentEditor {
    * Gives the editor the theme of a grid. The editor container is in <body>, outside the grid, and is shared by all
    * grids on the page.
    *
-   * @param {Element} themeSource The grid's root element.
+   * @param themeSource The grid's root element.
    */
-  setTheme(themeSource) {
-    applyTheme(this.editor.parentNode, themeSource);
+  setTheme(themeSource: Element): void {
+    applyTheme(this.editor.parentNode as HTMLElement, themeSource);
   }
 
   /**
    * Show the comments editor.
    */
-  show() {
+  show(): void {
     this.editorStyle.display = 'block';
     this.hidden = false;
   }
@@ -101,62 +106,52 @@ class CommentEditor {
   /**
    * Hide the comments editor.
    */
-  hide() {
+  hide(): void {
     this.editorStyle.display = 'none';
     this.hidden = true;
   }
 
   /**
    * Checks if the editor is visible.
-   *
-   * @returns {Boolean}
    */
-  isVisible() {
+  isVisible(): boolean {
     return this.editorStyle.display === 'block';
   }
 
   /**
    * Set the comment value.
    *
-   * @param {String} [value] The value to use.
+   * @param [value] The value to use.
    */
-  setValue(value = '') {
-    const comment = value || '';
-
-    this.getInputElement().value = comment;
+  setValue(value: string | null = ''): void {
+    this.getInputElement().value = value || '';
   }
 
   /**
    * Get the comment value.
-   *
-   * @returns {String}
    */
-  getValue() {
+  getValue(): string {
     return this.getInputElement().value;
   }
 
   /**
    * Checks if the comment input element is focused.
-   *
-   * @returns {Boolean}
    */
-  isFocused() {
+  isFocused(): boolean {
     return document.activeElement === this.getInputElement();
   }
 
   /**
    * Focus the comments input element.
    */
-  focus() {
+  focus(): void {
     this.getInputElement().focus();
   }
 
   /**
    * Create the `textarea` to be used as a comments editor.
-   *
-   * @returns {HTMLElement}
    */
-  createEditor() {
+  createEditor(): HTMLDivElement {
     const editor = document.createElement('div');
     const textArea = document.createElement('textarea');
     let container = document.querySelector(`.${CommentEditor.CLASS_EDITOR_CONTAINER}`);
@@ -178,20 +173,18 @@ class CommentEditor {
 
   /**
    * Get the input element.
-   *
-   * @returns {HTMLElement}
    */
-  getInputElement() {
-    return this.editor.querySelector(`.${CommentEditor.CLASS_INPUT}`);
+  getInputElement(): HTMLTextAreaElement {
+    return this.editor.querySelector(`.${CommentEditor.CLASS_INPUT}`) as HTMLTextAreaElement;
   }
 
   /**
    * Destroy the comments editor.
    */
-  destroy() {
-    this.editor.parentNode.removeChild(this.editor);
-    this.editor = null;
-    this.editorStyle = null;
+  destroy(): void {
+    this.editor.remove();
+    this.editor = null!;
+    this.editorStyle = null!;
   }
 }
 

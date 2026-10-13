@@ -1,173 +1,122 @@
-import {
-  hasOwnProperty,
-  isObject } from './../../helpers/object';
-import { arrayEach } from './../../helpers/array';
+import { hasOwnProperty, isObject } from './../../helpers/object';
+import type { PluginHost } from './../_base';
+
+/** The sides of a cell. */
+export type Side = 'top' | 'right' | 'bottom' | 'left';
+
+export const SIDES: Side[] = ['top', 'right', 'bottom', 'left'];
+
+/** One side's border, or `{ hide: true }`. */
+export type SideBorder = { width?: number; color?: string; hide?: boolean };
+
+/** A cell's borders, as Walkontable draws them. */
+export type CellBorders = {
+  id: string;
+  border: { width: number; color: string; cornerVisible: boolean };
+  row: number;
+  col: number;
+  top: SideBorder;
+  right: SideBorder;
+  bottom: SideBorder;
+  left: SideBorder;
+};
 
 /**
  * Create separated id for borders for each cell.
  *
- * @param {Number} row Visual row index.
- * @param {Number} col Visual column index.
- * @returns {String}
+ * @param row Visual row index.
+ * @param col Visual column index.
  */
-export function createId(row, col) {
-  return `border_row${row}col${col}`;
-}
+export const createId = (row: number, col: number): string => `border_row${row}col${col}`;
 
 /**
  * Create default single border for each position (top/right/bottom/left).
- *
- * @returns {Object} `{{width: number, color: string}}`
  */
-export function createDefaultCustomBorder() {
-  return {
-    width: 1,
-    color: 'var(--fg-custom-border-color)', // see src/css/variables.css
-  };
-}
+export const createDefaultCustomBorder = (): SideBorder => ({
+  width: 1,
+  color: 'var(--fg-custom-border-color)', // see src/css/variables.css
+});
 
 /**
  * Create default object for empty border.
- *
- * @returns {Object} `{{hide: boolean}}`
  */
-export function createSingleEmptyBorder() {
-  return { hide: true };
-}
+export const createSingleEmptyBorder = (): SideBorder => ({ hide: true });
 
 /**
  * Create default FreeGrid border object.
- *
- * @returns {Object} `{{width: number, color: string, cornerVisible: boolean}}`
  */
-export function createDefaultHtBorder() {
-  return {
-    width: 1,
-    color: 'var(--fg-custom-border-color)', // see src/css/variables.css
-    cornerVisible: false,
-  };
-}
+export const createDefaultHtBorder = (): CellBorders['border'] => ({
+  width: 1,
+  color: 'var(--fg-custom-border-color)', // see src/css/variables.css
+  cornerVisible: false,
+});
 
 /**
  * Prepare empty border for each cell with all custom borders hidden.
  *
- * @param {Number} row Visual row index.
- * @param {Number} col Visual column index.
- * @returns {Object} `{{id: *, border: *, row: *, col: *, top: {hide: boolean}, right: {hide: boolean}, bottom: {hide: boolean}, left: {hide: boolean}}}`
+ * @param row Visual row index.
+ * @param col Visual column index.
  */
-export function createEmptyBorders(row, col) {
-  return {
-    id: createId(row, col),
-    border: createDefaultHtBorder(),
-    row,
-    col,
-    top: createSingleEmptyBorder(),
-    right: createSingleEmptyBorder(),
-    bottom: createSingleEmptyBorder(),
-    left: createSingleEmptyBorder(),
-  };
-}
-
-export function extendDefaultBorder(defaultBorder, customBorder) {
-  if (hasOwnProperty(customBorder, 'border')) {
-    defaultBorder.border = customBorder.border;
-  }
-
-  if (hasOwnProperty(customBorder, 'top')) {
-    if (customBorder.top) {
-      if (!isObject(customBorder.top)) {
-        customBorder.top = createDefaultCustomBorder();
-      }
-
-      defaultBorder.top = customBorder.top;
-
-    } else {
-      customBorder.top = createSingleEmptyBorder();
-      defaultBorder.top = customBorder.top;
-    }
-  }
-
-  if (hasOwnProperty(customBorder, 'right')) {
-    if (customBorder.right) {
-      if (!isObject(customBorder.right)) {
-        customBorder.right = createDefaultCustomBorder();
-      }
-
-      defaultBorder.right = customBorder.right;
-
-    } else {
-      customBorder.right = createSingleEmptyBorder();
-      defaultBorder.right = customBorder.right;
-    }
-  }
-
-  if (hasOwnProperty(customBorder, 'bottom')) {
-    if (customBorder.bottom) {
-      if (!isObject(customBorder.bottom)) {
-        customBorder.bottom = createDefaultCustomBorder();
-      }
-
-      defaultBorder.bottom = customBorder.bottom;
-
-    } else {
-      customBorder.bottom = createSingleEmptyBorder();
-      defaultBorder.bottom = customBorder.bottom;
-    }
-  }
-
-  if (hasOwnProperty(customBorder, 'left')) {
-    if (customBorder.left) {
-      if (!isObject(customBorder.left)) {
-        customBorder.left = createDefaultCustomBorder();
-      }
-
-      defaultBorder.left = customBorder.left;
-
-    } else {
-      customBorder.left = createSingleEmptyBorder();
-      defaultBorder.left = customBorder.left;
-    }
-  }
-
-  return defaultBorder;
-}
+export const createEmptyBorders = (row: number, col: number): CellBorders => ({
+  id: createId(row, col),
+  border: createDefaultHtBorder(),
+  row,
+  col,
+  top: createSingleEmptyBorder(),
+  right: createSingleEmptyBorder(),
+  bottom: createSingleEmptyBorder(),
+  left: createSingleEmptyBorder(),
+});
 
 /**
- * Check if selection has border.
- *
- * @param hot
- * @param direction
+ * `defaultBorder` with the sides `customBorder` has: an object as it is, another truthy value as the default border,
+ * a falsy value as hidden. `customBorder` gets the same side objects.
  */
-export function checkSelectionBorders(hot, direction) {
+export const extendDefaultBorder = (defaultBorder: CellBorders, customBorder: Record<string, unknown>): CellBorders => {
+  if (hasOwnProperty(customBorder, 'border')) {
+    defaultBorder.border = customBorder.border as CellBorders['border'];
+  }
+
+  SIDES.forEach((side) => {
+    if (!hasOwnProperty(customBorder, side)) {
+      return;
+    }
+    if (!customBorder[side]) {
+      customBorder[side] = createSingleEmptyBorder();
+    } else if (!isObject(customBorder[side])) {
+      customBorder[side] = createDefaultCustomBorder();
+    }
+    defaultBorder[side] = customBorder[side] as SideBorder;
+  });
+
+  return defaultBorder;
+};
+
+/**
+ * Whether a selected cell has borders: on the side `direction`, or (without it) any.
+ */
+export const checkSelectionBorders = (hot: PluginHost, direction?: Side): boolean => {
   let atLeastOneHasBorder = false;
 
-  arrayEach(hot.getSelectedRange(), (range) => {
+  hot.getSelectedRange().forEach((range: { forAll(callback: (row: number, col: number) => boolean | void): void }) => {
     range.forAll((r, c) => {
       const metaBorders = hot.getCellMeta(r, c).borders;
 
-      if (metaBorders) {
-        if (direction) {
-          if (!hasOwnProperty(metaBorders[direction], 'hide') || metaBorders[direction].hide === false) {
-            atLeastOneHasBorder = true;
-            return false; // breaks forAll
-          }
-        } else {
-          atLeastOneHasBorder = true;
-          return false; // breaks forAll
-        }
+      if (metaBorders && (!direction || !hasOwnProperty(metaBorders[direction], 'hide') ||
+        metaBorders[direction].hide === false)) {
+        atLeastOneHasBorder = true;
+
+        return false; // breaks forAll
       }
+
+      return undefined;
     });
   });
 
   return atLeastOneHasBorder;
-}
+};
 
 /**
  * Mark label in contextMenu as selected.
- *
- * @param label
- * @returns {string}
  */
-export function markSelected(label) {
-  return `<span class="selected">${String.fromCharCode(10003)}</span>${label}`; // workaround for https://github.com/handsontable/handsontable/issues/1946
-}
+export const markSelected = (label: string): string => `<span class="selected">${String.fromCharCode(10003)}</span>${label}`;
