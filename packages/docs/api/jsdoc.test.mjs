@@ -250,6 +250,31 @@ class Search extends BasePlugin {
   assert.equal(enablePlugin.returns, undefined);
 });
 
+test('a TypeScript method without @returns gets its return type from the signature (but not void)', () => {
+  const plugin = readPlugin(`
+/**
+ * @plugin Search
+ */
+class Search extends BasePlugin {
+  /**
+   * Whether the plugin is on.
+   */
+  isEnabled(): boolean {
+  }
+
+  /**
+   * Enables it.
+   */
+  enablePlugin(): void {
+  }
+}`);
+
+  const [isEnabled, enablePlugin] = plugin.methods;
+
+  assert.deepEqual(isEnabled.returns, { type: 'boolean', description: '' });
+  assert.equal(enablePlugin.returns, undefined);
+});
+
 test('a line comment between a JSDoc comment and its method does not join it with the next method', () => {
   const plugin = readPlugin(`
 /**

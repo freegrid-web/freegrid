@@ -1,34 +1,28 @@
 import * as C from './../../../i18n/constants';
+import type ManualColumnFreeze from './../manualColumnFreeze';
+import type { MenuItem } from './../../contextMenu/menuItem';
+import type { PluginHost } from './../../_base';
 
-export default function unfreezeColumnItem(manualColumnFreezePlugin) {
-  return {
-    key: 'unfreeze_column',
-    name() {
-      return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_UNFREEZE_COLUMN);
-    },
-    callback(key, selected) {
-      const [{ start: { col: selectedColumn } }] = selected;
+/** The context menu entry that unfreezes the selected column (shown when one frozen column is selected). */
+const unfreezeColumnItem = (manualColumnFreezePlugin: ManualColumnFreeze): MenuItem => ({
+  key: 'unfreeze_column',
+  name(this: PluginHost) {
+    return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_UNFREEZE_COLUMN);
+  },
+  callback(this: PluginHost, key, selected) {
+    const [{ start: { col: selectedColumn } }] = selected;
 
-      manualColumnFreezePlugin.unfreezeColumn(selectedColumn);
+    manualColumnFreezePlugin.unfreezeColumn(selectedColumn);
 
-      this.render();
-      this.view.wt.wtOverlays.adjustElementsSize(true);
-    },
-    hidden() {
-      const selection = this.getSelectedRange();
-      let hide = false;
+    this.render();
+    this.view.wt.wtOverlays.adjustElementsSize(true);
+  },
+  hidden(this: PluginHost) {
+    const selection = this.getSelectedRange();
 
-      if (selection === void 0) {
-        hide = true;
+    return selection === undefined || selection.length > 1 || selection[0].from.col !== selection[0].to.col
+      || selection[0].from.col >= this.getSettings().fixedColumnsLeft;
+  },
+});
 
-      } else if (selection.length > 1) {
-        hide = true;
-
-      } else if ((selection[0].from.col !== selection[0].to.col) || selection[0].from.col >= this.getSettings().fixedColumnsLeft) {
-        hide = true;
-      }
-
-      return hide;
-    },
-  };
-}
+export default unfreezeColumnItem;

@@ -1,7 +1,7 @@
 import BasePlugin from './../_base';
 import DataObserver from './dataObserver';
-import { arrayEach } from './../../helpers/array';
 import { registerPlugin } from './../../plugins';
+import type { Patch } from './utils';
 
 // FreeGrid.hooks.register('afterChangesObserved');
 
@@ -21,31 +21,25 @@ import { registerPlugin } from './../../plugins';
  * To configure this plugin see {@link Options#observeChanges}.
  */
 class ObserveChanges extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
-    /**
-     * Instance of {@link DataObserver}.
-     *
-     * @private
-     * @type {DataObserver}
-     */
-    this.observer = null;
-  }
+  /**
+   * Instance of {@link DataObserver}.
+   *
+   * @private
+   */
+  observer: DataObserver | null = null;
 
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ObserveChanges#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
-    return this.hot.getSettings().observeChanges;
+  isEnabled(): boolean {
+    return !!this.hot.getSettings().observeChanges;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
@@ -54,13 +48,13 @@ class ObserveChanges extends BasePlugin {
       this._exposePublicApi();
     }
 
-    this.observer.addLocalHook('change', patches => this.onDataChange(patches));
+    this.observer.addLocalHook('change', (patches: Patch[]) => this.onDataChange(patches));
     this.addHook('afterCreateRow', () => this.onAfterTableAlter());
     this.addHook('afterRemoveRow', () => this.onAfterTableAlter());
     this.addHook('afterCreateCol', () => this.onAfterTableAlter());
     this.addHook('afterRemoveCol', () => this.onAfterTableAlter());
-    this.addHook('afterChange', (changes, source) => this.onAfterTableAlter(source));
-    this.addHook('afterLoadData', firstRun => this.onAfterLoadData(firstRun));
+    this.addHook('afterChange', (changes: unknown, source: string) => this.onAfterTableAlter(source));
+    this.addHook('afterLoadData', (firstRun: boolean) => this.onAfterLoadData(firstRun));
 
     super.enablePlugin();
   }
@@ -68,7 +62,7 @@ class ObserveChanges extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     if (this.observer) {
       this.observer.destroy();
       this.observer = null;
@@ -82,21 +76,23 @@ class ObserveChanges extends BasePlugin {
    * Data change observer.
    *
    * @private
-   * @param {Array} patches An array of objects which every item defines coordinates where data was changed.
+   * @param patches An array of objects which every item defines coordinates where data was changed.
    */
-  onDataChange(patches) {
-    if (!this.observer.isPaused()) {
+  onDataChange(patches: Patch[]): void {
+    if (!this.observer!.isPaused()) {
       const sourceName = `${this.pluginName}.change`;
-      const actions = {
+      // A patch without a column index adds or removes a row.
+      const isRow = (patch: Patch) => Number.isNaN(Number(patch.col));
+      const actions: Record<string, (patch: Patch) => void> = {
         add: (patch) => {
-          if (isNaN(patch.col)) {
+          if (isRow(patch)) {
             this.hot.runHooks('afterCreateRow', patch.row, 1, sourceName);
           } else {
             this.hot.runHooks('afterCreateCol', patch.col, 1, sourceName);
           }
         },
         remove: (patch) => {
-          if (isNaN(patch.col)) {
+          if (isRow(patch)) {
             this.hot.runHooks('afterRemoveRow', patch.row, 1, sourceName);
           } else {
             this.hot.runHooks('afterRemoveCol', patch.col, 1, sourceName);
@@ -107,11 +103,7 @@ class ObserveChanges extends BasePlugin {
         },
       };
 
-      arrayEach(patches, (patch) => {
-        if (actions[patch.op]) {
-          actions[patch.op](patch);
-        }
-      });
+      patches.forEach(patch => actions[patch.op]?.(patch));
       this.hot.render();
     }
 
@@ -122,12 +114,12 @@ class ObserveChanges extends BasePlugin {
    * On after table alter listener. Prevents infinity loop between internal and external data changing.
    *
    * @private
-   * @param source
+   * @param [source] Where the change comes from.
    */
-  onAfterTableAlter(source) {
+  onAfterTableAlter(source?: string): void {
     if (source !== 'loadData') {
-      this.observer.pause();
-      this.hot.addHookOnce('afterChangesObserved', () => this.observer.resume());
+      this.observer!.pause();
+      this.hot.addHookOnce('afterChangesObserved', () => this.observer!.resume());
     }
   }
 
@@ -135,18 +127,18 @@ class ObserveChanges extends BasePlugin {
    * On after load data listener.
    *
    * @private
-   * @param {Boolean} firstRun `true` if event was fired first time.
+   * @param firstRun `true` if event was fired first time.
    */
-  onAfterLoadData(firstRun) {
+  onAfterLoadData(firstRun: boolean): void {
     if (!firstRun) {
-      this.observer.setObservedData(this.hot.getSourceData());
+      this.observer!.setObservedData(this.hot.getSourceData());
     }
   }
 
   /**
    * Destroys the plugin instance.
    */
-  destroy() {
+  destroy(): void {
     if (this.observer) {
       this.observer.destroy();
       this._deletePublicApi();
@@ -159,12 +151,12 @@ class ObserveChanges extends BasePlugin {
    *
    * @private
    */
-  _exposePublicApi() {
-    const hot = this.hot;
+  _exposePublicApi(): void {
+    const { hot } = this;
 
-    hot.pauseObservingChanges = () => this.observer.pause();
-    hot.resumeObservingChanges = () => this.observer.resume();
-    hot.isPausedObservingChanges = () => this.observer.isPaused();
+    hot.pauseObservingChanges = () => this.observer!.pause();
+    hot.resumeObservingChanges = () => this.observer!.resume();
+    hot.isPausedObservingChanges = () => this.observer!.isPaused();
   }
 
   /**
@@ -172,8 +164,8 @@ class ObserveChanges extends BasePlugin {
    *
    * @private
    */
-  _deletePublicApi() {
-    const hot = this.hot;
+  _deletePublicApi(): void {
+    const { hot } = this;
 
     delete hot.pauseObservingChanges;
     delete hot.resumeObservingChanges;

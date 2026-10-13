@@ -1,64 +1,16 @@
+/** A JSON patch from the observer, with the cell it changes (`col` is undefined for a whole row). */
+export type Patch = {
+  op: string;
+  path: string;
+  value?: unknown;
+  row?: number;
+  col?: number | string;
+};
 
 /**
- * Clean and extend patches from jsonpatch observer.
- *
- * @param {Array} patches
- * @returns {Array}
+ * The row and the column of a JSON patch path (`/2/3`, `/2/name`, `/2`), or `null` when the path has no row.
  */
-export function cleanPatches(patches) {
-  const newOrRemovedColumns = [];
-
-  /**
-   * If observeChanges uses native Object.observe method, then it produces patches for length property. Filter them.
-   * If path can't be parsed. Filter it.
-   */
-  let cleanedPatches = patches.filter((patch) => {
-    if (/[/]length/ig.test(patch.path)) {
-      return false;
-    }
-    if (!parsePath(patch.path)) {
-      return false;
-    }
-
-    return true;
-  });
-  /**
-   * Extend patches with changed cells coords
-   */
-  cleanedPatches = cleanedPatches.map((patch) => {
-    const coords = parsePath(patch.path);
-
-    patch.row = coords.row;
-    patch.col = coords.col;
-
-    return patch;
-  });
-  /**
-   * Removing or adding column will produce one patch for each table row.
-   * Leaves only one patch for each column add/remove operation.
-   */
-  cleanedPatches = cleanedPatches.filter((patch) => {
-    if (['add', 'remove'].indexOf(patch.op) !== -1 && !isNaN(patch.col)) {
-      if (newOrRemovedColumns.indexOf(patch.col) !== -1) {
-        return false;
-      }
-      newOrRemovedColumns.push(patch.col);
-    }
-
-    return true;
-  });
-  newOrRemovedColumns.length = 0;
-
-  return cleanedPatches;
-}
-
-/**
- * Extract coordinates from path where data was changed.
- *
- * @param {String} path Path describing where data was changed.
- * @returns {Object|null} Returns an object with `row` and `col` properties or `null` if path doesn't have necessary information.
- */
-export function parsePath(path) {
+export const parsePath = (path: string): { row: number; col: number | string | undefined } | null => {
   const match = path.match(/^\/(\d+)\/?(.*)?$/);
 
   if (!match) {
@@ -68,6 +20,36 @@ export function parsePath(path) {
 
   return {
     row: parseInt(row, 10),
-    col: /^\d*$/.test(column) ? parseInt(column, 10) : column
+    // A missing column stays undefined (`/^\d*$/` does not match "undefined").
+    col: /^\d*$/.test(column as string) ? parseInt(column, 10) : column,
   };
-}
+};
+
+/**
+ * The observer's patches with their cells: without `length` patches and paths without a row, and with one patch for
+ * each added or removed column (the observer makes one per row).
+ */
+export const cleanPatches = (patches: Patch[]): Patch[] => {
+  const newOrRemovedColumns = new Set<number | string>();
+
+  return patches
+    .filter(patch => !/[/]length/i.test(patch.path) && parsePath(patch.path))
+    .map((patch) => {
+      const { row, col } = parsePath(patch.path)!;
+
+      patch.row = row;
+      patch.col = col;
+
+      return patch;
+    })
+    .filter((patch) => {
+      if (['add', 'remove'].includes(patch.op) && !Number.isNaN(Number(patch.col))) {
+        if (newOrRemovedColumns.has(patch.col!)) {
+          return false;
+        }
+        newOrRemovedColumns.add(patch.col!);
+      }
+
+      return true;
+    });
+};

@@ -1,12 +1,11 @@
 import BasePlugin from './../_base';
+import type { PluginHost } from './../_base';
 import { addClass, hasClass, removeClass, outerWidth } from './../../helpers/dom/element';
 import EventManager from './../../eventManager';
 import { pageY } from './../../helpers/dom/event';
-import { arrayEach } from './../../helpers/array';
-import { rangeEach } from './../../helpers/number';
 import { registerPlugin } from './../../plugins';
 
-// Developer note! Whenever you make a change in this file, make an analogous change in manualRowResize.js
+// Developer note! Whenever you make a change in this file, make an analogous change in manualColumnResize.ts
 
 /**
  * @description
@@ -20,24 +19,50 @@ import { registerPlugin } from './../../plugins';
  * @plugin ManualRowResize
  */
 class ManualRowResize extends BasePlugin {
-  constructor(hotInstance) {
-    super(hotInstance);
+  /** The header the handle is on. */
+  currentTH: HTMLTableCellElement | null = null;
 
-    this.currentTH = null;
-    this.currentRow = null;
-    this.selectedRows = [];
-    this.currentHeight = null;
-    this.newSize = null;
-    this.startY = null;
-    this.startHeight = null;
-    this.startOffset = null;
-    this.handle = document.createElement('DIV');
-    this.guide = document.createElement('DIV');
+  /** The row of that header. */
+  currentRow: number | null = null;
+
+  /** The rows that get the new height (the selected ones, when the handle is on one of them). */
+  selectedRows: number[] = [];
+
+  /** The height while dragging. */
+  currentHeight: number | null = null;
+
+  /** The height the rows get. */
+  newSize: number | null = null;
+
+  /** The mouse's position when dragging started. */
+  startY: number | null = null;
+
+  startHeight: number | null = null;
+
+  startOffset: number | null = null;
+
+  /** The draggable handle at the header's bottom edge. */
+  handle: HTMLDivElement = document.createElement('DIV') as HTMLDivElement;
+
+  /** The horizontal line that shows the new height while dragging. */
+  guide: HTMLDivElement = document.createElement('DIV') as HTMLDivElement;
+
+  eventManager: EventManager;
+
+  /** Whether the handle is being dragged. */
+  pressed = false;
+
+  /** Mouse downs on the handle within half a second (two: a double click, which fits the height to the content). */
+  dblclick = 0;
+
+  autoresizeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /** The heights set by resizing, by physical row. */
+  manualRowHeights: (number | undefined)[] = [];
+
+  constructor(hotInstance: PluginHost) {
+    super(hotInstance);
     this.eventManager = new EventManager(this);
-    this.pressed = null;
-    this.dblclick = 0;
-    this.autoresizeTimeout = null;
-    this.manualRowHeights = [];
 
     addClass(this.handle, 'manualRowResizer');
     addClass(this.guide, 'manualRowResizerGuide');
@@ -46,27 +71,22 @@ class ManualRowResize extends BasePlugin {
   /**
    * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ManualRowResize#enablePlugin} method is called.
-   *
-   * @returns {Boolean}
    */
-  isEnabled() {
-    return this.hot.getSettings().manualRowResize;
+  isEnabled(): boolean {
+    return !!this.hot.getSettings().manualRowResize;
   }
 
   /**
    * Enables the plugin functionality for this FreeGrid instance.
    */
-  enablePlugin() {
+  enablePlugin(): void {
     if (this.enabled) {
       return;
     }
-
-    this.manualRowHeights = [];
-
     const initialRowHeights = this.hot.getSettings().manualRowResize;
     const loadedManualRowHeights = this.loadManualRowHeights();
 
-    if (typeof loadedManualRowHeights !== 'undefined') {
+    if (loadedManualRowHeights !== undefined) {
       this.manualRowHeights = loadedManualRowHeights;
     } else if (Array.isArray(initialRowHeights)) {
       this.manualRowHeights = initialRowHeights;
@@ -74,10 +94,7 @@ class ManualRowResize extends BasePlugin {
       this.manualRowHeights = [];
     }
 
-    this.addHook('modifyRowHeight', (height, row) => this.onModifyRowHeight(height, row));
-
-    // FreeGrid.hooks.register('beforeRowResize');
-    // FreeGrid.hooks.register('afterRowResize');
+    this.addHook('modifyRowHeight', (height: number, row: number) => this.onModifyRowHeight(height, row));
 
     this.bindEvents();
 
@@ -87,12 +104,11 @@ class ManualRowResize extends BasePlugin {
   /**
    * Updates the plugin state. This method is executed when {@link Core#updateSettings} is invoked.
    */
-  updatePlugin() {
+  updatePlugin(): void {
     const initialRowHeights = this.hot.getSettings().manualRowResize;
 
     if (Array.isArray(initialRowHeights)) {
       this.manualRowHeights = initialRowHeights;
-
     } else if (!initialRowHeights) {
       this.manualRowHeights = [];
     }
@@ -101,7 +117,7 @@ class ManualRowResize extends BasePlugin {
   /**
    * Disables the plugin functionality for this FreeGrid instance.
    */
-  disablePlugin() {
+  disablePlugin(): void {
     super.disablePlugin();
   }
 
@@ -110,19 +126,19 @@ class ManualRowResize extends BasePlugin {
    * @fires Hooks#persistentStateSave
    * @fires Hooks#manualRowHeights
    */
-  saveManualRowHeights() {
+  saveManualRowHeights(): void {
     this.hot.runHooks('persistentStateSave', 'manualRowHeights', this.manualRowHeights);
   }
 
   /**
    * Loads the previously saved sizes using the persistentState plugin (the {@link Options#persistentState} option has to be enabled).
    *
-   * @returns {Array}
+   * @returns The saved heights, or `undefined`.
    * @fires Hooks#persistentStateLoad
    * @fires Hooks#manualRowHeights
    */
-  loadManualRowHeights() {
-    const storedState = {};
+  loadManualRowHeights(): (number | undefined)[] | undefined {
+    const storedState: { value?: (number | undefined)[] } = {};
 
     this.hot.runHooks('persistentStateLoad', 'manualRowHeights', storedState);
 
@@ -133,46 +149,39 @@ class ManualRowResize extends BasePlugin {
    * Sets the resize handle position.
    *
    * @private
-   * @param {HTMLCellElement} TH TH HTML element.
+   * @param TH TH HTML element.
    */
-  setupHandlePosition(TH) {
+  setupHandlePosition(TH: HTMLTableCellElement): void {
     this.currentTH = TH;
-    const row = this.hot.view.wt.wtTable.getCoords(TH).row; // getCoords returns CellCoords
+
+    const { row } = this.hot.view.wt.wtTable.getCoords(TH);
     const headerWidth = outerWidth(this.currentTH);
 
-    if (row >= 0) { // if not col header
-      const box = this.currentTH.getBoundingClientRect();
-
-      this.currentRow = row;
-      this.selectedRows = [];
-
-      if (this.hot.selection.isSelected() && this.hot.selection.isSelectedByRowHeader()) {
-        const { from, to } = this.hot.getSelectedRangeLast();
-        let start = from.row;
-        let end = to.row;
-
-        if (start >= end) {
-          start = to.row;
-          end = from.row;
-        }
-
-        if (this.currentRow >= start && this.currentRow <= end) {
-          rangeEach(start, end, i => this.selectedRows.push(i));
-
-        } else {
-          this.selectedRows.push(this.currentRow);
-        }
-      } else {
-        this.selectedRows.push(this.currentRow);
-      }
-
-      this.startOffset = box.top - 6;
-      this.startHeight = parseInt(box.height, 10);
-      this.handle.style.left = `${box.left}px`;
-      this.handle.style.top = `${this.startOffset + this.startHeight}px`;
-      this.handle.style.width = `${headerWidth}px`;
-      this.hot.rootElement.appendChild(this.handle);
+    // A column header has a negative row.
+    if (row < 0) {
+      return;
     }
+    const box = this.currentTH.getBoundingClientRect();
+
+    this.currentRow = row;
+    this.selectedRows = [row];
+
+    if (this.hot.selection.isSelected() && this.hot.selection.isSelectedByRowHeader()) {
+      const { from, to } = this.hot.getSelectedRangeLast();
+      const start = Math.min(from.row, to.row);
+      const end = Math.max(from.row, to.row);
+
+      if (row >= start && row <= end) {
+        this.selectedRows = Array.from({ length: end - start + 1 }, (_, index) => start + index);
+      }
+    }
+
+    this.startOffset = box.top - 6;
+    this.startHeight = Math.trunc(box.height);
+    this.handle.style.left = `${box.left}px`;
+    this.handle.style.top = `${this.startOffset + this.startHeight}px`;
+    this.handle.style.width = `${headerWidth}px`;
+    this.hot.rootElement.appendChild(this.handle);
   }
 
   /**
@@ -180,8 +189,8 @@ class ManualRowResize extends BasePlugin {
    *
    * @private
    */
-  refreshHandlePosition() {
-    this.handle.style.top = `${this.startOffset + this.currentHeight}px`;
+  refreshHandlePosition(): void {
+    this.handle.style.top = `${this.startOffset! + this.currentHeight!}px`;
   }
 
   /**
@@ -189,10 +198,11 @@ class ManualRowResize extends BasePlugin {
    *
    * @private
    */
-  setupGuidePosition() {
-    const handleWidth = parseInt(outerWidth(this.handle), 10);
+  setupGuidePosition(): void {
+    const handleWidth = Math.trunc(outerWidth(this.handle));
     const handleRightPosition = parseInt(this.handle.style.left, 10) + handleWidth;
-    const maximumVisibleElementWidth = parseInt(this.hot.view.maximumVisibleElementWidth(0), 10);
+    const maximumVisibleElementWidth = Math.trunc(this.hot.view.maximumVisibleElementWidth(0));
+
     addClass(this.handle, 'active');
     addClass(this.guide, 'active');
 
@@ -207,7 +217,7 @@ class ManualRowResize extends BasePlugin {
    *
    * @private
    */
-  refreshGuidePosition() {
+  refreshGuidePosition(): void {
     this.guide.style.top = this.handle.style.top;
   }
 
@@ -216,7 +226,7 @@ class ManualRowResize extends BasePlugin {
    *
    * @private
    */
-  hideHandleAndGuide() {
+  hideHandleAndGuide(): void {
     removeClass(this.handle, 'active');
     removeClass(this.guide, 'active');
   }
@@ -225,18 +235,15 @@ class ManualRowResize extends BasePlugin {
    * Checks if provided element is considered as a row header.
    *
    * @private
-   * @param {HTMLElement} element HTML element.
-   * @returns {Boolean}
+   * @param element HTML element.
    */
-  checkIfRowHeader(element) {
-    if (element !== this.hot.rootElement) {
-      const parent = element.parentNode;
+  checkIfRowHeader(element: HTMLElement): boolean {
+    for (let current = element; current !== this.hot.rootElement && current.parentElement;) {
+      current = current.parentElement;
 
-      if (parent.tagName === 'TBODY') {
+      if (current.tagName === 'TBODY') {
         return true;
       }
-
-      return this.checkIfRowHeader(parent);
     }
 
     return false;
@@ -246,16 +253,13 @@ class ManualRowResize extends BasePlugin {
    * Gets the TH element from the provided element.
    *
    * @private
-   * @param {HTMLElement} element HTML element.
-   * @returns {HTMLElement}
+   * @param element HTML element.
    */
-  getTHFromTargetElement(element) {
-    if (element.tagName !== 'TABLE') {
-      if (element.tagName === 'TH') {
-        return element;
+  getTHFromTargetElement(element: HTMLElement): HTMLTableCellElement | null {
+    for (let current: HTMLElement | null = element; current && current.tagName !== 'TABLE'; current = current.parentElement) {
+      if (current.tagName === 'TH') {
+        return current as HTMLTableCellElement;
       }
-      return this.getTHFromTargetElement(element.parentNode);
-
     }
 
     return null;
@@ -265,62 +269,40 @@ class ManualRowResize extends BasePlugin {
    * 'mouseover' event callback - set the handle position.
    *
    * @private
-   * @param {MouseEvent} event
    */
-  onMouseOver(event) {
-    if (this.checkIfRowHeader(event.target)) {
-      const th = this.getTHFromTargetElement(event.target);
+  onMouseOver(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
 
-      if (th) {
-        if (!this.pressed) {
-          this.setupHandlePosition(th);
-        }
-      }
+    if (!this.checkIfRowHeader(target)) {
+      return;
+    }
+    const th = this.getTHFromTargetElement(target);
+
+    if (th && !this.pressed) {
+      this.setupHandlePosition(th);
     }
   }
 
   /**
-   * Auto-size row after doubleclick - callback.
+   * After a double click on the handle: fits the rows to their content.
    *
    * @private
    * @fires Hooks#beforeRowResize
    * @fires Hooks#afterRowResize
    */
-  afterMouseDownTimeout() {
-    const render = () => {
-      this.hot.forceFullRender = true;
-      this.hot.view.render(); // updates all
-      this.hot.view.wt.wtOverlays.adjustElementsSize(true);
-    };
-    const resize = (selectedRow, forceRender) => {
-      const hookNewSize = this.hot.runHooks('beforeRowResize', selectedRow, this.newSize, true);
-
-      if (hookNewSize !== void 0) {
-        this.newSize = hookNewSize;
-      }
-
-      this.setManualSize(selectedRow, this.newSize); // double click sets auto row size
-
-      if (forceRender) {
-        render();
-      }
-
-      this.hot.runHooks('afterRowResize', selectedRow, this.newSize, true);
-    };
-
+  afterMouseDownTimeout(): void {
     if (this.dblclick >= 2) {
-      const selectedRowsLength = this.selectedRows.length;
+      this.#resizeSelected((selectedRow) => {
+        const hookNewSize = this.hot.runHooks('beforeRowResize', selectedRow, this.newSize, true);
 
-      if (selectedRowsLength > 1) {
-        arrayEach(this.selectedRows, (selectedRow) => {
-          resize(selectedRow);
-        });
-        render();
-      } else {
-        arrayEach(this.selectedRows, (selectedRow) => {
-          resize(selectedRow, true);
-        });
-      }
+        if (hookNewSize !== undefined) {
+          this.newSize = hookNewSize;
+        }
+        // The new size comes from the autoRowSize plugin (through beforeRowResize).
+        this.setManualSize(selectedRow, this.newSize!);
+      }, (selectedRow) => {
+        this.hot.runHooks('afterRowResize', selectedRow, this.newSize, true);
+      });
     }
     this.dblclick = 0;
     this.autoresizeTimeout = null;
@@ -330,42 +312,39 @@ class ManualRowResize extends BasePlugin {
    * 'mousedown' event callback.
    *
    * @private
-   * @param {MouseEvent} event
    */
-  onMouseDown(event) {
-    if (hasClass(event.target, 'manualRowResizer')) {
-      this.setupGuidePosition();
-      this.pressed = this.hot;
-
-      if (this.autoresizeTimeout === null) {
-        this.autoresizeTimeout = setTimeout(() => this.afterMouseDownTimeout(), 500);
-
-        this.hot._registerTimeout(this.autoresizeTimeout);
-      }
-
-      this.dblclick += 1;
-      this.startY = pageY(event);
-      this.newSize = this.startHeight;
+  onMouseDown(event: MouseEvent): void {
+    if (!hasClass(event.target as HTMLElement, 'manualRowResizer')) {
+      return;
     }
+    this.setupGuidePosition();
+    this.pressed = true;
+
+    if (this.autoresizeTimeout === null) {
+      this.autoresizeTimeout = setTimeout(() => this.afterMouseDownTimeout(), 500);
+      this.hot._registerTimeout(this.autoresizeTimeout);
+    }
+    this.dblclick += 1;
+    this.startY = pageY(event);
+    this.newSize = this.startHeight;
   }
 
   /**
    * 'mousemove' event callback - refresh the handle and guide positions, cache the new row height.
    *
    * @private
-   * @param {MouseEvent} event
    */
-  onMouseMove(event) {
-    if (this.pressed) {
-      this.currentHeight = this.startHeight + (pageY(event) - this.startY);
-
-      arrayEach(this.selectedRows, (selectedRow) => {
-        this.newSize = this.setManualSize(selectedRow, this.currentHeight);
-      });
-
-      this.refreshHandlePosition();
-      this.refreshGuidePosition();
+  onMouseMove(event: MouseEvent): void {
+    if (!this.pressed) {
+      return;
     }
+    this.currentHeight = this.startHeight! + (pageY(event) - this.startY!);
+    this.selectedRows.forEach((selectedRow) => {
+      this.newSize = this.setManualSize(selectedRow, this.currentHeight!);
+    });
+
+    this.refreshHandlePosition();
+    this.refreshGuidePosition();
   }
 
   /**
@@ -376,44 +355,23 @@ class ManualRowResize extends BasePlugin {
    * @fires Hooks#beforeRowResize
    * @fires Hooks#afterRowResize
    */
-  onMouseUp() {
-    const render = () => {
-      this.hot.forceFullRender = true;
-      this.hot.view.render(); // updates all
-      this.hot.view.wt.wtOverlays.adjustElementsSize(true);
-    };
-    const runHooks = (selectedRow, forceRender) => {
-      this.hot.runHooks('beforeRowResize', selectedRow, this.newSize);
-
-      if (forceRender) {
-        render();
-      }
-
-      this.saveManualRowHeights();
-
-      this.hot.runHooks('afterRowResize', selectedRow, this.newSize, false);
-    };
-    if (this.pressed) {
-      this.hideHandleAndGuide();
-      this.pressed = false;
-
-      if (this.newSize !== this.startHeight) {
-        const selectedRowsLength = this.selectedRows.length;
-
-        if (selectedRowsLength > 1) {
-          arrayEach(this.selectedRows, (selectedRow) => {
-            runHooks(selectedRow);
-          });
-          render();
-        } else {
-          arrayEach(this.selectedRows, (selectedRow) => {
-            runHooks(selectedRow, true);
-          });
-        }
-      }
-
-      this.setupHandlePosition(this.currentTH);
+  onMouseUp(): void {
+    if (!this.pressed) {
+      return;
     }
+    this.hideHandleAndGuide();
+    this.pressed = false;
+
+    if (this.newSize !== this.startHeight) {
+      this.#resizeSelected((selectedRow) => {
+        this.hot.runHooks('beforeRowResize', selectedRow, this.newSize);
+      }, (selectedRow) => {
+        this.saveManualRowHeights();
+        this.hot.runHooks('afterRowResize', selectedRow, this.newSize, false);
+      });
+    }
+
+    this.setupHandlePosition(this.currentTH!);
   }
 
   /**
@@ -421,23 +379,23 @@ class ManualRowResize extends BasePlugin {
    *
    * @private
    */
-  bindEvents() {
-    this.eventManager.addEventListener(this.hot.rootElement, 'mouseover', e => this.onMouseOver(e));
-    this.eventManager.addEventListener(this.hot.rootElement, 'mousedown', e => this.onMouseDown(e));
-    this.eventManager.addEventListener(window, 'mousemove', e => this.onMouseMove(e));
+  bindEvents(): void {
+    this.eventManager.addEventListener(this.hot.rootElement, 'mouseover', (event: MouseEvent) => this.onMouseOver(event));
+    this.eventManager.addEventListener(this.hot.rootElement, 'mousedown', (event: MouseEvent) => this.onMouseDown(event));
+    this.eventManager.addEventListener(window, 'mousemove', (event: MouseEvent) => this.onMouseMove(event));
     this.eventManager.addEventListener(window, 'mouseup', () => this.onMouseUp());
   }
 
   /**
    * Sets the new height for specified row index.
    *
-   * @param {Number} row Visual row index.
-   * @param {Number} height Row height.
-   * @returns {Number} Returns new height.
+   * @param row Visual row index.
+   * @param height Row height.
+   * @returns Returns new height.
    *
    * @fires Hooks#modifyRow
    */
-  setManualSize(row, height) {
+  setManualSize(row: number, height: number): number {
     const physicalRow = this.hot.runHooks('modifyRow', row);
 
     this.manualRowHeights[physicalRow] = height;
@@ -449,25 +407,52 @@ class ManualRowResize extends BasePlugin {
    * Modifies the provided row height, based on the plugin settings.
    *
    * @private
-   * @param {Number} height Row height.
-   * @param {Number} row Visual row index.
-   * @returns {Number}
+   * @param height Row height.
+   * @param row Visual row index.
    *
    * @fires Hooks#modifyRow
    */
-  onModifyRowHeight(height, row) {
-    if (this.enabled) {
-      const autoRowSizePlugin = this.hot.getPlugin('autoRowSize');
-      const autoRowHeightResult = autoRowSizePlugin ? autoRowSizePlugin.heights[row] : null;
-      const physicalRow = this.hot.runHooks('modifyRow', row);
-      const manualRowHeight = this.manualRowHeights[physicalRow];
+  onModifyRowHeight(height: number, row: number): number {
+    if (!this.enabled) {
+      return height;
+    }
+    const autoRowSizePlugin = this.hot.getPlugin('autoRowSize');
+    const autoRowHeightResult = autoRowSizePlugin ? autoRowSizePlugin.heights[row] : null;
+    const manualRowHeight = this.manualRowHeights[this.hot.runHooks('modifyRow', row)];
 
-      if (manualRowHeight !== void 0 && (manualRowHeight === autoRowHeightResult || manualRowHeight > (height || 0))) {
-        return manualRowHeight;
-      }
+    // A height set by resizing wins unless the row's content needs more.
+    if (manualRowHeight !== undefined && (manualRowHeight === autoRowHeightResult || manualRowHeight > (height || 0))) {
+      return manualRowHeight;
     }
 
     return height;
+  }
+
+  /**
+   * Resizes each selected row with `resize` and calls `after` for it; renders the grid after the row (one row) or after
+   * all of them.
+   */
+  #resizeSelected(resize: (row: number) => void, after: (row: number) => void): void {
+    const single = this.selectedRows.length === 1;
+    const many = this.selectedRows.length > 1;
+
+    this.selectedRows.forEach((selectedRow) => {
+      resize(selectedRow);
+
+      if (single) {
+        this.#renderAll();
+      }
+      after(selectedRow);
+    });
+    if (many) {
+      this.#renderAll();
+    }
+  }
+
+  #renderAll(): void {
+    this.hot.forceFullRender = true;
+    this.hot.view.render();
+    this.hot.view.wt.wtOverlays.adjustElementsSize(true);
   }
 }
 
