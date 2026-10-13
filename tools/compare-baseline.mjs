@@ -1,5 +1,6 @@
 // Usage: node tools/compare-baseline.mjs <unit|e2e|walkontable|production> <results.json>
-// Exits 1 when a test that passed in the upstream baseline does not pass now (and is not FG-SKIP'd).
+// Exits 1 when a test that passed in the upstream baseline does not pass now (and is not FG-SKIP'd), when a test
+// that is not in the baseline fails, or when a test file fails to load.
 // Tests removed on purpose, together with the behavior they checked, are listed with a reason in
 // docs/baseline/retired.json; a listed test that still runs is an error, so the list stays accurate.
 import { readdirSync, readFileSync } from 'node:fs';
@@ -9,7 +10,8 @@ import { toMap, entriesOf } from './baseline/results-map.mjs';
 
 const [suite, file] = process.argv.slice(2);
 const baseline = JSON.parse(readFileSync(new URL('../docs/baseline/6.2.2-results.json', import.meta.url), 'utf8')).suites[suite];
-const now = toMap(entriesOf(JSON.parse(readFileSync(file, 'utf8'))));
+const raw = JSON.parse(readFileSync(file, 'utf8'));
+const now = toMap(entriesOf(raw));
 const retired = JSON.parse(readFileSync(new URL('../docs/baseline/retired.json', import.meta.url), 'utf8'))[suite] || {};
 
 if (!baseline) {
@@ -20,7 +22,7 @@ if (!baseline) {
 function countSkips(dir) {
   return readdirSync(dir, { withFileTypes: true }).reduce((n, e) => {
     if (e.isDirectory()) return ['node_modules', 'dist', 'test-results', 'lib'].includes(e.name) ? n : n + countSkips(join(dir, e.name));
-    return e.name.endsWith('.js') ? n + (readFileSync(join(dir, e.name), 'utf8').match(/\/\/ FG-SKIP:/g) || []).length : n;
+    return /\.(js|ts)$/.test(e.name) ? n + (readFileSync(join(dir, e.name), 'utf8').match(/\/\/ FG-SKIP:/g) || []).length : n;
   }, 0);
 }
 const pkgDir = fileURLToPath(new URL('../packages/freegrid', import.meta.url));
@@ -42,6 +44,18 @@ for (const [name, status] of Object.entries(baseline || now)) {
     const line = `${name}  [baseline: ${baseline ? status : 'n/a'}, now: ${current ?? 'missing'}]`;
 
     (current === 'pending' ? skippedNow : regressions).push(line);
+  }
+}
+// Tests newer than the baseline must pass too (the runner's exit code is not checked).
+if (baseline) {
+  for (const [name, status] of Object.entries(now)) {
+    if (!(name in baseline) && status === 'failed') regressions.push(`${name}  [not in baseline, now: failed]`);
+  }
+}
+// A test file that fails to load (Vitest) has no test results at all.
+for (const { name, status, message, assertionResults } of Array.isArray(raw) ? [] : raw.testResults) {
+  if (status === 'failed' && !assertionResults.some(a => a.status === 'failed')) {
+    regressions.push(`${name}  (test file failed: ${(message || '').split('\n')[0]})`);
   }
 }
 // A baseline-passing test may only become pending through an FG-SKIP marker.

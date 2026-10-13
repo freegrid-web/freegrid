@@ -30,6 +30,7 @@ jobs:
         with: { node-version-file: .nvmrc, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: node --test tools/*.test.mjs
       - run: pnpm typecheck
       - run: pnpm --filter @freegrid/core test:unit
       - run: pnpm --filter @freegrid/core test:types
