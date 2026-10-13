@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- FreeGrid's own date picker replaces Pikaday: themed by the `--fg-*` variables (dark theme and Modern style
+  included), usable from the keyboard (<kbd>Alt</kbd>+<kbd>↓</kbd> in the editor, then arrows, Page Up/Down,
+  Home/End, Enter, Esc), with screen-reader labels. It follows a date typed in the cell. `datePickerConfig` keeps
+  Pikaday's option names for `firstDay`, `minDate`, `maxDate`, `disableDayFn`, `disableWeekends`, `yearRange`,
+  `i18n`, `onSelect`, `onOpen`, `onClose` and `onDraw`; other Pikaday options are ignored. Pikaday is no longer a
+  dependency: the plain UMD build needs only numbro, and every CSS build styles the calendar. Its classes are
+  `fg-datepicker*` instead of `pika-*`; the Pikaday-only theme variables are gone and `--fg-datepicker-radius` and
+  `--fg-datepicker-focus-color` are new.
 - Dates without moment.js: FreeGrid reads and writes `dateFormat` / `timeFormat` itself, with moment's tokens and
   parsing rules, so existing formats keep working. moment is no longer a dependency: the plain UMD build
   (`freegrid.js`) no longer needs it on the page, `freegrid.full.js` no longer bundles it or sets `window.moment`,

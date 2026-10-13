@@ -4,23 +4,20 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { browserTarget, defineConstants, banner } from './constants.js';
-import { commonjsOptions, ignorePikadayCss, localeRegistration } from './plugins.js';
+import { commonjsOptions, localeRegistration } from './plugins.js';
 import { legacyClassNames } from './legacyClassNames.js';
 
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const buildDate = new Date();
 const define = defineConstants({ buildDate });
-const deps = ['numbro', 'pikaday'];
-// Pikaday's CSS is not a dependency to keep external: ignorePikadayCss() drops it (upstream used an
-// empty module), and an external CSS import would break Node/SSR and AMD/CommonJS consumers.
-const isDep = id => !id.startsWith('pikaday/css') && deps.some(d => id === d || id.startsWith(`${d}/`));
+const deps = ['numbro'];
+const isDep = id => deps.some(d => id === d || id.startsWith(`${d}/`));
 
 const base = { configFile: false, logLevel: 'warn', define, css: { postcss: { plugins: [legacyClassNames()] } } };
 
 async function esm() {
   await build({
     ...base,
-    plugins: [ignorePikadayCss()],
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
       lib: { entry: { index: r('src/index.js'), compat: r('src/compat.js') }, formats: ['es'], cssFileName: 'freegrid' },
@@ -34,14 +31,13 @@ async function umd({ full, minify }) {
 
   await build({
     ...base,
-    plugins: full ? [] : [ignorePikadayCss()],
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
       cssMinify: minify, sourcemap: true,
       lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
         external: full ? [] : isDep,
-        output: { exports: 'default', banner: banner(buildDate), globals: { numbro: 'numbro', pikaday: 'Pikaday' } },
+        output: { exports: 'default', banner: banner(buildDate), globals: { numbro: 'numbro' } },
       },
     },
   });

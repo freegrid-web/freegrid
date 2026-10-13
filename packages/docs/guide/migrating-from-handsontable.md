@@ -49,6 +49,9 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 - **Dates:** FreeGrid no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
   rules (see [Date and time formats](./cell-types#date-and-time-formats)); use real formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Week tokens (`w`, `W`, `gggg`) and locales other than English are not supported.
+- **Date picker:** FreeGrid has its own calendar instead of Pikaday (classes `fg-datepicker*` instead of `pika-*`).
+  `datePickerConfig` keeps Pikaday's names for the common options (see [Date picker](./cell-types#date-picker));
+  other Pikaday options are ignored. You no longer load Pikaday or its CSS.
 - **CSS class names** are now FreeGrid's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
   old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
   switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now

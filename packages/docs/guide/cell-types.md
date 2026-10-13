@@ -39,6 +39,36 @@ Your own rule:
 
 See it live in the [cell types example](../examples/cell-types).
 
+## Date picker
+
+A `date` cell opens a calendar under the cell. Pick a day with the mouse, or press <kbd>Alt</kbd>+<kbd>↓</kbd> to move
+into the calendar: arrows move by day and week, <kbd>Page Up</kbd>/<kbd>Page Down</kbd> by month (with
+<kbd>Shift</kbd> by year), <kbd>Home</kbd>/<kbd>End</kbd> to the start/end of the week, <kbd>Enter</kbd> picks the
+day and <kbd>Esc</kbd> closes the calendar. While you type a date in the cell's format, the calendar follows it.
+
+`datePickerConfig` sets the calendar:
+
+```js
+columns: [{
+  type: 'date',
+  dateFormat: 'YYYY-MM-DD',
+  datePickerConfig: {
+    firstDay: 1, // weeks start on Monday (0 = Sunday, the default)
+    minDate: new Date(2026, 0, 1),
+    maxDate: new Date(2026, 11, 31),
+    disableWeekends: true,
+    disableDayFn: date => date.getDate() === 13, // days that cannot be picked
+    yearRange: [2020, 2030], // the year list: [from, to], or n years around the shown year (default 10)
+    i18n: { previousMonth: 'Ankstesnis mėnuo', nextMonth: 'Kitas mėnuo', months: [/* 12 names */],
+      weekdays: [/* 7 names, Sunday first */], weekdaysShort: [/* 7 short names */] },
+    onSelect: () => {}, onOpen: () => {}, onClose: () => {}, onDraw: () => {},
+  },
+}]
+```
+
+`defaultDate` (a cell setting) is the date shown when the cell is empty. The calendar's colors come from the
+`--fg-datepicker-*` [theme variables](./theming).
+
 ## Date and time formats
 
 `dateFormat` (default `DD/MM/YYYY`) and `timeFormat` (default `h:mm:ss a`) use the same tokens as moment.js, so

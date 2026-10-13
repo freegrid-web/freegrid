@@ -57,11 +57,6 @@ browser uses dark mode, light otherwise. Without a theme class the grid is light
 `fg-theme-light` (or `data-fg-theme="light"`) keeps a grid light inside a dark page: the closest theme to the grid
 wins.
 
-::: info Date picker
-`freegrid.full.css` themes the date picker (Pikaday) too. With `freegrid.css` you bring Pikaday's own styles, which
-stay light in the dark theme.
-:::
-
 ## Styles
 
 Two looks, independent of the color theme:

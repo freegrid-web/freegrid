@@ -206,9 +206,6 @@ importers:
       numbro:
         specifier: 2.1.1
         version: 2.1.1
-      pikaday:
-        specifier: 1.5.1
-        version: 1.5.1
     devDependencies:
       jasmine-core:
         specifier: ^5.13.0
@@ -1909,9 +1906,6 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
-
-  pikaday@1.5.1:
-    resolution: {integrity: sha512-JpGs4DM+DrwhGx/deyi2pUcrUtTcyegR6XOIbFkjSaJp0yYp5d8Bvzlgtl8eaX1gNEqsqJZFIsRMEzdRA1xbDQ==}
 
   playwright-core@1.64.0:
     resolution: {integrity: sha512-T9r+MZkTECl2+oUcZ26YgZzTrYidTsIhYYkJix+6iDOymOb1FB2RLLSOxRGnZGv5DStt+aduIVbt+E8WygXYpg==}
@@ -4064,10 +4058,6 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
-
-  pikaday@1.5.1:
-    optionalDependencies:
-      moment: 2.31.0
 
   playwright-core@1.64.0: {}
 

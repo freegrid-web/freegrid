@@ -1,18 +1,4 @@
-const EMPTY = '\0fg-empty';
 const WINDOW = '\0fg-window';
-
-/**
- * Drop `pikaday/css/*` imports, and FreeGrid's theme for them (`pikaday-theme.css`), in non-full builds and test
- * bundles: those builds leave Pikaday's styles to the user.
- */
-export function ignorePikadayCss() {
-  return {
-    name: 'fg-ignore-pikaday-css',
-    enforce: 'pre',
-    resolveId: id => (id.startsWith('pikaday/css') || /(^|[\\/])pikaday-theme\.css$/.test(id) ? EMPTY : null),
-    load: id => (id === EMPTY ? '' : null),
-  };
-}
 
 /** `import window from 'window'` (a webpack external in upstream test helpers). */
 export function windowModule() {
@@ -38,5 +24,4 @@ export function localeRegistration() {
 }
 
 /** The vendored runtime code in lib/ is CommonJS (guarded `exports` assignments), like node_modules. */
-// Pikaday require()s moment when it is there; FreeGrid does not use it, so it is left out of the bundles.
-export const commonjsOptions = { include: [/node_modules/, /[\\/]freegrid[\\/]lib[\\/]/], ignore: ['moment'] };
+export const commonjsOptions = { include: [/node_modules/, /[\\/]freegrid[\\/]lib[\\/]/] };

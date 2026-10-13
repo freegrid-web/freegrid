@@ -35,6 +35,10 @@
   border-radius: var(--fg-datepicker-radius);
 }
 
+.fg-datepicker-header .fg-datepicker-year {
+  flex: none;
+}
+
 .fg-datepicker-prev,
 .fg-datepicker-next {
   flex: none;

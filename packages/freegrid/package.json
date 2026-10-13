@@ -61,8 +61,7 @@
     "test:e2e:webkit": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser webkit; node ../../tools/check-known-failures.mjs webkit test-results/e2e-dev-webkit.json"
   },
   "dependencies": {
-    "numbro": "2.1.1",
-    "pikaday": "1.5.1"
+    "numbro": "2.1.1"
   },
   "devDependencies": {
     "jasmine-core": "^5.13.0",

@@ -32,12 +32,12 @@ describe('DateEditor', () => {
       ]
     });
 
-    expect($('.pika-single').is(':visible')).toBe(false);
+    expect($('.fg-datepicker').is(':visible')).toBe(false);
 
     selectCell(0, 0);
     keyDown('enter');
 
-    expect($('.pika-single').is(':visible')).toBe(true);
+    expect($('.fg-datepicker').is(':visible')).toBe(true);
   });
 
   it('should pass date picker config object to Pikday', () => {
@@ -95,16 +95,16 @@ describe('DateEditor', () => {
       ]
     });
 
-    expect($('.pika-single').length).toBe(0);
+    expect($('.fg-datepicker').length).toBe(0);
 
     selectCell(0, 0);
     keyDown('enter');
 
-    expect($('.pika-single').length).toBe(1);
+    expect($('.fg-datepicker').length).toBe(1);
 
     destroy();
 
-    expect($('.pika-single').length).toBe(0);
+    expect($('.fg-datepicker').length).toBe(0);
   });
 
   it('should select date corresponding to cell value', () => {
@@ -123,9 +123,9 @@ describe('DateEditor', () => {
 
     const date = new Date(getDates()[0][0]);
 
-    expect($('.pika-single').find('.pika-select-year').find(':selected').val()).toMatch(date.getFullYear().toString());
-    expect($('.pika-single').find('.pika-select-month').find(':selected').val()).toMatch(date.getMonth().toString());
-    expect($('.pika-single').find('.pika-table .is-selected').text()).toMatch(date.getDate().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-year').find(':selected').val()).toMatch(date.getFullYear().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-month').find(':selected').val()).toMatch(date.getMonth().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-table [aria-selected="true"]').text()).toMatch(date.getDate().toString());
   });
 
   it('should save new date after clicked on calendar', (done) => {
@@ -144,7 +144,7 @@ describe('DateEditor', () => {
 
     keyDown('enter');
 
-    mouseDown($('.pika-single').find('.pika-table tbody tr:eq(0) td:eq(0) button'));
+    mouseDown($('.fg-datepicker').find('.fg-datepicker-table tbody tr:eq(0) td:eq(0) button'));
 
     setTimeout(() => {
       expect(getDataAtCell(0, 0)).toMatch('01/01/2006');
@@ -168,7 +168,7 @@ describe('DateEditor', () => {
 
     keyDown('enter');
 
-    mouseDown($('.pika-single').find('.pika-table tbody tr:eq(0) td:eq(0) button'));
+    mouseDown($('.fg-datepicker').find('.fg-datepicker-table tbody tr:eq(0) td:eq(0) button'));
 
     setTimeout(() => {
       expect(getDataAtCell(0, 0)).toMatch('01/01/2006');
@@ -197,9 +197,9 @@ describe('DateEditor', () => {
 
     const date = new Date('01/01/1900');
 
-    expect($('.pika-single').find('.pika-select-year').find(':selected').val()).toMatch(date.getFullYear().toString());
-    expect($('.pika-single').find('.pika-select-month').find(':selected').val()).toMatch(date.getMonth().toString());
-    expect($('.pika-single').find('.pika-table .is-selected').text()).toMatch(date.getDate().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-year').find(':selected').val()).toMatch(date.getFullYear().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-month').find(':selected').val()).toMatch(date.getMonth().toString());
+    expect($('.fg-datepicker').find('.fg-datepicker-table [aria-selected="true"]').text()).toMatch(date.getDate().toString());
 
     keyDown('enter');
 
@@ -223,11 +223,11 @@ describe('DateEditor', () => {
     selectCell(0, 0);
     keyDown('enter');
 
-    expect($('.pika-single').is(':visible')).toBe(true);
+    expect($('.fg-datepicker').is(':visible')).toBe(true);
 
-    mouseDown($('.pika-single').find('.pika-table tbody tr:eq(0) td:eq(0) button'));
+    mouseDown($('.fg-datepicker').find('.fg-datepicker-table tbody tr:eq(0) td:eq(0) button'));
 
-    expect($('.pika-single').is(':visible')).toBe(false);
+    expect($('.fg-datepicker').is(':visible')).toBe(false);
   });
 
   it('should enable to input any value in textarea', async() => {
@@ -375,9 +375,9 @@ describe('DateEditor', () => {
       selectCell(5, 1);
       keyDown('enter');
 
-      expect($('.pika-single').is(':visible')).toBe(true);
+      expect($('.fg-datepicker').is(':visible')).toBe(true);
 
-      mouseDown($('.pika-single').find('.pika-table tbody tr:eq(3) td:eq(3) button'));
+      mouseDown($('.fg-datepicker').find('.fg-datepicker-table tbody tr:eq(3) td:eq(3) button'));
     }, 150);
 
     setTimeout(() => {
@@ -402,7 +402,7 @@ describe('DateEditor', () => {
     keyDown('enter');
 
     const cellOffset = $(hot.getActiveEditor().TD).offset();
-    const datePickerOffset = $('.pika-single').offset();
+    const datePickerOffset = $('.fg-datepicker').offset();
 
     // 23 is a height of the editor cell
     expect(cellOffset.top + 23).toBeCloseTo(datePickerOffset.top, 0);
@@ -434,7 +434,7 @@ describe('DateEditor', () => {
     keyDown('enter');
 
     const cellOffset = $(hot.getActiveEditor().TD).offset();
-    const datePickerOffset = $('.pika-single').offset();
+    const datePickerOffset = $('.fg-datepicker').offset();
 
     expect(cellOffset.top + 23).toBeCloseTo(datePickerOffset.top, 0);
     expect(cellOffset.left).toBeCloseTo(datePickerOffset.left, 0);
@@ -463,6 +463,82 @@ describe('DateEditor', () => {
     const editor = hot.getActiveEditor();
 
     expect(editor.TEXTAREA.value).toEqual(cellValue);
+  });
+
+  describe('FreeGrid date picker', () => {
+    const press = (target, key, init = {}) => {
+      target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
+    };
+
+    it('moves the focus into the calendar with Alt+Down and picks a day with the keyboard', async() => {
+      handsontable({
+        data: [['01/14/2006']],
+        columns: [{ type: 'date', dateFormat: 'MM/DD/YYYY' }],
+      });
+
+      selectCell(0, 0);
+      keyDownUp('enter');
+      press(getActiveEditor().TEXTAREA, 'ArrowDown', { altKey: true });
+
+      expect(document.activeElement.dataset.date).toBe('2006-01-14');
+
+      press(document.activeElement, 'ArrowRight');
+      press(document.activeElement, 'ArrowDown');
+      press(document.activeElement, 'Enter');
+      await sleep(100);
+
+      expect(getDataAtCell(0, 0)).toBe('01/22/2006');
+      expect($('.fg-datepicker').is(':visible')).toBe(false);
+      expect(getActiveEditor().isOpened()).toBe(false);
+    });
+
+    it('does not pick a disabled day', async() => {
+      handsontable({
+        data: [['01/14/2006']],
+        columns: [{ type: 'date', dateFormat: 'MM/DD/YYYY', datePickerConfig: { minDate: new Date(2006, 0, 10) } }],
+      });
+
+      selectCell(0, 0);
+      keyDownUp('enter');
+      mouseDown($('.fg-datepicker [data-date="2006-01-05"]'));
+      await sleep(100);
+
+      expect($('.fg-datepicker [data-date="2006-01-05"]').prop('disabled')).toBe(true);
+      expect($('.fg-datepicker').is(':visible')).toBe(true);
+      expect(getDataAtCell(0, 0)).toBe('01/14/2006');
+    });
+
+    it('follows a date typed in the cell format', () => {
+      handsontable({
+        data: [['01/14/2006']],
+        columns: [{ type: 'date', dateFormat: 'MM/DD/YYYY' }],
+      });
+
+      selectCell(0, 0);
+      keyDownUp('enter');
+      const textarea = getActiveEditor().TEXTAREA;
+
+      textarea.value = '03/05/2010';
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect($('.fg-datepicker-year').val()).toBe('2010');
+      expect($('.fg-datepicker [aria-selected="true"]').data('date')).toBe('2010-03-05');
+    });
+
+    it('gives the calendar the theme of the grid', () => {
+      spec().$container.addClass('fg-theme-dark');
+      handsontable({
+        data: [['01/14/2006']],
+        columns: [{ type: 'date', dateFormat: 'MM/DD/YYYY' }],
+      });
+
+      selectCell(0, 0);
+      keyDownUp('enter');
+
+      expect($('.fg-datepicker').closest('.fg-datepicker-holder').hasClass('fg-theme-dark')).toBe(true);
+      expect(getComputedStyle($('.fg-datepicker')[0]).backgroundColor).toBe('rgb(30, 30, 30)');
+      spec().$container.removeClass('fg-theme-dark');
+    });
   });
 
   describe('IME support', () => {
