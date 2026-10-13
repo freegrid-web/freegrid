@@ -20,7 +20,7 @@ async function esm() {
     ...base,
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
-      lib: { entry: { index: r('src/index.js'), compat: r('src/compat.js') }, formats: ['es'], cssFileName: 'freegrid' },
+      lib: { entry: { index: r('src/index.js'), compat: r('src/compat.ts') }, formats: ['es'], cssFileName: 'freegrid' },
       rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
     },
   });
