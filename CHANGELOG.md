@@ -1,6 +1,9 @@
 # FreeGrid changelog
 
-## Unreleased
+## 0.2.0 (2026-10-13)
+
+FreeGrid has no runtime dependencies now: its own date and number formatting and its own date picker replace
+moment, numbro and Pikaday. Theming with CSS variables, a dark theme, the Modern style and a complete API reference.
 
 - Docs: a complete API reference, generated from the source code at every docs build:
   - [Methods](https://freegrid-web.github.io/freegrid/api/methods): every method, with parameters, return value and

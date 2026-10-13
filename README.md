@@ -14,7 +14,7 @@ modernized step by step (TypeScript, signals-based reactivity, CSS-variable them
 
 ## Status
 
-`0.1.0` is the first release on npm: [`@freegrid/core`](https://www.npmjs.com/package/@freegrid/core). Until
+FreeGrid is on npm as [`@freegrid/core`](https://www.npmjs.com/package/@freegrid/core) (latest: `0.2.0`). Until
 `1.0.0` the API may still change between minor versions (see the [changelog](CHANGELOG.md)). What comes next:
 the [roadmap](https://freegrid-web.github.io/freegrid/project/roadmap).
 
