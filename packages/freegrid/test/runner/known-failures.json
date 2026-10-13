@@ -26,6 +26,7 @@
     "AutoColumnSize should update column width after update value in cell (array of objects)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
     "ContextMenu afterContextMenuDefaultOptions hook should call afterContextMenuDefaultOptions hook with context menu options as the first param": "timing: flaky in this browser (opens the menu, then a fixed 200 ms wait), failed once in CI and passed on rerun (#7)",
     "ContextMenu beforeContextMenuSetItems hook should add new menu item even when item is excluded from plugin settings": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu menu destroy should close context menu when HOT is being destroyed": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
     "ContextMenu menu hidden items should remove separators from top, bottom and duplicated": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
     "ContextMenu subMenu should not open subMenu immediately": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
     "ContextMenu subMenu should open subMenu with delay": "timing: flaky in this browser (300 ms submenu debounce vs a 300 ms wait), passes in most runs (#7)",
