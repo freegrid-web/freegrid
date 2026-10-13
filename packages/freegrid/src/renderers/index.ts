@@ -1,4 +1,5 @@
 import staticRegister from './../utils/staticRegister';
+import type { Renderer } from '../cellTypes/types';
 
 import baseRenderer from './_cellDecorator';
 import autocompleteRenderer from './autocompleteRenderer';
@@ -14,7 +15,7 @@ const {
   hasItem,
   getNames,
   getValues,
-} = staticRegister('renderers');
+} = staticRegister<Renderer>('renderers');
 
 register('base', baseRenderer);
 register('autocomplete', autocompleteRenderer);
@@ -24,13 +25,8 @@ register('numeric', numericRenderer);
 register('password', passwordRenderer);
 register('text', textRenderer);
 
-/**
- * Retrieve renderer function.
- *
- * @param {String} name Renderer identification.
- * @returns {Function} Returns renderer function.
- */
-function _getItem(name) {
+/** A registered renderer by name (a function is returned as it is); throws for an unknown name. */
+const getRendererItem = (name: string | Renderer): Renderer => {
   if (typeof name === 'function') {
     return name;
   }
@@ -38,12 +34,12 @@ function _getItem(name) {
     throw Error(`No registered renderer found under "${name}" name`);
   }
 
-  return getItem(name);
-}
+  return getItem(name) as Renderer;
+};
 
 export {
   register as registerRenderer,
-  _getItem as getRenderer,
+  getRendererItem as getRenderer,
   hasItem as hasRenderer,
   getNames as getRegisteredRendererNames,
   getValues as getRegisteredRenderers,

@@ -1,4 +1,5 @@
 import staticRegister from './../utils/staticRegister';
+import type { Validator } from '../cellTypes/types';
 
 import autocompleteValidator from './autocompleteValidator';
 import dateValidator from './dateValidator';
@@ -11,20 +12,15 @@ const {
   hasItem,
   getNames,
   getValues,
-} = staticRegister('validators');
+} = staticRegister<Validator>('validators');
 
 register('autocomplete', autocompleteValidator);
 register('date', dateValidator);
 register('numeric', numericValidator);
 register('time', timeValidator);
 
-/**
- * Retrieve validator function.
- *
- * @param {String} name Validator identification.
- * @returns {Function} Returns validator function.
- */
-function _getItem(name) {
+/** A registered validator by name (a function is returned as it is); throws for an unknown name. */
+const getValidatorItem = (name: string | Validator): Validator => {
   if (typeof name === 'function') {
     return name;
   }
@@ -32,12 +28,12 @@ function _getItem(name) {
     throw Error(`No registered validator found under "${name}" name`);
   }
 
-  return getItem(name);
-}
+  return getItem(name) as Validator;
+};
 
 export {
   register as registerValidator,
-  _getItem as getValidator,
+  getValidatorItem as getValidator,
   hasItem as hasValidator,
   getNames as getRegisteredValidatorNames,
   getValues as getRegisteredValidators,

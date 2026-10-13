@@ -1,68 +1,53 @@
 import { formatDate, parseDate } from '../helpers/dateFormat';
+import type { ValidatorContext } from '../cellTypes/types';
 
-// Formats which are correctly parsed to time
+// Values that are read as a date and time rather than as a time.
 const STRICT_FORMATS = [
   'YYYY-MM-DDTHH:mm:ss.SSSZ',
   'X', // Unix timestamp
-  'x' // Unix ms timestamp
+  'x', // Unix ms timestamp
 ];
 
 /**
- * Time cell validator
- *
- * @private
- * @validator TimeValidator
- * @param {*} value - Value of edited cell
- * @param {Function} callback - Callback called with validation result
+ * Valid: a time in `timeFormat` (default `h:mm:ss a`), or an empty value with `allowEmpty`. A time in another form
+ * (also a Unix timestamp, an ISO date, or `13` for 13:00) is invalid, unless `correctFormat` rewrites it in
+ * `timeFormat`.
  */
-export default function timeValidator(value, callback) {
+export default function timeValidator(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
   const timeFormat = this.timeFormat || 'h:mm:ss a';
-  let valid = true;
-  let valueToValidate = value;
+  let valueToValidate: unknown = value === null ? '' : value;
 
-  if (valueToValidate === null) {
-    valueToValidate = '';
+  // 3+ digits: a timestamp. 1–2 digits: an hour.
+  if (/^\d{3,}$/.test(valueToValidate as string)) {
+    valueToValidate = parseInt(valueToValidate as string, 10);
   }
-
-  valueToValidate = /^\d{3,}$/.test(valueToValidate) ? parseInt(valueToValidate, 10) : valueToValidate;
-
-  const twoDigitValue = /^\d{1,2}$/.test(valueToValidate);
+  const twoDigitValue = /^\d{1,2}$/.test(valueToValidate as string);
 
   if (twoDigitValue) {
-    valueToValidate += ':00';
+    valueToValidate = `${valueToValidate}:00`;
   }
-
-  // A timestamp or an ISO date is read as a date; anything else as a time in timeFormat.
-  const date = parseDate(valueToValidate, STRICT_FORMATS, true)
-    ? parseDate(new Date(valueToValidate), timeFormat)
-    : parseDate(valueToValidate, timeFormat);
-  let isValidTime = date !== null;
-
-  // is it in the specified format
-  let isValidFormat = parseDate(valueToValidate, timeFormat, true) !== null && !twoDigitValue;
-
   if (this.allowEmpty && valueToValidate === '') {
-    isValidTime = true;
-    isValidFormat = true;
-  }
-  if (!isValidTime) {
-    valid = false;
-  }
-  if (!isValidTime && isValidFormat) {
-    valid = true;
-  }
-  if (isValidTime && !isValidFormat) {
-    if (this.correctFormat === true) { // if format correction is enabled
-      const correctedValue = formatDate(date, timeFormat);
-      const row = this.instance.runHooks('unmodifyRow', this.row);
-      const column = this.instance.runHooks('unmodifyCol', this.col);
+    callback(true);
 
-      this.instance.setDataAtCell(row, column, correctedValue, 'timeValidator');
-      valid = true;
-    } else {
-      valid = false;
-    }
+    return;
   }
+  if (parseDate(valueToValidate, timeFormat, true) !== null && !twoDigitValue) {
+    callback(true);
 
-  callback(valid);
+    return;
+  }
+  const date = parseDate(valueToValidate, STRICT_FORMATS, true)
+    ? parseDate(new Date(valueToValidate as string | number), timeFormat)
+    : parseDate(valueToValidate, timeFormat);
+
+  if (date !== null && this.correctFormat === true) {
+    const row = this.instance.runHooks('unmodifyRow', this.row) as number;
+    const column = this.instance.runHooks('unmodifyCol', this.col) as number;
+
+    this.instance.setDataAtCell(row, column, formatDate(date, timeFormat), 'timeValidator');
+    callback(true);
+
+    return;
+  }
+  callback(false);
 }

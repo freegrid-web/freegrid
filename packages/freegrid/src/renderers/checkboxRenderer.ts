@@ -3,101 +3,186 @@ import { empty, addClass } from './../helpers/dom/element';
 import { equalsIgnoreCase } from './../helpers/string';
 import EventManager from './../eventManager';
 import { isKey } from './../helpers/unicode';
-import { partial } from './../helpers/function';
 import { stopImmediatePropagation, isImmediatePropagationStopped } from './../helpers/dom/event';
 import { getRenderer } from './index';
+import type { CellProperties, GridInstance, Renderer } from '../cellTypes/types';
 
-const isListeningKeyDownEvent = new WeakMap();
-const isCheckboxListenerAdded = new WeakMap();
+const isListeningKeyDownEvent = new WeakMap<GridInstance, true>();
+const isCheckboxListenerAdded = new WeakMap<GridInstance, EventManager>();
 const BAD_VALUE_CLASS = 'fg-bad-value';
 
-/**
- * Checkbox renderer
- *
- * @private
- * @param {Object} instance FreeGrid instance
- * @param {Element} TD Table cell where to render
- * @param {Number} row
- * @param {Number} col
- * @param {String|Number} prop Row object property name
- * @param value Value to render (remember to escape unsafe HTML before inserting to DOM!)
- * @param {Object} cellProperties Cell properties (shared by cell renderer and editor)
- */
-function checkboxRenderer(instance, TD, row, col, prop, value, cellProperties, ...args) {
-  getRenderer('base').apply(this, [instance, TD, row, col, prop, value, cellProperties, ...args]);
-  registerEvents(instance);
+const isCheckboxInput = (element: EventTarget | null): element is HTMLInputElement => element instanceof HTMLElement
+  && element.tagName === 'INPUT' && element.getAttribute('type') === 'checkbox';
 
-  let input = createInput();
-  const labelOptions = cellProperties.label;
-  let badValue = false;
+const createInput = (): HTMLInputElement => {
+  const input = document.createElement('input');
 
-  if (typeof cellProperties.checkedTemplate === 'undefined') {
+  input.className = withLegacyClassNames('fg-checkbox-renderer-input');
+  input.type = 'checkbox';
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('tabindex', '-1');
+
+  return input;
+};
+
+const createLabel = (text: unknown): HTMLLabelElement => {
+  const label = document.createElement('label');
+
+  label.className = withLegacyClassNames('fg-checkbox-renderer-label');
+  label.appendChild(document.createTextNode(text as string));
+
+  return label;
+};
+
+/** The checkbox of the event's cell, with its cell settings; nothing for other targets. */
+const checkboxTarget = (event: Event, instance: GridInstance) => {
+  if (!isCheckboxInput(event.target)) {
+    return null;
+  }
+  const row = parseInt(event.target.getAttribute('data-row') as string, 10);
+  const col = parseInt(event.target.getAttribute('data-col') as string, 10);
+
+  return { input: event.target, row, col, cellProperties: instance.getCellMeta(row, col) };
+};
+
+// A click on a read-only checkbox does not change it.
+const onClick = (event: MouseEvent, instance: GridInstance): void => {
+  if (checkboxTarget(event, instance)?.cellProperties.readOnly) {
+    event.preventDefault();
+  }
+};
+
+// The grid listens to the keyboard again after a checkbox took the focus.
+const onMouseUp = (event: MouseEvent, instance: GridInstance): void => {
+  if (isCheckboxInput(event.target)) {
+    setTimeout(instance.listen, 10);
+  }
+};
+
+// Writes the checked or unchecked template to the data.
+const onChange = (event: Event, instance: GridInstance): void => {
+  const target = checkboxTarget(event, instance);
+
+  if (!target || target.cellProperties.readOnly) {
+    return;
+  }
+  const { input, row, col, cellProperties } = target;
+  let newCheckboxValue;
+
+  if (input.checked) {
+    newCheckboxValue = cellProperties.uncheckedTemplate === undefined ? true : cellProperties.checkedTemplate;
+  } else {
+    newCheckboxValue = cellProperties.uncheckedTemplate === undefined ? false : cellProperties.uncheckedTemplate;
+  }
+  instance.setDataAtCell(row, col, newCheckboxValue);
+};
+
+/** Click, mouseup and change listeners on the grid (once per grid). */
+const registerEvents = (instance: GridInstance): EventManager => {
+  let eventManager = isCheckboxListenerAdded.get(instance);
+
+  if (!eventManager) {
+    eventManager = new EventManager(instance);
+    eventManager.addEventListener(instance.rootElement, 'click', (event: MouseEvent) => onClick(event, instance));
+    eventManager.addEventListener(instance.rootElement, 'mouseup', (event: MouseEvent) => onMouseUp(event, instance));
+    eventManager.addEventListener(instance.rootElement, 'change', (event: Event) => onChange(event, instance));
+    isCheckboxListenerAdded.set(instance, eventManager);
+  }
+
+  return eventManager;
+};
+
+/** The cell's templates, defaulting to `true` and `false` (written back to the cell settings, as before). */
+const applyDefaultTemplates = (cellProperties: CellProperties): void => {
+  if (cellProperties.checkedTemplate === undefined) {
     cellProperties.checkedTemplate = true;
   }
-  if (typeof cellProperties.uncheckedTemplate === 'undefined') {
+  if (cellProperties.uncheckedTemplate === undefined) {
     cellProperties.uncheckedTemplate = false;
   }
+};
 
-  empty(TD); // TODO identify under what circumstances this line can be removed
-
-  if (value === cellProperties.checkedTemplate || equalsIgnoreCase(value, cellProperties.checkedTemplate)) {
-    input.checked = true;
-
-  } else if (value === cellProperties.uncheckedTemplate || equalsIgnoreCase(value, cellProperties.uncheckedTemplate)) {
-    input.checked = false;
-
-  } else if (value === null) { // default value
-    addClass(input, 'noValue');
-
-  } else {
-    input.style.display = 'none';
-    addClass(input, BAD_VALUE_CLASS);
-    badValue = true;
+/**
+ * Space or Enter toggles the selected checkboxes; Delete or Backspace unchecks them. The keys are handled once per
+ * grid (the first rendered checkbox adds the hook).
+ */
+const listenToKeys = (instance: GridInstance): void => {
+  if (isListeningKeyDownEvent.has(instance)) {
+    return;
   }
+  isListeningKeyDownEvent.set(instance, true);
 
-  input.setAttribute('data-row', row);
-  input.setAttribute('data-col', col);
+  // Calls `callback` while the selection's cells are checkboxes (stops at the first other cell).
+  const eachSelectedCheckboxCell = (callback: () => void): void => {
+    const selRange = instance.getSelectedRangeLast();
 
-  if (!badValue && labelOptions) {
-    let labelText = '';
-
-    if (labelOptions.value) {
-      labelText = typeof labelOptions.value === 'function' ? labelOptions.value.call(this, row, col, prop, value) : labelOptions.value;
-
-    } else if (labelOptions.property) {
-      labelText = instance.getDataAtRowProp(row, labelOptions.property);
+    if (!selRange) {
+      return;
     }
-    const label = createLabel(labelText);
+    const topLeft = selRange.getTopLeftCorner();
+    const bottomRight = selRange.getBottomRightCorner();
 
-    if (labelOptions.position === 'before') {
-      label.appendChild(input);
-    } else {
-      label.insertBefore(input, label.firstChild);
+    for (let visualRow = topLeft.row; visualRow <= bottomRight.row; visualRow += 1) {
+      for (let visualColumn = topLeft.col; visualColumn <= bottomRight.col; visualColumn += 1) {
+        const cachedCellProperties = instance.getCellMeta(visualRow, visualColumn);
+
+        if (cachedCellProperties.type !== 'checkbox') {
+          return;
+        }
+        const cell = instance.getCell(visualRow, visualColumn);
+
+        if (cell === null || cell === undefined) {
+          callback();
+        } else if (cell.querySelectorAll('input[type=checkbox]').length > 0 && !cachedCellProperties.readOnly) {
+          callback();
+        }
+      }
     }
-    input = label;
-  }
+  };
 
-  TD.appendChild(input);
+  const changeSelectedCheckboxesState = (uncheckCheckbox = false): void => {
+    const selRange = instance.getSelectedRangeLast();
 
-  if (badValue) {
-    TD.appendChild(document.createTextNode('#bad-value#'));
-  }
+    if (!selRange) {
+      return;
+    }
+    const { row: startRow, col: startColumn } = selRange.getTopLeftCorner();
+    const { row: endRow, col: endColumn } = selRange.getBottomRightCorner();
+    const changes: [number, number, unknown][] = [];
 
-  if (!isListeningKeyDownEvent.has(instance)) {
-    isListeningKeyDownEvent.set(instance, true);
-    instance.addHook('beforeKeyDown', onBeforeKeyDown);
-  }
+    for (let visualRow = startRow; visualRow <= endRow; visualRow += 1) {
+      for (let visualColumn = startColumn; visualColumn <= endColumn; visualColumn += 1) {
+        const cachedCellProperties = instance.getCellMeta(visualRow, visualColumn);
 
-  /**
-   * On before key down DOM listener.
-   *
-   * @private
-   * @param {Event} event
-   */
-  function onBeforeKeyDown(event) {
+        if (cachedCellProperties.type !== 'checkbox') {
+          return;
+        }
+        // eslint-disable-next-line no-continue
+        if (cachedCellProperties.readOnly === true) {
+          continue;
+        }
+        applyDefaultTemplates(cachedCellProperties);
+        const { checkedTemplate, uncheckedTemplate } = cachedCellProperties;
+        const dataAtCell = instance.getDataAtCell(visualRow, visualColumn);
+
+        if (uncheckCheckbox) {
+          changes.push([visualRow, visualColumn, uncheckedTemplate]);
+        } else if ([checkedTemplate, String(checkedTemplate)].includes(dataAtCell)) {
+          changes.push([visualRow, visualColumn, uncheckedTemplate]);
+        } else if ([uncheckedTemplate, String(uncheckedTemplate), null, undefined].includes(dataAtCell)) {
+          changes.push([visualRow, visualColumn, checkedTemplate]);
+        }
+      }
+    }
+    if (changes.length > 0) {
+      instance.setDataAtCell(changes);
+    }
+  };
+
+  instance.addHook('beforeKeyDown', (event: KeyboardEvent) => {
     const toggleKeys = 'SPACE|ENTER';
     const switchOffKeys = 'DELETE|BACKSPACE';
-    const isKeyCode = partial(isKey, event.keyCode);
+    const isKeyCode = (keys: string) => isKey(event.keyCode, keys);
 
     if (!instance.getSettings().enterBeginsEditing && isKeyCode('ENTER')) {
       return;
@@ -114,232 +199,66 @@ function checkboxRenderer(instance, TD, row, col, prop, value, cellProperties, .
     if (isKeyCode(switchOffKeys)) {
       changeSelectedCheckboxesState(true);
     }
+  });
+};
+
+/**
+ * A checkbox: checked for `checkedTemplate` (default `true`), unchecked for `uncheckedTemplate` (default `false`),
+ * hidden with `#bad-value#` for other values. `label` adds a label from a value, a function or a data property.
+ */
+const checkboxRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+  getRenderer('base')(instance, TD, row, col, prop, value, cellProperties);
+  registerEvents(instance);
+  applyDefaultTemplates(cellProperties);
+
+  const input = createInput();
+  const labelOptions = cellProperties.label;
+  let element: HTMLElement = input;
+  let badValue = false;
+
+  // TODO identify under what circumstances this line can be removed
+  empty(TD);
+
+  if (value === cellProperties.checkedTemplate || equalsIgnoreCase(value, cellProperties.checkedTemplate)) {
+    input.checked = true;
+  } else if (value === cellProperties.uncheckedTemplate || equalsIgnoreCase(value, cellProperties.uncheckedTemplate)) {
+    input.checked = false;
+  } else if (value === null) {
+    // No value yet.
+    addClass(input, 'noValue');
+  } else {
+    input.style.display = 'none';
+    addClass(input, BAD_VALUE_CLASS);
+    badValue = true;
   }
+  input.setAttribute('data-row', String(row));
+  input.setAttribute('data-col', String(col));
 
-  /**
-   * Change checkbox checked property
-   *
-   * @private
-   * @param {Boolean} [uncheckCheckbox=false]
-   */
-  function changeSelectedCheckboxesState(uncheckCheckbox = false) {
-    const selRange = instance.getSelectedRangeLast();
+  if (!badValue && labelOptions) {
+    let labelText: unknown = '';
 
-    if (!selRange) {
-      return;
+    if (labelOptions.value) {
+      labelText = typeof labelOptions.value === 'function'
+        ? labelOptions.value(row, col, prop, value)
+        : labelOptions.value;
+    } else if (labelOptions.property) {
+      labelText = instance.getDataAtRowProp(row, labelOptions.property);
     }
+    const label = createLabel(labelText);
 
-    const { row: startRow, col: startColumn } = selRange.getTopLeftCorner();
-    const { row: endRow, col: endColumn } = selRange.getBottomRightCorner();
-    const changes = [];
-
-    for (let visualRow = startRow; visualRow <= endRow; visualRow += 1) {
-      for (let visualColumn = startColumn; visualColumn <= endColumn; visualColumn += 1) {
-        const cachedCellProperties = instance.getCellMeta(visualRow, visualColumn);
-
-        if (cachedCellProperties.type !== 'checkbox') {
-          return;
-        }
-
-        /* eslint-disable no-continue */
-        if (cachedCellProperties.readOnly === true) {
-          continue;
-        }
-
-        if (typeof cachedCellProperties.checkedTemplate === 'undefined') {
-          cachedCellProperties.checkedTemplate = true;
-        }
-        if (typeof cachedCellProperties.uncheckedTemplate === 'undefined') {
-          cachedCellProperties.uncheckedTemplate = false;
-        }
-
-        const dataAtCell = instance.getDataAtCell(visualRow, visualColumn);
-
-        if (uncheckCheckbox === false) {
-          if ([cachedCellProperties.checkedTemplate, cachedCellProperties.checkedTemplate.toString()].includes(dataAtCell)) {
-            changes.push([visualRow, visualColumn, cachedCellProperties.uncheckedTemplate]);
-
-          } else if ([cachedCellProperties.uncheckedTemplate, cachedCellProperties.uncheckedTemplate.toString(), null, void 0].includes(dataAtCell)) {
-            changes.push([visualRow, visualColumn, cachedCellProperties.checkedTemplate]);
-          }
-
-        } else {
-          changes.push([visualRow, visualColumn, cachedCellProperties.uncheckedTemplate]);
-        }
-      }
-    }
-
-    if (changes.length > 0) {
-      instance.setDataAtCell(changes);
-    }
-  }
-
-  /**
-   * Call callback for each found selected cell with checkbox type.
-   *
-   * @private
-   * @param {Function} callback
-   */
-  function eachSelectedCheckboxCell(callback) {
-    const selRange = instance.getSelectedRangeLast();
-
-    if (!selRange) {
-      return;
-    }
-    const topLeft = selRange.getTopLeftCorner();
-    const bottomRight = selRange.getBottomRightCorner();
-
-    for (let visualRow = topLeft.row; visualRow <= bottomRight.row; visualRow++) {
-      for (let visualColumn = topLeft.col; visualColumn <= bottomRight.col; visualColumn++) {
-        const cachedCellProperties = instance.getCellMeta(visualRow, visualColumn);
-
-        if (cachedCellProperties.type !== 'checkbox') {
-          return;
-        }
-
-        const cell = instance.getCell(visualRow, visualColumn);
-
-        if (cell === null || cell === void 0) {
-          callback(visualRow, visualColumn, cachedCellProperties);
-
-        } else {
-          const checkboxes = cell.querySelectorAll('input[type=checkbox]');
-
-          if (checkboxes.length > 0 && !cachedCellProperties.readOnly) {
-            callback(checkboxes);
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- * Register checkbox listeners.
- *
- * @param {FreeGrid} instance FreeGrid instance.
- * @returns {EventManager}
- */
-function registerEvents(instance) {
-  let eventManager = isCheckboxListenerAdded.get(instance);
-
-  if (!eventManager) {
-    eventManager = new EventManager(instance);
-    eventManager.addEventListener(instance.rootElement, 'click', event => onClick(event, instance));
-    eventManager.addEventListener(instance.rootElement, 'mouseup', event => onMouseUp(event, instance));
-    eventManager.addEventListener(instance.rootElement, 'change', event => onChange(event, instance));
-
-    isCheckboxListenerAdded.set(instance, eventManager);
-  }
-
-  return eventManager;
-}
-
-/**
- * Create input element.
- *
- * @returns {Node}
- */
-function createInput() {
-  const input = document.createElement('input');
-
-  input.className = withLegacyClassNames('fg-checkbox-renderer-input');
-  input.type = 'checkbox';
-  input.setAttribute('autocomplete', 'off');
-  input.setAttribute('tabindex', '-1');
-
-  return input.cloneNode(false);
-}
-
-/**
- * Create label element.
- *
- * @returns {Node}
- */
-function createLabel(text) {
-  const label = document.createElement('label');
-
-  label.className = withLegacyClassNames('fg-checkbox-renderer-label');
-  label.appendChild(document.createTextNode(text));
-
-  return label.cloneNode(true);
-}
-
-/**
- * `mouseup` callback.
- *
- * @private
- * @param {Event} event `mouseup` event.
- * @param {Object} instance FreeGrid instance.
- */
-function onMouseUp(event, instance) {
-  if (!isCheckboxInput(event.target)) {
-    return;
-  }
-  setTimeout(instance.listen, 10);
-}
-
-/**
- * `click` callback.
- *
- * @private
- * @param {Event} event `click` event.
- * @param {Object} instance FreeGrid instance.
- */
-function onClick(event, instance) {
-  if (!isCheckboxInput(event.target)) {
-    return false;
-  }
-
-  const row = parseInt(event.target.getAttribute('data-row'), 10);
-  const col = parseInt(event.target.getAttribute('data-col'), 10);
-  const cellProperties = instance.getCellMeta(row, col);
-
-  if (cellProperties.readOnly) {
-    event.preventDefault();
-  }
-}
-
-/**
- * `change` callback.
- *
- * @param {Event} event `change` event.
- * @param {Object} instance FreeGrid instance.
- * @param {Object} cellProperties Reference to cell properties.
- * @returns {Boolean}
- */
-function onChange(event, instance) {
-  if (!isCheckboxInput(event.target)) {
-    return false;
-  }
-
-  const row = parseInt(event.target.getAttribute('data-row'), 10);
-  const col = parseInt(event.target.getAttribute('data-col'), 10);
-  const cellProperties = instance.getCellMeta(row, col);
-
-  if (!cellProperties.readOnly) {
-    let newCheckboxValue = null;
-
-    if (event.target.checked) {
-      newCheckboxValue = cellProperties.uncheckedTemplate === void 0 ? true : cellProperties.checkedTemplate;
-
+    if (labelOptions.position === 'before') {
+      label.appendChild(input);
     } else {
-      newCheckboxValue = cellProperties.uncheckedTemplate === void 0 ? false : cellProperties.uncheckedTemplate;
+      label.insertBefore(input, label.firstChild);
     }
-
-    instance.setDataAtCell(row, col, newCheckboxValue);
+    element = label;
   }
-}
+  TD.appendChild(element);
 
-/**
- * Check if the provided element is the checkbox input.
- *
- * @private
- * @param {HTMLElement} element The element in question.
- * @returns {Boolean}
- */
-function isCheckboxInput(element) {
-  return element.tagName === 'INPUT' && element.getAttribute('type') === 'checkbox';
-}
+  if (badValue) {
+    TD.appendChild(document.createTextNode('#bad-value#'));
+  }
+  listenToKeys(instance);
+};
 
 export default checkboxRenderer;

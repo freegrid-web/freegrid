@@ -17,8 +17,8 @@ let listenersCounter = 0;
  */
 class EventManager {
   /**
-   * @param {Object} [context=null]
-   * @private
+   * @param {Object} [context=null] The object whose `eventListeners` keep the listeners (e.g. a grid, which removes
+   * them when it is destroyed); the manager itself by default.
    */
   constructor(context = null) {
     this.context = context || this;

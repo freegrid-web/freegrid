@@ -3,61 +3,42 @@ import { addClass, hasClass } from './../helpers/dom/element';
 import EventManager from './../eventManager';
 import { CellCoords } from './../3rdparty/walkontable/src';
 import { getRenderer } from './index';
+import type { Renderer } from '../cellTypes/types';
 
-const clonableWRAPPER = document.createElement('DIV');
-clonableWRAPPER.className = withLegacyClassNames('fg-autocomplete-wrapper');
-
+// Cloned for every cell: faster than creating the element.
 const clonableARROW = document.createElement('DIV');
+
 clonableARROW.className = withLegacyClassNames('fg-autocomplete-arrow');
-// workaround for https://github.com/handsontable/handsontable/issues/1946
-// this is faster than innerHTML. See: https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
 clonableARROW.appendChild(document.createTextNode(String.fromCharCode(9660)));
 
 /**
- * Autocomplete renderer
- *
- * @private
- * @renderer AutocompleteRenderer
- * @param {Object} instance FreeGrid instance
- * @param {Element} TD Table cell where to render
- * @param {Number} row
- * @param {Number} col
- * @param {String|Number} prop Row object property name
- * @param value Value to render (remember to escape unsafe HTML before inserting to DOM!)
- * @param {Object} cellProperties Cell properites (shared by cell renderer and editor)
+ * The value (as text, or as HTML with `allowHtml`) with a dropdown arrow. A mousedown on the arrow opens the cell's
+ * editor.
  */
-function autocompleteRenderer(instance, TD, row, col, prop, value, cellProperties, ...args) {
-  const rendererType = cellProperties.allowHtml ? 'html' : 'text';
-  const ARROW = clonableARROW.cloneNode(true); // this is faster than createElement
+const autocompleteRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+  getRenderer(cellProperties.allowHtml ? 'html' : 'text')(instance, TD, row, col, prop, value, cellProperties);
 
-  getRenderer(rendererType).apply(this, [instance, TD, row, col, prop, value, cellProperties, ...args]);
-
-  if (!TD.firstChild) { // http://jsperf.com/empty-node-if-needed
-    // otherwise empty fields appear borderless in demo/renderers.html (IE)
-    TD.appendChild(document.createTextNode(String.fromCharCode(160))); // workaround for https://github.com/handsontable/handsontable/issues/1946
-    // this is faster than innerHTML. See: https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
+  if (!TD.firstChild) {
+    // An empty cell would otherwise have no height to align the arrow with.
+    TD.appendChild(document.createTextNode(String.fromCharCode(160)));
   }
-
-  TD.insertBefore(ARROW, TD.firstChild);
+  TD.insertBefore(clonableARROW.cloneNode(true), TD.firstChild);
   addClass(TD, 'fg-autocomplete');
 
   if (!instance.acArrowListener) {
     const eventManager = new EventManager(instance);
 
-    // not very elegant but easy and fast
-    instance.acArrowListener = function(event) {
-      if (hasClass(event.target, 'fg-autocomplete-arrow')) {
+    instance.acArrowListener = (event: MouseEvent) => {
+      if (hasClass(event.target as HTMLElement, 'fg-autocomplete-arrow')) {
         instance.view.wt.getSetting('onCellDblClick', null, new CellCoords(row, col), TD);
       }
     };
-
     eventManager.addEventListener(instance.rootElement, 'mousedown', instance.acArrowListener);
-
-    // We need to unbind the listener after the table has been destroyed
+    // Removes the listener when the grid is destroyed.
     instance.addHookOnce('afterDestroy', () => {
       eventManager.destroy();
     });
   }
-}
+};
 
 export default autocompleteRenderer;

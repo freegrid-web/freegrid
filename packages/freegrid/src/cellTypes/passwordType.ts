@@ -1,10 +1,13 @@
 import { getEditor } from './../editors';
 import { getRenderer } from './../renderers';
+import type { CellType } from './types';
 
 const CELL_TYPE = 'password';
 
-export default {
+const cellType: CellType = {
   editor: getEditor(CELL_TYPE),
   renderer: getRenderer(CELL_TYPE),
   copyable: false,
 };
+
+export default cellType;

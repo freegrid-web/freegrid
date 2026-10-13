@@ -1,26 +1,12 @@
-/**
- * Numeric cell validator
- *
- * @private
- * @validator NumericValidator
- * @param {*} value - Value of edited cell
- * @param {*} callback - Callback called with validation result
- */
-
 import { isNumeric } from './../helpers/number';
+import type { ValidatorContext } from '../cellTypes/types';
 
-export default function numericValidator(value, callback) {
-  let valueToValidate = value;
+/** Valid: a number, or an empty value with `allowEmpty`. */
+export default function numericValidator(this: ValidatorContext, value: unknown, callback: (valid: boolean) => void): void {
+  const valueToValidate = value ?? '';
 
-  if (valueToValidate === null || valueToValidate === void 0) {
-    valueToValidate = '';
-  }
-  if (this.allowEmpty && valueToValidate === '') {
-    callback(true);
-
-  } else if (valueToValidate === '') {
-    callback(false);
-
+  if (valueToValidate === '') {
+    callback(!!this.allowEmpty);
   } else {
     callback(isNumeric(value));
   }

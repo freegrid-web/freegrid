@@ -1,47 +1,21 @@
-import { empty, fastInnerText } from './../helpers/dom/element';
+import { fastInnerText } from './../helpers/dom/element';
 import { stringify } from './../helpers/mixed';
 import { getRenderer } from './index';
+import type { Renderer } from '../cellTypes/types';
 
 /**
- * Default text renderer
- *
- * @private
- * @renderer TextRenderer
- * @param {Object} instance FreeGrid instance
- * @param {Element} TD Table cell where to render
- * @param {Number} row
- * @param {Number} col
- * @param {String|Number} prop Row object property name
- * @param value Value to render (remember to escape unsafe HTML before inserting to DOM!)
- * @param {Object} cellProperties Cell properties (shared by cell renderer and editor)
+ * The default renderer: the value as text (or the placeholder when it is empty). Spaces are kept unless
+ * `trimWhitespace` is on.
  */
-function textRenderer(instance, TD, row, col, prop, value, cellProperties, ...args) {
-  getRenderer('base').apply(this, [instance, TD, row, col, prop, value, cellProperties, ...args]);
-  let escaped = value;
-
-  if (!escaped && cellProperties.placeholder) {
-    escaped = cellProperties.placeholder;
-  }
-
-  escaped = stringify(escaped);
+const textRenderer: Renderer = (instance, TD, row, col, prop, value, cellProperties) => {
+  getRenderer('base')(instance, TD, row, col, prop, value, cellProperties);
+  let text = stringify(!value && cellProperties.placeholder ? cellProperties.placeholder : value);
 
   if (!instance.getSettings().trimWhitespace) {
-    escaped = escaped.replace(/ /g, String.fromCharCode(160));
+    text = text.replace(/ /g, String.fromCharCode(160));
   }
-
-  if (cellProperties.rendererTemplate) {
-    empty(TD);
-    const TEMPLATE = document.createElement('TEMPLATE');
-    TEMPLATE.setAttribute('bind', '{{}}');
-    TEMPLATE.innerHTML = cellProperties.rendererTemplate;
-    HTMLTemplateElement.decorate(TEMPLATE);
-    TEMPLATE.model = instance.getSourceDataAtRow(row);
-    TD.appendChild(TEMPLATE);
-
-  } else {
-    // this is faster than innerHTML. See: https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
-    fastInnerText(TD, escaped);
-  }
-}
+  // Faster than innerHTML.
+  fastInnerText(TD, text);
+};
 
 export default textRenderer;

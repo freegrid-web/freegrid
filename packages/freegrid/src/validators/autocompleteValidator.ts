@@ -1,54 +1,28 @@
-/**
- * Autocomplete cell validator.
- *
- * @private
- * @validator AutocompleteValidator
- * @param {*} value - Value of edited cell
- * @param {Function} callback - Callback called with validation result
- */
-export default function autocompleteValidator(value, callback) {
-  let valueToValidate = value;
+import type { ValidatorContext } from '../cellTypes/types';
 
-  if (valueToValidate === null || valueToValidate === void 0) {
-    valueToValidate = '';
-  }
+/**
+ * Valid: with `strict` and a `source`, a value from the source (a list, or a function that gives one for the value);
+ * without them, anything. An empty value is valid with `allowEmpty`.
+ */
+export default function autocompleteValidator(this: ValidatorContext, value: unknown,
+  callback: (valid: boolean) => void): void {
+  const valueToValidate = value ?? '';
 
   if (this.allowEmpty && valueToValidate === '') {
     callback(true);
 
     return;
   }
-
-  if (this.strict && this.source) {
-    if (typeof this.source === 'function') {
-      this.source(valueToValidate, process(valueToValidate, callback));
-    } else {
-      process(valueToValidate, callback)(this.source);
-    }
-  } else {
+  if (!this.strict || !this.source) {
     callback(true);
+
+    return;
   }
-}
+  const isInSource = (source: unknown[]) => callback(source.some(item => item === valueToValidate));
 
-/**
- * Function responsible for validation of autocomplete value.
- *
- * @param {*} value - Value of edited cell
- * @param {Function} callback - Callback called with validation result
- */
-function process(value, callback) {
-  const originalVal = value;
-
-  return function(source) {
-    let found = false;
-
-    for (let s = 0, slen = source.length; s < slen; s++) {
-      if (originalVal === source[s]) {
-        found = true; // perfect match
-        break;
-      }
-    }
-
-    callback(found);
-  };
+  if (typeof this.source === 'function') {
+    this.source(valueToValidate, isInSource);
+  } else {
+    isInSource(this.source);
+  }
 }
