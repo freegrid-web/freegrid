@@ -1,10 +1,8 @@
-import moment from 'moment';
 import numbro from 'numbro';
 import FreeGrid from '../src/index';
 
-// Upstream handsontable.full.js exposed these globals; keep that behaviour.
+// Upstream handsontable.full.js exposed numbro as a global; keep that.
 if (typeof window !== 'undefined') {
-  window.moment = moment;
   window.numbro = numbro;
 }
 

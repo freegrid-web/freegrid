@@ -77,6 +77,12 @@ describe('dateFormat', () => {
       expect(result).toEqual([]);
     });
 
+    it('reads text without a format like moment (ISO dates, then the browser)', () => {
+      ['2015-01-02', '2016-03-18T14:38:02.123Z', '2015-01-02 10:20', 'Jan 2 2015', 'foo', ''].forEach((input) => {
+        expect(time(parseDate(input, undefined)), input).toBe(reference(input, undefined as unknown as string, false));
+      });
+    });
+
     it('returns null for null, undefined and an empty format list', () => {
       expect(parseDate(null, 'DD/MM/YYYY')).toBeNull();
       expect(parseDate(undefined, 'DD/MM/YYYY')).toBeNull();

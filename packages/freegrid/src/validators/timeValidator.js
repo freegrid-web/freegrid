@@ -1,6 +1,6 @@
-import moment from 'moment';
+import { formatDate, parseDate } from '../helpers/dateFormat';
 
-// Formats which are correctly parsed to time (supported by momentjs)
+// Formats which are correctly parsed to time
 const STRICT_FORMATS = [
   'YYYY-MM-DDTHH:mm:ss.SSSZ',
   'X', // Unix timestamp
@@ -32,11 +32,14 @@ export default function timeValidator(value, callback) {
     valueToValidate += ':00';
   }
 
-  const date = moment(valueToValidate, STRICT_FORMATS, true).isValid() ? moment(valueToValidate) : moment(valueToValidate, timeFormat);
-  let isValidTime = date.isValid();
+  // A timestamp or an ISO date is read as a date; anything else as a time in timeFormat.
+  const date = parseDate(valueToValidate, STRICT_FORMATS, true)
+    ? parseDate(new Date(valueToValidate), timeFormat)
+    : parseDate(valueToValidate, timeFormat);
+  let isValidTime = date !== null;
 
   // is it in the specified format
-  let isValidFormat = moment(valueToValidate, timeFormat, true).isValid() && !twoDigitValue;
+  let isValidFormat = parseDate(valueToValidate, timeFormat, true) !== null && !twoDigitValue;
 
   if (this.allowEmpty && valueToValidate === '') {
     isValidTime = true;
@@ -50,7 +53,7 @@ export default function timeValidator(value, callback) {
   }
   if (isValidTime && !isValidFormat) {
     if (this.correctFormat === true) { // if format correction is enabled
-      const correctedValue = date.format(timeFormat);
+      const correctedValue = formatDate(date, timeFormat);
       const row = this.instance.runHooks('unmodifyRow', this.row);
       const column = this.instance.runHooks('unmodifyCol', this.col);
 

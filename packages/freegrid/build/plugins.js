@@ -38,4 +38,5 @@ export function localeRegistration() {
 }
 
 /** The vendored runtime code in lib/ is CommonJS (guarded `exports` assignments), like node_modules. */
-export const commonjsOptions = { include: [/node_modules/, /[\\/]freegrid[\\/]lib[\\/]/] };
+// Pikaday require()s moment when it is there; FreeGrid does not use it, so it is left out of the bundles.
+export const commonjsOptions = { include: [/node_modules/, /[\\/]freegrid[\\/]lib[\\/]/], ignore: ['moment'] };

@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 
-import moment from 'moment';
+import { parseDate } from '../../../helpers/dateFormat';
 import { isEmpty } from '../../../helpers/mixed';
 import { DO_NOT_SWAP, FIRST_BEFORE_SECOND, FIRST_AFTER_SECOND } from '../sortService';
 
@@ -43,22 +43,22 @@ export function compareFunctionFactory(sortOrder, columnMeta, columnPluginSettin
     }
 
     const dateFormat = columnMeta.dateFormat;
-    const firstDate = moment(value, dateFormat);
-    const nextDate = moment(nextValue, dateFormat);
+    const firstDate = parseDate(value, dateFormat);
+    const nextDate = parseDate(nextValue, dateFormat);
 
-    if (!firstDate.isValid()) {
+    if (!firstDate) {
       return FIRST_AFTER_SECOND;
     }
 
-    if (!nextDate.isValid()) {
+    if (!nextDate) {
       return FIRST_BEFORE_SECOND;
     }
 
-    if (nextDate.isAfter(firstDate)) {
+    if (nextDate > firstDate) {
       return sortOrder === 'asc' ? FIRST_BEFORE_SECOND : FIRST_AFTER_SECOND;
     }
 
-    if (nextDate.isBefore(firstDate)) {
+    if (nextDate < firstDate) {
       return sortOrder === 'asc' ? FIRST_AFTER_SECOND : FIRST_BEFORE_SECOND;
     }
 

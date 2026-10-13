@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Dates without moment.js: FreeGrid reads and writes `dateFormat` / `timeFormat` itself, with moment's tokens and
+  parsing rules, so existing formats keep working. moment is no longer a dependency: the plain UMD build
+  (`freegrid.js`) no longer needs it on the page, `freegrid.full.js` no longer bundles it or sets `window.moment`,
+  and the ESM build no longer imports it (the full build is about 54 KB smaller minified). Week tokens and
+  non-English month and day names are not supported.
 - Theming: every color, the font and the shadows come from CSS variables (`--fg-*`, all defined in
   `src/css/variables.css`). Override base variables such as `--fg-color-accent` on `:root`, or component variables on
   `.freegrid`. The default look is unchanged.
