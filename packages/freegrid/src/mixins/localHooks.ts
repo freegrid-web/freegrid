@@ -1,27 +1,24 @@
-import { arrayEach } from './../helpers/array';
 import { defineGetter } from './../helpers/object';
 
-const MIXIN_NAME = 'localHooks';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- a hook may take any arguments
+type LocalHook = (...params: any[]) => unknown;
+
+/** What `localHooks` adds to a class (with `mixin(Class, localHooks)`). */
+export type LocalHooks = {
+  _localHooks: Record<string, LocalHook[]>;
+  addLocalHook(key: string, callback: LocalHook): LocalHooks;
+  runLocalHooks(key: string, ...params: unknown[]): void;
+  clearLocalHooks(): LocalHooks;
+};
 
 /**
- * Mixin object to extend objects functionality for local hooks.
- *
- * @type {Object}
+ * Hooks of one object (not of the grid): `addLocalHook('change', callback)` and `runLocalHooks('change', ...params)`.
+ * Each instance gets its own hooks (see `mixin` in helpers/object).
  */
 const localHooks = {
-  /**
-   * Internal hooks storage.
-   */
-  _localHooks: Object.create(null),
+  _localHooks: Object.create(null) as Record<string, LocalHook[]>,
 
-  /**
-   * Add hook to the collection.
-   *
-   * @param {String} key Hook name.
-   * @param {Function} callback Hook callback
-   * @returns {Object}
-   */
-  addLocalHook(key, callback) {
+  addLocalHook(this: LocalHooks, key: string, callback: LocalHook): LocalHooks {
     if (!this._localHooks[key]) {
       this._localHooks[key] = [];
     }
@@ -30,31 +27,19 @@ const localHooks = {
     return this;
   },
 
-  /**
-   * Run hooks.
-   *
-   * @param {String} key Hook name.
-   * @param {*} params
-   */
-  runLocalHooks(key, ...params) {
-    if (this._localHooks[key]) {
-      arrayEach(this._localHooks[key], callback => callback.apply(this, params));
-    }
+  /** Calls the hooks of `key`, with this object as `this`. */
+  runLocalHooks(this: LocalHooks, key: string, ...params: unknown[]): void {
+    this._localHooks[key]?.forEach(callback => callback.apply(this, params));
   },
 
-  /**
-   * Clear all added hooks.
-   *
-   * @returns {Object}
-   */
-  clearLocalHooks() {
+  clearLocalHooks(this: LocalHooks): LocalHooks {
     this._localHooks = {};
 
     return this;
   },
 };
 
-defineGetter(localHooks, 'MIXIN_NAME', MIXIN_NAME, {
+defineGetter(localHooks, 'MIXIN_NAME', 'localHooks', {
   writable: false,
   enumerable: false,
 });

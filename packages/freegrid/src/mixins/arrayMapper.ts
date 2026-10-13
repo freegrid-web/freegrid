@@ -2,54 +2,45 @@ import { arrayMax } from './../helpers/array';
 import { defineGetter } from './../helpers/object';
 import { rangeEach } from './../helpers/number';
 
-const MIXIN_NAME = 'arrayMapper';
+/** What `arrayMapper` adds to a class (with `mixin(Class, arrayMapper)`). */
+export type ArrayMapper = {
+  _arrayMap: number[];
+  getValueByIndex(physicalIndex: number): number | null;
+  getIndexByValue(translatedIndex: number): number | null;
+  insertItems(physicalIndex: number, amount?: number): number[][];
+  removeItems(physicalIndex: number | number[], amount?: number): number[];
+  unshiftItems(physicalIndex: number | number[], amount?: number): void;
+  shiftItems(physicalIndex: number, amount?: number): void;
+  swapIndexes(physicalIndexFrom: number, physicalIndexTo: number): void;
+  clearMap(): void;
+};
 
 /**
- * @type {Object}
+ * Maps indexes to other indexes (e.g. physical rows to moved or sorted rows) in `_arrayMap`: the value at a physical
+ * index is its translated index.
  */
 const arrayMapper = {
-  _arrayMap: [],
+  _arrayMap: [] as number[],
 
-  /**
-   * Get translated index by its physical index.
-   *
-   * @param {Number} physicalIndex Physical index.
-   * @return {Number|null} Returns translated index mapped by passed physical index.
-   */
-  getValueByIndex(physicalIndex) {
-    const length = this._arrayMap.length;
-    let translatedIndex = null;
+  /** The translated index of `physicalIndex`, or `null` past the end. */
+  getValueByIndex(this: ArrayMapper, physicalIndex: number): number | null {
+    return physicalIndex < this._arrayMap.length ? this._arrayMap[physicalIndex] : null;
+  },
 
-    if (physicalIndex < length) {
-      translatedIndex = this._arrayMap[physicalIndex];
-    }
+  /** The physical index of `translatedIndex`, or `null`. */
+  getIndexByValue(this: ArrayMapper, translatedIndex: number): number | null {
+    const physicalIndex = this._arrayMap.indexOf(translatedIndex);
 
-    return translatedIndex;
+    return physicalIndex === -1 ? null : physicalIndex;
   },
 
   /**
-   * Get physical index by its translated index.
-   *
-   * @param {*} translatedIndex Value to search.
-   * @returns {Number|null} Returns a physical index of the array mapper.
+   * Inserts `amount` new entries at `physicalIndex`, numbered after the largest value. Returns what `splice` returned
+   * for each insertion (empty arrays), as before.
    */
-  getIndexByValue(translatedIndex) {
-    let physicalIndex;
-
-    // eslint-disable-next-line no-cond-assign, no-return-assign
-    return (physicalIndex = this._arrayMap.indexOf(translatedIndex)) === -1 ? null : physicalIndex;
-  },
-
-  /**
-   * Insert new items to array mapper starting at passed index. New entries will be a continuation of last value in the array.
-   *
-   * @param {Number} physicalIndex Array index.
-   * @param {Number} [amount=1] Defines how many items will be created to an array.
-   * @returns {Array} Returns added items.
-   */
-  insertItems(physicalIndex, amount = 1) {
-    const newIndex = arrayMax(this._arrayMap) + 1;
-    const addedItems = [];
+  insertItems(this: ArrayMapper, physicalIndex: number, amount = 1): number[][] {
+    const newIndex = (arrayMax(this._arrayMap) as number) + 1;
+    const addedItems: number[][] = [];
 
     rangeEach(amount - 1, (count) => {
       addedItems.push(this._arrayMap.splice(physicalIndex + count, 0, newIndex + count));
@@ -58,110 +49,51 @@ const arrayMapper = {
     return addedItems;
   },
 
-  /**
-   * Remove items from array mapper.
-   *
-   * @param {Number} physicalIndex Array index.
-   * @param {Number} [amount=1] Defines how many items will be created to an array.
-   * @returns {Array} Returns removed items.
-   */
-  removeItems(physicalIndex, amount = 1) {
-    let removedItems = [];
-
-    if (Array.isArray(physicalIndex)) {
-      const mapCopy = [].concat(this._arrayMap);
-
-      // Sort descending
-      physicalIndex.sort((a, b) => b - a);
-
-      for (let i = 0, length = physicalIndex.length; i < length; i++) {
-        const indexToRemove = physicalIndex[i];
-        this._arrayMap.splice(indexToRemove, 1);
-        removedItems.push(mapCopy[indexToRemove]);
-      }
-
-    } else {
-      removedItems = this._arrayMap.splice(physicalIndex, amount);
+  /** Removes `amount` entries at `physicalIndex`, or the entries at each index of a list. Returns their values. */
+  removeItems(this: ArrayMapper, physicalIndex: number | number[], amount = 1): number[] {
+    if (!Array.isArray(physicalIndex)) {
+      return this._arrayMap.splice(physicalIndex, amount);
     }
+    const mapCopy = [...this._arrayMap];
 
-    return removedItems;
+    // Largest index first, so that the other indexes stay valid.
+    physicalIndex.sort((a, b) => b - a);
+
+    return physicalIndex.map((indexToRemove) => {
+      this._arrayMap.splice(indexToRemove, 1);
+
+      return mapCopy[indexToRemove];
+    });
   },
 
-  /**
-   * Unshift items (remove and shift chunk of array to the left).
-   *
-   * @param {Number|Array} physicalIndex Array index or Array of indexes to unshift.
-   * @param {Number} [amount=1] Defines how many items will be removed from an array (when index is passed as number).
-   */
-  unshiftItems(physicalIndex, amount = 1) {
+  /** Removes entries (as `removeItems`) and lowers the values above each removed one, so that none is missing. */
+  unshiftItems(this: ArrayMapper, physicalIndex: number | number[], amount = 1): void {
     const removedItems = this.removeItems(physicalIndex, amount);
 
-    function countRowShift(logicalRow) {
-      // Todo: compare perf between reduce vs sort->each->brake
-      return removedItems.reduce((count, removedLogicalRow) => {
-        let result = count;
-
-        if (logicalRow > removedLogicalRow) {
-          result += 1;
-        }
-
-        return result;
-      }, 0);
-    }
-
-    this._arrayMap = this._arrayMap.map((logicalRow) => {
-      let logicalRowIndex = logicalRow;
-      const rowShift = countRowShift(logicalRowIndex);
-
-      if (rowShift) {
-        logicalRowIndex -= rowShift;
-      }
-
-      return logicalRowIndex;
-    });
+    this._arrayMap = this._arrayMap
+      .map(logicalRow => logicalRow - removedItems.filter(removed => logicalRow > removed).length);
   },
 
-  /**
-   * Shift (right shifting) items starting at passed index.
-   *
-   * @param {Number} physicalIndex Array index.
-   * @param {Number} [amount=1] Defines how many items will be created to an array.
-   */
-  shiftItems(physicalIndex, amount = 1) {
-    this._arrayMap = this._arrayMap.map((row) => {
-      let physicalRowIndex = row;
-
-      if (physicalRowIndex >= physicalIndex) {
-        physicalRowIndex += amount;
-      }
-
-      return physicalRowIndex;
-    });
+  /** Raises the values from `physicalIndex` by `amount` and inserts `amount` entries there, valued as their index. */
+  shiftItems(this: ArrayMapper, physicalIndex: number, amount = 1): void {
+    this._arrayMap = this._arrayMap.map(row => (row >= physicalIndex ? row + amount : row));
 
     rangeEach(amount - 1, (count) => {
       this._arrayMap.splice(physicalIndex + count, 0, physicalIndex + count);
     });
   },
 
-  /**
-   * Swap indexes in arrayMapper.
-   *
-   * @param {Number} physicalIndexFrom index to move.
-   * @param {Number} physicalIndexTo index to.
-   */
-  swapIndexes(physicalIndexFrom, physicalIndexTo) {
+  /** Moves the entry at `physicalIndexFrom` to `physicalIndexTo`. */
+  swapIndexes(this: ArrayMapper, physicalIndexFrom: number, physicalIndexTo: number): void {
     this._arrayMap.splice(physicalIndexTo, 0, ...this._arrayMap.splice(physicalIndexFrom, 1));
   },
 
-  /**
-   * Clear all stored index<->value information from an array.
-   */
-  clearMap() {
+  clearMap(this: ArrayMapper): void {
     this._arrayMap.length = 0;
-  }
+  },
 };
 
-defineGetter(arrayMapper, 'MIXIN_NAME', MIXIN_NAME, {
+defineGetter(arrayMapper, 'MIXIN_NAME', 'arrayMapper', {
   writable: false,
   enumerable: false,
 });
