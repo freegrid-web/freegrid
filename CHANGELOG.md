@@ -26,6 +26,7 @@
 - **Security:** pasting HTML could run code from it (e.g. an image's `onerror`), because the pasted table was read through
   an element's `innerHTML`. Pasted HTML is now parsed into an inert document.
 - Plugins, part 5: manualColumnMove, manualRowMove.
+- Plugins, part 6: customBorders, comments.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
