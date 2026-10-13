@@ -1,7 +1,7 @@
 import { classNameIncludes } from './../helpers/classNames';
-import numbro from 'numbro';
 import { getRenderer } from './index';
 import { isNumeric } from './../helpers/number';
+import { formatNumber } from './../helpers/numberFormat';
 
 /**
  * Numeric cell renderer
@@ -20,24 +20,10 @@ function numericRenderer(instance, TD, row, col, prop, value, cellProperties) {
   let newValue = value;
 
   if (isNumeric(newValue)) {
-    const numericFormat = cellProperties.numericFormat;
-    const cellCulture = numericFormat && numericFormat.culture || '-';
-    const cellFormatPattern = numericFormat && numericFormat.pattern;
     const className = cellProperties.className || '';
     const classArr = className.length ? className.split(' ') : [];
 
-    if (typeof cellCulture !== 'undefined' && !numbro.languages()[cellCulture]) {
-      const shortTag = cellCulture.replace('-', '');
-      const langData = numbro.allLanguages ? numbro.allLanguages[cellCulture] : numbro[shortTag];
-
-      if (langData) {
-        numbro.registerLanguage(langData);
-      }
-    }
-
-    numbro.setLanguage(cellCulture);
-
-    newValue = numbro(newValue).format(cellFormatPattern || '0');
+    newValue = formatNumber(Number(newValue), cellProperties.numericFormat);
 
     const classes = classArr.join(' ');
 

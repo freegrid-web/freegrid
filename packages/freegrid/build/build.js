@@ -10,7 +10,7 @@ import { legacyClassNames } from './legacyClassNames.js';
 const r = p => fileURLToPath(new URL(`../${p}`, import.meta.url));
 const buildDate = new Date();
 const define = defineConstants({ buildDate });
-const deps = ['numbro'];
+const deps = [];
 const isDep = id => deps.some(d => id === d || id.startsWith(`${d}/`));
 
 const base = { configFile: false, logLevel: 'warn', define, css: { postcss: { plugins: [legacyClassNames()] } } };
@@ -37,7 +37,7 @@ async function umd({ full, minify }) {
       lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
         external: full ? [] : isDep,
-        output: { exports: 'default', banner: banner(buildDate), globals: { numbro: 'numbro' } },
+        output: { exports: 'default', banner: banner(buildDate) },
       },
     },
   });

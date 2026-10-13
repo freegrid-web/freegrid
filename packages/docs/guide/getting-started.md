@@ -35,12 +35,12 @@ The result:
 
 ## Without a bundler
 
-Load the "full" build, which already includes its dependency (numbro), from a
-`<script>` tag. It defines a global `FreeGrid`:
+Load the build from a `<script>` tag. It defines a global `FreeGrid` and needs no other library: FreeGrid formats
+numbers and dates and shows its date picker itself.
 
 ```html
-<link rel="stylesheet" href="@freegrid/core/dist/freegrid.full.min.css">
-<script src="@freegrid/core/dist/freegrid.full.min.js"></script>
+<link rel="stylesheet" href="@freegrid/core/dist/freegrid.min.css">
+<script src="@freegrid/core/dist/freegrid.min.js"></script>
 
 <div id="grid"></div>
 <script>
@@ -52,8 +52,8 @@ Load the "full" build, which already includes its dependency (numbro), from a
 </script>
 ```
 
-If your page already loads numbro, use `freegrid.min.js` and `freegrid.min.css` instead; they expect `numbro` as a
-global. FreeGrid reads and writes dates and shows its date picker itself, without other libraries.
+`freegrid.full.min.js` and `freegrid.full.min.css` still exist for pages that load them; they are now the same as
+`freegrid.min.js` and `freegrid.min.css`.
 
 ## Sizing
 

@@ -3,7 +3,6 @@ import { JSDOM } from 'jsdom';
 
 const dist = f => new URL(`../../dist/${f}`, import.meta.url);
 const read = f => readFileSync(dist(f), 'utf8');
-const nm = f => readFileSync(new URL(`../../node_modules/${f}`, import.meta.url), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ColumnSorting', 'Comments', 'ContextMenu',
   'CopyPaste', 'CustomBorders', 'DragToScroll', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
@@ -67,9 +66,9 @@ describe('dist outputs', () => {
     expect(windowWith(read('freegrid.full.js')).moment).toBeUndefined();
   });
 
-  it('plain UMD keeps numbro external and registers all 6.2.2 plugins', () => {
+  it('plain UMD works on its own and registers all 6.2.2 plugins', () => {
     const code = read('freegrid.js');
-    const w = windowWith(nm('numbro/dist/numbro.js'), code);
+    const w = windowWith(code);
 
     expect(typeof w.FreeGrid).toBe('function');
     expect(w.FreeGrid.packageName).toBe('@freegrid/core');
@@ -77,11 +76,13 @@ describe('dist outputs', () => {
     PLUGINS_622.forEach(p => expect(typeof w.FreeGrid.plugins[p], p).toBe('function'));
   });
 
-  it('full UMD bundles dependencies and exposes window.numbro', () => {
+  it('no bundle contains or needs numbro', () => {
+    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js']
+      .forEach(f => expect(read(f), f).not.toMatch(/BigNumber|from ["']numbro["']|require\(["']numbro["']\)/));
     const w = windowWith(read('freegrid.full.js'));
 
     expect(typeof w.FreeGrid).toBe('function');
-    expect(typeof w.numbro).toBe('function');
+    expect(w.numbro).toBeUndefined();
   });
 
   it('UMD builds expose the number helpers on FreeGrid.helper', () => {

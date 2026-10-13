@@ -17,7 +17,6 @@ export function runnerHtml(suite, buildKind) {
       css: ['/test/lib/normalize.css', `/dist/freegrid${min}.css`, '/test/helpers/common.css'],
       js: ['/test/helpers/jasmine-bridge-reporter.js', '/test/lib/jquery.min.js', '/test/lib/jquery.simulate.js',
         '/test/lib/lodash.underscore.js', '/test/lib/backbone.js',
-        '/node_modules/numbro/dist/numbro.js', '/node_modules/numbro/dist/languages.min.js',
         '/node_modules/moment/moment.js', // specs use it; FreeGrid does not
         `/dist/freegrid${min}.js`, '/dist/compat.js', `/dist/languages/all${min}.js`,
         '/test/dist/helpers.entry.js', '/test/dist/specs.entry.js'],

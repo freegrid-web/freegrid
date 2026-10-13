@@ -2077,13 +2077,12 @@ DefaultSettings.prototype = {
    *
    * __Note__, this option only works for [numeric-typed](https://github.com/freegrid-web/freegrid) cells.
    *
-   * Format is described by two properties:
-   * * `pattern` - Handled by `numbro` for purpose of formatting numbers to desired pattern. List of supported patterns can be found [here](http://numbrojs.com/format.html#numbers).
-   * * `culture` - Handled by `numbro` for purpose of formatting currencies. Examples showing how it works can be found [here](http://numbrojs.com/format.html#currency). List of supported cultures can be found [here](http://numbrojs.com/languages.html#supported-languages).
+   * Format is described by:
+   * * `pattern` - A numbro-style pattern, such as `0,0.00`, `$0,0.00`, `0.0%` or `0.0a`.
+   * * `culture` - A locale (default `en-US`): its separators and currency come from the browser (`Intl`).
+   * * Without `pattern`, any `Intl.NumberFormat` options, such as `{ style: 'currency', currency: 'EUR' }`.
    *
    * __Note:__ Please keep in mind that this option is used only to format the displayed output! It has no effect on the input data provided for the cell. The numeric data can be entered to the table only as floats (separated by a dot or a comma) or integers, and are stored in the source dataset as JavaScript numbers.
-   *
-   * FreeGrid uses [numbro](http://numbrojs.com/) as a main library for numbers formatting.
    *
    * @since 0.35.0
    * @type {Object}

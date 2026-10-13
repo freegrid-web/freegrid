@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Numbers without numbro: FreeGrid formats `numericFormat` itself. numbro patterns keep working and give the same
+  text; the separators and the currency of `culture` come from the browser (`Intl`), so every locale works without
+  language files. Without a `pattern`, `numericFormat` takes `Intl.NumberFormat` options (`style`, `currency`,
+  `unit`, `notation`, …). numbro is no longer a dependency: FreeGrid has no runtime dependencies, `freegrid.js` works
+  on its own, and `freegrid.full.js` is the same build (it no longer sets `window.numbro`); about 37 KB smaller
+  minified. Differences from numbro: `a` uses `k`/`m`/`b`/`t` in every culture, ordinals other than English are
+  `.`, and currency symbols are the browser's (`￥` for `ja-JP`).
 - FreeGrid's own date picker replaces Pikaday: themed by the `--fg-*` variables (dark theme and Modern style
   included), usable from the keyboard (<kbd>Alt</kbd>+<kbd>↓</kbd> in the editor, then arrows, Page Up/Down,
   Home/End, Enter, Esc), with screen-reader labels. It follows a date typed in the cell. `datePickerConfig` keeps
