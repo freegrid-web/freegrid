@@ -8,8 +8,8 @@ import CellRange from './cell/range';
  */
 class Selection {
   /**
-   * @param {Object} settings
-   * @param {CellRange} cellRange
+   * @param {Object} [settings]
+   * @param {CellRange} [cellRange]
    */
   constructor(settings, cellRange) {
     this.settings = settings;

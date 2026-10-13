@@ -1,7 +1,7 @@
 import { arrayEach } from './array';
 
 type AnyObject = Record<PropertyKey, unknown>;
-type Constructor = { new (...args: never[]): unknown; prototype: AnyObject };
+type Constructor = { new (...args: never[]): unknown; prototype: object };
 
 /**
  * Builds an empty "schema" with the same shape as `object`: nested objects are recreated, arrays become `[]`
@@ -121,11 +121,11 @@ export const mixin = <B extends Constructor>(Base: B, ...mixins: AnyObject[]): B
     target.MIXINS?.push(mixinItem.MIXIN_NAME);
 
     objectEach(mixinItem, (value, key) => {
-      if (Base.prototype[key] !== void 0) {
+      if ((Base.prototype as AnyObject)[key] !== void 0) {
         throw new Error(`Mixin conflict. Property '${key}' already exist and cannot be overwritten.`);
       }
       if (typeof value === 'function') {
-        Base.prototype[key] = value;
+        (Base.prototype as AnyObject)[key] = value;
 
       } else {
         const getter = (property: string, initialValue: unknown) => {
