@@ -393,6 +393,22 @@ describe('CopyPaste', () => {
   });
 
   describe('paste', () => {
+    it('should not run code from pasted HTML (an image error handler)', async() => {
+      window.__pastedHtmlRan = false;
+      handsontable({ data: arrayOfArrays() });
+
+      selectCell(0, 0);
+      getPlugin('copyPaste')
+        .paste('x', '<table><tr><td><img src="x" onerror="window.__pastedHtmlRan = true">A</td></tr></table>');
+
+      await sleep(200);
+
+      expect(window.__pastedHtmlRan).toBe(false);
+      expect(getDataAtCell(0, 0)).toBe('A');
+
+      delete window.__pastedHtmlRan;
+    });
+
     it('should not create new rows or columns when allowInsertRow and allowInsertColumn equal false', async() => {
       handsontable({
         data: arrayOfArrays(),

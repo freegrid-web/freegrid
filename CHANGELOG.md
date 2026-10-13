@@ -22,6 +22,9 @@
   - manualColumnResize: a column header with `colspan="1"` gets the resize handle too.
 - Plugins, part 3: autoColumnSize, autoRowSize, autofill, undoRedo (a class now; `UndoRedo.ChangeAction` and the other
   actions stay available as static properties).
+- Plugins, part 4: copyPaste. A paste event without clipboard data is ignored (it threw an error).
+- **Security:** pasting HTML could run code from it (e.g. an image's `onerror`), because the pasted table was read through
+  an element's `innerHTML`. Pasted HTML is now parsed into an inert document.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
