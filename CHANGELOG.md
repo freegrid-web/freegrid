@@ -65,6 +65,9 @@
   code (case blocks with braces, `prefer-const`, `_` for parameters only overriding methods use). `any` is down
   from 31 to 20 places: the open types (settings, cell meta, callbacks) are in `src/types.ts`, and the "core.js is
   not typed yet" stand-ins point at the real types.
+- Cleanup, part 2: no TODO/FIXME comments in the source. The open work they described is in issues #65–#71 (cell meta
+  inheritance, visual/physical indexes, undo/redo, `populateFromArray`'s `direction`, `modifyRowData`, render cycles,
+  Walkontable), and the code links to them; the rest became plain explanations or went away.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

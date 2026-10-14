@@ -377,9 +377,7 @@ class Core {
         }
       }
 
-      // @TODO: These CSS classes are no longer needed anymore. They are used only as a indicator of the selected
-      // rows/columns in the MergedCells plugin (via border.js#L520 in the walkontable module). After fixing
-      // the Border class this should be removed.
+      // Only Walkontable's border.js uses these classes (selected rows/columns with merged cells); see #71.
       if (isSelectedByRowHeader && isSelectedByColumnHeader) {
         addClass(this.rootElement, ['fg-selection--rows', 'fg-selection--columns']);
 
@@ -583,8 +581,7 @@ class Core {
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
-                // TODO: for datamap.removeRow index should be passed as it is (with undefined and null values). If not, the logic
-                // inside the datamap.removeRow breaks the removing functionality.
+                // datamap.removeRow needs the index as it is, with undefined and null values (see #66).
                 this.#datamap.removeRow(groupIndex, groupAmount, source);
                 this.#priv.cellSettings.splice(calcIndex, amount);
 
@@ -632,8 +629,7 @@ class Core {
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
-                // TODO: for datamap.removeCol index should be passed as it is (with undefined and null values). If not, the logic
-                // inside the datamap.removeCol breaks the removing functionality.
+                // datamap.removeCol needs the index as it is, with undefined and null values (see #66).
                 this.#datamap.removeCol(groupIndex, groupAmount, source);
 
                 for (let row = 0, len = this.countSourceRows(); row < len; row++) {
@@ -800,7 +796,7 @@ class Core {
        */
       populateFromArray: (start: Coords, input: any[][], end?: Coords, source?: string, method?: string, // eslint-disable-line @typescript-eslint/no-explicit-any -- any values
         direction?: string, deltas?: unknown[]) => {
-        // TODO: either remove or implement the `direction` argument. Currently it's not working at all.
+        // The `direction` argument does nothing (see #68).
         let r;
         let rlen;
         let c;
@@ -2211,7 +2207,7 @@ class Core {
    * @param {String|Number} prop Property name or physical column index.
    * @returns {Array} Array of cell values.
    */
-  // TODO: Getting data from `datamap` should work on visual indexes.
+  // Reads physical rows from `datamap` (it should take visual indexes; see #66).
   getDataAtProp(prop: Prop) {
     const range = this.#datamap.getRange(
       new CellCoords(0, this.#datamap.propToCol(prop)),
@@ -2288,7 +2284,7 @@ class Core {
    * @param {Number} column Visual column index.
    * @returns {Array} Array of the column's cell values.
    */
-  // TODO: Getting data from `sourceData` should work always on physical indexes.
+  // It should always take physical indexes (see #66).
   getSourceDataAtCol(column: number) {
     return this.#dataSource.getAtColumn(column);
   }
@@ -2319,7 +2315,7 @@ class Core {
    * @param {Number} column Visual column index.
    * @returns {*} Cell data.
    */
-  // TODO: Getting data from `sourceData` should work always on physical indexes.
+  // It should always take physical indexes (see #66).
   getSourceDataAtCell(row: number, column: number) {
     return this.#dataSource.getAtCell(row, column);
   }

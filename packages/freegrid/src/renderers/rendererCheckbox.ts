@@ -215,7 +215,7 @@ const rendererCheckbox: Renderer = (instance, TD, row, col, prop, value, cellPro
   let element: HTMLElement = input;
   let badValue = false;
 
-  // TODO identify under what circumstances this line can be removed
+  // The TD is reused between renders: start from an empty cell.
   empty(TD);
 
   if (value === cellProperties.checkedTemplate || equalsIgnoreCase(value, cellProperties.checkedTemplate)) {
