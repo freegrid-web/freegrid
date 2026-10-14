@@ -579,9 +579,18 @@ class Core {
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
+                const rowsBefore = this.countSourceRows();
+
                 // datamap.removeRow needs the index as it is, with undefined and null values (see #66).
                 this.#datamap.removeRow(groupIndex, groupAmount, source);
-                this.#priv.cellSettings.splice(calcIndex, amount);
+
+                const removedRows = rowsBefore - this.countSourceRows();
+
+                // beforeRemoveRow cancelled it: the cell meta and the frozen rows stay as they are.
+                if (removedRows <= 0) {
+                  return;
+                }
+                this.#priv.cellSettings.splice(calcIndex, removedRows);
 
                 const totalRows = this.countRows();
                 const fixedRowsTop = this.getSettings().fixedRowsTop;
@@ -627,8 +636,15 @@ class Core {
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
+                const columnsBefore = this.countCols();
+
                 // datamap.removeCol needs the index as it is, with undefined and null values (see #66).
                 this.#datamap.removeCol(groupIndex, groupAmount, source);
+
+                // beforeRemoveCol cancelled it: the cell meta, frozen columns and headers stay as they are.
+                if (this.countCols() === columnsBefore) {
+                  return;
+                }
 
                 for (let row = 0, len = this.countSourceRows(); row < len; row++) {
                   if (this.#priv.cellSettings[row]) { // if row hasn't been rendered it wouldn't have cellSettings
@@ -1783,6 +1799,10 @@ class Core {
       throw new Error('"cols" setting is no longer supported. do you mean startCols, minCols or maxCols?');
     }
 
+    // The class names the grid has now (the loop below overwrites them).
+    const previousClassName = this.#GridSettings.prototype.className;
+    const previousTableClassName = this.#GridSettings.prototype.tableClassName;
+
     for (i in settings) {
       if (i === 'data') {
         continue; // loadData will be triggered later
@@ -1870,12 +1890,29 @@ class Core {
     this.runHooks('afterCellMetaReset');
 
     if (isDefined(settings.className)) {
-      if (this.#GridSettings.prototype.className) {
-        removeClass(this.rootElement, this.#GridSettings.prototype.className);
+      if (previousClassName) {
+        removeClass(this.rootElement, previousClassName);
       }
       if (settings.className) {
         addClass(this.rootElement, settings.className);
       }
+    }
+    if (!init && isDefined(settings.tableClassName) && this.table) {
+      if (previousTableClassName) {
+        removeClass(this.table, previousTableClassName);
+      }
+      if (settings.tableClassName) {
+        addClass(this.table, settings.tableClassName);
+      }
+    }
+    if (!init && ['currentHeaderClassName', 'activeHeaderClassName', 'currentRowClassName', 'currentColClassName']
+      .some(name => hasOwnProperty(settings, name))) {
+      this.selection.highlight.setClassNames({
+        headerClassName: this.#priv.settings.currentHeaderClassName,
+        activeHeaderClassName: this.#priv.settings.activeHeaderClassName,
+        rowClassName: this.#priv.settings.currentRowClassName,
+        columnClassName: this.#priv.settings.currentColClassName,
+      });
     }
 
     let currentHeight: string | number = this.rootElement.style.height;

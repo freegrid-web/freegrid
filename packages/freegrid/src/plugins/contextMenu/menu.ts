@@ -142,6 +142,15 @@ class Menu {
    * @fires Hooks#afterContextMenuShow
    */
   open(): void {
+    // Submenu `items` come straight from the settings and may be an object; such a submenu stays empty.
+    const filteredItems = filterSeparators(Array.from(this.menuItems!).filter(item => isItemHidden(item, this.hot)),
+      SEPARATOR);
+
+    // Nothing to show (e.g. `contextMenu: []`): the menu stays closed instead of opening an empty box.
+    if (filteredItems.length === 0) {
+      return;
+    }
+
     this.runLocalHooks('beforeOpen');
 
     this.container.removeAttribute('style');
@@ -150,11 +159,6 @@ class Menu {
 
     const delayedOpenSubMenu = debounce((row: number) => this.openSubMenu(row), 300);
     const minWidthOfMenu = this.options.minWidth || MIN_WIDTH;
-
-    // Submenu `items` come straight from the settings and may be an object; such a submenu stays empty.
-    let filteredItems = Array.from(this.menuItems!).filter(item => isItemHidden(item, this.hot));
-
-    filteredItems = filterSeparators(filteredItems, SEPARATOR);
 
     const settings = {
       data: filteredItems,

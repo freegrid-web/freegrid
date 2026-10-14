@@ -1219,4 +1219,36 @@ describe('Core_alter', () => {
     });
   });
 
+
+  describe('cancelled removals', () => {
+    it('should keep the cell meta and frozen rows when beforeRemoveRow cancels the removal', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 1), fixedRowsTop: 2, beforeRemoveRow: () => false });
+
+      setCellMeta(1, 0, 'readOnly', true);
+      alter('remove_row', 0);
+
+      expect(getCellMeta(1, 0).readOnly).toBe(true);
+      expect(getInstance().getSettings().fixedRowsTop).toBe(2);
+    });
+
+    it('should keep the cell meta and frozen columns when beforeRemoveCol cancels the removal', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(1, 3), fixedColumnsLeft: 2, beforeRemoveCol: () => false });
+
+      setCellMeta(0, 1, 'readOnly', true);
+      alter('remove_col', 0);
+
+      expect(getCellMeta(0, 1).readOnly).toBe(true);
+      expect(getInstance().getSettings().fixedColumnsLeft).toBe(2);
+    });
+
+    it('should remove the cell meta of every row of an index group', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(5, 1) });
+
+      setCellMeta(4, 0, 'className', 'last');
+      alter('remove_row', [[1, 3]]);
+
+      expect(countRows()).toBe(2);
+      expect(getCellMeta(1, 0).className).toBe('last');
+    });
+  });
 });

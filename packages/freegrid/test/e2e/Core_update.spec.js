@@ -650,4 +650,48 @@ describe('Core_updateSettings', () => {
 
     expect(Object.keys(updatedSetting)).toEqual(Object.keys(newSettings));
   });
+
+  describe('class names and headers', () => {
+    it('should replace the table class name', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), tableClassName: 'one' });
+
+      updateSettings({ tableClassName: 'two' });
+
+      expect(getInstance().table.classList.contains('two')).toBe(true);
+      expect(getInstance().table.classList.contains('one')).toBe(false);
+    });
+
+    it('should replace the root class name', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), className: 'one' });
+
+      updateSettings({ className: 'two' });
+
+      expect(getInstance().rootElement.classList.contains('two')).toBe(true);
+      expect(getInstance().rootElement.classList.contains('one')).toBe(false);
+    });
+
+    it('should hide the column headers when colHeaders is turned off', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), colHeaders: true });
+
+      updateSettings({ colHeaders: false });
+
+      const visible = [...spec().$container[0].querySelectorAll('thead th')].filter(th => th.getBoundingClientRect().height > 0);
+
+      expect(visible.length).toBe(0);
+
+      updateSettings({ colHeaders: true });
+
+      expect(spec().$container.find('.ht_clone_top thead th').filter((i, th) => th.getBoundingClientRect().height > 0).length).toBeGreaterThan(0);
+    });
+
+    it('should use a new currentRowClassName', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), currentRowClassName: 'one' });
+
+      updateSettings({ currentRowClassName: 'two' });
+      selectCell(0, 0);
+
+      expect(getCell(0, 1).classList.contains('two')).toBe(true);
+      expect(getCell(0, 1).classList.contains('one')).toBe(false);
+    });
+  });
 });

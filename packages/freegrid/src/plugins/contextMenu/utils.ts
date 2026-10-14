@@ -61,8 +61,9 @@ export const getAlignmentClasses = (ranges: FromToRange[], callback: (row: numbe
   const classes: Record<number, unknown[]> = {};
 
   ranges.forEach(({ from, to }) => {
-    for (let row = from.row; row <= to.row; row += 1) {
-      for (let col = from.col; col <= to.col; col += 1) {
+    // A selection made upward or to the left has `from` below or right of `to`.
+    for (let row = Math.min(from.row, to.row); row <= Math.max(from.row, to.row); row += 1) {
+      for (let col = Math.min(from.col, to.col); col <= Math.max(from.col, to.col); col += 1) {
         if (!classes[row]) {
           classes[row] = [];
         }
@@ -94,8 +95,9 @@ const applyAlignClassName = (row: number, col: number, type: string, alignment: 
 export const align = (ranges: FromToRange[], type: string, alignment: string, cellDescriptor: CellDescriptor,
   propertySetter: PropertySetter): void => {
   ranges.forEach(({ from, to }) => {
-    for (let row = from.row; row <= to.row; row += 1) {
-      for (let col = from.col; col <= to.col; col += 1) {
+    // A selection made upward or to the left has `from` below or right of `to`.
+    for (let row = Math.min(from.row, to.row); row <= Math.max(from.row, to.row); row += 1) {
+      for (let col = Math.min(from.col, to.col); col <= Math.max(from.col, to.col); col += 1) {
         applyAlignClassName(row, col, type, alignment, cellDescriptor, propertySetter);
       }
     }

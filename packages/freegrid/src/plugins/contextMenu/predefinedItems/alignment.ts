@@ -35,14 +35,14 @@ const alignmentOption = (name: string, label: string, type: 'horizontal' | 'vert
   disabled: false,
 });
 
-/** The context menu entry with the alignment options (disabled without a selection or for the whole table). */
+/** The context menu entry with the alignment options (disabled without a selection). */
 const alignmentItem = (): MenuItem => ({
   key: KEY,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_ALIGNMENT);
   },
   disabled(this: PluginHost) {
-    return !(this.getSelectedRange() && !this.selection.isSelectedByCorner());
+    return !this.getSelectedRange();
   },
   submenu: {
     items: [

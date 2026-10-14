@@ -14,8 +14,10 @@ export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, column
   (firstValue, secondValue) => {
     const { sortEmptyCells } = columnPluginSettings;
     // Strings compare case-insensitively; values that are numbers (also as strings) compare as numbers.
-    let value = typeof firstValue === 'string' ? firstValue.toLowerCase() : firstValue;
-    let nextValue = typeof secondValue === 'string' ? secondValue.toLowerCase() : secondValue;
+    // Booleans compare as 0 and 1 (`false` first in ascending order).
+    const comparable = (item: unknown) => (typeof item === 'boolean' ? Number(item) : item);
+    let value = typeof firstValue === 'string' ? firstValue.toLowerCase() : comparable(firstValue);
+    let nextValue = typeof secondValue === 'string' ? secondValue.toLowerCase() : comparable(secondValue);
     const notNumber = (item: unknown) => Number.isNaN(Number(item));
 
     if (value === nextValue) {
