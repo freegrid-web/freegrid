@@ -582,10 +582,26 @@ describe('UndoRedo', () => {
           expect(countCols()).toEqual(4);
           expect(getDataAtRow(0)).toEqual(['D1', 'B1', 'F1', 'E1']);
 
-          // HOT.undo();
-          //
-          // expect(countCols()).toEqual(7);
-          // expect(getDataAtRow(0)).toEqual(['D1', 'C1', 'A1', 'G1', 'B1', 'F1', 'E1']);
+          getInstance().undo();
+
+          expect(countCols()).toEqual(7);
+          expect(getDataAtRow(0)).toEqual(['D1', 'C1', 'A1', 'G1', 'B1', 'F1', 'E1']);
+          expect(getDataAtRow(1)).toEqual(['D2', 'C2', 'A2', 'G2', 'B2', 'F2', 'E2']);
+        });
+
+        it('should put removed columns back in place when their physical indexes are 3 and 10', () => {
+          // Visual columns 0 and 1 are the physical columns 10 and 3.
+          handsontable({
+            data: Handsontable.helper.createSpreadsheetData(1, 12),
+            manualColumnMove: [10, 3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 11],
+          });
+          const before = getDataAtRow(0);
+
+          alter('remove_col', 0, 2);
+          getInstance().undo();
+
+          expect(getDataAtRow(0)).toEqual(before);
+          expect(getSourceDataAtRow(0)).toEqual(Handsontable.helper.createSpreadsheetData(1, 12)[0]);
         });
 
         it('should undo multiple changes', () => {
