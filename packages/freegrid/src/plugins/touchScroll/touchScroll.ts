@@ -60,7 +60,7 @@ class TouchScroll extends BasePlugin {
   }
 
   /**
-   * Disable plugin for this FreeGrid instance.
+   * Disable plugin for this FreeSheet instance.
    */
   disablePlugin(): void {
     super.disablePlugin();

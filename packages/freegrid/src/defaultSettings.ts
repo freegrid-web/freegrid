@@ -11,11 +11,11 @@ type Grid = Core;
 
  * ## Constructor options
  *
- * Constructor options are applied using an object literal passed as a second argument to the FreeGrid constructor.
+ * Constructor options are applied using an object literal passed as a second argument to the FreeSheet constructor.
  *
  * ```js
  * const container = document.getElementById('example');
- * const hot = new FreeGrid(container, {
+ * const hot = new FreeSheet(container, {
  *   data: myArray,
  *   width: 400,
  *   height: 300
@@ -25,13 +25,13 @@ type Grid = Core;
  * ---
  * ## Cascading configuration
  *
- * FreeGrid is using *Cascading Configuration*, which is a fast way to provide configuration options
+ * FreeSheet is using *Cascading Configuration*, which is a fast way to provide configuration options
  * for the entire table, including its columns and particular cells.
  *
  * Consider the following example:
  * ```js
  * const container = document.getElementById('example');
- * const hot = new FreeGrid(container, {
+ * const hot = new FreeSheet(container, {
  *   readOnly: true,
  *   columns: [
  *     {readOnly: false},
@@ -56,7 +56,7 @@ type Grid = Core;
  *
  * ##### 1. Constructor
  *
- * Configuration options that are provided using first-level `new FreeGrid(container, {option: "value"})` and `updateSettings` method.
+ * Configuration options that are provided using first-level `new FreeSheet(container, {option: "value"})` and `updateSettings` method.
  *
  * ##### 2. Columns
  *
@@ -73,13 +73,13 @@ type Grid = Core;
  * compared to the previous model that used jQuery extend. See: [http://jsperf.com/extending-settings](http://jsperf.com/extending-settings).
  *
  * ---
- * __Important notice:__ In order for the data separation to work properly, make sure that each instance of FreeGrid has a unique `id`.
+ * __Important notice:__ In order for the data separation to work properly, make sure that each instance of FreeSheet has a unique `id`.
  */
 function DefaultSettings(): void {}
 
 DefaultSettings.prototype = {
   /**
-   * License key for commercial version of FreeGrid.
+   * License key for commercial version of FreeSheet.
    *
    * @pro
    * @type {String}
@@ -190,7 +190,7 @@ DefaultSettings.prototype = {
    * @description
    * Initial number of rows.
    *
-   * __Note:__ This option only has effect in FreeGrid constructor and only if `data` option is not provided
+   * __Note:__ This option only has effect in FreeSheet constructor and only if `data` option is not provided
    *
    * @type {Number}
    * @default 5
@@ -207,7 +207,7 @@ DefaultSettings.prototype = {
    * @description
    * Initial number of columns.
    *
-   * __Note:__ This option only has effect in FreeGrid constructor and only if `data` option is not provided
+   * __Note:__ This option only has effect in FreeSheet constructor and only if `data` option is not provided
    *
    * @type {Number}
    * @default 5
@@ -370,10 +370,10 @@ DefaultSettings.prototype = {
   /**
    * @description
    * Defines the cell properties for given `row`, `col`, `prop` coordinates. Any constructor or column option may be
-   * overwritten for a particular cell (row/column combination) using the `cells` property in the FreeGrid constructor.
+   * overwritten for a particular cell (row/column combination) using the `cells` property in the FreeSheet constructor.
    *
    * __Note:__ Parameters `row` and `col` always represent __physical indexes__. Example below show how to execute
-   * operations based on the __visual__ representation of FreeGrid.
+   * operations based on the __visual__ representation of FreeSheet.
    *
    * Possible values of `prop`:
    * - property name for column's data source object, when dataset is an array of objects
@@ -401,7 +401,7 @@ DefaultSettings.prototype = {
 
   /**
    * Any constructor or column option may be overwritten for a particular cell (row/column combination), using `cell`
-   * array passed to the FreeGrid constructor.
+   * array passed to the FreeSheet constructor.
    *
    * @type {Array[]}
    * @default []
@@ -425,7 +425,7 @@ DefaultSettings.prototype = {
    * If `true`, enables the {@link Comments} plugin, which enables an option to apply cell comments through the context menu
    * (configurable with context menu keys `commentsAddEdit`, `commentsRemove`).
    *
-   * To initialize FreeGrid with predefined comments, provide cell coordinates and comment text values in a form of
+   * To initialize FreeSheet with predefined comments, provide cell coordinates and comment text values in a form of
    * an array.
    *
    * See [Comments](https://github.com/freegrid-web/freegrid) demo for examples.
@@ -456,7 +456,7 @@ DefaultSettings.prototype = {
   /**
    * @description
    * If `true`, enables the {@link CustomBorders} plugin, which enables an option to apply custom borders through the context
-   * menu (configurable with context menu key `borders`). To initialize FreeGrid with predefined custom borders,
+   * menu (configurable with context menu key `borders`). To initialize FreeSheet with predefined custom borders,
    * provide cell coordinates and border styles in a form of an array.
    *
    * See [Custom Borders](https://github.com/freegrid-web/freegrid) demo for examples.
@@ -573,7 +573,7 @@ DefaultSettings.prototype = {
   maxCols: Infinity,
 
   /**
-   * When set to 1 (or more), FreeGrid will add a new row at the end of grid if there are no more empty rows.
+   * When set to 1 (or more), FreeSheet will add a new row at the end of grid if there are no more empty rows.
    * (unless the number of rows exceeds the one set in the `maxRows` property)
    *
    * @type {Number}
@@ -588,7 +588,7 @@ DefaultSettings.prototype = {
   minSpareRows: 0,
 
   /**
-   * When set to 1 (or more), FreeGrid will add a new column at the end of grid if there are no more empty columns.
+   * When set to 1 (or more), FreeSheet will add a new column at the end of grid if there are no more empty columns.
    * (unless the number of rows exceeds the one set in the `maxCols` property)
    *
    * @type {Number}
@@ -870,7 +870,7 @@ DefaultSettings.prototype = {
    * Turns on saving the state of column sorting, column positions and column sizes in local storage.
    *
    * You can save any sort of data in local storage to preserve table state between page reloads.  In order to enable
-   * data storage mechanism, `persistentState` option must be set to `true` (you can set it either during FreeGrid
+   * data storage mechanism, `persistentState` option must be set to `true` (you can set it either during FreeSheet
    * initialization or using the `updateSettings` method). When `persistentState` is enabled it exposes 3 hooks:
    *
    * __persistentStateSave__ (key: String, value: Mixed)
@@ -888,11 +888,11 @@ DefaultSettings.prototype = {
    *   * Clears the value saved under `key`. If no `key` is given, all values associated with table will be cleared.
    *
    * __Note:__ The main reason behind using `persistentState` hooks rather than regular LocalStorage API is that it
-   * ensures separation of data stored by multiple FreeGrid instances. In other words, if you have two (or more)
-   * instances of FreeGrid on one page, data saved by one instance won't be accessible by the second instance.
+   * ensures separation of data stored by multiple FreeSheet instances. In other words, if you have two (or more)
+   * instances of FreeSheet on one page, data saved by one instance won't be accessible by the second instance.
    * Those two instances can store data under the same key and no data would be overwritten.
    *
-   * __Important:__ In order for the data separation to work properly, make sure that each instance of FreeGrid has a unique `id`.
+   * __Important:__ In order for the data separation to work properly, make sure that each instance of FreeSheet has a unique `id`.
    *
    * @type {Boolean}
    * @default false
@@ -964,7 +964,7 @@ DefaultSettings.prototype = {
   activeHeaderClassName: 'fg-active-highlight',
 
   /**
-   * Class name for the FreeGrid container element.
+   * Class name for the FreeSheet container element.
    *
    * @type {String|String[]}
    * @default undefined
@@ -1090,9 +1090,9 @@ DefaultSettings.prototype = {
   observeDOMVisibility: true,
 
   /**
-   * If set to `true`, FreeGrid will accept values that were marked as invalid by the cell `validator`. It will
-   * result with *invalid* cells being treated as *valid* (will save the *invalid* value into the FreeGrid data source).
-   * If set to `false`, FreeGrid will *not* accept the invalid values and won't allow the user to close the editor.
+   * If set to `true`, FreeSheet will accept values that were marked as invalid by the cell `validator`. It will
+   * result with *invalid* cells being treated as *valid* (will save the *invalid* value into the FreeSheet data source).
+   * If set to `false`, FreeSheet will *not* accept the invalid values and won't allow the user to close the editor.
    * This option will be particularly useful when used with the Autocomplete's `strict` mode.
    *
    * @type {Boolean}
@@ -1107,8 +1107,8 @@ DefaultSettings.prototype = {
   allowInvalid: true,
 
   /**
-   * If set to `true`, FreeGrid will accept values that are empty (`null`, `undefined` or `''`). If set to `false`,
-   * FreeGrid will *not* accept the empty values and mark cell as invalid.
+   * If set to `true`, FreeSheet will accept values that are empty (`null`, `undefined` or `''`). If set to `false`,
+   * FreeSheet will *not* accept the empty values and mark cell as invalid.
    *
    * @type {Boolean}
    * @default true
@@ -1214,7 +1214,7 @@ DefaultSettings.prototype = {
    * @example
    * ```js
    * // register custom renderer
-   * FreeGrid.renderers.registerRenderer('my.renderer', function(instance, TD, row, col, prop, value, cellProperties) {
+   * FreeSheet.renderers.registerRenderer('my.renderer', function(instance, TD, row, col, prop, value, cellProperties) {
    *   TD.innerHTML = value;
    * });
    *
@@ -1345,7 +1345,7 @@ DefaultSettings.prototype = {
    *  * [checkbox](https://github.com/freegrid-web/freegrid)
    *  * [date](https://github.com/freegrid-web/freegrid)
    *  * [dropdown](https://github.com/freegrid-web/freegrid)
-   *  * [FreeGrid](https://github.com/freegrid-web/freegrid)
+   *  * [FreeSheet](https://github.com/freegrid-web/freegrid)
    *  * [numeric](https://github.com/freegrid-web/freegrid)
    *  * [password](https://github.com/freegrid-web/freegrid)
    *  * text
@@ -1360,7 +1360,7 @@ DefaultSettings.prototype = {
    * @example
    * ```js
    * // register custom cell type:
-   * FreeGrid.cellTypes.registerCellType('my.type', {
+   * FreeSheet.cellTypes.registerCellType('my.type', {
    *   editor: MyEditorClass,
    *   renderer: function(hot, td, row, col, prop, value, cellProperties) {
    *     td.innerHTML = value;
@@ -1418,7 +1418,7 @@ DefaultSettings.prototype = {
    *  * [checkbox](https://github.com/freegrid-web/freegrid)
    *  * [date](https://github.com/freegrid-web/freegrid)
    *  * [dropdown](https://github.com/freegrid-web/freegrid)
-   *  * [FreeGrid](https://github.com/freegrid-web/freegrid)
+   *  * [FreeSheet](https://github.com/freegrid-web/freegrid)
    *  * [mobile](https://github.com/freegrid-web/freegrid)
    *  * [password](https://github.com/freegrid-web/freegrid)
    *  * [select](https://github.com/freegrid-web/freegrid)
@@ -1819,7 +1819,7 @@ DefaultSettings.prototype = {
   /**
    * @description
    * Number of rows to be rendered outside of the visible part of the table. By default, it's set to `'auto'`, which
-   * makes FreeGrid to attempt to calculate the best offset performance-wise.
+   * makes FreeSheet to attempt to calculate the best offset performance-wise.
    *
    * You may test out different values to find the best one that works for your specific implementation.
    *
@@ -1836,7 +1836,7 @@ DefaultSettings.prototype = {
   /**
    * @description
    * Number of columns to be rendered outside of the visible part of the table. By default, it's set to `'auto'`, which
-   * makes FreeGrid try calculating the best offset performance-wise.
+   * makes FreeSheet try calculating the best offset performance-wise.
    *
    * You may experiment with the value to find the one that works best for your specific implementation.
    *
@@ -1937,7 +1937,7 @@ DefaultSettings.prototype = {
   manualColumnFreeze: void 0,
 
   /**
-   * Defines whether FreeGrid should trim the whitespace at the beginning and the end of the cell contents.
+   * Defines whether FreeSheet should trim the whitespace at the beginning and the end of the cell contents.
    *
    * @type {Boolean}
    * @default true
@@ -2099,7 +2099,7 @@ DefaultSettings.prototype = {
   numericFormat: void 0,
 
   /**
-   * Language for FreeGrid translation. Possible language codes are [listed here](https://github.com/freegrid-web/freegrid).
+   * Language for FreeSheet translation. Possible language codes are [listed here](https://github.com/freegrid-web/freegrid).
    *
    * @type {String}
    * @default 'en-US'
@@ -2291,7 +2291,7 @@ DefaultSettings.prototype = {
   allowHtml: false,
 
   /**
-   * If typed `true` then virtual rendering mechanism for FreeGrid will be disabled.
+   * If typed `true` then virtual rendering mechanism for FreeSheet will be disabled.
    *
    * @type {Boolean}
    * @default undefined
@@ -2375,7 +2375,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Allows making pre-defined calculations on the cell values and display the results within FreeGrid.
+   * Allows making pre-defined calculations on the cell values and display the results within FreeSheet.
    *
    * Possible types:
    *  * `'sum'`
@@ -2448,7 +2448,7 @@ DefaultSettings.prototype = {
   filters: void 0,
 
   /**
-   * The {@link Formulas} plugin allows FreeGrid to process formula expressions defined in the provided data.
+   * The {@link Formulas} plugin allows FreeSheet to process formula expressions defined in the provided data.
    *
    * @pro
    * @type {Boolean|Object}
@@ -2472,7 +2472,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * The {@link GanttChart} plugin enables a possibility to create a Gantt chart using a FreeGrid instance. In this
+   * The {@link GanttChart} plugin enables a possibility to create a Gantt chart using a FreeSheet instance. In this
    * case, the whole table becomes read-only.
    *
    * @pro

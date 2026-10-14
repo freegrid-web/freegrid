@@ -72,7 +72,7 @@ describe('Core.setCellMeta', () => {
       ]
     });
 
-    // FreeGrid adds the fg- counterpart of each legacy class name (0.x transition).
+    // FreeSheet adds the fg- counterpart of each legacy class name (0.x transition).
     expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual('htCenter fg-center htTop fg-top');
     expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual('htRight fg-right htBottom fg-bottom');
   });
@@ -90,7 +90,7 @@ describe('Core.setCellMeta', () => {
       ]
     });
 
-    // FreeGrid adds the fg- counterpart of each legacy class name (0.x transition).
+    // FreeSheet adds the fg- counterpart of each legacy class name (0.x transition).
     expect(spec().$container.find('tbody tr:eq(0) td:eq(0)')[0].className).toEqual('htCenter fg-center htTop fg-top');
     expect(spec().$container.find('tbody tr:eq(1) td:eq(1)')[0].className).toEqual('htRight fg-right htBottom fg-bottom');
 

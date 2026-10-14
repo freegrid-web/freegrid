@@ -13,7 +13,7 @@ const UNIT = 'px';
  */
 class BaseUI {
   /**
-   * Instance of FreeGrid.
+   * Instance of FreeSheet.
    */
   hot: PluginHost;
 

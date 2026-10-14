@@ -1,5 +1,5 @@
 <script setup>
-// Renders packages/docs/examples/<name>.js in the browser only: FreeGrid needs `window` when imported.
+// Renders packages/docs/examples/<name>.js in the browser only: FreeSheet needs `window` when imported.
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useData } from 'vitepress';
 import { gridStyle, loadGridStyle } from './gridStyle';

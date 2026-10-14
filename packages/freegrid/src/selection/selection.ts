@@ -74,7 +74,7 @@ class Selection {
 
   constructor(settings: SelectionSettings, tableProps: TableProps) {
     /**
-     * FreeGrid settings instance.
+     * FreeSheet settings instance.
      *
      * @type {GridSettings}
      */
@@ -366,7 +366,7 @@ class Selection {
    * @param {Number} rowDelta Rows number to move, value can be passed as negative number.
    * @param {Number} colDelta Columns number to move, value can be passed as negative number.
    * @param {Boolean} force If `true` the new rows/columns will be created if necessary. Otherwise, row/column will
-   *                        be created according to `minSpareRows/minSpareCols` settings of FreeGrid.
+   *                        be created according to `minSpareRows/minSpareCols` settings of FreeSheet.
    */
   transformStart(rowDelta: number, colDelta: number, force?: boolean): void {
     this.setRangeStart(this.transformation.transformStart(rowDelta, colDelta, force));

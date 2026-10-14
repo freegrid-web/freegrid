@@ -51,10 +51,10 @@ describe('Core_destroy', () => {
 
     expect(() => {
       hot.getDataAtCell(0, 0);
-    }).toThrowError('The "getDataAtCell" method cannot be called because this FreeGrid instance has been destroyed');
+    }).toThrowError('The "getDataAtCell" method cannot be called because this FreeSheet instance has been destroyed');
     expect(() => {
       hot.listen();
-    }).toThrowError('The "listen" method cannot be called because this FreeGrid instance has been destroyed');
+    }).toThrowError('The "listen" method cannot be called because this FreeSheet instance has been destroyed');
   });
 
   it('should set isDestroyed flag to `true` when instance is destroyed', () => {
@@ -77,7 +77,7 @@ describe('Core_destroy', () => {
 
     ['getData', 'selectCell', 'render', 'getPlugin', 'destroy', 'myMethod', 'runHooks'].forEach((name) => {
       expect(() => hot[name]()).toThrowError(
-        `The "${name}" method cannot be called because this FreeGrid instance has been destroyed`);
+        `The "${name}" method cannot be called because this FreeSheet instance has been destroyed`);
     });
   });
 

@@ -70,8 +70,8 @@ test('writes a collapsible "Usage" example where the source code has none', () =
 
   assert.match(method, /::: details Usage\n```js\nconst result = grid\.getDataAtCell\(row, column\);\n```\n:::/);
   assert.match(plugin, /::: details Usage\n```js\ngrid\.getPlugin\('columnSorting'\)\.sort\(sortConfig\);\n```\n:::/);
-  assert.match(event, /::: details Usage\n```js\nnew FreeGrid\(element, \{\n {2}afterChange\(changes, source\) \{\n {4}\/\/ …\n {2}\},\n\}\);\n\n\/\/ or later\ngrid\.addHook\('afterChange', \(changes, source\) => \{\n {2}\/\/ …\n\}\);\n```\n:::/);
-  assert.match(setting, /::: details Usage\n```js\nnew FreeGrid\(element, \{\n {2}fillHandle: false,\n\}\);\n\n\/\/ or later\ngrid\.updateSettings\(\{ fillHandle: false \}\);\n```\n:::/);
+  assert.match(event, /::: details Usage\n```js\nnew FreeSheet\(element, \{\n {2}afterChange\(changes, source\) \{\n {4}\/\/ …\n {2}\},\n\}\);\n\n\/\/ or later\ngrid\.addHook\('afterChange', \(changes, source\) => \{\n {2}\/\/ …\n\}\);\n```\n:::/);
+  assert.match(setting, /::: details Usage\n```js\nnew FreeSheet\(element, \{\n {2}fillHandle: false,\n\}\);\n\n\/\/ or later\ngrid\.updateSettings\(\{ fillHandle: false \}\);\n```\n:::/);
 });
 
 test('turns links to entries the reference does not have into plain text', () => {

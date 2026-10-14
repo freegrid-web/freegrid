@@ -7,7 +7,7 @@ api: [Lifecycle, Rows and columns, Rendering and scrolling]
 A grid is configured with one settings object, passed to the constructor:
 
 ```js
-const grid = new FreeGrid(container, {
+const grid = new FreeSheet(container, {
   data,
   colHeaders: true,
   rowHeaders: true,
@@ -32,7 +32,7 @@ Settings apply at three levels. The more specific level wins:
 3. **Cell:** an entry in `cell`, or the result of the `cells` function.
 
 ```js
-new FreeGrid(container, {
+new FreeSheet(container, {
   data,
   readOnly: true,                       // every cell…
   columns: [

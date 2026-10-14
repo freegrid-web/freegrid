@@ -1,6 +1,6 @@
 <script setup>
 // Live theme editor for the Theming page: a grid, a light/dark/auto switch, presets and editors for the base
-// variables. Edits go into a <style> rule for the playground grid and FreeGrid's floating elements (menus, comment
+// variables. Edits go into a <style> rule for the playground grid and FreeSheet's floating elements (menus, comment
 // editor, date picker), so they apply in every theme; the panel shows the CSS to copy.
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useData } from 'vitepress';

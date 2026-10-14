@@ -22,10 +22,10 @@
     "directory": "packages/freegrid"
   },
   "type": "module",
-  "types": "./types/freegrid.d.ts",
+  "types": "./types/freesheet.d.ts",
   "exports": {
     ".": {
-      "types": "./types/freegrid.d.ts",
+      "types": "./types/freesheet.d.ts",
       "import": "./dist/esm/index.js"
     },
     "./compat": {

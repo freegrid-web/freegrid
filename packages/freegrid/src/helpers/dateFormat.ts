@@ -1,5 +1,5 @@
 /**
- * Reads and writes dates with moment.js format tokens (`DD/MM/YYYY`, `h:mm:ss a`, …), the way FreeGrid did with
+ * Reads and writes dates with moment.js format tokens (`DD/MM/YYYY`, `h:mm:ss a`, …), the way FreeSheet did with
  * moment: the same lenient and strict parsing rules, in English.
  *
  * Tokens: `YYYY YY Y Q M MM MMM MMMM D DD Do d dd ddd dddd H HH h hh k kk m mm s ss S SS SSS a A Z ZZ X x`, text in

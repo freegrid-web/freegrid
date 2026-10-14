@@ -60,7 +60,7 @@ class DataMap {
   propToColCache = new MultiMap<number>();
 
   /**
-   * @param {Object} instance Instance of FreeGrid.
+   * @param {Object} instance Instance of FreeSheet.
    * @param {Object} priv The grid's private state.
    * @param {Function} GridSettings Grid settings constructor.
    */

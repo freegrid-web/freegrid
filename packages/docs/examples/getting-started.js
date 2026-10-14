@@ -1,8 +1,8 @@
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 export default function createGrid(container) {
-  return new FreeGrid(container, {
+  return new FreeSheet(container, {
     data: [
       ['Name', 'City', 'Score'],
       ['Ona', 'Vilnius', 92],

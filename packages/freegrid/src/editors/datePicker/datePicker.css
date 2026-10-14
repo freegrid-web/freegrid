@@ -1,4 +1,4 @@
-/* FreeGrid's date picker. Colors and sizes come from the --fg-datepicker-* variables (src/css/variables.css). */
+/* FreeSheet's date picker. Colors and sizes come from the --fg-datepicker-* variables (src/css/variables.css). */
 .fg-datepicker {
   display: inline-block;
   box-sizing: border-box;

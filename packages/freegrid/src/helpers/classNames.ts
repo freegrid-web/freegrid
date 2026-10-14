@@ -1,13 +1,13 @@
 /**
- * FreeGrid's CSS class names and the legacy names inherited from Handsontable 6.
+ * FreeSheet's CSS class names and the legacy names inherited from Handsontable 6.
  *
- * FreeGrid uses `fg-` names (`htCore` → `fg-core`, `ht_master` → `fg-master`, `wtHolder` → `fg-holder`,
- * `handsontable` → `freegrid`). During FreeGrid 0.x every element carries both names, so stylesheets and
+ * FreeSheet uses `fg-` names (`htCore` → `fg-core`, `ht_master` → `fg-master`, `wtHolder` → `fg-holder`,
+ * `handsontable` → `freegrid`). During FreeSheet 0.x every element carries both names, so stylesheets and
  * code written for the old names keep working; the DOM class helpers (`addClass`, `removeClass`,
  * `hasClass`) add, remove and match the counterpart automatically. The legacy names are removed in 1.0.
  */
 
-/** Every legacy class name FreeGrid knows. Names not listed here (e.g. `current`, `area`) are not branded. */
+/** Every legacy class name FreeSheet knows. Names not listed here (e.g. `current`, `area`) are not branded. */
 export const LEGACY_CLASS_NAMES: readonly string[] = [
   'handsontable', 'handsontableEditor', 'handsontableInput', 'handsontableInputHolder', 'htAutoSize',
   'htAutocomplete', 'htAutocompleteArrow', 'htAutocompleteWrapper', 'htBadValue', 'htBorder', 'htBordered',
@@ -59,17 +59,17 @@ const LEGACY_TO_FREEGRID = new Map(LEGACY_CLASS_NAMES.map(legacy => [legacy, con
 const FREEGRID_TO_LEGACY = new Map(Array.from(LEGACY_TO_FREEGRID, ([legacy, name]) => [name, legacy]));
 
 /**
- * The FreeGrid name for a legacy name; any other name unchanged.
+ * The FreeSheet name for a legacy name; any other name unchanged.
  */
 export const toFreeGridClassName = (className: string): string => LEGACY_TO_FREEGRID.get(className) || className;
 
 /**
- * The legacy name for a FreeGrid name; any other name unchanged.
+ * The legacy name for a FreeSheet name; any other name unchanged.
  */
 export const toLegacyClassName = (className: string): string => FREEGRID_TO_LEGACY.get(className) || className;
 
 /**
- * Adds the counterpart (legacy or FreeGrid) after every known class name.
+ * Adds the counterpart (legacy or FreeSheet) after every known class name.
  */
 export const withCounterpartClassNames = (classNames: readonly string[]): string[] => {
   const result: string[] = [];
@@ -87,12 +87,12 @@ export const withCounterpartClassNames = (classNames: readonly string[]): string
 };
 
 /**
- * For code that writes `element.className` directly: a FreeGrid class name followed by its legacy name.
+ * For code that writes `element.className` directly: a FreeSheet class name followed by its legacy name.
  */
 export const withLegacyClassNames = (...classNames: string[]): string => withCounterpartClassNames(classNames).join(' ');
 
 /**
- * Whether a space-separated class string (such as a cell's `className` setting) contains a FreeGrid
+ * Whether a space-separated class string (such as a cell's `className` setting) contains a FreeSheet
  * class name or its legacy counterpart.
  */
 export const classNameIncludes = (classNames: string | null | undefined, className: string): boolean => {

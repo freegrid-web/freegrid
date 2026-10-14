@@ -1,4 +1,4 @@
-// The API reference model: FreeGrid's methods, events, settings and plugins read from the source code's JSDoc,
+// The API reference model: FreeSheet's methods, events, settings and plugins read from the source code's JSDoc,
 // each with its topic and its page and anchor in the docs.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';

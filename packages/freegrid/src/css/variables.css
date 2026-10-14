@@ -1,5 +1,5 @@
 /*
- * FreeGrid theme variables. Every color, the font and the shadows of FreeGrid come from here; no other stylesheet
+ * FreeSheet theme variables. Every color, the font and the shadows of FreeSheet come from here; no other stylesheet
  * contains a color value.
  *
  * - Base variables (--fg-color-*, --fg-font-*, --fg-shadow) and component variables with their own value are defaults
@@ -8,7 +8,7 @@
  *   theme does not set comes from the style's --fg-style-* defaults (see "Style defaults"), so your values win in
  *   both styles.
  * - Component variables that follow a base variable are declared on the grid's parts (the grid and the elements
- *   FreeGrid puts in <body>), so they always see the current base values. Override those on the grid:
+ *   FreeSheet puts in <body>), so they always see the current base values. Override those on the grid:
  *   `.freegrid { --fg-cell-background: ... }`.
  * - In Classic, --fg-color-text, --fg-font-family and --fg-font-size have no default: the grid inherits the page's
  *   text color and font, as before.
@@ -24,7 +24,7 @@
   --fg-color-readonly-text: #777; /* Text of read-only cells. */
   --fg-color-muted-text: #999; /* Placeholders and disabled menu items. */
   --fg-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
-  --fg-row-height: 23px; /* Row height, including the bottom border; FreeGrid reads it when the grid is created. */
+  --fg-row-height: 23px; /* Row height, including the bottom border; FreeSheet reads it when the grid is created. */
   --fg-cell-padding-x: 4px; /* Left and right cell padding. */
   --fg-header-font-weight: normal; /* Header text weight. */
   --fg-radius: 0; /* Corner radius of the cell editor and the context menu. */
@@ -106,7 +106,7 @@
   --fg-style-datepicker-hover-background: #e8effd; /* Hovered day. */
 }
 
-/* == Components that follow a base variable (declared on the grid and on the parts FreeGrid appends to <body>) == */
+/* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freegrid, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder) {
   /* == Cells == */
   --fg-cell-background: var(--fg-color-background); /* Cell background. */

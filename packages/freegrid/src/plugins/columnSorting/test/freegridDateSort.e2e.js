@@ -1,5 +1,5 @@
-// FreeGrid: more date sorting specs with valid formats (next to the date spec in columnSorting.e2e.js).
-describe('ColumnSorting (FreeGrid) data type: date with a valid format', () => {
+// FreeSheet: more date sorting specs with valid formats (next to the date spec in columnSorting.e2e.js).
+describe('ColumnSorting (FreeSheet) data type: date with a valid format', () => {
   const id = 'testContainer';
 
   beforeEach(function() {

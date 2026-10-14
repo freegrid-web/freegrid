@@ -40,7 +40,7 @@ Hooks.getSingleton().register('afterContextMenuExecute');
 
 /**
  * @description
- * This plugin creates the FreeGrid Context Menu. It allows to create a new row or column at any place in the
+ * This plugin creates the FreeSheet Context Menu. It allows to create a new row or column at any place in the
  * grid among [other features](https://github.com/freegrid-web/freegrid).
  * Possible values:
  * * `true` (to enable default options),
@@ -133,7 +133,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ContextMenu#enablePlugin} method is called.
    *
    */
@@ -142,7 +142,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -211,7 +211,7 @@ class ContextMenu extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     this.close();
@@ -248,7 +248,7 @@ class ContextMenu extends BasePlugin {
 
     // ContextMenu is not detected HotTableEnv correctly because is injected outside hot-table
     this.menu.hotMenu!.isHotTableEnv = this.hot.isHotTableEnv;
-    // FreeGrid.eventManager.isHotTableEnv = this.hot.isHotTableEnv;
+    // FreeSheet.eventManager.isHotTableEnv = this.hot.isHotTableEnv;
   }
 
   /**

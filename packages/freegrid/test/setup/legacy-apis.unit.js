@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-// APIs that only Internet Explorer (or Shadow DOM v0) had. FreeGrid supports Chrome/Edge 107+, Firefox 104+ and Safari 16+,
+// APIs that only Internet Explorer (or Shadow DOM v0) had. FreeSheet supports Chrome/Edge 107+, Firefox 104+ and Safari 16+,
 // so code using them is dead. `cancelBubble` is not listed: it is also a standard alias for stopping propagation.
 const IE_ONLY = [
   /\battachEvent\b/, /\bdetachEvent\b/, /\bcreateEventObject\b/, /\.currentStyle\b/, /\bdocument\.selection\b/,

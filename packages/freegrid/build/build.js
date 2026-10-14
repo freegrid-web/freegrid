@@ -20,24 +20,37 @@ async function esm() {
     ...base,
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
-      lib: { entry: { index: r('src/index.ts'), compat: r('src/compat.ts') }, formats: ['es'], cssFileName: 'freegrid' },
+      lib: { entry: { index: r('src/index.ts'), compat: r('src/compat.ts') }, formats: ['es'], cssFileName: 'freesheet' },
       rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
     },
   });
 }
 
+// `window.FreeGrid`, the global's name up to 0.3: the same object, with a warning on first use. Removed in 1.0.
+const legacyGlobal = `(function(root) {
+  if (!root || !root.FreeSheet || 'FreeGrid' in root) return;
+  var warned = false;
+  Object.defineProperty(root, 'FreeGrid', { configurable: true, get: function() {
+    if (!warned && typeof console !== 'undefined') {
+      warned = true;
+      console.warn('"FreeGrid" is deprecated and will be removed in 1.0: use "FreeSheet" instead.');
+    }
+    return root.FreeSheet;
+  } });
+}(typeof self !== 'undefined' ? self : this));`;
+
 async function umd({ full, minify }) {
-  const name = `freegrid${full ? '.full' : ''}${minify ? '.min' : ''}`;
+  const name = `freesheet${full ? '.full' : ''}${minify ? '.min' : ''}`;
 
   await build({
     ...base,
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
       cssMinify: minify, sourcemap: true,
-      lib: { entry: full ? r('build/full-entry.js') : r('src/index.ts'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
+      lib: { entry: full ? r('build/full-entry.js') : r('src/index.ts'), name: 'FreeSheet', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
         external: full ? [] : isDep,
-        output: { exports: 'default', banner: banner(buildDate) },
+        output: { exports: 'default', banner: banner(buildDate), footer: legacyGlobal },
       },
     },
   });
@@ -63,8 +76,8 @@ async function locales({ minify }) {
         plugins: [localeRegistration()],
         build: {
           target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/languages'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
-          lib: { entry, name: 'FreeGridLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
-          rollupOptions: { external: ['@freegrid/sheet'], output: { globals: { '@freegrid/sheet': 'FreeGrid' } } },
+          lib: { entry, name: 'FreeSheetLanguage', formats: ['umd'], fileName: () => `${code}${minify ? '.min' : ''}.js` },
+          rollupOptions: { external: ['@freegrid/sheet'], output: { globals: { '@freegrid/sheet': 'FreeSheet' } } },
         },
       });
     }
@@ -73,7 +86,7 @@ async function locales({ minify }) {
   }
 }
 
-/** ESM locale modules for bundlers: `import '@freegrid/sheet/languages/de-DE'` registers on the imported FreeGrid. */
+/** ESM locale modules for bundlers: `import '@freegrid/sheet/languages/de-DE'` registers on the imported FreeSheet. */
 async function esmLocales() {
   const dir = r('src/i18n/languages');
   const files = readdirSync(dir).filter(f => /^[a-z]{2}-[A-Z]{2}\.(js|ts)$/.test(f));
@@ -123,4 +136,4 @@ await locales({ minify: true });
 await esmLocales();
 await walkontable();
 copyFileSync(r('build/compat-global.js'), r('dist/compat.js'));
-console.log('FreeGrid build complete.');
+console.log('FreeSheet build complete.');

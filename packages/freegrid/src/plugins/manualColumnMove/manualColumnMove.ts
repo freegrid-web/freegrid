@@ -52,7 +52,7 @@ const CSS_AFTER_SELECTION = 'after-selection--columns';
  * - moveColumn - move single column to the new position.
  * - moveColumns - move many columns (as an array of indexes) to the new position.
  *
- * If you want apply visual changes, you have to call manually the render() method on the instance of FreeGrid.
+ * If you want apply visual changes, you have to call manually the render() method on the instance of FreeSheet.
  *
  * The plugin creates additional components to make moving possibly using user interface:
  * - backlight - highlight of selected columns.
@@ -120,7 +120,7 @@ class ManualColumnMove extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ManualColumnMove#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -132,7 +132,7 @@ class ManualColumnMove extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -169,7 +169,7 @@ class ManualColumnMove extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     const pluginSettings = this.hot.getSettings().manualColumnMove;

@@ -30,7 +30,7 @@ export type CopyableRange = { startRow: number; startCol: number; endRow: number
 
 /**
  * @description
- * This plugin enables the copy/paste functionality in the FreeGrid. The functionality works for API, Context Menu,
+ * This plugin enables the copy/paste functionality in the FreeSheet. The functionality works for API, Context Menu,
  * using keyboard shortcuts and menu bar from the browser.
  * Possible values:
  * * `true` (to enable default options),
@@ -102,7 +102,7 @@ class CopyPaste extends BasePlugin {
   #isFragmentSelectionEnabled = false;
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link CopyPaste#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -110,7 +110,7 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -153,7 +153,7 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     if (this.focusableElement) {

@@ -29,7 +29,7 @@ class MergedCellsCollection {
   mergedCells: MergedCellCoords[] = [];
 
   /**
-   * The FreeGrid instance.
+   * The FreeSheet instance.
    */
   hot: PluginHost;
 

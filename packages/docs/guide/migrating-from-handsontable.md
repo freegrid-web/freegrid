@@ -1,8 +1,8 @@
 # Migrating from Handsontable 6
 
-FreeGrid started from the code of Handsontable 6.2.2, so a project built on Handsontable 6.x can usually
+FreeSheet started from the code of Handsontable 6.2.2, so a project built on Handsontable 6.x can usually
 switch with a few changes. The compatibility layer described here is a migration aid: it stays available
-throughout FreeGrid `0.x` and is removed in `1.0`.
+throughout FreeSheet `0.x` and is removed in `1.0`.
 
 ## 1. Replace the package
 
@@ -17,17 +17,17 @@ The quickest switch keeps the `Handsontable` name through the compatibility entr
 
 ```js
 import Handsontable from '@freegrid/sheet/compat';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import '@freegrid/sheet/dist/freesheet.full.css';
 ```
 
-When you have time, move to the FreeGrid name. The API is the same:
+When you have time, move to the FreeSheet name. The API is the same:
 
 ```js
-import FreeGrid from '@freegrid/sheet';
+import FreeSheet from '@freegrid/sheet';
 ```
 
-With `<script>` tags, load `dist/freegrid.full.js` and then `dist/compat.js`, which defines
-`window.Handsontable` as an alias of `window.FreeGrid`.
+With `<script>` tags, load `dist/freesheet.full.js` and then `dist/compat.js`, which defines
+`window.Handsontable` as an alias of `window.FreeSheet`.
 
 ## 3. Language files
 
@@ -43,19 +43,19 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 ## 4. Check these differences
 
 - **No license key.** The `licenseKey` setting is ignored, because there is nothing to unlock.
-- **CommonJS and IE are not supported.** FreeGrid ships ES modules and UMD bundles for Chrome/Edge
+- **CommonJS and IE are not supported.** FreeSheet ships ES modules and UMD bundles for Chrome/Edge
   107+, Firefox 104+ and Safari 16+.
 - **jQuery:** the plugin is `$(el).freegrid(...)`. `$(el).handsontable(...)` still works during `0.x`.
-- **Dates:** FreeGrid no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
+- **Dates:** FreeSheet no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
   rules (see [Date and time formats](./cell-types#date-and-time-formats)); use real formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Week tokens (`w`, `W`, `gggg`) and locales other than English are not supported.
-- **Numbers:** FreeGrid no longer needs numbro. `numericFormat` patterns keep numbro's syntax and give the same text;
+- **Numbers:** FreeSheet no longer needs numbro. `numericFormat` patterns keep numbro's syntax and give the same text;
   the separators and the currency come from the browser, so no numbro language files are needed (see
   [Number formats](./cell-types#number-formats)).
-- **Date picker:** FreeGrid has its own calendar instead of Pikaday (classes `fg-datepicker*` instead of `pika-*`).
+- **Date picker:** FreeSheet has its own calendar instead of Pikaday (classes `fg-datepicker*` instead of `pika-*`).
   `datePickerConfig` keeps Pikaday's names for the common options (see [Date picker](./cell-types#date-picker));
   other Pikaday options are ignored. You no longer load Pikaday or its CSS.
-- **CSS class names** are now FreeGrid's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
+- **CSS class names** are now FreeSheet's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
   old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
   switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now
   writes `fg-` alignment classes into `getCellMeta(...).className`.
@@ -65,11 +65,11 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 
 ## Editor, renderer and validator names
 
-The classes and functions under `FreeGrid.editors`, `FreeGrid.renderers` and `FreeGrid.validators` have uniform
+The classes and functions under `FreeSheet.editors`, `FreeSheet.renderers` and `FreeSheet.validators` have uniform
 names, the kind first. The old names are removed. Names used in settings (`type: 'date'`, `editor: 'text'`,
 `renderer: 'numeric'`, `validator: 'time'`) do not change.
 
-| Handsontable 6 | FreeGrid |
+| Handsontable 6 | FreeSheet |
 | --- | --- |
 | `editors.BaseEditor` | `editors.EditorBase` |
 | `editors.TextEditor` | `editors.EditorText` |
@@ -97,7 +97,7 @@ names, the kind first. The old names are removed. Names used in settings (`type:
 // before
 class UpperCaseEditor extends Handsontable.editors.TextEditor { … }
 // after
-class UpperCaseEditor extends FreeGrid.editors.EditorText { … }
+class UpperCaseEditor extends FreeSheet.editors.EditorText { … }
 ```
 
 Your own editors, renderers and validators keep the names you register them under

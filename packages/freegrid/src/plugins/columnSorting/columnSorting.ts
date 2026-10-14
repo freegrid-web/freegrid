@@ -134,7 +134,7 @@ class ColumnSorting extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ColumnSorting#enablePlugin} method is called.
    *
    */
@@ -143,7 +143,7 @@ class ColumnSorting extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -179,7 +179,7 @@ class ColumnSorting extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     const clearColHeader = (column: number, TH: HTMLTableCellElement) => {

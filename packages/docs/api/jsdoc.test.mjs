@@ -66,11 +66,11 @@ test('marks private entries', () => {
   assert.equal(hidden.private, true);
 });
 
-test('reads an event, says FreeGrid instead of the upstream name, keeps deprecation and version', () => {
+test('reads an event, says FreeSheet instead of the upstream name, keeps deprecation and version', () => {
   const event = parseBlocks(SOURCE).find(block => block.kind === 'event');
 
   assert.equal(event.name, 'afterChange');
-  assert.equal(event.description, 'Fired after one or more cells has been changed in FreeGrid.');
+  assert.equal(event.description, 'Fired after one or more cells has been changed in FreeSheet.');
   assert.equal(event.params[0].name, 'changes');
   assert.equal(event.deprecated, 'Use something else.');
   assert.equal(event.since, '0.35.0');

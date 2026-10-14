@@ -42,7 +42,7 @@ import { registerLanguageDictionary, getLanguagesDictionaries, getLanguageDictio
  * @param {Object} [userSettings]
  * @returns {Core}
  */
-function FreeGrid(rootElement: HTMLElement, userSettings?: object): Core {
+function FreeSheet(rootElement: HTMLElement, userSettings?: object): Core {
   const instance = new Core(rootElement, userSettings || {}, rootInstanceSymbol);
 
   instance.init();
@@ -58,26 +58,26 @@ const publicMembers = (modules: object[]): Record<string, unknown> => Object.fro
 const byPrefixedName = (prefix: string, names: string[], get: (name: string) => unknown): Record<string, unknown> =>
   Object.fromEntries(names.map(name => [`${prefix}${stringHelpers.toUpperCaseFirst(name)}`, get(name)]));
 
-jQueryWrapper(FreeGrid as unknown as Parameters<typeof jQueryWrapper>[0]);
+jQueryWrapper(FreeSheet as unknown as Parameters<typeof jQueryWrapper>[0]);
 
-FreeGrid.Core = Core;
-FreeGrid.DefaultSettings = DefaultSettings;
-FreeGrid.EventManager = EventManager;
-FreeGrid._getListenersCounter = getListenersCounter; // For MemoryLeak tests
+FreeSheet.Core = Core;
+FreeSheet.DefaultSettings = DefaultSettings;
+FreeSheet.EventManager = EventManager;
+FreeSheet._getListenersCounter = getListenersCounter; // For MemoryLeak tests
 
-FreeGrid.buildDate = __FG_BUILD_DATE__;
-FreeGrid.packageName = __FG_PACKAGE_NAME__;
-FreeGrid.version = __FG_VERSION__;
+FreeSheet.buildDate = __FG_BUILD_DATE__;
+FreeSheet.packageName = __FG_PACKAGE_NAME__;
+FreeSheet.version = __FG_VERSION__;
 
 // Export Hooks singleton
-FreeGrid.hooks = Hooks.getSingleton();
+FreeSheet.hooks = Hooks.getSingleton();
 
 // For the GhostTable specs (test/e2e/utils/ghostTable.spec.js), which run against the built bundle.
-FreeGrid.__GhostTable = GhostTable;
+FreeSheet.__GhostTable = GhostTable;
 //
 
-// Export all helpers to the FreeGrid object
-FreeGrid.helper = publicMembers([
+// Export all helpers to the FreeSheet object
+FreeSheet.helper = publicMembers([
   arrayHelpers,
   browserHelpers,
   dataHelpers,
@@ -91,46 +91,46 @@ FreeGrid.helper = publicMembers([
   stringHelpers,
   unicodeHelpers,
 ]);
-FreeGrid.dom = publicMembers([
+FreeSheet.dom = publicMembers([
   domHelpers,
   domEventHelpers,
 ]);
 
 // Export cell types.
-FreeGrid.cellTypes = {
+FreeSheet.cellTypes = {
   ...Object.fromEntries(getRegisteredCellTypeNames().map(name => [name, getCellType(name)])),
   registerCellType,
   getCellType,
 };
 
-// Export all registered editors from the FreeGrid.
-FreeGrid.editors = {
+// Export all registered editors from the FreeSheet.
+FreeSheet.editors = {
   ...byPrefixedName('Editor', getRegisteredEditorNames(), getEditor),
   registerEditor,
   getEditor,
 };
 
-// Export all registered renderers from the FreeGrid.
-FreeGrid.renderers = {
+// Export all registered renderers from the FreeSheet.
+FreeSheet.renderers = {
   ...byPrefixedName('Renderer', getRegisteredRendererNames(), getRenderer),
   registerRenderer,
   getRenderer,
 };
 
-// Export all registered validators from the FreeGrid.
-FreeGrid.validators = {
+// Export all registered validators from the FreeSheet.
+FreeSheet.validators = {
   ...byPrefixedName('Validator', getRegisteredValidatorNames(), getValidator),
   registerValidator,
   getValidator,
 };
 
-// Export all registered plugins from the FreeGrid (`Base` as `BasePlugin`).
-FreeGrid.plugins = {
+// Export all registered plugins from the FreeSheet (`Base` as `BasePlugin`).
+FreeSheet.plugins = {
   ...Object.fromEntries(Object.entries(plugins).map(([name, plugin]) => [name === 'Base' ? 'BasePlugin' : name, plugin])),
   registerPlugin,
 };
 
-FreeGrid.languages = {
+FreeSheet.languages = {
   dictionaryKeys: constants,
   getLanguageDictionary,
   getLanguagesDictionaries,
@@ -139,4 +139,4 @@ FreeGrid.languages = {
   getTranslatedPhrase: (...args: Parameters<typeof getTranslatedPhrase>) => getTranslatedPhrase(...args),
 };
 
-export default FreeGrid;
+export default FreeSheet;

@@ -1,4 +1,4 @@
-// Reads FreeGrid's theme variables from packages/freegrid/src/css/variables.css at docs build time, so the Theming
+// Reads FreeSheet's theme variables from packages/freegrid/src/css/variables.css at docs build time, so the Theming
 // page always lists exactly what the stylesheet defines.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

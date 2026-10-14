@@ -1,6 +1,6 @@
-import FreeGrid from '@freegrid/sheet';
+import FreeSheet from '@freegrid/sheet';
 import '@freegrid/sheet/languages/all';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 export default function createGrid(container) {
   const toolbar = document.createElement('div');
@@ -13,7 +13,7 @@ export default function createGrid(container) {
     <label>Context menu language <select></select></label>`;
   container.append(toolbar, gridElement);
 
-  const grid = new FreeGrid(gridElement, {
+  const grid = new FreeSheet(gridElement, {
     data: [
       ['Vilnius', 'Lithuania', 588412, 'EUR'],
       ['Riga', 'Latvia', 605273, 'EUR'],
@@ -38,7 +38,7 @@ export default function createGrid(container) {
   });
 
   const select = toolbar.querySelector('select');
-  const codes = [...new Set(FreeGrid.languages.getLanguagesDictionaries().map(d => d.languageCode))].sort();
+  const codes = [...new Set(FreeSheet.languages.getLanguagesDictionaries().map(d => d.languageCode))].sort();
 
   select.innerHTML = codes.map(code => `<option${code === 'en-US' ? ' selected' : ''}>${code}</option>`).join('');
   select.addEventListener('change', () => grid.updateSettings({ language: select.value }));

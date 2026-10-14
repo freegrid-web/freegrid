@@ -78,14 +78,14 @@ class BasePlugin {
   }
 
   /**
-   * Enable plugin for this FreeGrid instance.
+   * Enable plugin for this FreeSheet instance.
    */
   enablePlugin(): void {
     this.enabled = true;
   }
 
   /**
-   * Disable plugin for this FreeGrid instance.
+   * Disable plugin for this FreeSheet instance.
    */
   disablePlugin(): void {
     this.eventManager?.clear();

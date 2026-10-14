@@ -43,14 +43,14 @@ class MultipleSelectionHandles extends BasePlugin {
   touchStartRange: { width: number; height: number; direction: string } | undefined = undefined;
 
   /**
-   * Check if the plugin is enabled in the FreeGrid settings.
+   * Check if the plugin is enabled in the FreeSheet settings.
    */
   isEnabled(): boolean {
     return isMobileBrowser();
   }
 
   /**
-   * Enable plugin for this FreeGrid instance.
+   * Enable plugin for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {

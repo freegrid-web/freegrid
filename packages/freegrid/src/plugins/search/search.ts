@@ -35,7 +35,7 @@ const DEFAULT_QUERY_METHOD: QueryMethod = (query, value) => {
  * @plugin Search
  *
  * @description
- * The search plugin provides an easy interface to search data across FreeGrid.
+ * The search plugin provides an easy interface to search data across FreeSheet.
  *
  * In order to enable search mechanism, {@link Options#search} option must be set to `true`.
  *
@@ -84,7 +84,7 @@ class Search extends BasePlugin {
   searchResultClass = DEFAULT_SEARCH_RESULT_CLASS;
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoRowSize#enablePlugin} method is called.
    *
    */
@@ -93,7 +93,7 @@ class Search extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -108,7 +108,7 @@ class Search extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     // The next render takes the search result class off the cells.
@@ -220,7 +220,7 @@ class Search extends BasePlugin {
   /**
    * Updates the settings of the plugin.
    *
-   * @param searchSettings The plugin settings, taken from FreeGrid configuration.
+   * @param searchSettings The plugin settings, taken from FreeSheet configuration.
    * @private
    */
   updatePluginSettings(searchSettings: boolean | SearchSettings): void {

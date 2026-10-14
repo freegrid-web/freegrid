@@ -1,5 +1,5 @@
 /**
- * Themes for the parts FreeGrid appends to <body> (context menu, comment editor, date picker): they are outside the
+ * Themes for the parts FreeSheet appends to <body> (context menu, comment editor, date picker): they are outside the
  * grid, so they get the grid's theme class explicitly. See src/css/variables.css.
  */
 const THEMES = ['fg-theme-light', 'fg-theme-dark', 'fg-theme-auto'] as const;

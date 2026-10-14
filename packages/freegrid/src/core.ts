@@ -105,22 +105,22 @@ class ValidatorsQueue {
 }
 
 /**
- * FreeGrid constructor
+ * FreeSheet constructor
  *
  * @core
  * @constructor Core
  * @description
  *
- * After FreeGrid is constructed, you can modify the grid behavior using the available public methods.
+ * After FreeSheet is constructed, you can modify the grid behavior using the available public methods.
  *
  * ---
  * ## How to call methods
  *
- * These are 2 equal ways to call a FreeGrid method:
+ * These are 2 equal ways to call a FreeSheet method:
  *
  * ```js
- * // all following examples assume that you constructed FreeGrid like this
- * const hot = new FreeGrid(document.getElementById('example1'), options);
+ * // all following examples assume that you constructed FreeSheet like this
+ * const hot = new FreeSheet(document.getElementById('example1'), options);
  *
  * // now, to use setDataAtCell method, you can either:
  * ht.setDataAtCell(0, 0, 'new value');
@@ -206,7 +206,7 @@ const validatorLookup = cellMethodLookupFactory('validator');
  */
 function postMortem(method: string) {
   return () => {
-    throw new Error(`The "${method}" method cannot be called because this FreeGrid instance has been destroyed`);
+    throw new Error(`The "${method}" method cannot be called because this FreeSheet instance has been destroyed`);
   };
 }
 
@@ -1337,7 +1337,7 @@ class Core {
 
 
   /**
-   * Listen to the keyboard input on document body. This allows FreeGrid to capture keyboard events and respond
+   * Listen to the keyboard input on document body. This allows FreeSheet to capture keyboard events and respond
    * in the right way.
    *
    * @memberof Core#
@@ -1366,7 +1366,7 @@ class Core {
 
 
   /**
-   * Stop listening to keyboard input on the document body. Calling this method makes the FreeGrid inactive for
+   * Stop listening to keyboard input on the document body. Calling this method makes the FreeSheet inactive for
    * any keyboard events.
    *
    * @memberof Core#
@@ -1381,7 +1381,7 @@ class Core {
 
 
   /**
-   * Returns `true` if the current FreeGrid instance is listening to keyboard input on document body.
+   * Returns `true` if the current FreeSheet instance is listening to keyboard input on document body.
    *
    * @memberof Core#
    * @function isListening
@@ -1581,7 +1581,7 @@ class Core {
    * Rerender the table. Calling this method starts the process of recalculating, redrawing and applying the changes
    * to the DOM. While rendering the table all cell renderers are recalled.
    *
-   * Calling this method manually is not recommended. FreeGrid tries to render itself by choosing the most
+   * Calling this method manually is not recommended. FreeSheet tries to render itself by choosing the most
    * optimal moments in its lifecycle.
    *
    * @memberof Core#
@@ -1599,7 +1599,7 @@ class Core {
 
 
   /**
-   * Loads new data to FreeGrid. Loading new data resets the cell meta.
+   * Loads new data to FreeSheet. Loading new data resets the cell meta.
    *
    * @memberof Core#
    * @function loadData
@@ -2390,7 +2390,7 @@ class Core {
 
   /**
    * @description
-   * Returns a data type defined in the FreeGrid settings under the `type` key ([Options#type](https://github.com/freegrid-web/freegrid)).
+   * Returns a data type defined in the FreeSheet settings under the `type` key ([Options#type](https://github.com/freegrid-web/freegrid)).
    * If there are cells with different types in the selected range, it returns `'mixed'`.
    *
    * __Note__: If data is reordered, sorted or trimmed, the currently visible order will be used.
@@ -3353,7 +3353,7 @@ class Core {
    * @param {Number} [endRow] Visual end row index (if selecting a range).
    * @param {Number|String} [endColumn] Visual end column index or column property (if selecting a range).
    * @param {Boolean} [scrollToCell=true] If `true`, the viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeSheet will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   selectCell(row: number, column: number | string, endRow?: number, endColumn?: number | string, scrollToCell: boolean = true, changeListener: boolean = true) {
@@ -3395,7 +3395,7 @@ class Core {
    *                                     the same format as `getSelected` method returns or as an CellRange objects
    *                                     which is the same format what `getSelectedRange` method returns.
    * @param {Boolean} [scrollToCell=true] If `true`, the viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeSheet will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   selectCells(coords: Parameters<Selection['selectCells']>[0] = [[]] as never, scrollToCell: boolean = true, changeListener: boolean = true) {
@@ -3426,7 +3426,7 @@ class Core {
    * @param {Number} [endRow] visual end row index (if selecting a range).
    * @param {String} [endProp] End property name (if selecting a range).
    * @param {Boolean} [scrollToCell=true] If `true`, viewport will be scrolled to the selection.
-   * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
+   * @param {Boolean} [changeListener=true] If `false`, FreeSheet will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
   selectCellByProp(row: number, prop: string, endRow?: number, endProp?: string, scrollToCell: boolean = true, changeListener: boolean = true) {
@@ -3545,7 +3545,7 @@ class Core {
 
 
   /**
-   * Removes the table from the DOM and destroys the instance of the FreeGrid.
+   * Removes the table from the DOM and destroys the instance of the FreeSheet.
    *
    * @memberof Core#
    * @function destroy
@@ -3638,11 +3638,11 @@ class Core {
 
 
   /**
-   * Returns the FreeGrid instance.
+   * Returns the FreeSheet instance.
    *
    * @memberof Core#
    * @function getInstance
-   * @returns {FreeGrid} The FreeGrid instance.
+   * @returns {FreeSheet} The FreeSheet instance.
    */
   getInstance() {
     return this;
@@ -3650,7 +3650,7 @@ class Core {
 
 
   /**
-   * Adds listener to the specified hook name (only for this FreeGrid instance).
+   * Adds listener to the specified hook name (only for this FreeSheet instance).
    *
    * @memberof Core#
    * @function addHook
@@ -3668,7 +3668,7 @@ class Core {
 
 
   /**
-   * Check if for a specified hook name there are added listeners (only for this FreeGrid instance). All available
+   * Check if for a specified hook name there are added listeners (only for this FreeSheet instance). All available
    * hooks you will find {@link Hooks}.
    *
    * @memberof Core#
@@ -3688,7 +3688,7 @@ class Core {
 
 
   /**
-   * Adds listener to specified hook name (only for this FreeGrid instance). After the listener is triggered,
+   * Adds listener to specified hook name (only for this FreeSheet instance). After the listener is triggered,
    * it will be automatically removed.
    *
    * @memberof Core#

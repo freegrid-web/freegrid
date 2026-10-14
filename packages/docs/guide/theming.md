@@ -4,7 +4,7 @@ import { data } from './theming.data.mjs';
 
 # Theming
 
-Every color of FreeGrid, its font and its shadows come from CSS variables (`--fg-*`). Override a few of them to match
+Every color of FreeSheet, its font and its shadows come from CSS variables (`--fg-*`). Override a few of them to match
 your site, or switch to the built-in dark theme.
 
 ## Change the colors
@@ -82,7 +82,7 @@ lists what Modern changes. To show a Classic grid inside a Modern page, add `fg-
 `data-fg-style="classic"`) around it: the closest style wins.
 
 Sizes are variables too (`--fg-row-height`, `--fg-cell-padding-x`, `--fg-radius`, `--fg-header-font-weight`,
-`--fg-fill-handle-radius`), so you can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeGrid
+`--fg-fill-handle-radius`), so you can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeSheet
 reads `--fg-row-height` when the grid is created; after changing it later, call `updateSettings({})`. Modern's wider
 padding needs a little more column width: with fixed `colWidths`, add about 8px per column so that text does not wrap.
 
@@ -95,7 +95,7 @@ context menu, double-click a date to open the date picker.
 
 ## Variables
 
-The values are read from FreeGrid's `variables.css`. "Light" is the default (Classic) value; "Modern" is shown where
+The values are read from FreeSheet's `variables.css`. "Light" is the default (Classic) value; "Modern" is shown where
 the Modern style differs; "(page)" means the grid inherits the value from the page; an empty dark value means the
 variable keeps its light value or follows a base variable.
 

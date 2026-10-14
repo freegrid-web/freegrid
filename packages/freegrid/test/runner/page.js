@@ -14,11 +14,11 @@ export function runnerHtml(suite, buildKind) {
 
   const SUITES = {
     e2e: {
-      css: ['/test/lib/normalize.css', `/dist/freegrid${min}.css`, '/test/helpers/common.css'],
+      css: ['/test/lib/normalize.css', `/dist/freesheet${min}.css`, '/test/helpers/common.css'],
       js: ['/test/helpers/jasmine-bridge-reporter.js', '/test/lib/jquery.min.js', '/test/lib/jquery.simulate.js',
         '/test/lib/lodash.underscore.js', '/test/lib/backbone.js',
-        '/node_modules/moment/moment.js', // specs use it; FreeGrid does not
-        `/dist/freegrid${min}.js`, '/dist/compat.js', `/dist/languages/all${min}.js`,
+        '/node_modules/moment/moment.js', // specs use it; FreeSheet does not
+        `/dist/freesheet${min}.js`, '/dist/compat.js', `/dist/languages/all${min}.js`,
         '/test/dist/helpers.entry.js', '/test/dist/specs.entry.js'],
     },
     walkontable: {
@@ -40,5 +40,5 @@ export function runnerHtml(suite, buildKind) {
     'data:text/javascript,jasmine.getEnv().configure({random:false});', bRel('boot1.js'), ...s.js]
     .map(src => `<script src="${src}"></script>`);
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FreeGrid ${suite}</title>${css.join('')}</head><body>${js.join('')}</body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FreeSheet ${suite}</title>${css.join('')}</head><body>${js.join('')}</body></html>`;
 }

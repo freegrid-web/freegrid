@@ -51,7 +51,7 @@ class Autofill extends BasePlugin {
   mouseDownOnCellCorner = false;
 
   /**
-   * Specifies if mouse was dragged outside FreeGrid.
+   * Specifies if mouse was dragged outside FreeSheet.
    *
    * @private
    */
@@ -82,14 +82,14 @@ class Autofill extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings.
+   * Checks if the plugin is enabled in the FreeSheet settings.
    */
   isEnabled(): boolean {
     return !!this.hot.getSettings().fillHandle;
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -116,7 +116,7 @@ class Autofill extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     this.clearMappedSettings();

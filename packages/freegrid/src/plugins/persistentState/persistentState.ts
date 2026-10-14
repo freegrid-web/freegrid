@@ -32,7 +32,7 @@ class PersistentState extends BasePlugin {
   storage: Storage | undefined = undefined;
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link PersistentState#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -40,7 +40,7 @@ class PersistentState extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -59,7 +59,7 @@ class PersistentState extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     this.storage = undefined;

@@ -465,7 +465,7 @@ describe('DateEditor', () => {
     expect(editor.TEXTAREA.value).toEqual(cellValue);
   });
 
-  describe('FreeGrid date picker', () => {
+  describe('FreeSheet date picker', () => {
     const press = (target, key, init = {}) => {
       target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
     };

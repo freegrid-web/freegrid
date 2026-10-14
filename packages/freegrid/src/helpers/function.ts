@@ -1,5 +1,5 @@
 // The wrappers below are `function`s, not arrows, on purpose: they pass their own `this` on to `func`, because
-// FreeGrid calls them as methods. `Fn` accepts any function: callers pass arbitrary methods and callbacks.
+// FreeSheet calls them as methods. `Fn` accepts any function: callers pass arbitrary methods and callbacks.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- any function signature, as in `Function`
 type Fn = (...args: any[]) => unknown;
 

@@ -1,5 +1,5 @@
 // Smoke test for the built docs site: every example page renders its live grid without console errors.
-// Usage: pnpm build (FreeGrid) && pnpm --filter @freegrid/docs build && node test/smoke.js
+// Usage: pnpm build (FreeSheet) && pnpm --filter @freegrid/docs build && node test/smoke.js
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -80,7 +80,7 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     await page.waitForSelector('.live-example .handsontable .htCore', { timeout: 10000 }).catch(() => {});
   }
   const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
-  // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeGrid's height
+  // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeSheet's height
   // (--fg-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
   const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {
     const table = el.querySelector('.ht_master table.htCore');

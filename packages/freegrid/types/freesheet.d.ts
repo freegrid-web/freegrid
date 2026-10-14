@@ -1,7 +1,7 @@
-declare namespace _FreeGrid {
+declare namespace _FreeSheet {
 
   class Core {
-    constructor(element: Element, options: FreeGrid.DefaultSettings);
+    constructor(element: Element, options: FreeSheet.DefaultSettings);
     addHook(key: string, callback: (() => void) | (() => void)[]): void;
     addHookOnce(key: string, callback: (() => void) | (() => void)[]): void;
     alter(action: 'insert_row' | 'insert_col' | 'remove_row' | 'remove_col', index?: number | Array<[number, number]>, amount?: number, source?: string, keepEmptyRows?: boolean): void;
@@ -24,10 +24,10 @@ declare namespace _FreeGrid {
     emptySelectedCells(): void;
     getActiveEditor(): object;
     getCell(row: number, col: number, topmost?: boolean): Element;
-    getCellEditor<T extends FreeGrid._editors.Base>(row: number, col: number): T;
-    getCellMeta(row: number, col: number): FreeGrid.GridSettings;
-    getCellMetaAtRow(row: number): FreeGrid.GridSettings[];
-    getCellRenderer(row: number, col: number): FreeGrid.renderers.Base;
+    getCellEditor<T extends FreeSheet._editors.Base>(row: number, col: number): T;
+    getCellMeta(row: number, col: number): FreeSheet.GridSettings;
+    getCellMetaAtRow(row: number): FreeSheet.GridSettings[];
+    getCellRenderer(row: number, col: number): FreeSheet.renderers.Base;
     getCellValidator(row: number, col: number): (value: any, callback: (valid: boolean) => void) => void | RegExp | undefined;
     getColHeader(col?: number): any[] | string;
     getColWidth(col: number): number;
@@ -41,16 +41,16 @@ declare namespace _FreeGrid {
     getDataAtRow(row: number): any[];
     getDataAtRowProp(row: number, prop: string): any;
     getDataType(rowFrom: number, columnFrom: number, rowTo: number, columnTo: number): string;
-    getInstance(): FreeGrid;
-    getPlugin<T extends keyof FreeGrid.PluginsCollection>(pluginName: T): FreeGrid.PluginsCollection[T];
+    getInstance(): FreeSheet;
+    getPlugin<T extends keyof FreeSheet.PluginsCollection>(pluginName: T): FreeSheet.PluginsCollection[T];
     getRowHeader(row?: number): any[] | string;
     getRowHeight(row: number): number;
     getSchema(): object;
     getSelected(): Array<[number, number, number, number]> | undefined;
     getSelectedLast(): number[] | undefined;
-    getSelectedRange():  FreeGrid.wot.CellRange[] | undefined;
-    getSelectedRangeLast(): FreeGrid.wot.CellRange | undefined;
-    getSettings(): FreeGrid.DefaultSettings;
+    getSelectedRange():  FreeSheet.wot.CellRange[] | undefined;
+    getSelectedRangeLast(): FreeSheet.wot.CellRange | undefined;
+    getSettings(): FreeSheet.DefaultSettings;
     getSourceData(r?: number, c?: number, r2?: number, c2?: number): any[];
     getSourceDataArray(r?: number, c?: number, r2?: number, c2?: number): any[];
     getSourceDataAtCell(row: number, column: number): any;
@@ -78,7 +78,7 @@ declare namespace _FreeGrid {
     selectAll(): void;
     selectCell(row: number, col: number, endRow?: number, endCol?: number, scrollToCell?: boolean, changeListener?: boolean): boolean;
     selectCellByProp(row: number, prop: string, endRow?: number, endProp?: string, scrollToCell?: boolean): boolean;
-    selectCells(coords: Array<[number, number | string, number, number | string]> | Array<FreeGrid.wot.CellRange>, scrollToCell?: boolean, changeListener?: boolean): boolean;
+    selectCells(coords: Array<[number, number | string, number, number | string]> | Array<FreeSheet.wot.CellRange>, scrollToCell?: boolean, changeListener?: boolean): boolean;
     selectColumns(startColumn: number | string, endColumn?: number | string): boolean;
     selectRows(startRow: number, endRow?: number): boolean;
     setCellMeta(row: number, col: number, key: string, val: string): void;
@@ -94,7 +94,7 @@ declare namespace _FreeGrid {
     toVisualColumn(column: number): number;
     toVisualRow(row: number): number;
     unlisten(): void;
-    updateSettings(settings: FreeGrid.DefaultSettings, init: boolean): void;
+    updateSettings(settings: FreeSheet.DefaultSettings, init: boolean): void;
     validateCells(callback: (valid: boolean) => void): void;
     validateColumns(columns: number[], callback: (valid: boolean) => void): void;
     validateRows(rows: number[], callback: (valid: boolean) => void): void;
@@ -102,7 +102,7 @@ declare namespace _FreeGrid {
   }
 }
 
-declare namespace FreeGrid {
+declare namespace FreeSheet {
   namespace wot {
     interface CellCoords {
       col: number,
@@ -139,8 +139,8 @@ declare namespace FreeGrid {
       validator: (value: any, callback: (valid: boolean) => void) => void;
     }
 
-    interface FreeGrid {
-      editor: _editors.FreeGrid;
+    interface FreeSheet {
+      editor: _editors.FreeSheet;
       renderer: renderers.Autocomplete;
     }
 
@@ -171,14 +171,14 @@ declare namespace FreeGrid {
 
   namespace _editors {
     class Base {
-      instance: _FreeGrid.Core;
+      instance: _FreeSheet.Core;
       row: number;
       col: number;
       prop: string | number;
       TD: HTMLElement;
       cellProperties: object;
 
-      constructor(hotInstance: _FreeGrid.Core, row: number, col: number, prop: string | number, TD: HTMLElement, cellProperties: GridSettings)
+      constructor(hotInstance: _FreeSheet.Core, row: number, col: number, prop: string | number, TD: HTMLElement, cellProperties: GridSettings)
 
       beginEditing(initialValue?: string): void;
       cancelChanges(): void;
@@ -246,7 +246,7 @@ declare namespace FreeGrid {
       showDatepicker(event?: Event): void;
     }
 
-    class FreeGrid extends Text {
+    class FreeSheet extends Text {
       assignHooks(): void;
       beginEditing(initialValue?: any): void;
       close(): void;
@@ -259,7 +259,7 @@ declare namespace FreeGrid {
 
     class Password extends Text {}
 
-    class Autocomplete extends FreeGrid {
+    class Autocomplete extends FreeSheet {
       allowKeyEventPropagation(keyCode?: number): boolean;
       finishEditing(restoreOriginalValue?: boolean): void;
       flipDropdown(dropdownHeight?: number): void;
@@ -327,7 +327,7 @@ declare namespace FreeGrid {
           visualCol: number,
           visualRow: number,
           type: string,
-          instance: _FreeGrid.Core,
+          instance: _FreeSheet.Core,
           dateFormat?: string
         },
         value: string
@@ -368,7 +368,7 @@ declare namespace FreeGrid {
       interface BaseUI {
         buildState: boolean;
         eventManager: EventManager;
-        hot: _FreeGrid.Core;
+        hot: _FreeSheet.Core;
         options: object;
 
         build(): void;
@@ -387,7 +387,7 @@ declare namespace FreeGrid {
       interface MultipleSelectUI extends BaseUI {
         clearAllUI: BaseUI;
         items: any[];
-        itemsBox: _FreeGrid.Core;
+        itemsBox: _FreeSheet.Core;
         searchInput: InputUI;
         selectAllUI: BaseUI;
 
@@ -452,7 +452,7 @@ declare namespace FreeGrid {
     }
 
     interface CommandExecutor {
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       commands: object;
       commonCallback: (() => void) | void;
 
@@ -481,7 +481,7 @@ declare namespace FreeGrid {
 
     interface Endpoints {
       plugin: plugins.ColumnSummary;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       endpoints: any[];
       settings: object | (() => void);
       settingsType: string;
@@ -514,7 +514,7 @@ declare namespace FreeGrid {
     interface GhostTable {
       columns: number[];
       container: HTMLElement | null;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       injected: boolean;
       rows: object[];
       samples: object | null;
@@ -545,7 +545,7 @@ declare namespace FreeGrid {
 
     interface ItemsFactory {
       defaultOrderPattern: any[] | void;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       predefinedItems: object;
 
       getItems(pattern?: any[] | object | boolean): any[];
@@ -555,8 +555,8 @@ declare namespace FreeGrid {
     interface Menu {
       container: HTMLElement;
       eventManager: EventManager;
-      hot: _FreeGrid.Core;
-      hotMenu: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
+      hotMenu: _FreeSheet.Core;
       hotSubMenus: object;
       keyEvent: boolean;
       menuItems: any[] | null;
@@ -609,7 +609,7 @@ declare namespace FreeGrid {
       enabled: boolean;
       initialized: boolean;
 
-      constructor(hotInstance?: _FreeGrid.Core);
+      constructor(hotInstance?: _FreeSheet.Core);
 
       addHook(name: string, callback: () => void): void;
       callOnPluginsReady(callback: () => void): void;
@@ -851,7 +851,7 @@ declare namespace FreeGrid {
     }
 
     interface RecordTranslator {
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
 
       toPhysical(row: number | object, column?: number): object | any[];
       toPhysicalColumn(column: number): number;
@@ -863,7 +863,7 @@ declare namespace FreeGrid {
 
     interface DataProvider {
       changes: object;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       t: RecordTranslator;
 
       clearChanges(): void;
@@ -881,7 +881,7 @@ declare namespace FreeGrid {
 
     interface AlterManager {
       sheet: Sheet;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       dataProvider: DataProvider;
       matrix: Matrix;
 
@@ -941,7 +941,7 @@ declare namespace FreeGrid {
     interface Sheet {
       alterManager: AlterManager
       dataProvider: DataProvider;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       matrix: Matrix;
       parser: Parser;
       t: RecordTranslator;
@@ -998,7 +998,7 @@ declare namespace FreeGrid {
       currentYear: number | void;
       dateCalculator: object | void;
       dataFeed: object | void;
-      hotSource: _FreeGrid.Core | void;
+      hotSource: _FreeSheet.Core | void;
       initialSettings: object | void;
       monthHeadersArray: any[];
       monthList: any[];
@@ -1022,7 +1022,7 @@ declare namespace FreeGrid {
       removeAllRangeBars(): void;
       setRangeBarColors(rows: object): void;
       setYear(year: number): void;
-      uniformBackgroundRenderer(instance: _FreeGrid.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: string | number, cellProperties: GridSettings): void;
+      uniformBackgroundRenderer(instance: _FreeSheet.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: string | number, cellProperties: GridSettings): void;
       unrenderRangeBar(row: number, startDateColumn: number, endDateColumn: number): void;
       updateRangeBarData(row: number, column: number, data: object): void;
     }
@@ -1111,7 +1111,7 @@ declare namespace FreeGrid {
 
     namespace moveUI {
       interface BaseUI {
-        hot: _FreeGrid.Core;
+        hot: _FreeSheet.Core;
         state: number;
 
         appendTo(wrapper: HTMLElement): void;
@@ -1167,7 +1167,7 @@ declare namespace FreeGrid {
         colspan: number;
         removed: boolean;
 
-        normalize(hotInstance: _FreeGrid.Core): void;
+        normalize(hotInstance: _FreeSheet.Core): void;
         includes(row: number, column: number): boolean;
         includesHorizontally(column: number): boolean;
         includesVertically(row: number): boolean;
@@ -1181,7 +1181,7 @@ declare namespace FreeGrid {
       interface MergedCellsCollection {
         plugin: MergeCells;
         mergedCells: MergeCellsPlugin.MergedCellCoords[];
-        hot: _FreeGrid.Core;
+        hot: _FreeSheet.Core;
 
         get(row: number, column: number): MergeCellsPlugin.MergedCellCoords | boolean;
         getByRange(range: wot.CellRange | object): MergeCellsPlugin.MergedCellCoords | boolean;
@@ -1217,7 +1217,7 @@ declare namespace FreeGrid {
       handle: HTMLElement;
       manualColumnWidths: any[];
       newSize: number | void;
-      pressed: _FreeGrid.Core | void;
+      pressed: _FreeSheet.Core | void;
       selectedCols: any[];
       startOffset: number | void;
       startWidth: number | void;
@@ -1258,7 +1258,7 @@ declare namespace FreeGrid {
       handle: HTMLElement;
       manualRowHeights: any[];
       newSize: number | void;
-      pressed: _FreeGrid.Core | void;
+      pressed: _FreeSheet.Core | void;
       selectedRows: any[];
       startOffset: number | void;
       startWidth: number | void;
@@ -1316,7 +1316,7 @@ declare namespace FreeGrid {
     interface DataManager {
       cache: object;
       data: object;
-      hot: _FreeGrid.Core;
+      hot: _FreeSheet.Core;
       parentReference: any; //WeakMap
       plugin: NestedRows;
 
@@ -1396,7 +1396,7 @@ declare namespace FreeGrid {
 
   namespace renderers {
     interface Base {
-      (instance: _FreeGrid.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: any, cellProperties: GridSettings): HTMLElement;
+      (instance: _FreeSheet.Core, TD: HTMLElement, row: number, col: number, prop: string | number, value: any, cellProperties: GridSettings): HTMLElement;
     }
 
     interface Autocomplete extends Base {}
@@ -1552,8 +1552,8 @@ declare namespace FreeGrid {
     afterColumnResize?: (currentColumn: number, newSize: number, isDoubleClick: boolean) => void;
     afterColumnSort?: (currentSortConfig: object[], destinationSortConfigs: object[]) => void;
     afterContextMenuDefaultOptions?: (predefinedItems: any[]) => void;
-    afterContextMenuHide?: (context: FreeGrid.plugins.ContextMenu) => void;
-    afterContextMenuShow?: (context: FreeGrid.plugins.ContextMenu) => void;
+    afterContextMenuHide?: (context: FreeSheet.plugins.ContextMenu) => void;
+    afterContextMenuShow?: (context: FreeSheet.plugins.ContextMenu) => void;
     afterCopy?: (data: any[], coords: any[]) => void;
     afterCopyLimit?: (selectedRows: number, selectedColumnds: number, copyRowsLimit: number, copyColumnsLimit: number) => void;
     afterCreateCol?: (index: number, amount: number) => void;
@@ -1565,8 +1565,8 @@ declare namespace FreeGrid {
     afterDocumentKeyDown?: (event: Event) => void;
     afterDrawSelection?: (currentRow: number, currentColumn: number, cornersOfSelection: number[], layerLevel: number | void) => string | void
     afterDropdownMenuDefaultOptions?: (predefinedItems: any[]) => void;
-    afterDropdownMenuHide?: (instance: FreeGrid.plugins.DropdownMenu) => void;
-    afterDropdownMenuShow?: (instance: FreeGrid.plugins.DropdownMenu) => void;
+    afterDropdownMenuHide?: (instance: FreeSheet.plugins.DropdownMenu) => void;
+    afterDropdownMenuShow?: (instance: FreeSheet.plugins.DropdownMenu) => void;
     afterFilter?: (formulasStack: any[]) => void;
     afterGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     afterGetColHeader?: (col: number, TH: Element) => void;
@@ -1626,7 +1626,7 @@ declare namespace FreeGrid {
     beforeColumnResize?: (currentColumn: number, newSize: number, isDoubleClick: boolean) => void;
     beforeColumnSort?: (currentSortConfig: object[], destinationSortConfigs: object[]) => void;
     beforeContextMenuSetItems?: (menuItems: any[]) => void;
-    beforeContextMenuShow?: (context: FreeGrid.plugins.ContextMenu) => void;
+    beforeContextMenuShow?: (context: FreeSheet.plugins.ContextMenu) => void;
     beforeCopy?: (data: any[], coords: any[]) => any;
     beforeCreateCol?: (index: number, amount: number, source?: string) => void;
     beforeCreateRow?: (index: number, amount: number, source?: string) => void;
@@ -1634,7 +1634,7 @@ declare namespace FreeGrid {
     beforeDetachChild?: (parent: object, element: object) => void;
     beforeDrawBorders?: (corners: any[], borderClassName: string) => void;
     beforeDropdownMenuSetItems?: (menuItems: any[]) => void;
-    beforeDropdownMenuShow?: (instance: FreeGrid.plugins.DropdownMenu) => void;
+    beforeDropdownMenuShow?: (instance: FreeSheet.plugins.DropdownMenu) => void;
     beforeFilter?: (formulasStack: any[]) => void;
     beforeGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     beforeInit?: () => void;
@@ -1715,7 +1715,7 @@ declare namespace FreeGrid {
     checkbox: cellTypes.Checkbox;
     date: cellTypes.Date;
     dropdown: cellTypes.Dropdown;
-    handsontable: cellTypes.FreeGrid;
+    handsontable: cellTypes.FreeSheet;
     numeric: cellTypes.Numeric;
     password: cellTypes.Password;
     text: cellTypes.Text;
@@ -1723,17 +1723,17 @@ declare namespace FreeGrid {
   }
 
   interface Editors {
-    EditorAutocomplete: typeof FreeGrid._editors.Autocomplete;
-    EditorBase: typeof FreeGrid._editors.Base;
-    EditorCheckbox: typeof FreeGrid._editors.Checkbox;
-    EditorDate: typeof FreeGrid._editors.Date;
-    EditorDropdown: typeof FreeGrid._editors.Dropdown;
-    EditorHandsontable: typeof FreeGrid._editors.FreeGrid;
-    EditorNumeric: typeof FreeGrid._editors.Numeric;
-    EditorPassword: typeof FreeGrid._editors.Password;
-    EditorSelect: typeof FreeGrid._editors.Select;
-    EditorText: typeof FreeGrid._editors.Text;
-    getEditor: (editorName: string, hotInstance: FreeGrid) => any;
+    EditorAutocomplete: typeof FreeSheet._editors.Autocomplete;
+    EditorBase: typeof FreeSheet._editors.Base;
+    EditorCheckbox: typeof FreeSheet._editors.Checkbox;
+    EditorDate: typeof FreeSheet._editors.Date;
+    EditorDropdown: typeof FreeSheet._editors.Dropdown;
+    EditorHandsontable: typeof FreeSheet._editors.FreeSheet;
+    EditorNumeric: typeof FreeSheet._editors.Numeric;
+    EditorPassword: typeof FreeSheet._editors.Password;
+    EditorSelect: typeof FreeSheet._editors.Select;
+    EditorText: typeof FreeSheet._editors.Text;
+    getEditor: (editorName: string, hotInstance: FreeSheet) => any;
     registerEditor: (editorName: string, editorClass: any) => void;
   }
 
@@ -2063,21 +2063,21 @@ declare namespace FreeGrid {
 }
 
 
-declare class FreeGrid extends _FreeGrid.Core {
+declare class FreeSheet extends _FreeSheet.Core {
   static baseVersion: string;
   static buildDate: string;
   static packageName: string;
   static version: string;
-  static cellTypes: FreeGrid.CellTypes;
-  static languages: FreeGrid.I18n.Internationalization;
-  static dom: FreeGrid.Dom;
-  static editors: FreeGrid.Editors;
-  static helper: FreeGrid.Helper;
-  static hooks: FreeGrid.Hooks;
-  static plugins: FreeGrid.Plugins;
-  static renderers: FreeGrid.Renderers;
-  static validators: FreeGrid.Validators;
+  static cellTypes: FreeSheet.CellTypes;
+  static languages: FreeSheet.I18n.Internationalization;
+  static dom: FreeSheet.Dom;
+  static editors: FreeSheet.Editors;
+  static helper: FreeSheet.Helper;
+  static hooks: FreeSheet.Hooks;
+  static plugins: FreeSheet.Plugins;
+  static renderers: FreeSheet.Renderers;
+  static validators: FreeSheet.Validators;
 }
 
-export = FreeGrid;
-export as namespace FreeGrid;
+export = FreeSheet;
+export as namespace FreeSheet;

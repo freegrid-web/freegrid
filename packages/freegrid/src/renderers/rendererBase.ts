@@ -11,7 +11,7 @@ const rendererBase: Renderer = (instance, TD, row, col, prop, value, cellPropert
   const classesToRemove: string[] = [];
 
   if (cellProperties.className) {
-    // Written directly (not via addClass), so add FreeGrid/legacy counterparts here.
+    // Written directly (not via addClass), so add FreeSheet/legacy counterparts here.
     const classNames = Array.isArray(cellProperties.className)
       ? cellProperties.className
       : String(cellProperties.className).split(' ');

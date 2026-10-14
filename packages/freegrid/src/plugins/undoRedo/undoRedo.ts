@@ -1,5 +1,5 @@
 /**
- * FreeGrid UndoRedo class
+ * FreeSheet UndoRedo class
  */
 import Hooks from './../../pluginHooks';
 import { rangeEach } from './../../helpers/number';
@@ -10,10 +10,10 @@ import type { PluginHost } from './../_base';
 import type { CellRange } from './../../3rdparty/walkontable/src';
 
 
-/** What undo expects from a filters plugin (FreeGrid has none yet; see the roadmap). */
+/** What undo expects from a filters plugin (FreeSheet has none yet; see the roadmap). */
 type FiltersPlugin = { conditionCollection: { importAllConditions(conditions: unknown[]): void }; filter(): void };
 
-/** What undo expects from a formulas plugin (FreeGrid has none). */
+/** What undo expects from a formulas plugin (FreeSheet has none). */
 type FormulasPlugin = { onAfterSetDataAtCell(changes: unknown[]): void; recalculateFull(): void };
 
 declare module '../../core' {
@@ -448,7 +448,7 @@ const isUndoRedoSource = (source: string): boolean => (
 
 /**
  * @description
- * FreeGrid UndoRedo plugin allows to undo and redo certain actions done in the table.
+ * FreeSheet UndoRedo plugin allows to undo and redo certain actions done in the table.
  *
  * __Note__, that not all actions are currently undo-able. The UndoRedo plugin is enabled by default.
  *

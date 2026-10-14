@@ -17,7 +17,7 @@ function windowWith(...scripts) {
 
 describe('dist outputs', () => {
 
-  it('FreeGrid.dom exposes exactly the public DOM helper names', () => {
+  it('FreeSheet.dom exposes exactly the public DOM helper names', () => {
     // A change here is a public API change: list it in the CHANGELOG.
     const expected = [
       'HTML_CHARACTERS', 'addClass', 'addEvent', 'closest', 'closestDown', 'empty', 'fastInnerHTML', 'fastInnerText',
@@ -31,10 +31,10 @@ describe('dist outputs', () => {
       'setOverlayPosition', 'stopImmediatePropagation', 'stopPropagation',
     ];
 
-    expect(Object.keys(windowWith(read('freegrid.full.js')).FreeGrid.dom).sort()).toEqual(expected);
+    expect(Object.keys(windowWith(read('freesheet.full.js')).FreeSheet.dom).sort()).toEqual(expected);
   });
 
-  it('FreeGrid.helper exposes exactly the public helper names', () => {
+  it('FreeSheet.helper exposes exactly the public helper names', () => {
     // A change here is a public API change: list it in the CHANGELOG.
     const expected = [
       'KEY_CODES', 'arrayAvg', 'arrayEach', 'arrayFilter', 'arrayFlatten', 'arrayMap', 'arrayMax', 'arrayMin',
@@ -51,69 +51,82 @@ describe('dist outputs', () => {
       'translateRowsToColumns', 'valueAccordingPercent',
     ];
 
-    expect(Object.keys(windowWith(read('freegrid.full.js')).FreeGrid.helper).sort()).toEqual(expected);
+    expect(Object.keys(windowWith(read('freesheet.full.js')).FreeSheet.helper).sort()).toEqual(expected);
   });
-  it('FreeGrid exposes exactly the public names (top level, editors, renderers, validators, cell types, plugins, languages)', () => {
+  it('FreeSheet exposes exactly the public names (top level, editors, renderers, validators, cell types, plugins, languages)', () => {
     // A change here is a public API change: list it in the CHANGELOG.
-    const { FreeGrid } = windowWith(read('freegrid.full.js'));
+    const { FreeSheet } = windowWith(read('freesheet.full.js'));
     const names = object => Object.keys(object).sort();
 
-    expect(names(FreeGrid)).toEqual(['Core', 'DefaultSettings', 'EventManager', '__GhostTable', '_getListenersCounter',
+    expect(names(FreeSheet)).toEqual(['Core', 'DefaultSettings', 'EventManager', '__GhostTable', '_getListenersCounter',
       'buildDate', 'cellTypes', 'dom', 'editors', 'helper', 'hooks', 'languages', 'packageName', 'plugins', 'renderers',
       'validators', 'version']);
-    expect(names(FreeGrid.editors)).toEqual(['EditorAutocomplete', 'EditorBase', 'EditorCheckbox', 'EditorDate',
+    expect(names(FreeSheet.editors)).toEqual(['EditorAutocomplete', 'EditorBase', 'EditorCheckbox', 'EditorDate',
       'EditorDropdown', 'EditorHandsontable', 'EditorNumeric', 'EditorPassword', 'EditorSelect', 'EditorText',
       'EditorTime', 'getEditor', 'registerEditor']);
-    expect(names(FreeGrid.renderers)).toEqual(['RendererAutocomplete', 'RendererBase', 'RendererCheckbox',
+    expect(names(FreeSheet.renderers)).toEqual(['RendererAutocomplete', 'RendererBase', 'RendererCheckbox',
       'RendererDate', 'RendererDropdown', 'RendererHandsontable', 'RendererHtml', 'RendererNumeric', 'RendererPassword',
       'RendererText', 'RendererTime', 'getRenderer', 'registerRenderer']);
-    expect(names(FreeGrid.validators)).toEqual(['ValidatorAutocomplete', 'ValidatorDate', 'ValidatorDropdown',
+    expect(names(FreeSheet.validators)).toEqual(['ValidatorAutocomplete', 'ValidatorDate', 'ValidatorDropdown',
       'ValidatorNumeric', 'ValidatorTime', 'getValidator', 'registerValidator']);
-    expect(names(FreeGrid.cellTypes)).toEqual(['autocomplete', 'checkbox', 'date', 'dropdown', 'getCellType',
+    expect(names(FreeSheet.cellTypes)).toEqual(['autocomplete', 'checkbox', 'date', 'dropdown', 'getCellType',
       'handsontable', 'numeric', 'password', 'registerCellType', 'text', 'time']);
-    expect(names(FreeGrid.plugins)).toEqual([...PLUGINS_622, 'BasePlugin', 'registerPlugin'].sort());
-    expect(names(FreeGrid.languages)).toEqual(['dictionaryKeys', 'getLanguageDictionary', 'getLanguagesDictionaries',
+    expect(names(FreeSheet.plugins)).toEqual([...PLUGINS_622, 'BasePlugin', 'registerPlugin'].sort());
+    expect(names(FreeSheet.languages)).toEqual(['dictionaryKeys', 'getLanguageDictionary', 'getLanguagesDictionaries',
       'getTranslatedPhrase', 'registerLanguageDictionary']);
-    expect(FreeGrid.languages.getTranslatedPhrase).not.toBe(undefined);
-    expect(typeof FreeGrid.hooks.add).toBe('function');
-    expect(FreeGrid.version).toMatch(/^\d+\.\d+\.\d+/);
+    expect(FreeSheet.languages.getTranslatedPhrase).not.toBe(undefined);
+    expect(typeof FreeSheet.hooks.add).toBe('function');
+    expect(FreeSheet.version).toMatch(/^\d+\.\d+\.\d+/);
   });
 
   it('produces every expected file', () => {
-    ['esm/index.js', 'esm/compat.js', 'freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js',
-      'freegrid.css', 'freegrid.min.css', 'freegrid.full.css', 'freegrid.full.min.css', 'compat.js',
+    ['esm/index.js', 'esm/compat.js', 'freesheet.js', 'freesheet.min.js', 'freesheet.full.js', 'freesheet.full.min.js',
+      'freesheet.css', 'freesheet.min.css', 'freesheet.full.css', 'freesheet.full.min.css', 'compat.js',
       'languages/all.js', 'languages/de-DE.js', 'languages/de-DE.min.js']
       .forEach(f => expect(existsSync(dist(f)), f).toBe(true));
   });
 
   it('no bundle contains or needs moment', () => {
-    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js']
+    ['freesheet.js', 'freesheet.min.js', 'freesheet.full.js', 'freesheet.full.min.js', 'esm/index.js']
       .forEach(f => expect(read(f), f).not.toMatch(/moment construction falls back|from ["']moment["']/));
-    expect(windowWith(read('freegrid.full.js')).moment).toBeUndefined();
+    expect(windowWith(read('freesheet.full.js')).moment).toBeUndefined();
   });
 
   it('plain UMD works on its own and registers all 6.2.2 plugins', () => {
-    const code = read('freegrid.js');
+    const code = read('freesheet.js');
     const w = windowWith(code);
 
-    expect(typeof w.FreeGrid).toBe('function');
-    expect(w.FreeGrid.packageName).toBe('@freegrid/sheet');
+    expect(typeof w.FreeSheet).toBe('function');
+    expect(w.FreeSheet.packageName).toBe('@freegrid/sheet');
     expect(w.Handsontable).toBeUndefined();
-    PLUGINS_622.forEach(p => expect(typeof w.FreeGrid.plugins[p], p).toBe('function'));
+    PLUGINS_622.forEach(p => expect(typeof w.FreeSheet.plugins[p], p).toBe('function'));
+  });
+
+  it('UMD keeps window.FreeGrid as a deprecated name of FreeSheet, warning once', () => {
+    ['freesheet.js', 'freesheet.min.js'].forEach((file) => {
+      const w = windowWith(read(file));
+      const warnings = [];
+
+      w.console.warn = (...args) => warnings.push(args.join(' '));
+
+      expect(w.FreeGrid, file).toBe(w.FreeSheet);
+      expect(w.FreeGrid, file).toBe(w.FreeSheet);
+      expect(warnings, file).toEqual(['"FreeGrid" is deprecated and will be removed in 1.0: use "FreeSheet" instead.']);
+    });
   });
 
   it('no bundle contains or needs numbro', () => {
-    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js']
+    ['freesheet.js', 'freesheet.min.js', 'freesheet.full.js', 'freesheet.full.min.js', 'esm/index.js']
       .forEach(f => expect(read(f), f).not.toMatch(/BigNumber|from ["']numbro["']|require\(["']numbro["']\)/));
-    const w = windowWith(read('freegrid.full.js'));
+    const w = windowWith(read('freesheet.full.js'));
 
-    expect(typeof w.FreeGrid).toBe('function');
+    expect(typeof w.FreeSheet).toBe('function');
     expect(w.numbro).toBeUndefined();
   });
 
-  it('UMD builds expose the number helpers on FreeGrid.helper', () => {
-    ['freegrid.full.js', 'freegrid.full.min.js'].forEach((file) => {
-      const { helper } = windowWith(read(file)).FreeGrid;
+  it('UMD builds expose the number helpers on FreeSheet.helper', () => {
+    ['freesheet.full.js', 'freesheet.full.min.js'].forEach((file) => {
+      const { helper } = windowWith(read(file)).FreeSheet;
       const visited = [];
 
       expect(helper.isNumeric('0x1F'), file).toBe(true);
@@ -125,15 +138,15 @@ describe('dist outputs', () => {
     });
   });
 
-  it('IE and legacy Edge detection is gone from FreeGrid.helper', () => {
-    const { helper } = windowWith(read('freegrid.full.js')).FreeGrid;
+  it('IE and legacy Edge detection is gone from FreeSheet.helper', () => {
+    const { helper } = windowWith(read('freesheet.full.js')).FreeSheet;
 
     ['isIE', 'isIE8', 'isIE9', 'isEdge', 'isMSBrowser'].forEach(name => expect(helper[name], name).toBeUndefined());
     ['isChrome', 'isSafari', 'isMobileBrowser', 'setBrowserMeta'].forEach(name => expect(typeof helper[name], name).toBe('function'));
   });
 
-  it('polyfills and dead feature detections are gone from FreeGrid.helper', () => {
-    const { helper } = windowWith(read('freegrid.full.js')).FreeGrid;
+  it('polyfills and dead feature detections are gone from FreeSheet.helper', () => {
+    const { helper } = windowWith(read('freesheet.full.js')).FreeSheet;
 
     ['requestAnimationFrame', 'cancelAnimationFrame', 'isWebComponentSupportedNatively', 'hasCaptionProblem']
       .forEach(name => expect(helper[name], name).toBeUndefined());
@@ -142,7 +155,7 @@ describe('dist outputs', () => {
   });
 
   it('CSS has a dark theme and an automatic theme with the same values', () => {
-    const css = read('freegrid.css').replace(/\/\*[\s\S]*?\*\//g, '');
+    const css = read('freesheet.css').replace(/\/\*[\s\S]*?\*\//g, '');
     const media = css.match(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{([\s\S]*?\})\s*\}/)?.[1] ?? '';
     const outside = css.replace(/@media[^{]*\{[\s\S]*?\}\s*\}/g, '');
     const themeRules = (text, theme) => [...text.matchAll(/([^{}]+)\{([^}]*)\}/g)]
@@ -157,14 +170,14 @@ describe('dist outputs', () => {
   });
 
   it('every CSS build has the date picker, colored by variables', () => {
-    ['freegrid.css', 'freegrid.min.css', 'freegrid.full.css', 'esm/freegrid.css'].forEach((f) => {
+    ['freesheet.css', 'freesheet.min.css', 'freesheet.full.css', 'esm/freesheet.css'].forEach((f) => {
       expect(read(f), f).toMatch(/\.fg-datepicker\{|\.fg-datepicker \{/);
       expect(read(f), f).toMatch(/\.fg-datepicker-day[^{]*\{[^}]*var\(--fg-datepicker-/);
     });
   });
 
   it('CSS has no IE hacks', () => {
-    ['freegrid.css', 'freegrid.full.css'].forEach((file) => {
+    ['freesheet.css', 'freesheet.full.css'].forEach((file) => {
       const css = read(file);
 
       expect(css, file).not.toMatch(/-ms-/);
@@ -172,19 +185,19 @@ describe('dist outputs', () => {
     });
   });
 
-  it('compat.js aliases Handsontable and fails loudly without FreeGrid', () => {
-    const w = windowWith(read('freegrid.full.js'), read('compat.js'));
-    expect(w.Handsontable).toBe(w.FreeGrid);
+  it('compat.js aliases Handsontable and fails loudly without FreeSheet', () => {
+    const w = windowWith(read('freesheet.full.js'), read('compat.js'));
+    expect(w.Handsontable).toBe(w.FreeSheet);
 
-    expect(() => windowWith(read('compat.js'))).toThrow(/load freegrid/i);
+    expect(() => windowWith(read('compat.js'))).toThrow(/load freesheet/i);
   });
 
-  it('locale UMD registers on the global FreeGrid', () => {
-    const w = windowWith(read('freegrid.full.js'), read('languages/de-DE.js'));
-    expect(w.FreeGrid.languages.getLanguageDictionary('de-DE').languageCode).toBe('de-DE');
+  it('locale UMD registers on the global FreeSheet', () => {
+    const w = windowWith(read('freesheet.full.js'), read('languages/de-DE.js'));
+    expect(w.FreeSheet.languages.getLanguageDictionary('de-DE').languageCode).toBe('de-DE');
   });
 
-  it('ESM entries export FreeGrid and the compat alias', () => {
+  it('ESM entries export FreeSheet and the compat alias', () => {
     const esm = read('esm/index.js');
     const compat = read('esm/compat.js');
     expect(esm).toMatch(/export\s*\{[^}]*as default/);
@@ -192,13 +205,13 @@ describe('dist outputs', () => {
   });
 
   it('CSS keeps legacy class names', () => {
-    expect(read('freegrid.css')).toMatch(/\.handsontable/);
+    expect(read('freesheet.css')).toMatch(/\.handsontable/);
   });
 
   it('does not depend on a global setImmediate (upstream got it from @babel/polyfill)', async() => {
-    const w = windowWith(read('freegrid.full.js'));
+    const w = windowWith(read('freesheet.full.js'));
     expect(w.setImmediate).toBeUndefined();
-    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1]] });
+    const hot = new w.FreeSheet(w.document.getElementById('root'), { data: [[1]] });
     let ran = false;
 
     expect(() => hot._registerImmediate(() => { ran = true; })).not.toThrow();
@@ -208,18 +221,18 @@ describe('dist outputs', () => {
   });
 
   it('no build contains or needs Pikaday', () => {
-    ['freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js', 'esm/index.js', 'freegrid.full.css']
+    ['freesheet.js', 'freesheet.min.js', 'freesheet.full.js', 'freesheet.full.min.js', 'esm/index.js', 'freesheet.full.css']
       .forEach(f => expect(read(f), f).not.toMatch(/pikaday|pika-single/i));
   });
 
   it('minified CSS is built for the same browsers as the JS (it may use `inset`, Chrome 87+)', () => {
     // With a lower CSS target the minifier would keep `top/right/bottom/left` instead.
-    ['freegrid.min.css', 'freegrid.full.min.css'].forEach(f => expect(read(f), f).toMatch(/[{;]inset:/));
+    ['freesheet.min.css', 'freesheet.full.min.css'].forEach(f => expect(read(f), f).toMatch(/[{;]inset:/));
   });
 
   it('plugins are registered in the plugin registry, not just exported', () => {
-    const w = windowWith(read('freegrid.full.js'));
-    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1]] });
+    const w = windowWith(read('freesheet.full.js'));
+    const hot = new w.FreeSheet(w.document.getElementById('root'), { data: [[1]] });
 
     ['autoColumnSize', 'autoRowSize', 'autofill', 'columnSorting', 'comments', 'contextMenu', 'copyPaste',
       'customBorders', 'dragToScroll', 'manualColumnFreeze', 'manualColumnMove', 'manualColumnResize',
@@ -231,7 +244,7 @@ describe('dist outputs', () => {
     hot.destroy();
   });
 
-  it('ships ESM locale modules for bundlers, registering on the imported FreeGrid', () => {
+  it('ships ESM locale modules for bundlers, registering on the imported FreeSheet', () => {
     const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
     const code = read('esm/languages/de-DE.js');
 
@@ -241,8 +254,8 @@ describe('dist outputs', () => {
     expect(existsSync(dist('esm/languages/all.js'))).toBe(true);
   });
 
-  it('CSS uses FreeGrid class names and keeps legacy selectors during 0.x', () => {
-    const css = read('freegrid.css');
+  it('CSS uses FreeSheet class names and keeps legacy selectors during 0.x', () => {
+    const css = read('freesheet.css');
 
     expect(css).toMatch(/\.fg-core\b/);
     expect(css).toMatch(/\.freegrid\b/);
@@ -250,9 +263,9 @@ describe('dist outputs', () => {
     expect(css).toMatch(/\.fg-center[^{]*,[^{]*\.htCenter|\.htCenter[^{]*,[^{]*\.fg-center/);
   });
 
-  it('elements carry both the FreeGrid and the legacy class names', () => {
-    const w = windowWith(read('freegrid.full.js'));
-    const hot = new w.FreeGrid(w.document.getElementById('root'), { data: [[1, 2]], readOnly: true, colHeaders: true });
+  it('elements carry both the FreeSheet and the legacy class names', () => {
+    const w = windowWith(read('freesheet.full.js'));
+    const hot = new w.FreeSheet(w.document.getElementById('root'), { data: [[1, 2]], readOnly: true, colHeaders: true });
     const root = w.document.getElementById('root');
 
     ['freegrid', 'handsontable'].forEach(c => expect(root.classList.contains(c), c).toBe(true));

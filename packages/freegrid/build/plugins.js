@@ -11,7 +11,7 @@ export function windowModule() {
 }
 
 /**
- * Rewrites src/i18n/languages/<code>.ts so its build registers on the imported or global FreeGrid. It runs before
+ * Rewrites src/i18n/languages/<code>.ts so its build registers on the imported or global FreeSheet. It runs before
  * TypeScript is compiled ('pre'), on the source text it matches.
  */
 export function localeRegistration() {
@@ -21,11 +21,11 @@ export function localeRegistration() {
     transform(code, id) {
       if (!/[\\/]src[\\/]i18n[\\/]languages[\\/][a-z]{2}-[A-Z]{2}\.(js|ts)$/.test(id)) return null;
       const rewritten = code
-        .replace(/import \* as C from '\.\.\/constants';/, "import FreeGrid from '@freegrid/sheet';\n\nconst C = FreeGrid.languages.dictionaryKeys;")
-        .replace(/export default dictionary;/, 'FreeGrid.languages.registerLanguageDictionary(dictionary);\n\nexport default dictionary;');
+        .replace(/import \* as C from '\.\.\/constants';/, "import FreeSheet from '@freegrid/sheet';\n\nconst C = FreeSheet.languages.dictionaryKeys;")
+        .replace(/export default dictionary;/, 'FreeSheet.languages.registerLanguageDictionary(dictionary);\n\nexport default dictionary;');
 
       // A language file whose text no longer matches must not build without registering itself.
-      if (!rewritten.includes('registerLanguageDictionary') || !rewritten.includes('FreeGrid.languages.dictionaryKeys')) {
+      if (!rewritten.includes('registerLanguageDictionary') || !rewritten.includes('FreeSheet.languages.dictionaryKeys')) {
         throw new Error(`fg-locale-registration: ${id} does not match the expected import and export.`);
       }
 

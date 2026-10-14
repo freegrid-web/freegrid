@@ -27,14 +27,14 @@ declare module './core' {
 
 /**
  * @description
- * FreeGrid events are the common interface that function in 2 ways: as __callbacks__ and as __hooks__.
+ * FreeSheet events are the common interface that function in 2 ways: as __callbacks__ and as __hooks__.
  *
  * @example
  *
  * ```js
  * // Using events as callbacks:
  * ...
- * const hot1 = new FreeGrid(document.getElementById('example1'), {
+ * const hot1 = new FreeSheet(document.getElementById('example1'), {
  *   afterChange: function(changes, source) {
  *     $.ajax({
  *       url: "save.php',
@@ -48,16 +48,16 @@ declare module './core' {
  * ```js
  * // Using events as plugin hooks:
  * ...
- * const hot1 = new FreeGrid(document.getElementById('example1'), {
+ * const hot1 = new FreeSheet(document.getElementById('example1'), {
  *   myPlugin: true
  * });
  *
- * const hot2 = new FreeGrid(document.getElementById('example2'), {
+ * const hot2 = new FreeSheet(document.getElementById('example2'), {
  *   myPlugin: false
  * });
  *
  * // global hook
- * FreeGrid.hooks.add('afterChange', function() {
+ * FreeSheet.hooks.add('afterChange', function() {
  *   // Fired twice - for hot1 and hot2
  *   if (this.getSettings().myPlugin) {
  *     // function body - will only run for hot1
@@ -91,7 +91,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
    * @example
    * ```js
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   afterChange: (changes) => {
    *     changes.forEach(([row, prop, oldValue, newValue]) => {
    *       // Some logic...
@@ -242,7 +242,7 @@ const REGISTERED_HOOKS: string[] = [
   'afterDeselect',
 
   /**
-   * Fired after destroying the FreeGrid instance.
+   * Fired after destroying the FreeSheet instance.
    *
    * @event Hooks#afterDestroy
    */
@@ -308,7 +308,7 @@ const REGISTERED_HOOKS: string[] = [
   'afterGetRowHeader',
 
   /**
-   * Fired after the FreeGrid instance is initiated.
+   * Fired after the FreeSheet instance is initiated.
    *
    * @event Hooks#afterInit
    */
@@ -434,7 +434,7 @@ const REGISTERED_HOOKS: string[] = [
   'afterRemoveRow',
 
   /**
-   * Fired after the FreeGrid table is rendered.
+   * Fired after the FreeSheet table is rendered.
    *
    * @event Hooks#afterRender
    * @param {Boolean} isForced Is `true` if rendering was triggered by a change of settings or data; or `false` if
@@ -494,7 +494,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} selectionLayerLevel The number which indicates what selection layer is currently modified.
    * @example
    * ```js
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
    *     // setting if prevent scrolling after selection
    *     preventScrolling.value = true;
@@ -518,7 +518,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} selectionLayerLevel The number which indicates what selection layer is currently modified.
    * @example
    * ```js
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   afterSelectionByProp: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
    *     // setting if prevent scrolling after selection
    *     preventScrolling.value = true;
@@ -680,21 +680,21 @@ const REGISTERED_HOOKS: string[] = [
    * @example
    * ```js
    * // To disregard a single change, set changes[i] to null or remove it from array using changes.splice(i, 1).
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   beforeChange: (changes, source) => {
    *     // [[row, prop, oldVal, newVal], ...]
    *     changes[0] = null;
    *   }
    * });
    * // To alter a single change, overwrite the desired value to changes[i][3].
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   beforeChange: (changes, source) => {
    *     // [[row, prop, oldVal, newVal], ...]
    *     changes[0][3] = 10;
    *   }
    * });
    * // To cancel all edit, return false from the callback or set array length to 0 (changes.length = 0).
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   beforeChange: (changes, source) => {
    *     // [[row, prop, oldVal, newVal], ...]
    *     return false;
@@ -745,7 +745,7 @@ const REGISTERED_HOOKS: string[] = [
   'beforeRemoveCellMeta',
 
   /**
-   * Fired before the FreeGrid instance is initiated.
+   * Fired before the FreeSheet instance is initiated.
    *
    * @event Hooks#beforeInit
    */
@@ -850,7 +850,7 @@ const REGISTERED_HOOKS: string[] = [
   'beforeRemoveRow',
 
   /**
-   * Fired before the FreeGrid table is rendered.
+   * Fired before the FreeSheet table is rendered.
    *
    * @event Hooks#beforeRender
    * @param {Boolean} isForced If `true` rendering was triggered by a change of settings or data; or `false` if
@@ -915,14 +915,14 @@ const REGISTERED_HOOKS: string[] = [
   'beforeValueRender',
 
   /**
-   * Fired after FreeGrid instance is constructed (using `new` operator).
+   * Fired after FreeSheet instance is constructed (using `new` operator).
    *
    * @event Hooks#construct
    */
   'construct',
 
   /**
-   * Fired after FreeGrid instance is initiated but before table is rendered.
+   * Fired after FreeSheet instance is initiated but before table is rendered.
    *
    * @event Hooks#init
    */
@@ -1059,7 +1059,7 @@ const REGISTERED_HOOKS: string[] = [
 
   /**
    * Fired by {@link ColumnSorting} and {@link MultiColumnSorting} plugins before sorting the column. If you return `false` value inside callback for hook, then sorting
-   * will be not applied by the FreeGrid (useful for server-side sorting).
+   * will be not applied by the FreeSheet (useful for server-side sorting).
    *
    * This hook is fired when {@link Options#columnSorting} or {@link Options#multiColumnSorting} option is enabled.
    *
@@ -1109,7 +1109,7 @@ const REGISTERED_HOOKS: string[] = [
    * @example
    * ```js
    * // To disregard a single row, remove it from the array using data.splice(i, 1).
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   beforeCut: function(data, coords) {
    *     // data -> [[1, 2, 3], [4, 5, 6]]
    *     data.splice(0, 1);
@@ -1118,7 +1118,7 @@ const REGISTERED_HOOKS: string[] = [
    *   }
    * });
    * // To cancel a cutting action, just return `false`.
-   * new FreeGrid(element, {
+   * new FreeSheet(element, {
    *   beforeCut: function(data, coords) {
    *     return false;
    *   }
@@ -1151,7 +1151,7 @@ const REGISTERED_HOOKS: string[] = [
    * ```js
    * // To disregard a single row, remove it from array using data.splice(i, 1).
    * ...
-   * new FreeGrid(document.getElementById('example'), {
+   * new FreeSheet(document.getElementById('example'), {
    *   beforeCopy: (data, coords) => {
    *     // data -> [[1, 2, 3], [4, 5, 6]]
    *     data.splice(0, 1);
@@ -1163,7 +1163,7 @@ const REGISTERED_HOOKS: string[] = [
    *
    * // To cancel copying, return false from the callback.
    * ...
-   * new FreeGrid(document.getElementById('example'), {
+   * new FreeSheet(document.getElementById('example'), {
    *   beforeCopy: (data, coords) => {
    *     return false;
    *   }
@@ -1196,7 +1196,7 @@ const REGISTERED_HOOKS: string[] = [
    * @example
    * ```js
    * // To disregard a single row, remove it from array using data.splice(i, 1).
-   * new FreeGrid(example, {
+   * new FreeSheet(example, {
    *   beforePaste: (data, coords) => {
    *     // data -> [[1, 2, 3], [4, 5, 6]]
    *     data.splice(0, 1);
@@ -1205,7 +1205,7 @@ const REGISTERED_HOOKS: string[] = [
    *   }
    * });
    * // To cancel pasting, return false from the callback.
-   * new FreeGrid(example, {
+   * new FreeSheet(example, {
    *   beforePaste: (data, coords) => {
    *     return false;
    *   }
@@ -1694,7 +1694,7 @@ const REGISTERED_HOOKS: string[] = [
   'afterUnmergeCells',
 
   /**
-   * Fired after the table was switched into listening mode. This allows FreeGrid to capture keyboard events and
+   * Fired after the table was switched into listening mode. This allows FreeSheet to capture keyboard events and
    * respond in the right way.
    *
    * @event Hooks#afterListen
@@ -1702,7 +1702,7 @@ const REGISTERED_HOOKS: string[] = [
   'afterListen',
 
   /**
-   * Fired after the table was switched off from the listening mode. This makes the FreeGrid inert for any
+   * Fired after the table was switched off from the listening mode. This makes the FreeSheet inert for any
    * keyboard events.
    *
    * @event Hooks#afterUnlisten
@@ -1717,7 +1717,7 @@ const DEPRECATED_HOOKS: Record<string, string> = {
 const warnedHooks = new Set<string>();
 
 class Hooks {
-  /** The global hooks (`FreeGrid.hooks`). */
+  /** The global hooks (`FreeSheet.hooks`). */
   static getSingleton(): Hooks {
     return globalSingleton;
   }
@@ -1736,7 +1736,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.createEmptyBucket();
+   * FreeSheet.hooks.createEmptyBucket();
    * // Results:
    * {
    * ...
@@ -1760,8 +1760,8 @@ class Hooks {
   /**
    * Get hook bucket based on the context of the object or if argument is `undefined`, get the global hook bucket.
    *
-   * @param {Object} [context=null] A FreeGrid instance.
-   * @returns {Object} Returns a global or FreeGrid instance bucket.
+   * @param {Object} [context=null] A FreeSheet instance.
+   * @returns {Object} Returns a global or FreeSheet instance bucket.
    */
   getBucket(context: HookContext = null): HookBucket {
     if (context) {
@@ -1778,29 +1778,29 @@ class Hooks {
   /**
    * Adds a listener (globally or locally) to a specified hook name.
    * If the `context` parameter is provided, the hook will be added only to the instance it references.
-   * Otherwise, the callback will be used everytime the hook fires on any FreeGrid instance.
+   * Otherwise, the callback will be used everytime the hook fires on any FreeSheet instance.
    * You can provide an array of callback functions as the `callback` argument, this way they will all be fired
    * once the hook is triggered.
    *
    * @see Core#addHook
    * @param {String} key Hook name.
    * @param {Function|Array} callback Callback function or an array of functions.
-   * @param {Object} [context=null] The context for the hook callback to be added - a FreeGrid instance or leave empty.
+   * @param {Object} [context=null] The context for the hook callback to be added - a FreeSheet instance or leave empty.
    * @returns {Hooks} Instance of Hooks.
    *
    * @example
    * ```js
    * // single callback, added locally
-   * FreeGrid.hooks.add('beforeInit', myCallback, hotInstance);
+   * FreeSheet.hooks.add('beforeInit', myCallback, hotInstance);
    *
    * // single callback, added globally
-   * FreeGrid.hooks.add('beforeInit', myCallback);
+   * FreeSheet.hooks.add('beforeInit', myCallback);
    *
    * // multiple callbacks, added locally
-   * FreeGrid.hooks.add('beforeInit', [myCallback, anotherCallback], hotInstance);
+   * FreeSheet.hooks.add('beforeInit', [myCallback, anotherCallback], hotInstance);
    *
    * // multiple callbacks, added globally
-   * FreeGrid.hooks.add('beforeInit', [myCallback, anotherCallback]);
+   * FreeSheet.hooks.add('beforeInit', [myCallback, anotherCallback]);
    * ```
    */
   add(key: string, callback: HookCallback | HookCallback[], context: HookContext = null): this {
@@ -1841,11 +1841,11 @@ class Hooks {
    * @see Core#addHookOnce
    * @param {String} key Hook/Event name.
    * @param {Function|Array} callback Callback function.
-   * @param {Object} [context=null] A FreeGrid instance.
+   * @param {Object} [context=null] A FreeSheet instance.
    *
    * @example
    * ```js
-   * FreeGrid.hooks.once('beforeInit', myCallback, hotInstance);
+   * FreeSheet.hooks.once('beforeInit', myCallback, hotInstance);
    * ```
    */
   once(key: string, callback: HookCallback | HookCallback[], context: HookContext = null): void {
@@ -1859,17 +1859,17 @@ class Hooks {
   }
 
   /**
-   * Removes a listener from a hook with a given name. If the `context` argument is provided, it removes a listener from a local hook assigned to the given FreeGrid instance.
+   * Removes a listener from a hook with a given name. If the `context` argument is provided, it removes a listener from a local hook assigned to the given FreeSheet instance.
    *
    * @see Core#removeHook
    * @param {String} key Hook/Event name.
    * @param {Function} callback Callback function (needs the be the function that was previously added to the hook).
-   * @param {Object} [context=null] FreeGrid instance.
+   * @param {Object} [context=null] FreeSheet instance.
    * @return {Boolean} Returns `true` if hook was removed, `false` otherwise.
    *
    * @example
    * ```js
-   * FreeGrid.hooks.remove('beforeInit', myCallback);
+   * FreeSheet.hooks.remove('beforeInit', myCallback);
    * ```
    */
   remove(key: string, callback: HookCallback, context: HookContext = null): boolean {
@@ -1888,10 +1888,10 @@ class Hooks {
 
   /**
    * Checks whether there are any registered listeners for the provided hook name.
-   * If the `context` parameter is provided, it only checks for listeners assigned to the given FreeGrid instance.
+   * If the `context` parameter is provided, it only checks for listeners assigned to the given FreeSheet instance.
    *
    * @param {String} key Hook name.
-   * @param {Object} [context=null] A FreeGrid instance.
+   * @param {Object} [context=null] A FreeSheet instance.
    * @returns {Boolean} `true` for success, `false` otherwise.
    */
   has(key: string, context: HookContext = null): boolean {
@@ -1905,7 +1905,7 @@ class Hooks {
    * It returns either a return value from the last called callback or the first parameter (`p1`) passed to the `run` function.
    *
    * @see Core#runHooks
-   * @param {Object} context FreeGrid instance.
+   * @param {Object} context FreeSheet instance.
    * @param {String} key Hook/Event name.
    * @param {*} [p1] Parameter to be passed as an argument to the callback function.
    * @param {*} [p2] Parameter to be passed as an argument to the callback function.
@@ -1917,7 +1917,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.run(hot, 'beforeInit');
+   * FreeSheet.hooks.run(hot, 'beforeInit');
    * ```
    */
   run(context: HookContext, key: string, p1?: unknown, p2?: unknown, p3?: unknown, p4?: unknown, p5?: unknown,
@@ -1981,14 +1981,14 @@ class Hooks {
   /**
    * Destroy all listeners connected to the context. If no context is provided, the global listeners will be destroyed.
    *
-   * @param {Object} [context=null] A FreeGrid instance.
+   * @param {Object} [context=null] A FreeSheet instance.
    * @example
    * ```js
    * // destroy the global listeners
-   * FreeGrid.hooks.destroy();
+   * FreeSheet.hooks.destroy();
    *
    * // destroy the local listeners
-   * FreeGrid.hooks.destroy(hotInstance);
+   * FreeSheet.hooks.destroy(hotInstance);
    * ```
    */
   destroy(context: HookContext = null): void {
@@ -2006,7 +2006,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.register('myHook');
+   * FreeSheet.hooks.register('myHook');
    * ```
    */
   register(key: string): void {
@@ -2022,7 +2022,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.deregister('myHook');
+   * FreeSheet.hooks.deregister('myHook');
    * ```
    */
   deregister(key: string): void {
@@ -2039,7 +2039,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.isRegistered('beforeInit');
+   * FreeSheet.hooks.isRegistered('beforeInit');
    *
    * // Results:
    * true
@@ -2056,7 +2056,7 @@ class Hooks {
    *
    * @example
    * ```js
-   * FreeGrid.hooks.getRegistered();
+   * FreeSheet.hooks.getRegistered();
    *
    * // Results:
    * [

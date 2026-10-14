@@ -1,5 +1,5 @@
 /**
- * Marks the grid instances created by users (root instances), as opposed to the grids FreeGrid creates inside its
+ * Marks the grid instances created by users (root instances), as opposed to the grids FreeSheet creates inside its
  * own UI (e.g. the context menu).
  */
 export const holder = new WeakMap<object, true>();

@@ -1,5 +1,5 @@
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 function createRows(rows, cols) {
   return Array.from({ length: rows }, (_, r) => [
@@ -9,7 +9,7 @@ function createRows(rows, cols) {
 }
 
 export default function createGrid(container) {
-  return new FreeGrid(container, {
+  return new FreeSheet(container, {
     data: createRows(10000, 20),
     rowHeaders: true,
     colHeaders: true,

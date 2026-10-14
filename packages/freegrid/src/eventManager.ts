@@ -28,7 +28,7 @@ type Context = { eventListeners?: Listener[]; [key: string]: any };
 let listenersCounter = 0;
 
 /**
- * Event DOM manager for internal use in FreeGrid.
+ * Event DOM manager for internal use in FreeSheet.
  *
  * @class EventManager
  * @util
@@ -188,7 +188,7 @@ class EventManager {
 
 /**
  * The event with `realTarget` (the element it happened on, also inside a `<hot-table>` web component) and a
- * `stopImmediatePropagation()` that FreeGrid's handlers see too.
+ * `stopImmediatePropagation()` that FreeSheet's handlers see too.
  *
  * @private
  */
@@ -234,7 +234,7 @@ const extendEvent = (context: Context, nativeEvent: Event): ExtendedEvent => {
   }
   event.isTargetWebComponent = true;
 
-  // Native Shadow DOM v0 no longer exists, so FreeGrid resolves the real target itself.
+  // Native Shadow DOM v0 no longer exists, so FreeSheet resolves the real target itself.
   if (hasOwnProperty(context, 'hot') || context.isHotTableEnv || context.wtTable) {
     // Polymer doesn't support `event.target` property properly we must emulate it ourselves
     if (hasOwnProperty(context, 'hot')) {
@@ -242,7 +242,7 @@ const extendEvent = (context: Context, nativeEvent: Event): ExtendedEvent => {
       fromElement = context.hot ? context.hot.view.wt.wtTable.TABLE : null;
 
     } else if (context.isHotTableEnv) {
-      // FreeGrid.Core
+      // FreeSheet.Core
       fromElement = context.view.activeWt.wtTable.TABLE.parentNode.parentNode;
 
     } else if (context.wtTable) {

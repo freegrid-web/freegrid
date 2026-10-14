@@ -96,8 +96,8 @@ class EditorBase {
 
   /**
    * A subclass of this editor's class, for editors written in the style of older versions:
-   * `const MyEditor = FreeGrid.editors.EditorText.prototype.extend(); MyEditor.prototype.open = function() { … }`.
-   * (`class MyEditor extends FreeGrid.editors.EditorText {}` does the same.)
+   * `const MyEditor = FreeSheet.editors.EditorText.prototype.extend(); MyEditor.prototype.open = function() { … }`.
+   * (`class MyEditor extends FreeSheet.editors.EditorText {}` does the same.)
    */
   extend(): typeof EditorBase {
     const Base = this.constructor as typeof EditorBase;

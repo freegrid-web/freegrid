@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import numbro from 'numbro';
 import { formatNumber } from '../../../src/helpers/numberFormat';
 
-// numbro is the reference: FreeGrid's number module must write numericFormat patterns the way FreeGrid did with
+// numbro is the reference: FreeSheet's number module must write numericFormat patterns the way FreeSheet did with
 // numbro, for the cultures whose separators numbro and the browser (Intl) agree on.
 const require = createRequire(import.meta.url);
 

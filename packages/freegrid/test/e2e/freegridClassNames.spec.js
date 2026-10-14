@@ -1,5 +1,5 @@
-// FreeGrid: fg- class names, with the legacy Handsontable names kept during 0.x.
-describe('FreeGrid class names', () => {
+// FreeSheet: fg- class names, with the legacy Handsontable names kept during 0.x.
+describe('FreeSheet class names', () => {
   const id = 'testContainer';
 
   beforeEach(function() {
@@ -22,7 +22,7 @@ describe('FreeGrid class names', () => {
     expect(spec().$container.find('.ht_master table.htCore').length).toBe(1);
   });
 
-  it('styles alignment given with either the FreeGrid or the legacy class name', () => {
+  it('styles alignment given with either the FreeSheet or the legacy class name', () => {
     handsontable({
       data: [['a', 'b']],
       colWidths: 100,
@@ -43,7 +43,7 @@ describe('FreeGrid class names', () => {
     expect(getCell(0, 0).classList.contains('htDimmed')).toBe(true);
   });
 
-  it('writes FreeGrid names when aligning from the context menu', () => {
+  it('writes FreeSheet names when aligning from the context menu', () => {
     handsontable({ data: [['a']], contextMenu: true });
     selectCell(0, 0);
     getPlugin('contextMenu').executeCommand('alignment:right');

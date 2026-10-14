@@ -40,7 +40,7 @@ type ViewportCalculator = { startRow: number; endRow: number; startColumn: numbe
  * @example
  *
  * ```js
- * const hot = new FreeGrid(document.getElementById('example'), {
+ * const hot = new FreeSheet(document.getElementById('example'), {
  *  data: getData(),
  *  mergeCells: [
  *    {row: 0, col: 3, rowspan: 3, colspan: 3},
@@ -79,7 +79,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link MergeCells#enablePlugin} method is called.
    *
    */
@@ -88,7 +88,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -126,7 +126,7 @@ class MergeCells extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     this.clearCollections();

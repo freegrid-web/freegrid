@@ -15,7 +15,7 @@ type ColumnProp = number | string | ((row: SourceRow) => unknown);
  */
 class DataSource {
   /**
-   * Instance of FreeGrid.
+   * Instance of FreeSheet.
    */
   hot: PluginHost;
 

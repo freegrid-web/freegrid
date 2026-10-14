@@ -41,7 +41,7 @@ export const getValidSelection = (hot: { getSelected(): number[][] | undefined }
 const VERTICAL_ALIGNMENTS = ['fg-top', 'fg-middle', 'fg-bottom'];
 const HORIZONTAL_ALIGNMENTS = ['fg-left', 'fg-center', 'fg-right', 'fg-justify'];
 
-// Removes alignment classes, in both their FreeGrid and legacy names.
+// Removes alignment classes, in both their FreeSheet and legacy names.
 const removeAlignmentClasses = (className: string, alignments: string[]): string => alignments
   .reduce((result, alignment) => result.replace(alignment, '').replace(toLegacyClassName(alignment), ''), className)
   .replace('  ', '');

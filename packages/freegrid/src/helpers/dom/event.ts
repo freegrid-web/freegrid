@@ -3,7 +3,7 @@
  */
 import { getWindowScrollTop, getWindowScrollLeft } from './layout';
 
-type FreeGridEvent = {
+type FreeSheetEvent = {
   isImmediatePropagationEnabled?: boolean;
   cancelBubble?: boolean;
   stopPropagation?: () => void;
@@ -12,9 +12,9 @@ type FreeGridEvent = {
 type PointerLikeEvent = { pageX?: number; pageY?: number; clientX: number; clientY: number };
 
 /**
- * Stops other FreeGrid listeners of the same event (see `isImmediatePropagationStopped`) and the event's bubbling.
+ * Stops other FreeSheet listeners of the same event (see `isImmediatePropagationStopped`) and the event's bubbling.
  */
-export const stopImmediatePropagation = (event: FreeGridEvent): void => {
+export const stopImmediatePropagation = (event: FreeSheetEvent): void => {
   event.isImmediatePropagationEnabled = false;
   event.cancelBubble = true;
 };
@@ -22,12 +22,12 @@ export const stopImmediatePropagation = (event: FreeGridEvent): void => {
 /**
  * Checks if `stopImmediatePropagation` was called for the event.
  */
-export const isImmediatePropagationStopped = (event: FreeGridEvent): boolean => event.isImmediatePropagationEnabled === false;
+export const isImmediatePropagationStopped = (event: FreeSheetEvent): boolean => event.isImmediatePropagationEnabled === false;
 
 /**
  * Stops the event's bubbling. Also accepts plain event-like objects without `stopPropagation()`.
  */
-export const stopPropagation = (event: FreeGridEvent): void => {
+export const stopPropagation = (event: FreeSheetEvent): void => {
   if (typeof event.stopPropagation === 'function') {
     event.stopPropagation();
   } else {

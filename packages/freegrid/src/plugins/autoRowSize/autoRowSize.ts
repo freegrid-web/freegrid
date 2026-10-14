@@ -47,7 +47,7 @@ type AutoRowSizeSettings = { syncLimit?: number | string; samplingRatio?: number
  * @example
  *
  * ```js
- * const hot = new FreeGrid(document.getElementById('example'), {
+ * const hot = new FreeSheet(document.getElementById('example'), {
  *   date: getData(),
  *   autoRowSize: true
  * });
@@ -125,7 +125,7 @@ class AutoRowSize extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoRowSize#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -133,7 +133,7 @@ class AutoRowSize extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -155,7 +155,7 @@ class AutoRowSize extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     super.disablePlugin();

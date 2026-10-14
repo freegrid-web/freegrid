@@ -1,7 +1,7 @@
-/*! FreeGrid compat: exposes window.Handsontable for code written against Handsontable 6.x. MIT License. */
+/*! FreeSheet compat: exposes window.Handsontable for code written against Handsontable 6.x. MIT License. */
 (function(root) {
-  if (!root || typeof root.FreeGrid !== 'function') {
-    throw new Error('FreeGrid compat.js: load freegrid.js (or freegrid.full.js) before compat.js.');
+  if (!root || typeof root.FreeSheet !== 'function') {
+    throw new Error('FreeSheet compat.js: load freesheet.js (or freesheet.full.js) before compat.js.');
   }
-  root.Handsontable = root.FreeGrid;
+  root.Handsontable = root.FreeSheet;
 }(typeof self !== 'undefined' ? self : this));

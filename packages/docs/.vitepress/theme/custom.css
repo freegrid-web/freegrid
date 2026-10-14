@@ -16,7 +16,7 @@
   padding: 12px;
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
-  /* The grid inherits the page font and text color, so give it its own surface, text color and font from FreeGrid's
+  /* The grid inherits the page font and text color, so give it its own surface, text color and font from FreeSheet's
      theme variables instead of the docs theme's. In dark mode LiveExample adds the class fg-theme-dark. */
   background: var(--fg-color-background);
   color: var(--fg-color-text, var(--fg-style-color-text, #222));

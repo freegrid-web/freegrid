@@ -7,7 +7,7 @@ import {
 } from 'handsontable/helpers/classNames';
 import { addClass, removeClass, hasClass } from 'handsontable/helpers/dom/element';
 
-describe('FreeGrid class names', () => {
+describe('FreeSheet class names', () => {
   it('maps legacy names by rule', () => {
     expect(toFreeGridClassName('handsontable')).toBe('freegrid');
     expect(toFreeGridClassName('htCore')).toBe('fg-core');
@@ -29,7 +29,7 @@ describe('FreeGrid class names', () => {
     expect(toFreeGridClassName('wtBorder')).toBe('fg-selection-border');
   });
 
-  it('maps every legacy name to a unique FreeGrid name and back', () => {
+  it('maps every legacy name to a unique FreeSheet name and back', () => {
     const names = LEGACY_CLASS_NAMES.map(toFreeGridClassName);
 
     expect(new Set(names).size).toBe(LEGACY_CLASS_NAMES.length);

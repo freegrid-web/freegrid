@@ -42,7 +42,7 @@ const registerCellType = (name: string, type: CellType): void => {
 const getCellType = (name: string): CellType => {
   if (!hasItem(name)) {
     throw Error(`You declared cell type "${name}" as a string that is not mapped to a known object.
-                 Cell type must be an object or a string mapped to an object registered by "FreeGrid.cellTypes.registerCellType" method`);
+                 Cell type must be an object or a string mapped to an object registered by "FreeSheet.cellTypes.registerCellType" method`);
   }
 
   return getItem(name) as CellType;

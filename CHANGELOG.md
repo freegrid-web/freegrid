@@ -1,5 +1,25 @@
 # FreeGrid changelog
 
+## Unreleased
+
+### Breaking
+
+- The spreadsheet is now called **FreeSheet**. FreeGrid stays the name of the project and of the `@freegrid/*`
+  package family, and later components will get their own names (for example FreeGantt). Change your code to use
+  the new names:
+  - `import FreeSheet from '@freegrid/sheet'`, `new FreeSheet(element, settings)`; the type declarations use
+    `FreeSheet` as well;
+  - with a `<script>` tag, the global is `window.FreeSheet`;
+  - the files in `dist/` are named `freesheet.js`, `freesheet.css`, `freesheet.full.min.js`, … (they were
+    `freegrid.*`), and the type declarations are `types/freesheet.d.ts`;
+  - the jQuery plugin is `$(element).freesheet(…)`.
+
+  CSS class names (`.freegrid`, `fg-*`) and CSS variables (`--fg-*`) do not change.
+
+### Deprecated (removed in 1.0)
+
+- `window.FreeGrid` and `$.fn.freegrid` still work and refer to FreeSheet. The global warns once when it is used.
+
 ## 0.3.0 (2026-10-14)
 
 The package is now `@freegrid/sheet`. The whole grid is written in TypeScript (only the rendering engine is still

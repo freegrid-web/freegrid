@@ -1,7 +1,7 @@
 // Node runs this build script directly; it strips the TypeScript types of classNames.ts (Node 23.6+).
 import { LEGACY_CLASS_NAMES, toFreeGridClassName } from '../src/helpers/classNames.ts';
 
-// FreeGrid name → legacy name, e.g. fg-center → htCenter.
+// FreeSheet name → legacy name, e.g. fg-center → htCenter.
 const LEGACY_BY_NAME = new Map(LEGACY_CLASS_NAMES.map(legacy => [toFreeGridClassName(legacy), legacy]));
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const CLASS_PATTERN = new RegExp(
@@ -11,9 +11,9 @@ const CLASS_PATTERN = new RegExp(
 const processed = new WeakSet();
 
 /**
- * PostCSS plugin: for every selector that uses FreeGrid class names, also emit the same selector with the
+ * PostCSS plugin: for every selector that uses FreeSheet class names, also emit the same selector with the
  * legacy (Handsontable 6) names, so `className: 'htCenter'` and stylesheets written for the old names keep
- * working during FreeGrid 0.x. Removed in 1.0.
+ * working during FreeSheet 0.x. Removed in 1.0.
  */
 export function legacyClassNames() {
   return {

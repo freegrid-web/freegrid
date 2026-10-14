@@ -237,7 +237,7 @@ describe('Function helper', () => {
     });
   });
 
-  // The wrappers are called as methods by FreeGrid code; they must pass their `this` on to `func`.
+  // The wrappers are called as methods by FreeSheet code; they must pass their `this` on to `func`.
   describe('this forwarding', () => {
     it('throttle and throttleAfterHits call `func` with the wrapper\'s `this`', () => {
       const seen = [];

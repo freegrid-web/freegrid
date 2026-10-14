@@ -1,17 +1,17 @@
 # Introduction
 
-FreeGrid is a JavaScript data grid that looks and feels like a spreadsheet. It turns a `<div>` into an editable
+FreeSheet is a JavaScript data grid that looks and feels like a spreadsheet. It turns a `<div>` into an editable
 table with keyboard navigation, copy and paste, sorting, merged cells, comments, validation and more.
 
 It is **free and open source under the MIT license**, with no paid tier and no license key.
 
 ## Where it comes from
 
-FreeGrid started from the code of Handsontable 6.2.2, the last release of Handsontable published under the MIT
-license, together with its history and tests. From that point on, FreeGrid is an independent project with its own
+FreeSheet started from the code of Handsontable 6.2.2, the last release of Handsontable published under the MIT
+license, together with its history and tests. From that point on, FreeSheet is an independent project with its own
 API, releases and roadmap.
 
-While FreeGrid is in `0.x`, a small compatibility layer helps projects move over from Handsontable 6
+While FreeSheet is in `0.x`, a small compatibility layer helps projects move over from Handsontable 6
 (see [Migrating from Handsontable 6](./migrating-from-handsontable)).
 
 ## What you get
@@ -32,6 +32,6 @@ Available"). On iPhone and iPad this means iOS 16 or later.
 
 ## Status
 
-FreeGrid is young. The [roadmap](../project/roadmap) describes what comes next: a TypeScript rewrite,
+FreeSheet is young. The [roadmap](../project/roadmap) describes what comes next: a TypeScript rewrite,
 signals-based reactivity, theming with CSS variables, framework wrappers, and features such as filters
 and formulas.

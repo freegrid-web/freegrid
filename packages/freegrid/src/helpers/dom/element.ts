@@ -1,5 +1,5 @@
 /**
- * All DOM helpers in one module (what `FreeGrid.dom` exposes, together with `./event`). Importers keep using
+ * All DOM helpers in one module (what `FreeSheet.dom` exposes, together with `./event`). Importers keep using
  * `helpers/dom/element`; the helpers live in modules by topic.
  */
 export * from './tree';

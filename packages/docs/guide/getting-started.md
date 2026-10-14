@@ -25,7 +25,7 @@ yarn add @freegrid/sheet
 
 ## Your first grid
 
-Add an element for the grid, import FreeGrid and its styles, and create an instance:
+Add an element for the grid, import FreeSheet and its styles, and create an instance:
 
 ```html
 <div id="grid"></div>
@@ -39,16 +39,16 @@ The result:
 
 ## Without a bundler
 
-Load the build from a `<script>` tag. It defines a global `FreeGrid` and needs no other library: FreeGrid formats
+Load the build from a `<script>` tag. It defines a global `FreeSheet` and needs no other library: FreeSheet formats
 numbers and dates and shows its date picker itself.
 
 ```html
-<link rel="stylesheet" href="@freegrid/sheet/dist/freegrid.min.css">
-<script src="@freegrid/sheet/dist/freegrid.min.js"></script>
+<link rel="stylesheet" href="@freegrid/sheet/dist/freesheet.min.css">
+<script src="@freegrid/sheet/dist/freesheet.min.js"></script>
 
 <div id="grid"></div>
 <script>
-  new FreeGrid(document.getElementById('grid'), {
+  new FreeSheet(document.getElementById('grid'), {
     data: [['A1', 'B1'], ['A2', 'B2']],
     rowHeaders: true,
     colHeaders: true,
@@ -56,8 +56,8 @@ numbers and dates and shows its date picker itself.
 </script>
 ```
 
-`freegrid.full.min.js` and `freegrid.full.min.css` still exist for pages that load them; they are now the same as
-`freegrid.min.js` and `freegrid.min.css`.
+`freesheet.full.min.js` and `freesheet.full.min.css` still exist for pages that load them; they are now the same as
+`freesheet.min.js` and `freesheet.min.css`.
 
 ## Sizing
 

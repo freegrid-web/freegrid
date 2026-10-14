@@ -12,7 +12,7 @@ declare module '../../core' {
   }
 }
 
-// FreeGrid.hooks.register('afterChangesObserved');
+// FreeSheet.hooks.register('afterChangesObserved');
 
 /**
  * @plugin ObserveChanges
@@ -38,7 +38,7 @@ class ObserveChanges extends BasePlugin {
   observer: DataObserver | null = null;
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link ObserveChanges#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -46,7 +46,7 @@ class ObserveChanges extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -69,7 +69,7 @@ class ObserveChanges extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     if (this.observer) {

@@ -1,4 +1,4 @@
-import FreeGrid = require('./freegrid');
+import FreeSheet = require('./freesheet');
 
-export = FreeGrid;
+export = FreeSheet;
 export as namespace Handsontable;

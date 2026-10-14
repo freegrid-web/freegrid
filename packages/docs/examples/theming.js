@@ -1,10 +1,10 @@
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 // A grid that shows most themed parts: headers, a selection, a read-only and an invalid cell, a comment, a date
 // column, and the context menu (right-click).
 export default function createGrid(container) {
-  const grid = new FreeGrid(container, {
+  const grid = new FreeSheet(container, {
     data: [
       ['Apples', 'Fruit', 1.2, '10/12/2026', 'In stock'],
       ['Carrots', 'Vegetable', 0.8, '10/14/2026', 'In stock'],

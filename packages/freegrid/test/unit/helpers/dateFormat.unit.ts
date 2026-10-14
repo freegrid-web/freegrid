@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { formatDate, parseDate } from '../../../src/helpers/dateFormat';
 
-// moment is the reference: FreeGrid's date module must read and write dates the way FreeGrid did with moment.
+// moment is the reference: FreeSheet's date module must read and write dates the way FreeSheet did with moment.
 const INPUTS = [
   '', ' ', 'foo', 'test non-time string', 'nd', '1', '12', '19', '57', '123', '2015', '1234567890', '1450000000000',
   '01/02/2015', '1/2/2015', '1/2', '01/02/15', '02/30/2015', '13/01/2015', '31/12/2015', '29/02/2016', '29/02/2015',

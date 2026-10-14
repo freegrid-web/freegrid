@@ -46,7 +46,7 @@ type AutoColumnSizeSettings = {
  *
  * @example
  * ```js
- * const hot = new FreeGrid(document.getElementById('example'), {
+ * const hot = new FreeSheet(document.getElementById('example'), {
  *   date: getData(),
  *   autoColumnSize: true
  * });
@@ -139,7 +139,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Checks if the plugin is enabled in the FreeGrid settings. This method is executed in {@link Hooks#beforeInit}
+   * Checks if the plugin is enabled in the FreeSheet settings. This method is executed in {@link Hooks#beforeInit}
    * hook and if it returns `true` than the {@link AutoColumnSize#enablePlugin} method is called.
    */
   isEnabled(): boolean {
@@ -147,7 +147,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Enables the plugin functionality for this FreeGrid instance.
+   * Enables the plugin functionality for this FreeSheet instance.
    */
   enablePlugin(): void {
     if (this.enabled) {
@@ -182,7 +182,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * Disables the plugin functionality for this FreeGrid instance.
+   * Disables the plugin functionality for this FreeSheet instance.
    */
   disablePlugin(): void {
     super.disablePlugin();
@@ -502,7 +502,7 @@ class AutoColumnSize extends BasePlugin {
   }
 
   /**
-   * On after FreeGrid init fill plugin with all necessary values.
+   * On after FreeSheet init fill plugin with all necessary values.
    *
    * @private
    */

@@ -79,7 +79,7 @@ export const isInput = (element: Element | null | undefined): boolean | null | u
 };
 
 /**
- * Checks if the element is an input that is not part of FreeGrid (not its editor or copy-paste field).
+ * Checks if the element is an input that is not part of FreeSheet (not its editor or copy-paste field).
  */
 export const isOutsideInput = (element: Element | null | undefined): boolean | null | undefined =>
   isInput(element) && (element as Element).className.indexOf('fg-editor-input') === -1 &&

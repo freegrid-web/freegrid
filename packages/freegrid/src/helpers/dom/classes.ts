@@ -1,7 +1,7 @@
 /**
- * CSS class helpers. They add, remove and match the FreeGrid/legacy counterpart of every known class name
+ * CSS class helpers. They add, remove and match the FreeSheet/legacy counterpart of every known class name
  * (`fg-core` ↔ `htCore`, see `helpers/classNames`), so code and stylesheets using either name keep working
- * during FreeGrid 0.x.
+ * during FreeSheet 0.x.
  */
 import { toFreeGridClassName, toLegacyClassName, withCounterpartClassNames } from '../classNames';
 
@@ -39,7 +39,7 @@ const expandClassNames = (className: ClassNames): ClassNames => {
 };
 
 /**
- * Checks if the element has the class, or its FreeGrid/legacy counterpart.
+ * Checks if the element has the class, or its FreeSheet/legacy counterpart.
  */
 export const hasClass = (element: Element, className: string): boolean => {
   const counterpart = toFreeGridClassName(className) === className ? toLegacyClassName(className) : toFreeGridClassName(className);

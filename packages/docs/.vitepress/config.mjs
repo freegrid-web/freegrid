@@ -4,7 +4,7 @@ import baseConfig from 'vitepress-carbon/config';
 export default defineConfigWithTheme({
   // GitHub-style theme: https://carbon.breno.tech
   extends: baseConfig,
-  title: 'FreeGrid',
+  title: 'FreeSheet',
   description: 'A free, MIT-licensed, spreadsheet-like data grid for the web.',
   base: '/freegrid/',
   lang: 'en-US',

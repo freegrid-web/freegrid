@@ -43,7 +43,7 @@ export const createDefaultCustomBorder = (): SideBorder => ({
 export const createSingleEmptyBorder = (): SideBorder => ({ hide: true });
 
 /**
- * Create default FreeGrid border object.
+ * Create default FreeSheet border object.
  */
 export const createDefaultHtBorder = (): CellBorders['border'] => ({
   width: 1,

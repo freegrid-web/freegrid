@@ -2,14 +2,14 @@
 
 Include one of the stylesheets:
 
-- `@freegrid/sheet/dist/freegrid.full.css` also contains the date picker styles.
-- `@freegrid/sheet/dist/freegrid.css` contains the grid only (bring your own Pikaday styles).
+- `@freegrid/sheet/dist/freesheet.full.css` also contains the date picker styles.
+- `@freegrid/sheet/dist/freesheet.css` contains the grid only (bring your own Pikaday styles).
 
 To change colors and fonts, or to use the dark theme, see [Theming](./theming).
 
 ## Classes
 
-FreeGrid's class names use the `fg-` prefix. The root element has the class `freegrid`.
+FreeSheet's class names use the `fg-` prefix. The root element has the class `freegrid`.
 
 Add classes to cells, columns or the whole grid with `className`. Several helper classes are built in:
 
@@ -35,19 +35,19 @@ The `cells` setting and custom renderers can set classes per cell, based on the 
 
 ## Legacy class names
 
-FreeGrid started from Handsontable 6, whose classes were named `handsontable`, `htCore`, `htCenter` and so on.
-During FreeGrid `0.x` **both names work**:
+FreeSheet started from Handsontable 6, whose classes were named `handsontable`, `htCore`, `htCenter` and so on.
+During FreeSheet `0.x` **both names work**:
 
-- every element FreeGrid creates carries both its FreeGrid and its legacy class, so stylesheets written for
+- every element FreeSheet creates carries both its FreeSheet and its legacy class, so stylesheets written for
   the old names keep matching;
-- FreeGrid's CSS styles both names, so `className: 'htCenter'` still centers text.
+- FreeSheet's CSS styles both names, so `className: 'htCenter'` still centers text.
 
-The legacy names are removed in FreeGrid `1.0`. To prepare, switch your selectors and `className` values to
+The legacy names are removed in FreeSheet `1.0`. To prepare, switch your selectors and `className` values to
 the names below. Class names without a brand prefix (such as `current`, `area` or `manualColumnResizer`) are
 unchanged.
 
 ::: details All class names
-| FreeGrid | Legacy (until 1.0) |
+| FreeSheet | Legacy (until 1.0) |
 | --- | --- |
 | `fg-active-highlight` | `ht__active_highlight` |
 | `fg-auto-size` | `htAutoSize` |
