@@ -32,6 +32,9 @@
   character other than a letter or a digit with `_` (the range `A-z` also kept ``[\]^_` ``).
 - Plugins, part 9: mergeCells, the last plugin: every plugin is TypeScript now. Fix: clearing the merged cells
   (`clearCollections`, e.g. on `updateSettings`) left the cells a merged cell had covered invisible until the next render.
+- Core, part 1 (TypeScript rewrite): EventManager, EditorManager (a class now), DataSource, MultiMap and the compat
+  entry. Fix: a function in `enterMoves` got the browser's global `window.event` instead of the key event (the same
+  event during a key press, so it worked by chance).
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
