@@ -50,6 +50,10 @@
   - `getCellMeta('__proto__', 0)` (or `constructor` / `prototype` as an index) wrote into `Array.prototype`; such an
     index throws now.
   - Checking whether a numeric cell's text is a number took quadratic time on long runs of spaces.
+- Core, part 7 (TypeScript rewrite): `Core` is a class. Its state (`priv`, the data map, the editor manager, …) is in
+  `#private` fields, and the grid's methods are typed. Every method is still bound to its grid, as the closures were,
+  and now all of them work without `this` (`const { selectCell } = hot`): before, the ones that called another method
+  through `this` did not. After `destroy()`, every method throws, as before.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

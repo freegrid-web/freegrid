@@ -50,6 +50,19 @@ describe('Core methods', () => {
     ]);
   });
 
+  it('should work when a method is called without the grid as `this`', () => {
+    const hot = handsontable({ data: [[1, 2], [3, 4]] });
+    const { getDataAtCell, countRows, getRowHeight, selectCell, getSelectedLast } = hot;
+
+    expect(getDataAtCell(1, 1)).toBe(4);
+    expect(countRows()).toBe(2);
+    expect(getRowHeight(0)).toBe(hot.getRowHeight(0));
+
+    selectCell(1, 0);
+
+    expect(getSelectedLast()).toEqual([1, 0, 1, 0]);
+  });
+
   it('should let a test or plugin replace a method on one grid only', () => {
     const hot1 = handsontable({ data: [[1]] });
     const hot2 = new Handsontable(document.createElement('div'), { data: [[2]] });

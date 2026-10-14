@@ -35,10 +35,6 @@ import { getTranslatedPhrase } from './i18n';
 import * as constants from './i18n/constants';
 import { registerLanguageDictionary, getLanguagesDictionaries, getLanguageDictionary } from './i18n/dictionariesManager';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type GridInstance = any;
-type CoreConstructor = new (rootElement: Element, userSettings: object, rootInstance?: symbol) => GridInstance;
-
 /**
  * Creates a grid in `rootElement` and initializes it.
  *
@@ -46,8 +42,8 @@ type CoreConstructor = new (rootElement: Element, userSettings: object, rootInst
  * @param {Object} [userSettings]
  * @returns {Core}
  */
-function FreeGrid(rootElement: Element, userSettings?: object): GridInstance {
-  const instance = new (Core as unknown as CoreConstructor)(rootElement, userSettings || {}, rootInstanceSymbol);
+function FreeGrid(rootElement: HTMLElement, userSettings?: object): Core {
+  const instance = new Core(rootElement, userSettings || {}, rootInstanceSymbol);
 
   instance.init();
 
