@@ -1020,8 +1020,6 @@ describe('ContextMenu', () => {
         'Remove column',
         'Undo',
         'Redo',
-        'Read only',
-        'Alignment',
       ].join(''));
     });
 

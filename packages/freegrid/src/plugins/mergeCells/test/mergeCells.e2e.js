@@ -1197,8 +1197,6 @@ describe('MergeCells', () => {
         'Remove column',
         'Undo',
         'Redo',
-        'Read only',
-        'Alignment',
         'Merge cells',
       ].join(''));
     });

@@ -707,8 +707,9 @@ describe('Core_alter', () => {
     });
 
     it('should decrement the number of fixed columns, if a fix column is removed', () => {
+      // Five columns, so that both removals remove frozen columns.
       const hot = handsontable({
-        startCols: 1,
+        startCols: 5,
         startRows: 3,
         fixedColumnsLeft: 4
       });

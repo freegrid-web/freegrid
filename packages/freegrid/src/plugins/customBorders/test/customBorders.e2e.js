@@ -791,8 +791,6 @@ describe('CustomBorders', () => {
       'Remove column',
       'Undo',
       'Redo',
-      'Read only',
-      'Alignment',
       'Borders',
     ].join(''));
   });
