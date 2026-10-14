@@ -44,6 +44,7 @@
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
+  - A live example's sticky column header no longer covers the top bar when the page scrolls past it.
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
     (e.g. ManualColumnResize's `isEnabled` showed the plugin's description).

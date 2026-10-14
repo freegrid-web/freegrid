@@ -27,6 +27,13 @@
      clipping ancestor, so this frame must not be one. */
 }
 
+/* The grid's overlays (the sticky header is `position: fixed`, z-index 101 and up) stay in the example's own stacking
+   context, under the docs' top bar (z-index 30) when the page scrolls past them. */
+.live-example,
+.theme-playground {
+  isolation: isolate;
+}
+
 .live-example__error {
   color: var(--vp-c-danger-1);
 }
