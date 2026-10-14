@@ -1,8 +1,8 @@
 # Notes for coding agents
 
-FreeGrid is an independent family of MIT-licensed components for the web (pnpm monorepo). Its first component is
-FreeSheet, an Excel-style spreadsheet. Read `CONTRIBUTING.md` first: its clean-room, test, commit and TypeScript
-rules apply to every change.
+FreeSheet is an independent, MIT-licensed, Excel-style spreadsheet for the web (pnpm monorepo), the first component
+of the FreeGrid family (`@freegrid/*` on npm, one repository per component). Read `CONTRIBUTING.md` first: its
+clean-room, test, commit and TypeScript rules apply to every change.
 
 ## Repository
 
@@ -63,7 +63,7 @@ the docs build and the docs smoke test (`pnpm --dir packages/docs test:smoke`, n
   follow-up into a new PR. Base PRs on `main`, not on another PR's branch.
 - No AI attribution lines in commits or PRs (no `Co-Authored-By` for an agent, no "Generated with …").
 - Never copy code, tests or docs from Handsontable 7.0 or later or from HyperFormula, and do not mention them in
-  issues, PRs, commits, code comments or docs. Describe problems and fixes in FreeGrid's own words.
+  issues, PRs, commits, code comments or docs. Describe problems and fixes in FreeSheet's own words.
 - Every behavior change gets a spec that fails without the change; run it against the old code to see it fail.
   A pure refactor changes no spec. Add a `CHANGELOG.md` entry for anything a user could notice.
 - The docs model must not change by accident: when touching `core.ts`, `pluginHooks.ts`, `defaultSettings.ts` or a

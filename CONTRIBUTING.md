@@ -1,12 +1,12 @@
-# Contributing to FreeGrid
+# Contributing to FreeSheet
 
 Thanks for helping keep a free data grid alive.
 
 ## Clean-room rule (important)
 
-FreeGrid is based on Handsontable **6.2.2**, the last MIT release. **Do not copy code, tests, docs, or
+FreeSheet is based on Handsontable **6.2.2**, the last MIT release. **Do not copy code, tests, docs, or
 assets from Handsontable 7.0 or later, or from HyperFormula** — those are not MIT-licensed. Do not read
-their source while working on an equivalent FreeGrid feature. Pull requests that appear derived from
+their source while working on an equivalent FreeSheet feature. Pull requests that appear derived from
 them will be closed.
 
 ## Tests
@@ -31,7 +31,7 @@ them will be closed.
 
 ## TypeScript
 
-FreeGrid is moving to TypeScript one module group at a time (see
+FreeSheet is moving to TypeScript one module group at a time (see
 `docs/specs/2026-10-12-typescript-and-clean-code-design.md`). JavaScript and TypeScript modules import each
 other freely, and imports have no file extension, so converting a module needs no changes in its importers.
 Unit and E2E specs stay JavaScript for now.
