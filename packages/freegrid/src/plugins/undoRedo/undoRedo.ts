@@ -9,8 +9,6 @@ import { align } from './../contextMenu/utils';
 import type { PluginHost } from './../_base';
 import type { CellRange } from './../../3rdparty/walkontable/src';
 
-/** The column mapper as upstream's undo code addresses it (`__arrayMap`, which the mapper does not have). */
-type LegacyMapper = { __arrayMap: number[] };
 
 /** What undo expects from a filters plugin (FreeGrid has none yet; see the roadmap). */
 type FiltersPlugin = { conditionCollection: { importAllConditions(conditions: unknown[]): void }; filter(): void };
@@ -220,8 +218,8 @@ class RemoveColumnAction extends Action {
   }
 
   undo(instance: PluginHost, undoneCallback: Done): void {
-    // The columns go back in ascending order (as default sort compares strings, like before).
-    const ascendingIndexes = this.indexes.slice(0).sort();
+    // The columns go back in ascending physical order (compared as numbers: 10 after 3).
+    const ascendingIndexes = this.indexes.slice(0).sort((a, b) => a - b);
     const sortByIndexes = (elem: unknown, j: number, arr: unknown[]) => arr[this.indexes.indexOf(ascendingIndexes[j])];
     const sortedData = this.data.map(row => row.map(sortByIndexes));
     const sortedHeaders = this.headers.map(sortByIndexes);
@@ -248,15 +246,15 @@ class RemoveColumnAction extends Action {
       });
     }
 
-    if (instance.getPlugin('manualColumnMove')) {
-      // Upstream bug (see #67): the mapper's field is `_arrayMap`, so this restores nothing.
-      (instance.getPlugin('manualColumnMove').columnsMapper as unknown as LegacyMapper).__arrayMap = this.columnPositions;
-    }
-
     instance.addHookOnce('afterRender', undoneCallback);
 
     // A temporary hook from upstream (see #67)
     instance.runHooks('afterCreateCol', this.indexes[0], this.indexes.length, 'UndoRedo.undo');
+
+    // The column order of manualColumnMove from before the removal (after afterCreateCol, which moves it).
+    if (this.columnPositions.length) {
+      instance.getPlugin('manualColumnMove').columnsMapper._arrayMap = this.columnPositions.slice(0);
+    }
 
     (instance.getPlugin('formulas') as FormulasPlugin | undefined)?.recalculateFull();
 
@@ -545,9 +543,7 @@ class UndoRedo {
       const { colHeaders } = instance.getSettings();
       const headers = Array.isArray(colHeaders) ? physicalColumns.map(column => colHeaders[column] || null) : [];
       const manualColumnMovePlugin = instance.getPlugin('manualColumnMove');
-      // `__arrayMap` is not the mapper's field (an upstream bug, see #67).
-      const columnsMap = manualColumnMovePlugin.isEnabled()
-        ? (manualColumnMovePlugin.columnsMapper as unknown as LegacyMapper).__arrayMap : [];
+      const columnsMap = manualColumnMovePlugin.isEnabled() ? manualColumnMovePlugin.columnsMapper._arrayMap.slice(0) : [];
 
       this.done(new RemoveColumnAction(columnIndex, physicalColumns, removedData, headers, columnsMap));
     });

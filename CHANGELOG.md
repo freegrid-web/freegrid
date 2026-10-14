@@ -44,6 +44,8 @@
   - A column header that had to be rebuilt ran `afterGetColHeader` twice.
 - Undo: an edit that changes nothing is no undo step; undoing a row removal brings back the values of read-only
   cells and the rows' cell meta; undoing an inserted row or column keeps the frozen rows and columns (#74).
+- Undo of a column removal restores the column order made with `manualColumnMove` (it scrambled the columns and
+  could lose a value), and puts columns back in the right place when their indexes have two digits (#67).
 - Copy and paste: text with `""` outside a quoted cell (e.g. JSON with an empty string) keeps its quotes (#75); a
   paste event without clipboard data is ignored (it threw an error).
 - Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column
