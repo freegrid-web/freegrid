@@ -169,7 +169,7 @@ class ColumnSorting extends BasePlugin {
     this.addHook('afterCreateCol', () => this.onAfterCreateCol());
     this.addHook('afterRemoveCol', () => this.onAfterRemoveCol());
 
-    // TODO: Workaround? It should be refactored / described.
+    // Sort right away when the plugin is enabled on a grid that already renders (upstream workaround).
     if (this.hot.view) {
       this.loadOrSortBySettings();
     }
@@ -239,7 +239,7 @@ class ColumnSorting extends BasePlugin {
       this.saveAllSortSettings();
 
       this.hot.render();
-      this.hot.view.wt.draw(true); // TODO: Workaround? One test won't pass after removal. It should be refactored / described.
+      this.hot.view.wt.draw(true); // Upstream workaround: a spec fails without this redraw.
     }
 
     this.hot.runHooks('afterColumnSort', currentSortConfig, this.getSortConfig(), sortPossible);
@@ -461,7 +461,7 @@ class ColumnSorting extends BasePlugin {
    * @private
    * @param column Visual column index.
    */
-  // TODO: Workaround. Inheriting of non-primitive cell meta values doesn't work. Using this function we don't count
+  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. Using this function we don't count
   // merged properties few times.
   setMergedPluginSettings(column: number): void {
     const physicalColumnIndex = this.hot.toPhysicalColumn(column);
@@ -481,10 +481,10 @@ class ColumnSorting extends BasePlugin {
    * @private
    * @param column Visual column index.
    */
-  // TODO: Workaround. Inheriting of non-primitive cell meta values doesn't work. Instead of getting properties from
+  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. Instead of getting properties from
   // column meta we call this function.
   getFirstCellSettings(column: number): Record<string, unknown> {
-    // TODO: Remove test named: "should not break the dataset when inserted new row" (#5431).
+    // With #65 fixed, remove the spec "should not break the dataset when inserted new row" (upstream issue 5431).
     const actualBlockTranslationFlag = this.blockPluginTranslation;
 
     this.blockPluginTranslation = true;
@@ -736,7 +736,7 @@ class ColumnSorting extends BasePlugin {
     this.columnMetaCache.clear();
 
     if (initialLoad === true) {
-      // TODO: Workaround? It should be refactored / described.
+      // Sort right away when the settings change on a grid that already renders (upstream workaround).
       if (this.hot.view) {
         this.loadOrSortBySettings();
       }
@@ -765,8 +765,8 @@ class ColumnSorting extends BasePlugin {
     this.rowsMapper.unshiftItems(removedRows, amount);
   }
 
-  // TODO: Workaround. Inheriting of non-primitive cell meta values doesn't work. We clear the cache after action which reorganize sequence of columns.
-  // TODO: Remove test named: "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
+  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
+  // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
    * Callback for the `afterCreateCol` hook.
    *
@@ -776,8 +776,8 @@ class ColumnSorting extends BasePlugin {
     this.columnMetaCache.clear();
   }
 
-  // TODO: Workaround. Inheriting of non-primitive cell meta values doesn't work. We clear the cache after action which reorganize sequence of columns.
-  // TODO: Remove test named: "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
+  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
+  // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
    * Callback for the `afterRemoveCol` hook.
    *

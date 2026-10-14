@@ -69,7 +69,6 @@ declare module './core' {
  * ...
  */
 
-// @TODO: Move plugin description hooks to plugin?
 const REGISTERED_HOOKS: string[] = [
   /**
    * Fired after resetting a cell's meta. This happens when the {@link Core#updateSettings} method is called.

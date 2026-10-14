@@ -224,7 +224,7 @@ class AutoRowSize extends BasePlugin {
         cancelAnimationFrame(timer!);
         this.inProgress = false;
 
-        // @TODO Should call once per render cycle, currently fired separately in different plugins
+        // Each size plugin resizes the overlays; once per render cycle would do (see #70).
         this.hot.view.wt.wtOverlays.adjustElementsSize(true);
         // tmp
         if (this.hot.view.wt.wtOverlays.leftOverlay.needFullRender) {

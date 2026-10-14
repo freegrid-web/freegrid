@@ -142,8 +142,7 @@ class EditorText extends EditorBase {
         this.hideEditableElement();
       }
 
-      // @TODO: The fragmentSelection functionality is conflicted with IME. For this feature refocus has to
-      // be disabled (to make IME working).
+      // fragmentSelection conflicts with IME: refocusing the editor breaks IME input, so it is off then.
       const restoreFocus = !fragmentSelection;
 
       if (restoreFocus && !isMobileBrowser()) {
@@ -328,7 +327,7 @@ class EditorText extends EditorBase {
     let editLeft = currentOffset.left - containerOffset.left - 1 - scrollLeft;
     let cssTransformOffset;
 
-    // TODO: Refactor this to the new instance.getCell method (from #ply-59), after 0.12.1 is released
+    // Reads the overlays' clones (Walkontable internals; see #71).
     switch (editorSection) {
       case 'top':
         cssTransformOffset = getCssTransform(this.instance.view.wt.wtOverlays.topOverlay.clone.wtTable.holder.parentNode);

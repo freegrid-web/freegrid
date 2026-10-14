@@ -27,8 +27,7 @@ const removeRowItem = (): MenuItem => ({
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_REMOVE_ROW, pluralForm);
   },
   callback(this: PluginHost) {
-    // TODO: Please keep in mind that below `1` may be improper. The table's way of work, before change `f1747b3912ea3b21fe423fd102ca94c87db81379` was restored.
-    // There is still problem when removing more than one row.
+    // The amount `1` with index groups is upstream's; removing several rows still has problems (see #66).
     this.alter('remove_row', transformSelectionToRowDistance(this.getSelected()!), 1, 'ContextMenu.removeRow');
   },
   disabled(this: PluginHost) {

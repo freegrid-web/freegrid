@@ -202,7 +202,7 @@ class RemoveColumnAction extends Action {
     const sortedHeaders = this.headers.map(sortByIndexes);
     const changes: Change[] = [];
 
-    // TODO: Temporary hook for undo/redo mess
+    // A temporary hook from upstream (see #67)
     instance.runHooks('beforeCreateCol', this.indexes[0], this.indexes.length, 'UndoRedo.undo');
 
     rangeEach(this.data.length - 1, (i) => {
@@ -214,7 +214,7 @@ class RemoveColumnAction extends Action {
       });
     });
 
-    // TODO: Temporary hook for undo/redo mess
+    // A temporary hook from upstream (see #67)
     (instance.getPlugin('formulas') as FormulasPlugin | undefined)?.onAfterSetDataAtCell(changes);
 
     if (this.headers !== undefined) {
@@ -224,13 +224,13 @@ class RemoveColumnAction extends Action {
     }
 
     if (instance.getPlugin('manualColumnMove')) {
-      // Upstream bug (kept until it is fixed with tests): the mapper's field is `_arrayMap`, so this restores nothing.
+      // Upstream bug (see #67): the mapper's field is `_arrayMap`, so this restores nothing.
       (instance.getPlugin('manualColumnMove').columnsMapper as unknown as LegacyMapper).__arrayMap = this.columnPositions;
     }
 
     instance.addHookOnce('afterRender', undoneCallback);
 
-    // TODO: Temporary hook for undo/redo mess
+    // A temporary hook from upstream (see #67)
     instance.runHooks('afterCreateCol', this.indexes[0], this.indexes.length, 'UndoRedo.undo');
 
     (instance.getPlugin('formulas') as FormulasPlugin | undefined)?.recalculateFull();
@@ -380,7 +380,7 @@ class UnmergeCellsAction extends Action {
 /**
  * ManualRowMove action.
  *
- * @TODO: removeRow undo should works on logical index
+ * Undo should work on logical (physical) indexes (see #67).
  */
 class RowMoveAction extends Action {
   rows: number[];
@@ -515,7 +515,7 @@ class UndoRedo {
       const { colHeaders } = instance.getSettings();
       const headers = Array.isArray(colHeaders) ? physicalColumns.map(column => colHeaders[column] || null) : [];
       const manualColumnMovePlugin = instance.getPlugin('manualColumnMove');
-      // See RemoveColumnAction.undo: `__arrayMap` is not the mapper's field (an upstream bug, kept for now).
+      // `__arrayMap` is not the mapper's field (an upstream bug, see #67).
       const columnsMap = manualColumnMovePlugin.isEnabled()
         ? (manualColumnMovePlugin.columnsMapper as unknown as LegacyMapper).__arrayMap : [];
 

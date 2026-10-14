@@ -517,7 +517,7 @@ class DataMap {
     const physicalRow = this.instance.runHooks('modifyRow', row);
 
     let dataRow = this.dataSource[physicalRow];
-    // TODO: To remove, use 'modifyData' hook instead (see below)
+    // modifyRowData is to be deprecated for modifyData (see #69).
     const modifiedRowData = this.instance.runHooks('modifyRowData', physicalRow);
 
     dataRow = isNaN(modifiedRowData) ? modifiedRowData : dataRow;
@@ -601,7 +601,7 @@ class DataMap {
     const physicalRow = this.instance.runHooks('modifyRow', row, source || 'datamapGet');
     let newValue = value;
     let dataRow = this.dataSource[physicalRow];
-    // TODO: To remove, use 'modifyData' hook instead (see below)
+    // modifyRowData is to be deprecated for modifyData (see #69).
     const modifiedRowData = this.instance.runHooks('modifyRowData', physicalRow);
 
     dataRow = isNaN(modifiedRowData) ? modifiedRowData : dataRow;

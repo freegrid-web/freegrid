@@ -72,7 +72,7 @@ FreeGrid.version = __FG_VERSION__;
 // Export Hooks singleton
 FreeGrid.hooks = Hooks.getSingleton();
 
-// TODO: Remove this exports after rewrite tests about this module
+// For the GhostTable specs (test/e2e/utils/ghostTable.spec.js), which run against the built bundle.
 FreeGrid.__GhostTable = GhostTable;
 //
 

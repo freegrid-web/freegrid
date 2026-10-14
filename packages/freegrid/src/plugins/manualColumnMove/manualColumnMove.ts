@@ -147,7 +147,6 @@ class ManualColumnMove extends BasePlugin {
 
     this.registerEvents();
 
-    // TODO: move adding plugin classname to BasePlugin.
     addClass(this.hot.rootElement, CSS_PLUGIN);
 
     super.enablePlugin();
