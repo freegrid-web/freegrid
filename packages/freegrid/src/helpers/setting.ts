@@ -1,6 +1,6 @@
 import { inherit } from './object';
 
-type SettingsConstructor = { new (): unknown; prototype: Record<PropertyKey, unknown> };
+export type SettingsConstructor = { new (): unknown; prototype: Record<PropertyKey, unknown> };
 
 /**
  * Creates the column settings constructor: it inherits from `GridSettings`, with the `conflictList` settings

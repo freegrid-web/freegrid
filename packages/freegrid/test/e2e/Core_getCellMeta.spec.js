@@ -238,4 +238,27 @@ describe('Core_getCellMeta', () => {
     expect(rowInsideHook).toEqual(0);
     expect(colInsideHook).toEqual(1);
   });
+
+  it('should not change Array.prototype or Object.prototype through a `__proto__`, `constructor` or `prototype` index', () => {
+    handsontable({
+      data: Handsontable.helper.createSpreadsheetData(2, 2),
+    });
+
+    try {
+      ['__proto__', 'constructor', 'prototype'].forEach((key) => {
+        expect(() => getCellMeta(key, 0)).toThrowError(/index/);
+        expect(() => getCellMeta(0, key)).toThrowError(/index/);
+      });
+
+      expect([][0]).toBeUndefined();
+      expect([][1]).toBeUndefined();
+      expect(Array[0]).toBeUndefined();
+      expect({}[0]).toBeUndefined();
+      expect(getCellMeta(1, 1).row).toBe(1);
+    } finally {
+      delete Array.prototype[0];
+      delete Array[0];
+      delete Object.prototype[0];
+    }
+  });
 });
