@@ -211,7 +211,7 @@ class ViewportColumnsCalculator {
   }
 
   /**
-   * Get stretched column width based on stretchH (all or last) setting passed in FreeGrid instance.
+   * Get stretched column width based on stretchH (all or last) setting passed in FreeSheet instance.
    *
    * @param {Number} column
    * @param {Number} baseWidth

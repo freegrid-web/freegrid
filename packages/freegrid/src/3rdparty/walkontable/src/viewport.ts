@@ -348,7 +348,7 @@ class Viewport {
       height,
       pos,
       this.#engine.getSetting('totalRows'),
-      // Rows without their own height use the configured default (FreeGrid's --fg-row-height), not the calculator's 23.
+      // Rows without their own height use the configured default (FreeSheet's --fg-row-height), not the calculator's 23.
       (sourceRow: number) => {
         const height = this.#engine.wtTable.getRowHeight(sourceRow);
 

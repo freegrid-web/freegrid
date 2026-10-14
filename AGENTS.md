@@ -1,14 +1,15 @@
 # Notes for coding agents
 
-FreeGrid is an independent, MIT-licensed, Excel-style spreadsheet component for the web (pnpm monorepo). Read
-`CONTRIBUTING.md` first: its clean-room, test, commit and TypeScript rules apply to every change.
+FreeGrid is an independent family of MIT-licensed components for the web (pnpm monorepo). Its first component is
+FreeSheet, an Excel-style spreadsheet. Read `CONTRIBUTING.md` first: its clean-room, test, commit and TypeScript
+rules apply to every change.
 
 ## Repository
 
-- `packages/freegrid`: the library (`@freegrid/sheet` on npm; `@freegrid/core` was its name up to 0.2.0).
+- `packages/freegrid`: FreeSheet (`@freegrid/sheet` on npm; `@freegrid/core` was its name up to 0.2.0).
   - `src/core.ts` is the grid (`Core` class); `src/tableView.ts` connects it to Walkontable.
   - `src/3rdparty/walkontable/`: the rendering engine (virtual rendering, overlays for frozen rows, columns and
-    headers, selection borders). Still JavaScript.
+    headers, selection borders). TypeScript.
   - `src/plugins/*`, `src/editors/*`, `src/renderers/*`, `src/validators/*`, `src/selection/*`: TypeScript.
   - Tests: `test/unit` (Vitest), `test/e2e` and `src/plugins/*/test/*.e2e.js` (Jasmine in a real browser),
     `src/3rdparty/walkontable/test` (Walkontable's own Jasmine specs), `test/build` (dist checks).
@@ -68,24 +69,8 @@ the docs build and the docs smoke test (`pnpm --dir packages/docs test:smoke`, n
 - The docs model must not change by accident: when touching `core.ts`, `pluginHooks.ts`, `defaultSettings.ts` or a
   plugin's main file, compare `buildReference()` from `packages/docs/api/reference.mjs` before and after.
 
-## Current assignment: Walkontable in TypeScript (stage A)
+## Current assignment
 
-Convert `packages/freegrid/src/3rdparty/walkontable/src` (24 files, about 7,300 lines) to TypeScript **without
-changing how it works**. Issue #71 lists what the rest of the grid uses from it.
-
-- Same method as the rest of the codebase (`CONTRIBUTING.md` → TypeScript): for each group of files, a move
-  commit (`git mv x.js x.ts` only), then a typing commit. Suggested PRs, in order:
-  1. `cell/` (coords, range), `filter/`, `calculator/`, `settings`, `event`;
-  2. `table`, `tableRenderer`, `viewport`, `scroll`, `core`, `index`;
-  3. `overlay/*` and `overlays`;
-  4. `border`, `selection`.
-- Classes with `#private` fields where the field is not used from outside; regular methods; arrow functions for
-  module-level helpers. Keep public names and the exported API (`index`) the same: the grid and its specs use them.
-- Once a group is typed, replace the matching `any` stand-ins outside Walkontable (search for "Walkontable is not
-  typed yet" in `src/`).
-- Each PR: all the checks above pass, especially `test:walkontable` and the three browser E2E suites.
-- **Out of scope for stage A:** new rendering approaches (`position: sticky` instead of cloned overlays, rendering
-  straight to the DOM, lazy cell meta). They come later, as a separate design (`docs/specs/`), once the code is
-  typed.
-- **Ownership:** while this assignment runs, other work does not touch `src/3rdparty/walkontable/` or
-  `src/tableView.ts`; this assignment does not touch other areas except the stand-in types named above.
+None. Walkontable stage A (TypeScript, without changing how it works) is done. New rendering approaches
+(`position: sticky` instead of cloned overlays, rendering straight to the DOM, lazy cell meta) need a design in
+`docs/specs/` before any code.

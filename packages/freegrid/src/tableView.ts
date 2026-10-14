@@ -60,7 +60,7 @@ class TableView {
   #isMouseDown = false;
 
   /**
-   * @param {Object} instance Instance of FreeGrid.
+   * @param {Object} instance Instance of FreeSheet.
    */
   constructor(instance: Grid) {
     this.eventManager = new EventManager(instance);
@@ -542,7 +542,7 @@ class TableView {
    */
   beforeRender(force: boolean, skipRender: boolean): void {
     if (force) {
-      // this.instance.forceFullRender = did FreeGrid request full render?
+      // this.instance.forceFullRender = did FreeSheet request full render?
       this.instance.runHooks('beforeRender', this.instance.forceFullRender, skipRender);
     }
   }
@@ -554,7 +554,7 @@ class TableView {
    */
   onDraw(force: boolean): void {
     if (force) {
-      // this.instance.forceFullRender = did FreeGrid request full render?
+      // this.instance.forceFullRender = did FreeSheet request full render?
       this.instance.runHooks('afterRender', this.instance.forceFullRender);
     }
   }
