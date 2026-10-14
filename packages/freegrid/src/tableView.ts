@@ -14,9 +14,9 @@ import { stopPropagation, isImmediatePropagationStopped, isRightClick, isLeftCli
 import Walkontable from './3rdparty/walkontable/src';
 import { getRowHeight } from './helpers/dom/theme';
 import { handleMouseEvent } from './selection/mouseEventHandler';
+import type Core from './core';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type Grid = any;
+type Grid = Core;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
 type Wt = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
@@ -533,7 +533,7 @@ class TableView {
   isCellEdited(): boolean {
     const activeEditor = this.instance.getActiveEditor();
 
-    return activeEditor && activeEditor.isOpened();
+    return Boolean(activeEditor && activeEditor.isOpened());
   }
 
   /**

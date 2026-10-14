@@ -98,7 +98,7 @@ export const extendDefaultBorder = (defaultBorder: CellBorders, customBorder: Re
 export const checkSelectionBorders = (hot: PluginHost, direction?: Side): boolean => {
   let atLeastOneHasBorder = false;
 
-  hot.getSelectedRange().forEach((range: { forAll(callback: (row: number, col: number) => boolean | void): void }) => {
+  hot.getSelectedRange()!.forEach((range: { forAll(callback: (row: number, col: number) => boolean | void): void }) => {
     range.forAll((r, c) => {
       const metaBorders = hot.getCellMeta(r, c).borders;
 
@@ -119,4 +119,4 @@ export const checkSelectionBorders = (hot: PluginHost, direction?: Side): boolea
 /**
  * Mark label in contextMenu as selected.
  */
-export const markSelected = (label: string): string => `<span class="selected">${String.fromCharCode(10003)}</span>${label}`;
+export const markSelected = (label: string | null): string => `<span class="selected">${String.fromCharCode(10003)}</span>${label}`;

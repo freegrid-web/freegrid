@@ -9,6 +9,27 @@ import { align } from './../contextMenu/utils';
 import type { PluginHost } from './../_base';
 import type { CellRange } from './../../3rdparty/walkontable/src';
 
+/** The column mapper as upstream's undo code addresses it (`__arrayMap`, which the mapper does not have). */
+type LegacyMapper = { __arrayMap: number[] };
+
+/** What undo expects from a filters plugin (FreeGrid has none yet; see the roadmap). */
+type FiltersPlugin = { conditionCollection: { importAllConditions(conditions: unknown[]): void }; filter(): void };
+
+/** What undo expects from a formulas plugin (FreeGrid has none). */
+type FormulasPlugin = { onAfterSetDataAtCell(changes: unknown[]): void; recalculateFull(): void };
+
+declare module '../../core' {
+  interface Core {
+    /** The undo history (while the `undo` setting is not `false`). */
+    undoRedo?: UndoRedo;
+    undo?: () => void;
+    redo?: () => void;
+    isUndoAvailable?: () => boolean;
+    isRedoAvailable?: () => boolean;
+    clearUndo?: () => void;
+  }
+}
+
 /** Called when an action was undone or redone (its hook ran). */
 type Done = () => void;
 
@@ -50,12 +71,12 @@ class ChangeAction extends Action {
     data.forEach(([row, col]) => {
       if (minSpareRows && row + 1 + minSpareRows === instance.countRows() && emptyRowsAtTheEnd === minSpareRows) {
         instance.alter('remove_row', parseInt(String(row + 1), 10), minSpareRows);
-        instance.undoRedo.doneActions.pop();
+        instance.undoRedo!.doneActions.pop();
       }
       if (minSpareCols && (col as number) + 1 + minSpareCols === instance.countCols() &&
         emptyColsAtTheEnd === minSpareCols) {
         instance.alter('remove_col', parseInt(String((col as number) + 1), 10), minSpareCols);
-        instance.undoRedo.doneActions.pop();
+        instance.undoRedo!.doneActions.pop();
       }
     });
   }
@@ -196,7 +217,7 @@ class RemoveColumnAction extends Action {
     });
 
     // TODO: Temporary hook for undo/redo mess
-    instance.getPlugin('formulas')?.onAfterSetDataAtCell(changes);
+    (instance.getPlugin('formulas') as FormulasPlugin | undefined)?.onAfterSetDataAtCell(changes);
 
     if (this.headers !== undefined) {
       rangeEach(sortedHeaders.length - 1, (j) => {
@@ -205,7 +226,8 @@ class RemoveColumnAction extends Action {
     }
 
     if (instance.getPlugin('manualColumnMove')) {
-      instance.getPlugin('manualColumnMove').columnsMapper.__arrayMap = this.columnPositions;
+      // Upstream bug (kept until it is fixed with tests): the mapper's field is `_arrayMap`, so this restores nothing.
+      (instance.getPlugin('manualColumnMove').columnsMapper as unknown as LegacyMapper).__arrayMap = this.columnPositions;
     }
 
     instance.addHookOnce('afterRender', undoneCallback);
@@ -213,7 +235,7 @@ class RemoveColumnAction extends Action {
     // TODO: Temporary hook for undo/redo mess
     instance.runHooks('afterCreateCol', this.indexes[0], this.indexes.length, 'UndoRedo.undo');
 
-    instance.getPlugin('formulas')?.recalculateFull();
+    (instance.getPlugin('formulas') as FormulasPlugin | undefined)?.recalculateFull();
 
     instance.render();
   }
@@ -275,7 +297,7 @@ class FiltersAction extends Action {
   }
 
   undo(instance: PluginHost, undoneCallback: Done): void {
-    const filters = instance.getPlugin('filters');
+    const filters = instance.getPlugin('filters') as unknown as FiltersPlugin;
 
     instance.addHookOnce('afterRender', undoneCallback);
 
@@ -284,7 +306,7 @@ class FiltersAction extends Action {
   }
 
   redo(instance: PluginHost, redoneCallback: Done): void {
-    const filters = instance.getPlugin('filters');
+    const filters = instance.getPlugin('filters') as unknown as FiltersPlugin;
 
     instance.addHookOnce('afterRender', redoneCallback);
 
@@ -495,7 +517,9 @@ class UndoRedo {
       const { colHeaders } = instance.getSettings();
       const headers = Array.isArray(colHeaders) ? physicalColumns.map(column => colHeaders[column] || null) : [];
       const manualColumnMovePlugin = instance.getPlugin('manualColumnMove');
-      const columnsMap = manualColumnMovePlugin.isEnabled() ? manualColumnMovePlugin.columnsMapper.__arrayMap : [];
+      // See RemoveColumnAction.undo: `__arrayMap` is not the mapper's field (an upstream bug, kept for now).
+      const columnsMap = manualColumnMovePlugin.isEnabled()
+        ? (manualColumnMovePlugin.columnsMapper as unknown as LegacyMapper).__arrayMap : [];
 
       this.done(new RemoveColumnAction(columnIndex, physicalColumns, removedData, headers, columnsMap));
     });
@@ -627,10 +651,10 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: PluginHost, event: Keyboa
     return;
   }
   if (event.keyCode === 89 || (event.shiftKey && event.keyCode === 90)) {
-    this.undoRedo.redo();
+    this.undoRedo!.redo();
     stopImmediatePropagation(event);
   } else if (event.keyCode === 90) {
-    this.undoRedo.undo();
+    this.undoRedo!.undo();
     stopImmediatePropagation(event);
   }
 };
@@ -638,17 +662,17 @@ const onBeforeKeyDown = function onBeforeKeyDown(this: PluginHost, event: Keyboa
 // A grid hook: loading data clears the history.
 const onAfterChange = function onAfterChange(this: PluginHost, changes: unknown, source: string) {
   if (source === 'loadData') {
-    this.undoRedo.clear();
+    this.undoRedo!.clear();
   }
 };
 
 /** Adds `undo()`, `redo()`, `isUndoAvailable()`, `isRedoAvailable()` and `clearUndo()` to the grid. */
 const exposeUndoRedoMethods = (instance: PluginHost): void => {
-  instance.undo = () => instance.undoRedo.undo();
-  instance.redo = () => instance.undoRedo.redo();
-  instance.isUndoAvailable = () => instance.undoRedo.isUndoAvailable();
-  instance.isRedoAvailable = () => instance.undoRedo.isRedoAvailable();
-  instance.clearUndo = () => instance.undoRedo.clear();
+  instance.undo = () => instance.undoRedo!.undo();
+  instance.redo = () => instance.undoRedo!.redo();
+  instance.isUndoAvailable = () => instance.undoRedo!.isUndoAvailable();
+  instance.isRedoAvailable = () => instance.undoRedo!.isRedoAvailable();
+  instance.clearUndo = () => instance.undoRedo!.clear();
 };
 
 const removeExposedUndoRedoMethods = (instance: PluginHost): void => {

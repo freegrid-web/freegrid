@@ -118,7 +118,8 @@ class EditorSelect extends EditorBase {
 
   /** Takes the cell's value again (it was changed while the editor was open). */
   refreshValue(): void {
-    const sourceData = this.instance.getSourceDataAtCell(this.row, this.prop);
+    // A property name works as the column too (colToProp passes it through).
+    const sourceData = this.instance.getSourceDataAtCell(this.row, this.prop as number);
 
     this.originalValue = sourceData;
     this.setValue(sourceData);

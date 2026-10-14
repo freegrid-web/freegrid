@@ -23,6 +23,7 @@ import {
 import { arrayFlatten, arrayEach } from './helpers/array';
 import { toSingleLine } from './helpers/templateLiteralTag';
 import { getPlugin } from './plugins';
+import type { PluginByName } from './plugins/byName';
 import { getRenderer } from './renderers';
 import { getValidator } from './validators';
 import { randomString } from './helpers/string';
@@ -44,6 +45,7 @@ import { hasLanguageDictionary } from './i18n/dictionariesManager';
 import { warnUserAboutLanguageRegistration, applyLanguageSetting, normalizeLanguageCode } from './i18n/utils';
 import { startObserving as keyStateStartObserving, stopObserving as keyStateStopObserving } from './utils/keyStateObserver';
 import { Selection } from './selection';
+import type { getEditorInstance } from './editors';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- the grid is typed when Core becomes a class */
 type AnyObject = Record<string, any>;
@@ -1304,7 +1306,7 @@ class Core {
    * @param {String} value Value to be set.
    * @param {String} [source] String that identifies how this change will be described in changes array (useful in onChange callback).
    */
-  setDataAtRowProp(row: number | unknown[][], prop: Prop, value?: unknown, source?: string) {
+  setDataAtRowProp(row: number | unknown[][], prop: Prop | null, value?: unknown, source?: string) {
     const input = setDataInputToArray(row, prop, value);
     const changes: Change[] = [];
     let changeSource = source;
@@ -1420,7 +1422,7 @@ class Core {
    * @param {Array} deltas The deltas array. A difference between values of adjacent cells.
    *                       Useful **only** when the type of handled cells is `numeric`.
    */
-  populateFromArray(row: number, column: number, input: unknown[], endRow?: number, endCol?: number, source?: string, method?: string, direction?: string, deltas?: unknown[]) {
+  populateFromArray(row: number, column: number, input: unknown[], endRow?: number | null, endCol?: number | null, source?: string, method?: string | null, direction?: string, deltas?: unknown[]) {
     if (!(typeof input === 'object' && typeof input[0] === 'object')) {
       throw new Error('populateFromArray parameter `input` must be an array of arrays'); // API changed in 0.9-beta2, let's check if you use it correctly
     }
@@ -1477,7 +1479,8 @@ class Core {
   getSelected() { // https://github.com/handsontable/handsontable/issues/44  //cjl
     if (this.selection.isSelected()) {
       // `getSelectedRange()` is an iterable SelectionRange, not an array.
-      return Array.from(this.selection.getSelectedRange(), ({ from, to }) => [from.row, from.col, to.row, to.col]);
+      return Array.from(this.selection.getSelectedRange(),
+        ({ from, to }): [number, number, number, number] => [from.row, from.col, to.row, to.col]);
     }
   }
 
@@ -2037,7 +2040,7 @@ class Core {
    * hot.alter('remove_row', [[1, 3], [5, 2]]);
    * ```
    */
-  alter(action: string, index: number | number[], amount?: number, source?: string, keepEmptyRows?: boolean) {
+  alter(action: string, index?: number | number[] | [number, number][], amount?: number | null, source?: string, keepEmptyRows?: boolean) {
     this.#grid.alter(action, index, amount, source, keepEmptyRows);
   }
 
@@ -2072,7 +2075,7 @@ class Core {
    * // it returns CellCoords object instance with props row: 1 and col: 1.
    * ```
    */
-  getCoords(element: HTMLTableCellElement) {
+  getCoords(element: Element) {
     return this.view.wt.wtTable.getCoords.call(this.view.wt.wtTable, element);
   }
 
@@ -2196,7 +2199,7 @@ class Core {
    * @param {String} prop Property name.
    * @returns {*} Cell value.
    */
-  getDataAtRowProp(row: number, prop: string) {
+  getDataAtRowProp(row: number, prop: Prop) {
     return this.#datamap.get(row, prop);
   }
 
@@ -2482,7 +2485,7 @@ class Core {
    * @param {String} value Property value.
    * @fires Hooks#afterSetCellMeta
    */
-  setCellMeta(row: number, column: number, key: string, value: string) {
+  setCellMeta(row: number, column: number, key: string, value: unknown) {
     const [physicalRow, physicalColumn] = this.#recordTranslator.toPhysical(row, column) as [number, number];
 
     if (!this.#priv.columnSettings[physicalColumn]) {
@@ -2616,7 +2619,7 @@ class Core {
    * hot.getCellRenderer(hot.getCellMeta(1, 1));
    * ```
    */
-  getCellRenderer(row: number | AnyObject, column: number) {
+  getCellRenderer(row: number | AnyObject, column?: number) {
     return getRenderer(rendererLookup.call(this, row, column) as Parameters<typeof getRenderer>[0]);
   }
 
@@ -2638,7 +2641,7 @@ class Core {
    * ```
    */
   getCellEditor(row: number | AnyObject, column?: number) {
-    return editorLookup.call(this, row, column);
+    return editorLookup.call(this, row, column) as Parameters<typeof getEditorInstance>[0] | undefined;
   }
 
 
@@ -3375,7 +3378,7 @@ class Core {
    * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  selectCells(coords: unknown[][] | CellRange[] = [[]], scrollToCell: boolean = true, changeListener: boolean = true) {
+  selectCells(coords: Parameters<Selection['selectCells']>[0] = [[]] as never, scrollToCell: boolean = true, changeListener: boolean = true) {
     if (scrollToCell === false) {
       this.#preventScrollingToCell = true;
     }
@@ -3609,8 +3612,8 @@ class Core {
    * @param {String} pluginName The plugin name.
    * @returns {BasePlugin} The plugin instance.
    */
-  getPlugin(pluginName: string) {
-    return getPlugin(this, pluginName);
+  getPlugin<Name extends string>(pluginName: Name): PluginByName<Name> {
+    return getPlugin(this, pluginName) as PluginByName<Name>;
   }
 
 
@@ -3816,4 +3819,6 @@ class Core {
   }
 }
 
+// Also by name: plugins add their members to the grid's type with `declare module './core' { interface Core … }`.
+export { Core };
 export default Core;

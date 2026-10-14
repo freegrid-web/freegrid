@@ -1,8 +1,8 @@
 import { isDefined } from './helpers/mixed';
 import { isObjectEqual } from './helpers/object';
+import type Core from './core';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type Grid = any;
+type Grid = Core;
 
 /**
  * @alias Options

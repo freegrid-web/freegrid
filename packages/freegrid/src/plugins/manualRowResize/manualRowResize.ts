@@ -167,7 +167,7 @@ class ManualRowResize extends BasePlugin {
     this.selectedRows = [row];
 
     if (this.hot.selection.isSelected() && this.hot.selection.isSelectedByRowHeader()) {
-      const { from, to } = this.hot.getSelectedRangeLast();
+      const { from, to } = this.hot.getSelectedRangeLast()!;
       const start = Math.min(from.row, to.row);
       const end = Math.max(from.row, to.row);
 

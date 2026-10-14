@@ -24,7 +24,7 @@ const alignmentOption = (name: string, label: string, type: 'horizontal' | 'vert
     return hasClass ? markLabelAsSelected(text) : text;
   },
   callback(this: PluginHost) {
-    const selectedRange = this.getSelectedRange();
+    const selectedRange = this.getSelectedRange()!;
     const stateBefore = getAlignmentClasses(selectedRange, (row: number, col: number) => this.getCellMeta(row, col).className);
 
     this.runHooks('beforeCellAlignment', stateBefore, selectedRange, type, className);

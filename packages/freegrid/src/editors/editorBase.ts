@@ -1,6 +1,7 @@
 import { CellCoords } from './../3rdparty/walkontable/src';
 import { stringify } from './../helpers/mixed';
 import type { CellProperties } from '../cellTypes/types';
+import type Core from './../core';
 
 export const EditorState = {
   VIRGIN: 'STATE_VIRGIN', // before editing
@@ -12,11 +13,9 @@ export const EditorState = {
 export type EditorStateValue = typeof EditorState[keyof typeof EditorState];
 
 /**
- * The grid, as editors use it. src/core.js is not typed yet, and editors reach deep into it (the view, Walkontable's
- * overlays).
+ * The grid, as editors use it.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-export type EditorHost = any;
+export type EditorHost = Core;
 
 /**
  * The base of every editor. An editor edits one cell at a time: the grid calls `prepare()` for the selected cell,
@@ -121,7 +120,7 @@ class EditorBase {
     } else {
       selection = [this.row, this.col, null, null];
     }
-    this.instance.populateFromArray(selection[0], selection[1], value, selection[2], selection[3], 'edit');
+    this.instance.populateFromArray(selection[0] as number, selection[1] as number, value, selection[2], selection[3], 'edit');
   }
 
   /**

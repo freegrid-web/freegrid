@@ -8,7 +8,8 @@ export type SelectedRange = { start: { row: number; col: number }; end: { row: n
  */
 export type MenuItem = {
   key?: string;
-  name: string | ((this: PluginHost) => string);
+  // `getTranslatedPhrase` returns null for an unknown key (the menu then shows an empty label).
+  name: string | ((this: PluginHost) => string | null);
   callback?: (this: PluginHost, key: string, selection: SelectedRange[], event?: MouseEvent) => void;
   disabled?: boolean | ((this: PluginHost) => boolean);
   hidden?: boolean | ((this: PluginHost) => boolean);

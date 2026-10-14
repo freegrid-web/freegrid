@@ -10,10 +10,10 @@ const redoItem = (): MenuItem => ({
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_REDO);
   },
   callback(this: PluginHost) {
-    this.redo();
+    this.redo!();
   },
   disabled(this: PluginHost) {
-    return this.undoRedo && !this.undoRedo.isRedoAvailable();
+    return Boolean(this.undoRedo && !this.undoRedo.isRedoAvailable());
   },
 });
 

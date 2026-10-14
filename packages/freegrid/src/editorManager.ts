@@ -109,7 +109,7 @@ class EditorManager {
 
       return;
     }
-    const { row, col } = instance.selection.selectedRange.current().highlight;
+    const { row, col } = instance.selection.selectedRange.current()!.highlight;
     const prop = instance.colToProp(col);
     const td = instance.getCell(row, col);
     const originalValue = instance.getSourceDataAtCell(instance.runHooks('modifyRow', row), col);
@@ -118,7 +118,8 @@ class EditorManager {
 
     if (editorClass) {
       this.#activeEditor = getEditorInstance(editorClass, instance);
-      this.#activeEditor.prepare(row, col, prop, td, originalValue, cellProperties);
+      // `td` is null for a cell that is not rendered (as before; the editors handle it).
+      this.#activeEditor.prepare(row, col, prop as string | number, td as HTMLTableCellElement, originalValue, cellProperties);
 
     } else {
       this.#activeEditor = undefined;

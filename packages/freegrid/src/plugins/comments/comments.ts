@@ -595,7 +595,7 @@ class Comments extends BasePlugin {
    */
   onContextMenuAddComment(): void {
     this.displaySwitch.cancelHiding();
-    const coords = this.hot.getSelectedRangeLast();
+    const coords = this.hot.getSelectedRangeLast()!;
 
     this.contextMenuEvent = true;
     this.setRange({
@@ -616,7 +616,7 @@ class Comments extends BasePlugin {
    * @private
    */
   onContextMenuRemoveComment(): void {
-    const { from, to } = this.hot.getSelectedRangeLast();
+    const { from, to } = this.hot.getSelectedRangeLast()!;
 
     this.contextMenuEvent = true;
 
@@ -635,7 +635,7 @@ class Comments extends BasePlugin {
    * @private
    */
   onContextMenuMakeReadOnly(): void {
-    const { from, to } = this.hot.getSelectedRangeLast();
+    const { from, to } = this.hot.getSelectedRangeLast()!;
 
     this.contextMenuEvent = true;
 

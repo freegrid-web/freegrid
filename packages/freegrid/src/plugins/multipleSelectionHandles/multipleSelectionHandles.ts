@@ -87,7 +87,7 @@ class MultipleSelectionHandles extends BasePlugin {
       if (!handle) {
         return;
       }
-      const selectedRange = this.hot.getSelectedRangeLast();
+      const selectedRange = this.hot.getSelectedRangeLast()!;
 
       this.dragged.push(handle);
       this.touchStartRange = {
@@ -131,7 +131,7 @@ class MultipleSelectionHandles extends BasePlugin {
         if (targetCoords.col === -1) {
           targetCoords.col = 0;
         }
-        const selectedRange: CellRange = this.hot.getSelectedRangeLast();
+        const selectedRange: CellRange = this.hot.getSelectedRangeLast()!;
 
         if (selectedRange.getWidth() === 1 && selectedRange.getHeight() === 1) {
           this.hot.selection.setRangeEnd(targetCoords);
@@ -142,7 +142,7 @@ class MultipleSelectionHandles extends BasePlugin {
         if (newRangeCoords.start !== null) {
           this.hot.selection.setRangeStart(newRangeCoords.start);
         }
-        this.hot.selection.setRangeEnd(newRangeCoords.end);
+        this.hot.selection.setRangeEnd(newRangeCoords.end!);
         this.lastSetCell = endTarget;
       }
 

@@ -1,25 +1,9 @@
 import { addClass, outerHeight, outerWidth } from './../helpers/dom/element';
 import type { Samples } from './samplesGenerator';
+import type Core from './../core';
 
-type CellProperties = Record<string, unknown> & { row?: number; col?: number };
-type Renderer = (hot: Grid, td: HTMLTableCellElement, row: number, column: number, prop: unknown, value: unknown,
-  cellProperties: CellProperties) => void;
-
-/** What GhostTable needs from a grid. */
-type Grid = {
-  rootElement: HTMLElement;
-  table: HTMLTableElement;
-  getColHeader(column: number): unknown;
-  hasRowHeaders(): boolean;
-  getCellMeta(row: number, column: number): CellProperties;
-  getCellRenderer(cellProperties: CellProperties): Renderer;
-  colToProp(column: number): unknown;
-  view: {
-    appendColHeader(column: number, th: HTMLTableCellElement): void;
-    appendRowHeader(row: number, th: HTMLTableCellElement): void;
-    wt: { wtTable: { getStretchedColumnWidth(column: number): number } };
-  };
-};
+/** The grid GhostTable measures. */
+type Grid = Core;
 
 type TableParts = {
   fragment: DocumentFragment;

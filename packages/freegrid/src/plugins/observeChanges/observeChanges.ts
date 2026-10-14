@@ -3,6 +3,15 @@ import DataObserver from './dataObserver';
 import { registerPlugin } from './../../plugins';
 import type { Patch } from './utils';
 
+declare module '../../core' {
+  interface Core {
+    /** While `observeChanges` is on. */
+    pauseObservingChanges?: () => void;
+    resumeObservingChanges?: () => void;
+    isPausedObservingChanges?: () => boolean;
+  }
+}
+
 // FreeGrid.hooks.register('afterChangesObserved');
 
 /**

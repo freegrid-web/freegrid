@@ -54,6 +54,12 @@
   `#private` fields, and the grid's methods are typed. Every method is still bound to its grid, as the closures were,
   and now all of them work without `this` (`const { selectCell } = hot`): before, the ones that called another method
   through `this` did not. After `destroy()`, every method throws, as before.
+- Core, part 8 (TypeScript rewrite): plugins, editors, renderers, validators, DataMap and TableView see the grid
+  as `Core` instead of `any`.
+  - `getPlugin('mergeCells')` returns the `MergeCells` type: the plugin types come from the plugin classes, by name.
+  - Plugins declare what they add to the grid (`undo()`, `pauseObservingChanges()`, …) with
+    `declare module './core' { interface Core … }`; `Core` is also exported by name for that.
+  - Where the code relied on a selection being there, it says so with `!` (the behavior is the same as before).
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

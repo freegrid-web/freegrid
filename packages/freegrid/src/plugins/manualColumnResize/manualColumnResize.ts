@@ -172,7 +172,7 @@ class ManualColumnResize extends BasePlugin {
     this.selectedCols = [col];
 
     if (this.hot.selection.isSelected() && this.hot.selection.isSelectedByColumnHeader()) {
-      const { from, to } = this.hot.getSelectedRangeLast();
+      const { from, to } = this.hot.getSelectedRangeLast()!;
       const start = Math.min(from.col, to.col);
       const end = Math.max(from.col, to.col);
 

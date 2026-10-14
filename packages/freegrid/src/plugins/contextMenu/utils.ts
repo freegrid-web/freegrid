@@ -126,7 +126,7 @@ export const checkSelectionConsistency = (ranges: unknown, comparator: (row: num
 };
 
 /** A check mark before the label. */
-export const markLabelAsSelected = (label: string): string => (
+export const markLabelAsSelected = (label: string | null): string => (
   `<span class="selected">${String.fromCharCode(10003)}</span>${label}`);
 
 /**

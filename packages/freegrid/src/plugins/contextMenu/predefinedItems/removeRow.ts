@@ -29,7 +29,7 @@ const removeRowItem = (): MenuItem => ({
   callback(this: PluginHost) {
     // TODO: Please keep in mind that below `1` may be improper. The table's way of work, before change `f1747b3912ea3b21fe423fd102ca94c87db81379` was restored.
     // There is still problem when removing more than one row.
-    this.alter('remove_row', transformSelectionToRowDistance(this.getSelected()), 1, 'ContextMenu.removeRow');
+    this.alter('remove_row', transformSelectionToRowDistance(this.getSelected()!), 1, 'ContextMenu.removeRow');
   },
   disabled(this: PluginHost) {
     const selected = getValidSelection(this);

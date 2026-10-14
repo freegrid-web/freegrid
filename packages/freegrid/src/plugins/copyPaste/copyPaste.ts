@@ -270,7 +270,8 @@ class CopyPaste extends BasePlugin {
    * @private
    */
   getOrCreateFocusableElement(): void {
-    const editableElement = this.hot.getActiveEditor()?.TEXTAREA;
+    // The text editor's textarea (other editors have none).
+    const editableElement = (this.hot.getActiveEditor() as { TEXTAREA?: HTMLTextAreaElement } | undefined)?.TEXTAREA;
 
     if (editableElement) {
       this.focusableElement!.setFocusableElement(editableElement);
@@ -296,7 +297,7 @@ class CopyPaste extends BasePlugin {
    * @param [selection] Where they are pasted: `[row, column, row2, column2]`.
    * @returns Range coordinates after populate data
    */
-  populateValues(inputArray: unknown[][], selection: number[] = this.hot.getSelectedLast()): number[] | undefined {
+  populateValues(inputArray: unknown[][], selection: number[] = this.hot.getSelectedLast()!): number[] | undefined {
     if (!inputArray.length) {
       return undefined;
     }
@@ -465,7 +466,7 @@ class CopyPaste extends BasePlugin {
     const activeEditor = this.hot.getActiveEditor();
 
     if (!activeEditor ||
-      (activeElement !== this.focusableElement!.getFocusableElement() && activeElement !== activeEditor.select)) {
+      (activeElement !== this.focusableElement!.getFocusableElement() && activeElement !== (activeEditor as { select?: HTMLElement }).select)) {
       return;
     }
 
