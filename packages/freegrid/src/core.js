@@ -833,7 +833,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     this.updateSettings(priv.settings, true);
 
     this.view = new TableView(this);
-    editorManager = EditorManager.getInstance(instance, priv, selection, datamap);
+    editorManager = EditorManager.getInstance(instance, priv, selection);
 
     this.forceFullRender = true; // used when data was changed
 
