@@ -1,3 +1,27 @@
+import type { OverlayEngine } from './overlay/types';
+import type Walkontable from './core';
+import type TopOverlay from './overlay/top';
+import type LeftOverlay from './overlay/left';
+import type BottomOverlay from './overlay/bottom';
+import type TopLeftCornerOverlay from './overlay/topLeftCorner';
+import type BottomLeftCornerOverlay from './overlay/bottomLeftCorner';
+import type DebugOverlay from './overlay/debug';
+import type { ExtendedEvent } from '../../../eventManager';
+
+/** Old wheel properties are still read for callers which supply synthetic events. */
+type OverlayEvent = ExtendedEvent & {
+  target: Node | Window;
+  realTarget: Node;
+  deltaX: number;
+  deltaY: number;
+  deltaMode: number;
+  wheelDeltaX: number;
+  wheelDeltaY: number;
+  keyCode: number;
+};
+type Listener = [EventTarget, string, (event: OverlayEvent) => void];
+type DisabledOverlay = { needFullRender: false; updateStateOfRendering(): false; clone?: undefined };
+
 import {
   getScrollableElement,
   getScrollbarWidth,
@@ -12,10 +36,28 @@ import Overlay from './overlay/_base';
  * @class Overlays
  */
 class Overlays {
+  #engine: OverlayEngine;
+  declare instance: OverlayEngine;
+  #eventManager: EventManager;
+  declare scrollableElement: HTMLElement | Window;
+  declare topOverlay: TopOverlay;
+  declare leftOverlay: LeftOverlay;
+  declare bottomOverlay: BottomOverlay | DisabledOverlay;
+  declare topLeftCornerOverlay?: TopLeftCornerOverlay;
+  declare bottomLeftCornerOverlay?: BottomLeftCornerOverlay | DisabledOverlay;
+  declare debug?: DebugOverlay;
+  #destroyed: boolean;
+  #keyPressed: boolean;
+  #spreaderLastSize: { width: number | null; height: number | null };
+  #verticalScrolling: boolean;
+  #horizontalScrolling: boolean;
+  #registeredListeners: Listener[];
+  #browserLineHeight: number;
+
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     /**
      * Sometimes `line-height` might be set to 'normal'. In that case, a default `font-size` should be multiplied by roughly 1.2.
      * https://developer.mozilla.org/pl/docs/Web/CSS/line-height#Values
@@ -23,67 +65,33 @@ class Overlays {
     const BODY_LINE_HEIGHT = parseInt(getComputedStyle(document.body).lineHeight, 10);
     const FALLBACK_BODY_LINE_HEIGHT = parseInt(getComputedStyle(document.body).fontSize, 10) * 1.2;
 
-    this.wot = wotInstance;
+    this.#engine = wotInstance as unknown as OverlayEngine;
 
     // legacy support
-    this.instance = this.wot;
-    this.eventManager = new EventManager(this.wot);
+    this.instance = this.#engine;
+    this.#eventManager = new EventManager(this.#engine);
 
-    this.wot.update('scrollbarWidth', getScrollbarWidth());
-    this.wot.update('scrollbarHeight', getScrollbarWidth());
+    this.#engine.update('scrollbarWidth', getScrollbarWidth());
+    this.#engine.update('scrollbarHeight', getScrollbarWidth());
 
-    this.scrollableElement = getScrollableElement(this.wot.wtTable.TABLE);
+    this.scrollableElement = getScrollableElement(this.#engine.wtTable.TABLE);
 
     this.prepareOverlays();
 
-    this.destroyed = false;
-    this.keyPressed = false;
-    this.spreaderLastSize = {
+    this.#destroyed = false;
+    this.#keyPressed = false;
+    this.#spreaderLastSize = {
       width: null,
       height: null,
     };
-    this.overlayScrollPositions = {
-      master: {
-        top: 0,
-        left: 0,
-      },
-      top: {
-        top: null,
-        left: 0,
-      },
-      bottom: {
-        top: null,
-        left: 0
-      },
-      left: {
-        top: 0,
-        left: null
-      }
-    };
 
-    this.pendingScrollCallbacks = {
-      master: {
-        top: 0,
-        left: 0,
-      },
-      top: {
-        left: 0,
-      },
-      bottom: {
-        left: 0,
-      },
-      left: {
-        top: 0,
-      }
-    };
 
-    this.verticalScrolling = false;
-    this.horizontalScrolling = false;
-    this.delegatedScrollCallback = false;
+    this.#verticalScrolling = false;
+    this.#horizontalScrolling = false;
 
-    this.registeredListeners = [];
+    this.#registeredListeners = [];
 
-    this.browserLineHeight = BODY_LINE_HEIGHT || FALLBACK_BODY_LINE_HEIGHT;
+    this.#browserLineHeight = BODY_LINE_HEIGHT || FALLBACK_BODY_LINE_HEIGHT;
 
     this.registerListeners();
   }
@@ -99,7 +107,7 @@ class Overlays {
     if (this.topOverlay) {
       syncScroll = this.topOverlay.updateStateOfRendering() || syncScroll;
     } else {
-      this.topOverlay = Overlay.createOverlay(Overlay.CLONE_TOP, this.wot);
+      this.topOverlay = Overlay.createOverlay<TopOverlay>(Overlay.CLONE_TOP, this.#engine);
     }
 
     if (!Overlay.hasOverlay(Overlay.CLONE_BOTTOM)) {
@@ -118,20 +126,20 @@ class Overlays {
     if (this.bottomOverlay) {
       syncScroll = this.bottomOverlay.updateStateOfRendering() || syncScroll;
     } else {
-      this.bottomOverlay = Overlay.createOverlay(Overlay.CLONE_BOTTOM, this.wot);
+      this.bottomOverlay = Overlay.createOverlay<BottomOverlay>(Overlay.CLONE_BOTTOM, this.#engine);
     }
 
     if (this.leftOverlay) {
       syncScroll = this.leftOverlay.updateStateOfRendering() || syncScroll;
     } else {
-      this.leftOverlay = Overlay.createOverlay(Overlay.CLONE_LEFT, this.wot);
+      this.leftOverlay = Overlay.createOverlay<LeftOverlay>(Overlay.CLONE_LEFT, this.#engine);
     }
 
     if (this.topOverlay.needFullRender && this.leftOverlay.needFullRender) {
       if (this.topLeftCornerOverlay) {
         syncScroll = this.topLeftCornerOverlay.updateStateOfRendering() || syncScroll;
       } else {
-        this.topLeftCornerOverlay = Overlay.createOverlay(Overlay.CLONE_TOP_LEFT_CORNER, this.wot);
+        this.topLeftCornerOverlay = Overlay.createOverlay<TopLeftCornerOverlay>(Overlay.CLONE_TOP_LEFT_CORNER, this.#engine);
       }
     }
 
@@ -139,12 +147,12 @@ class Overlays {
       if (this.bottomLeftCornerOverlay) {
         syncScroll = this.bottomLeftCornerOverlay.updateStateOfRendering() || syncScroll;
       } else {
-        this.bottomLeftCornerOverlay = Overlay.createOverlay(Overlay.CLONE_BOTTOM_LEFT_CORNER, this.wot);
+        this.bottomLeftCornerOverlay = Overlay.createOverlay<BottomLeftCornerOverlay>(Overlay.CLONE_BOTTOM_LEFT_CORNER, this.#engine);
       }
     }
 
-    if (this.wot.getSetting('debug') && !this.debug) {
-      this.debug = Overlay.createOverlay(Overlay.CLONE_DEBUG, this.wot);
+    if (this.#engine.getSetting('debug') && !this.debug) {
+      this.debug = Overlay.createOverlay<DebugOverlay>(Overlay.CLONE_DEBUG, this.#engine);
     }
 
     return syncScroll;
@@ -154,27 +162,27 @@ class Overlays {
    * Refresh and redraw table
    */
   refreshAll() {
-    if (!this.wot.drawn) {
+    if (!this.#engine.drawn) {
       return;
     }
-    if (!this.wot.wtTable.holder.parentNode) {
+    if (!this.#engine.wtTable.holder.parentNode) {
       // Walkontable was detached from DOM, but this handler was not removed
       this.destroy();
 
       return;
     }
-    this.wot.draw(true);
+    this.#engine.draw(true);
 
-    if (this.verticalScrolling) {
+    if (this.#verticalScrolling) {
       this.leftOverlay.onScroll();
     }
 
-    if (this.horizontalScrolling) {
+    if (this.#horizontalScrolling) {
       this.topOverlay.onScroll();
     }
 
-    this.verticalScrolling = false;
-    this.horizontalScrolling = false;
+    this.#verticalScrolling = false;
+    this.#horizontalScrolling = false;
   }
 
   /**
@@ -184,7 +192,7 @@ class Overlays {
     const topOverlayScrollable = this.topOverlay.mainTableScrollableElement;
     const leftOverlayScrollable = this.leftOverlay.mainTableScrollableElement;
 
-    const listenersToRegister = [];
+    const listenersToRegister: Listener[] = [];
     listenersToRegister.push([document.documentElement, 'keydown', event => this.onKeyDown(event)]);
     listenersToRegister.push([document.documentElement, 'keyup', () => this.onKeyUp()]);
     listenersToRegister.push([document, 'visibilitychange', () => this.onKeyUp()]);
@@ -256,10 +264,10 @@ class Overlays {
     }
 
     while (listenersToRegister.length) {
-      const listener = listenersToRegister.pop();
-      this.eventManager.addEventListener(listener[0], listener[1], listener[2]);
+      const listener = listenersToRegister.pop()!;
+      this.#eventManager.addEventListener(listener[0], listener[1], listener[2]);
 
-      this.registeredListeners.push(listener);
+      this.#registeredListeners.push(listener);
     }
   }
 
@@ -267,9 +275,9 @@ class Overlays {
    * Deregister all previously registered listeners.
    */
   deregisterListeners() {
-    while (this.registeredListeners.length) {
-      const listener = this.registeredListeners.pop();
-      this.eventManager.removeEventListener(listener[0], listener[1], listener[2]);
+    while (this.#registeredListeners.length) {
+      const listener = this.#registeredListeners.pop()!;
+      this.#eventManager.removeEventListener(listener[0], listener[1], listener[2]);
     }
   }
 
@@ -278,7 +286,7 @@ class Overlays {
    *
    * @param {Event} event
    */
-  onTableScroll(event) {
+  onTableScroll(event: OverlayEvent) {
     // There was if statement which controlled flow of this function. It avoided the execution of the next lines
     // on mobile devices. It was changed. Broader description of this case is included within issue #4856.
 
@@ -288,14 +296,14 @@ class Overlays {
 
     // For key press, sync only master -> overlay position because while pressing Walkontable.render is triggered
     // by hot.refreshBorder
-    if (this.keyPressed) {
-      if ((masterVertical !== window && target !== window && !event.target.contains(masterVertical)) ||
-          (masterHorizontal !== window && target !== window && !event.target.contains(masterHorizontal))) {
+    if (this.#keyPressed) {
+      if ((masterVertical !== window && target !== window && !(event.target as Node).contains(masterVertical as Node)) ||
+          (masterHorizontal !== window && target !== window && !(event.target as Node).contains(masterHorizontal as Node))) {
         return;
       }
     }
 
-    this.syncScrollPositions(event);
+    (this.syncScrollPositions as (event: OverlayEvent) => void)(event);
   }
 
   /**
@@ -303,7 +311,7 @@ class Overlays {
    *
    * @param {Event} event
    */
-  onCloneWheel(event) {
+  onCloneWheel(event: OverlayEvent) {
     if (this.scrollableElement !== window) {
       event.preventDefault();
     }
@@ -316,10 +324,10 @@ class Overlays {
 
     // For key press, sync only master -> overlay position because while pressing Walkontable.render is triggered
     // by hot.refreshBorder
-    const shouldNotWheelVertically = masterVertical !== window && target !== window && !event.target.contains(masterVertical);
-    const shouldNotWheelHorizontally = masterHorizontal !== window && target !== window && !event.target.contains(masterHorizontal);
+    const shouldNotWheelVertically = masterVertical !== window && target !== window && !(event.target as Node).contains(masterVertical as Node);
+    const shouldNotWheelHorizontally = masterHorizontal !== window && target !== window && !(event.target as Node).contains(masterHorizontal as Node);
 
-    if (this.keyPressed && (shouldNotWheelVertically || shouldNotWheelHorizontally)) {
+    if (this.#keyPressed && (shouldNotWheelVertically || shouldNotWheelHorizontally)) {
       return;
     }
 
@@ -329,15 +337,15 @@ class Overlays {
   /**
    * Key down listener
    */
-  onKeyDown(event) {
-    this.keyPressed = isKey(event.keyCode, 'ARROW_UP|ARROW_RIGHT|ARROW_DOWN|ARROW_LEFT');
+  onKeyDown(event: OverlayEvent) {
+    this.#keyPressed = isKey(event.keyCode, 'ARROW_UP|ARROW_RIGHT|ARROW_DOWN|ARROW_LEFT');
   }
 
   /**
    * Key up listener
    */
   onKeyUp() {
-    this.keyPressed = false;
+    this.#keyPressed = false;
   }
 
   /**
@@ -347,13 +355,13 @@ class Overlays {
    * @param {Event} event
    * @returns {Boolean}
    */
-  translateMouseWheelToScroll(event) {
+  translateMouseWheelToScroll(event: OverlayEvent) {
     let deltaY = isNaN(event.deltaY) ? (-1) * event.wheelDeltaY : event.deltaY;
     let deltaX = isNaN(event.deltaX) ? (-1) * event.wheelDeltaX : event.deltaX;
 
     if (event.deltaMode === 1) {
-      deltaX += deltaX * this.browserLineHeight;
-      deltaY += deltaY * this.browserLineHeight;
+      deltaX += deltaX * this.#browserLineHeight;
+      deltaY += deltaY * this.#browserLineHeight;
     }
 
     this.scrollVertically(deltaY);
@@ -362,18 +370,18 @@ class Overlays {
     return false;
   }
 
-  scrollVertically(distance) {
+  scrollVertically(distance: number) {
     if (distance === 0) {
       return 0;
     }
-    this.scrollableElement.scrollTop += distance;
+    (this.scrollableElement as HTMLElement).scrollTop += distance;
   }
 
-  scrollHorizontally(distance) {
+  scrollHorizontally(distance: number) {
     if (distance === 0) {
       return 0;
     }
-    this.scrollableElement.scrollLeft += distance;
+    (this.scrollableElement as HTMLElement).scrollLeft += distance;
   }
 
   /**
@@ -383,19 +391,19 @@ class Overlays {
    * @param {Event|Object} event
    */
   syncScrollPositions() {
-    if (this.destroyed) {
+    if (this.#destroyed) {
       return;
     }
 
     const topHolder = this.topOverlay.clone.wtTable.holder;
     const leftHolder = this.leftOverlay.clone.wtTable.holder;
 
-    const [scrollLeft, scrollTop] = [this.scrollableElement.scrollLeft, this.scrollableElement.scrollTop];
+    const [scrollLeft, scrollTop] = [(this.scrollableElement as HTMLElement).scrollLeft, (this.scrollableElement as HTMLElement).scrollTop];
 
-    this.horizontalScrolling = topHolder.scrollLeft !== scrollLeft;
-    this.verticalScrolling = leftHolder.scrollTop !== scrollTop;
+    this.#horizontalScrolling = topHolder.scrollLeft !== scrollLeft;
+    this.#verticalScrolling = leftHolder.scrollTop !== scrollTop;
 
-    if (this.horizontalScrolling) {
+    if (this.#horizontalScrolling) {
       topHolder.scrollLeft = scrollLeft;
 
       const bottomHolder = this.bottomOverlay.needFullRender ? this.bottomOverlay.clone.wtTable.holder : null;
@@ -405,7 +413,7 @@ class Overlays {
       }
     }
 
-    if (this.verticalScrolling) {
+    if (this.#verticalScrolling) {
       leftHolder.scrollTop = scrollTop;
     }
 
@@ -417,7 +425,7 @@ class Overlays {
    */
   syncScrollWithMaster() {
     const master = this.topOverlay.mainTableScrollableElement;
-    const { scrollLeft, scrollTop } = master;
+    const { scrollLeft, scrollTop } = master as HTMLElement;
 
     if (this.topOverlay.needFullRender) {
       this.topOverlay.clone.wtTable.holder.scrollLeft = scrollLeft;
@@ -443,7 +451,7 @@ class Overlays {
       this.bottomOverlay.updateMainScrollableElement();
     }
 
-    this.scrollableElement = getScrollableElement(this.wot.wtTable.TABLE);
+    this.scrollableElement = getScrollableElement(this.#engine.wtTable.TABLE);
 
     this.registerListeners();
   }
@@ -452,7 +460,7 @@ class Overlays {
    *
    */
   destroy() {
-    this.eventManager.destroy();
+    this.#eventManager.destroy();
     this.topOverlay.destroy();
 
     if (this.bottomOverlay.clone) {
@@ -471,7 +479,7 @@ class Overlays {
     if (this.debug) {
       this.debug.destroy();
     }
-    this.destroyed = true;
+    this.#destroyed = true;
   }
 
   /**
@@ -479,13 +487,13 @@ class Overlays {
    */
   refresh(fastDraw = false) {
     if (this.topOverlay.areElementSizesAdjusted && this.leftOverlay.areElementSizesAdjusted) {
-      const container = this.wot.wtTable.wtRootElement.parentNode || this.wot.wtTable.wtRootElement;
+      const container = this.#engine.wtTable.wtRootElement.parentNode || this.#engine.wtTable.wtRootElement;
       const width = container.clientWidth;
       const height = container.clientHeight;
 
-      if (width !== this.spreaderLastSize.width || height !== this.spreaderLastSize.height) {
-        this.spreaderLastSize.width = width;
-        this.spreaderLastSize.height = height;
+      if (width !== this.#spreaderLastSize.width || height !== this.#spreaderLastSize.height) {
+        this.#spreaderLastSize.width = width;
+        this.#spreaderLastSize.height = height;
         this.adjustElementsSize();
       }
     }
@@ -516,11 +524,11 @@ class Overlays {
    * @param {Boolean} [force=false]
    */
   adjustElementsSize(force = false) {
-    const totalColumns = this.wot.getSetting('totalColumns');
-    const totalRows = this.wot.getSetting('totalRows');
-    const headerRowSize = this.wot.wtViewport.getRowHeaderWidth();
-    const headerColumnSize = this.wot.wtViewport.getColumnHeaderHeight();
-    const hiderStyle = this.wot.wtTable.hider.style;
+    const totalColumns = this.#engine.getSetting('totalColumns');
+    const totalRows = this.#engine.getSetting('totalRows');
+    const headerRowSize = this.#engine.wtViewport.getRowHeaderWidth();
+    const headerColumnSize = this.#engine.wtViewport.getColumnHeaderHeight();
+    const hiderStyle = this.#engine.wtTable.hider.style;
 
     hiderStyle.width = `${headerRowSize + this.leftOverlay.sumCellSizes(0, totalColumns)}px`;
     hiderStyle.height = `${headerColumnSize + this.topOverlay.sumCellSizes(0, totalRows) + 1}px`;
@@ -555,7 +563,7 @@ class Overlays {
    * @param {HTMLElement} element
    * @returns {Object|null}
    */
-  getParentOverlay(element) {
+  getParentOverlay(element: HTMLElement | null | undefined): Walkontable | null {
     if (!element) {
       return null;
     }
@@ -567,14 +575,14 @@ class Overlays {
       this.topLeftCornerOverlay,
       this.bottomLeftCornerOverlay
     ];
-    let result = null;
+    let result: Walkontable | null = null;
 
     arrayEach(overlays, (elem) => {
       if (!elem) {
         return;
       }
 
-      if (elem.clone && elem.clone.wtTable.TABLE.contains(element)) {
+      if (elem.clone && elem.clone.wtTable.TABLE.contains(element!)) {
         result = elem.clone;
       }
     });

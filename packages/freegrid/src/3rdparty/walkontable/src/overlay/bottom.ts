@@ -1,3 +1,5 @@
+import type { OverlayEngine } from './types';
+import type Walkontable from '../core';
 import {
   addClass,
   getScrollbarWidth,
@@ -14,10 +16,11 @@ import Overlay from './_base';
  * @class BottomOverlay
  */
 class BottomOverlay extends Overlay {
+  declare clone: OverlayEngine;
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     super(wotInstance);
     this.clone = this.makeClone(Overlay.CLONE_BOTTOM);
   }
@@ -59,11 +62,11 @@ class BottomOverlay extends Overlay {
     let headerPosition = 0;
     overlayRoot.style.top = '';
 
-    if (this.wot.wtOverlays.leftOverlay.trimmingContainer === window) {
+    if (this.wot.wtOverlays!.leftOverlay.trimmingContainer === window) {
       const box = this.wot.wtTable.hider.getBoundingClientRect();
       const bottom = Math.ceil(box.bottom);
-      let finalLeft;
-      let finalBottom;
+      let finalLeft: number | string;
+      let finalBottom: number | string;
       const bodyHeight = document.body.offsetHeight;
 
       finalLeft = this.wot.wtTable.hider.style.left;
@@ -75,11 +78,11 @@ class BottomOverlay extends Overlay {
         finalBottom = 0;
       }
       headerPosition = finalBottom;
-      finalBottom += 'px';
+      (finalBottom as number | string) += 'px';
 
       overlayRoot.style.top = '';
-      overlayRoot.style.left = finalLeft;
-      overlayRoot.style.bottom = finalBottom;
+      overlayRoot.style.left = finalLeft as unknown as string;
+      overlayRoot.style.bottom = finalBottom as unknown as string;
 
     } else {
       headerPosition = this.getScrollPosition();
@@ -94,12 +97,12 @@ class BottomOverlay extends Overlay {
    *
    * @param {Number} pos
    */
-  setScrollPosition(pos) {
+  setScrollPosition(pos: number) {
     if (this.mainTableScrollableElement === window) {
       window.scrollTo(getWindowScrollLeft(), pos);
 
     } else {
-      this.mainTableScrollableElement.scrollTop = pos;
+      (this.mainTableScrollableElement as HTMLElement).scrollTop = pos;
     }
   }
 
@@ -117,7 +120,7 @@ class BottomOverlay extends Overlay {
    * @param {Number} to Row index where calculation is finished
    * @returns {Number} Height sum
    */
-  sumCellSizes(from, to) {
+  sumCellSizes(from: number, to: number): number {
     let row = from;
     let sum = 0;
     const defaultRowHeight = this.wot.wtSettings.settings.defaultRowHeight;
@@ -231,7 +234,7 @@ class BottomOverlay extends Overlay {
    * @param sourceRow {Number} Row index which you want to scroll to
    * @param [bottomEdge=false] {Boolean} if `true`, scrolls according to the bottom edge (top edge is by default)
    */
-  scrollTo(sourceRow, bottomEdge) {
+  scrollTo(sourceRow: number, bottomEdge?: boolean) {
     let newY = this.getTableParentOffset();
     const sourceInstance = this.wot.cloneSource ? this.wot.cloneSource : this.wot;
     const mainHolder = sourceInstance.wtTable.holder;
@@ -260,7 +263,7 @@ class BottomOverlay extends Overlay {
    *
    * @returns {Number}
    */
-  getTableParentOffset() {
+  getTableParentOffset(): number {
     if (this.mainTableScrollableElement === window) {
       return this.wot.wtTable.holderOffset.top;
     }
@@ -273,7 +276,7 @@ class BottomOverlay extends Overlay {
    *
    * @returns {Number} Main table's vertical scroll position
    */
-  getScrollPosition() {
+  getScrollPosition(): number {
     return getScrollTop(this.mainTableScrollableElement);
   }
 
@@ -282,7 +285,7 @@ class BottomOverlay extends Overlay {
    *
    * @param {Number} position Header Y position if trimming container is window or scroll top if not
    */
-  adjustHeaderBordersPosition(position) {
+  adjustHeaderBordersPosition(position: number) {
     if (this.wot.getSetting('fixedRowsBottom') === 0 && this.wot.getSetting('columnHeaders').length > 0) {
       const masterParent = this.wot.wtTable.holder.parentNode;
       const previousState = hasClass(masterParent, 'innerBorderTop');
@@ -293,15 +296,15 @@ class BottomOverlay extends Overlay {
         removeClass(masterParent, 'innerBorderTop');
       }
       if (!previousState && position || previousState && !position) {
-        this.wot.wtOverlays.adjustElementsSize();
+        this.wot.wtOverlays!.adjustElementsSize();
       }
     }
     // nasty workaround for double border in the header, TODO: find a pure-css solution
     if (this.wot.getSetting('rowHeaders').length === 0) {
-      const secondHeaderCell = this.clone.wtTable.THEAD.querySelector('th:nth-of-type(2)');
+      const secondHeaderCell = this.clone.wtTable.THEAD.querySelector<HTMLTableCellElement>('th:nth-of-type(2)');
 
       if (secondHeaderCell) {
-        secondHeaderCell.style['border-left-width'] = 0;
+        (secondHeaderCell.style as unknown as Record<string, string>)['border-left-width'] = 0 as unknown as string;
       }
     }
   }

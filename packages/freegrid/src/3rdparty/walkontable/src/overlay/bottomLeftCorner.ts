@@ -1,3 +1,5 @@
+import type { OverlayEngine } from './types';
+import type Walkontable from '../core';
 import {
   getScrollbarWidth,
   outerHeight,
@@ -10,10 +12,11 @@ import Overlay from './_base';
  * @class TopLeftCornerOverlay
  */
 class BottomLeftCornerOverlay extends Overlay {
+  declare clone: OverlayEngine;
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     super(wotInstance);
     this.clone = this.makeClone(Overlay.CLONE_BOTTOM_LEFT_CORNER);
   }
@@ -63,8 +66,8 @@ class BottomLeftCornerOverlay extends Overlay {
       const box = this.wot.wtTable.hider.getBoundingClientRect();
       const bottom = Math.ceil(box.bottom);
       const left = Math.ceil(box.left);
-      let finalLeft;
-      let finalBottom;
+      let finalLeft: number | string;
+      let finalBottom: number | string;
       const bodyHeight = document.body.offsetHeight;
 
       if (left < 0) {
@@ -78,12 +81,12 @@ class BottomLeftCornerOverlay extends Overlay {
       } else {
         finalBottom = 0;
       }
-      finalBottom += 'px';
-      finalLeft += 'px';
+      (finalBottom as number | string) += 'px';
+      (finalLeft as number | string) += 'px';
 
       overlayRoot.style.top = '';
-      overlayRoot.style.left = finalLeft;
-      overlayRoot.style.bottom = finalBottom;
+      overlayRoot.style.left = finalLeft as unknown as string;
+      overlayRoot.style.bottom = finalBottom as unknown as string;
 
     } else {
       resetCssTransform(overlayRoot);
