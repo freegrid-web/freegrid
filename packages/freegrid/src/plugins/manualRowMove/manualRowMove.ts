@@ -706,7 +706,16 @@ class ManualRowMove extends BasePlugin {
    * @private
    */
   onAfterLoadData(): void {
+    // New data (not the first load, after which the plugin applies its settings itself): the order a user made goes,
+    // and the order from the settings (an array, or a saved state) applies again.
+    if (this.hot.view) {
+      this.rowsMapper.clearMap();
+    }
     this.updateRowsMapper();
+
+    if (this.hot.view) {
+      this.initialSettings();
+    }
   }
 
   /**

@@ -110,8 +110,14 @@ class CreateRowAction extends Action {
       this.index -= minSpareRows;
     }
 
+    // Removing the row would shrink the frozen rows, but inserting it did not grow them: they stay as they were.
+    const { fixedRowsTop, fixedRowsBottom } = instance.getSettings();
+
     instance.addHookOnce('afterRemoveRow', undoneCallback);
     instance.alter('remove_row', this.index, this.amount, 'UndoRedo.undo');
+
+    Object.assign(instance.getSettings(), { fixedRowsTop, fixedRowsBottom });
+    instance.render();
   }
 
   redo(instance: PluginHost, redoneCallback: Done): void {
@@ -120,23 +126,36 @@ class CreateRowAction extends Action {
   }
 }
 
-/** Removed rows (with their data). */
+/** Removed rows (with their data and cell meta). */
 class RemoveRowAction extends Action {
   index: number;
 
   data: unknown[][];
 
-  constructor(index: number, data: unknown[][]) {
+  /**
+   * The cell meta of each removed row (`undefined` for a row that had none yet). Private: the undo hooks get the action
+   * as a JSON copy, and cell meta refers to the grid.
+   */
+  #cellsMeta: (Record<string, unknown>[] | undefined)[];
+
+  constructor(index: number, data: unknown[][], cellsMeta: (Record<string, unknown>[] | undefined)[] = []) {
     super();
     this.index = index;
     this.data = data;
+    this.#cellsMeta = cellsMeta;
     this.actionType = 'remove_row';
   }
 
   undo(instance: PluginHost, undoneCallback: Done): void {
     instance.alter('insert_row', this.index, this.data.length, 'UndoRedo.undo');
+
+    if (this.#cellsMeta.length) {
+      instance.spliceCellsMeta(this.index, this.data.length, ...this.#cellsMeta.map(rowMeta => rowMeta || []));
+    }
     instance.addHookOnce('afterRender', undoneCallback);
-    instance.populateFromArray(this.index, 0, this.data, undefined, undefined, 'UndoRedo.undo');
+    // setDataAtCell, not populateFromArray: read-only cells get their values back too.
+    instance.setDataAtCell(this.data.flatMap((rowData, row) => rowData
+      .map((value, column): [number, number, unknown] => [this.index + row, column, value])), null, null, 'UndoRedo.undo');
   }
 
   redo(instance: PluginHost, redoneCallback: Done): void {
@@ -159,8 +178,14 @@ class CreateColumnAction extends Action {
   }
 
   undo(instance: PluginHost, undoneCallback: Done): void {
+    // Removing the column would shrink the frozen columns, but inserting it did not grow them.
+    const { fixedColumnsLeft } = instance.getSettings();
+
     instance.addHookOnce('afterRemoveCol', undoneCallback);
     instance.alter('remove_col', this.index, this.amount, 'UndoRedo.undo');
+
+    instance.getSettings().fixedColumnsLeft = fixedColumnsLeft;
+    instance.render();
   }
 
   redo(instance: PluginHost, redoneCallback: Done): void {
@@ -474,8 +499,11 @@ class UndoRedo {
     this.instance = instance;
 
     instance.addHook('afterChange', (changes: Change[] | null, source: string) => {
-      if (changes && source !== 'UndoRedo.undo' && source !== 'UndoRedo.redo' && source !== 'MergeCells') {
-        this.done(new ChangeAction(changes));
+      // Only the changes that change something are an undo step.
+      const realChanges = (changes || []).filter(change => change && change[2] !== change[3]);
+
+      if (realChanges.length && source !== 'UndoRedo.undo' && source !== 'UndoRedo.redo' && source !== 'MergeCells') {
+        this.done(new ChangeAction(realChanges));
       }
     });
 
@@ -493,8 +521,10 @@ class UndoRedo {
       const rowIndex = (originalData.length + index) % originalData.length;
       const physicalRowIndex = instance.toPhysicalRow(rowIndex);
       const removedData = deepClone(originalData.slice(physicalRowIndex, physicalRowIndex + amount));
+      const removedMeta = Array.from({ length: removedData.length },
+        (_, offset) => instance.getCellMetaAtRow(physicalRowIndex + offset) as Record<string, unknown>[] | undefined);
 
-      this.done(new RemoveRowAction(rowIndex, removedData));
+      this.done(new RemoveRowAction(rowIndex, removedData, removedMeta));
     });
 
     instance.addHook('afterCreateCol', (index: number, amount: number, source: string) => {

@@ -2566,4 +2566,48 @@ describe('UndoRedo', () => {
       }, 100);
     });
   });
+
+  describe('undo steps that restore what was there', () => {
+    it('should not add an undo step for an edit that changes nothing', () => {
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2) });
+
+      setDataAtCell(0, 0, 'A1');
+
+      expect(hot.isUndoAvailable()).toBe(false);
+    });
+
+    it('should restore the values of read-only cells when undoing a row removal', () => {
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 2), cells: row => (row === 1 ? { readOnly: true } : {}) });
+
+      alter('remove_row', 1);
+      hot.undo();
+
+      expect(getDataAtRow(1)).toEqual(['A2', 'B2']);
+    });
+
+    it('should restore the cell meta of a removed row', () => {
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 2) });
+
+      setCellMeta(1, 0, 'className', 'marked');
+      alter('remove_row', 1);
+      hot.undo();
+
+      expect(getCellMeta(1, 0).className).toBe('marked');
+      expect(getDataAtRow(1)).toEqual(['A2', 'B2']);
+    });
+
+    it('should keep the frozen rows and columns when undoing an insertion', () => {
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(5, 5), fixedRowsTop: 2, fixedColumnsLeft: 2 });
+
+      alter('insert_row', 0);
+      hot.undo();
+      alter('insert_col', 0);
+      hot.undo();
+
+      expect(hot.getSettings().fixedRowsTop).toBe(2);
+      expect(hot.getSettings().fixedColumnsLeft).toBe(2);
+      expect(countRows()).toBe(5);
+      expect(countCols()).toBe(5);
+    });
+  });
 });

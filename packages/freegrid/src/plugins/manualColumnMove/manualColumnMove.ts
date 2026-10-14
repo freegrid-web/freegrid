@@ -124,7 +124,11 @@ class ManualColumnMove extends BasePlugin {
    * hook and if it returns `true` than the {@link ManualColumnMove#enablePlugin} method is called.
    */
   isEnabled(): boolean {
-    return !!this.hot.getSettings().manualColumnMove;
+    const { manualColumnMove, manualColumnFreeze } = this.hot.getSettings();
+
+    // Freezing a column moves it, so manualColumnFreeze turns this plugin on too (see ManualColumnFreeze#onAfterInit);
+    // without this, updateSettings would turn it off and the frozen columns would lose their place.
+    return !!manualColumnMove || !!manualColumnFreeze;
   }
 
   /**
@@ -691,7 +695,16 @@ class ManualColumnMove extends BasePlugin {
    * @private
    */
   onAfterLoadData(): void {
+    // New data (not the first load, after which the plugin applies its settings itself): the order a user made goes,
+    // and the order from the settings (an array, or a saved state) applies again.
+    if (this.hot.view) {
+      this.columnsMapper.clearMap();
+    }
     this.updateColumnsMapper();
+
+    if (this.hot.view) {
+      this.initialSettings();
+    }
   }
 
   /**

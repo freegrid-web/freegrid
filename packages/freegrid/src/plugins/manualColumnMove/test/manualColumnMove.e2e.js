@@ -528,4 +528,23 @@ describe('manualColumnMove', () => {
       expect(hot.getDataAtCell(1, 3)).toBe('A2');
     });
   });
+
+  describe('loadData', () => {
+    it('should drop the column order a user made', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(1, 3), manualColumnMove: true });
+
+      getPlugin('manualColumnMove').moveColumn(2, 0);
+      loadData([['a', 'b', 'c']]);
+
+      expect(getDataAtRow(0)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should keep the column order given in the settings', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(1, 3), manualColumnMove: [2, 1, 0] });
+
+      loadData([['a', 'b', 'c']]);
+
+      expect(getDataAtRow(0)).toEqual(['c', 'b', 'a']);
+    });
+  });
 });

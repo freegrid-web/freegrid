@@ -90,6 +90,11 @@
   - Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column
     when columns are inserted or removed (#76).
   - `getCellMeta` rejects `__proto__`, `constructor` and `prototype` as indexes in a way CodeQL recognizes (#22).
+  - Undo: an edit that changes nothing is no undo step; undoing a row removal brings back the values of read-only
+    cells and the rows' cell meta; undoing an inserted row or column keeps the frozen rows and columns (#74).
+  - `loadData` drops the row and column order a user made with `manualRowMove` / `manualColumnMove`; an order given
+    in the settings (an array) applies to the new data (#78).
+  - A column frozen with `freezeColumn` keeps its place after `updateSettings` (#79).
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
