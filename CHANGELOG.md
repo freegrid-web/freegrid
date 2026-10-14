@@ -44,6 +44,8 @@
 - Core, part 4 (TypeScript rewrite): the hooks (`FreeGrid.hooks`, typed listeners and buckets). The docs read the
   core modules as `.ts` or `.js`.
 - Core, part 5 (TypeScript rewrite): the default settings (`FreeGrid.DefaultSettings`).
+- Core, part 6 (TypeScript rewrite): the grid itself (`core`), typed in place: still a constructor function, with
+  parameter types from its JSDoc. Turning it into a class comes next.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

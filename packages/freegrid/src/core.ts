@@ -1,11 +1,13 @@
 import { getRowHeight } from './helpers/dom/theme';
 import { addClass, empty, isChildOfWebComponentTable, removeClass } from './helpers/dom/element';
 import { columnFactory } from './helpers/setting';
+import type { SettingsConstructor } from './helpers/setting';
 import { isFunction } from './helpers/function';
 import { warn } from './helpers/console';
 import { isDefined, isUndefined, isRegExp, isEmpty } from './helpers/mixed';
 import { isMobileBrowser } from './helpers/browser';
 import DataMap from './dataMap';
+import type { Prop } from './dataMap';
 import EditorManager from './editorManager';
 import EventManager from './eventManager';
 import {
@@ -33,6 +35,7 @@ import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
 import Hooks from './pluginHooks';
+import type { HookCallback } from './pluginHooks';
 import DefaultSettings from './defaultSettings';
 import { getCellType } from './cellTypes';
 import { getTranslatedPhrase } from './i18n';
@@ -41,7 +44,63 @@ import { warnUserAboutLanguageRegistration, applyLanguageSetting, normalizeLangu
 import { startObserving as keyStateStartObserving, stopObserving as keyStateStopObserving } from './utils/keyStateObserver';
 import { Selection } from './selection';
 
-let activeGuid = null;
+/* eslint-disable @typescript-eslint/no-explicit-any -- the grid is typed when Core becomes a class */
+/** The grid instance (`this` of Core). */
+type Grid = any;
+type AnyObject = Record<string, any>;
+type AnyFunction = (...args: any[]) => any;
+type CellRange = any;
+/** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
+type Change = [number, Prop, any, any];
+/** A cell position (visual indexes). */
+type Coords = { row: number; col: number };
+/** `[index, amount]`: rows or columns to remove (`alter` with an array index). */
+type IndexGroup = [number, number];
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** The grid's private state, shared with DataMap and EditorManager. */
+type GridPrivate = {
+  cellSettings: AnyObject[][];
+  columnSettings: SettingsConstructor[];
+  columnsSettingConflicts: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a GridSettings instance
+  settings: any;
+  selRange: CellRange | null;
+  isPopulated: boolean | null;
+  scrollable: unknown;
+  /** `true` before the first `updateSettings`, then the first changes (for `afterChange`), then `false`. */
+  firstRun: boolean | [Change[] | null, string];
+  lastKeyCode?: number;
+};
+
+let activeGuid: string | null = null;
+
+/** Counts the running cell validators and calls `onQueueEmpty(valid)` once all of them are done. */
+class ValidatorsQueue {
+  validatorsInQueue = 0;
+  valid = true;
+  #resolved = false;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  onQueueEmpty: (valid: boolean) => void = () => {};
+
+  addValidatorToQueue(): void {
+    this.validatorsInQueue += 1;
+    this.#resolved = false;
+  }
+
+  removeValidatorFormQueue(): void {
+    this.validatorsInQueue = this.validatorsInQueue - 1 < 0 ? 0 : this.validatorsInQueue - 1;
+    this.checkIfQueueIsEmpty();
+  }
+
+  checkIfQueueIsEmpty(): void {
+    if (this.validatorsInQueue === 0 && this.#resolved === false) {
+      this.#resolved = true;
+      this.onQueueEmpty(this.valid);
+    }
+  }
+}
 
 /**
  * FreeGrid constructor
@@ -71,16 +130,19 @@ let activeGuid = null;
  * ```
  * ---
  */
-export default function Core(rootElement, userSettings, rootInstanceSymbol = false) {
+function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
+  rootInstanceSymbol: symbol | boolean = false) {
   let preventScrollingToCell = false;
-  let instance = this;
-  let GridSettings = function() {};
+  let instance: Grid = this; // eslint-disable-line @typescript-eslint/no-this-alias -- the closures below use it
+  // The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's.
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  let GridSettings = function() {} as unknown as SettingsConstructor & { prototype: AnyObject };
   const eventManager = new EventManager(instance);
-  let priv;
-  let datamap;
-  let dataSource;
-  let grid;
-  let editorManager;
+  let priv: GridPrivate;
+  let datamap: DataMap;
+  let dataSource: DataSource;
+  let grid: AnyObject;
+  let editorManager: EditorManager;
 
   extend(GridSettings.prototype, DefaultSettings.prototype); // create grid settings as a copy of default settings
   extend(GridSettings.prototype, userSettings); // overwrite defaults with user settings
@@ -117,7 +179,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     cellSettings: [],
     columnSettings: [],
     columnsSettingConflicts: ['data', 'width', 'language'],
-    settings: new GridSettings(), // current settings instance
+    settings: new GridSettings() as AnyObject, // current settings instance
     selRange: null, // exposed by public method `getSelectedRange`
     isPopulated: null,
     scrollable: null,
@@ -133,15 +195,15 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
   this.selection = selection;
 
-  this.selection.addLocalHook('beforeSetRangeStart', (cellCoords) => {
+  selection.addLocalHook('beforeSetRangeStart', (cellCoords) => {
     this.runHooks('beforeSetRangeStart', cellCoords);
   });
 
-  this.selection.addLocalHook('beforeSetRangeStartOnly', (cellCoords) => {
+  selection.addLocalHook('beforeSetRangeStartOnly', (cellCoords) => {
     this.runHooks('beforeSetRangeStartOnly', cellCoords);
   });
 
-  this.selection.addLocalHook('beforeSetRangeEnd', (cellCoords) => {
+  selection.addLocalHook('beforeSetRangeEnd', (cellCoords) => {
     this.runHooks('beforeSetRangeEnd', cellCoords);
 
     if (cellCoords.row < 0) {
@@ -152,7 +214,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
   });
 
-  this.selection.addLocalHook('afterSetRangeEnd', (cellCoords) => {
+  selection.addLocalHook('afterSetRangeEnd', (cellCoords) => {
     const preventScrolling = createObjectPropListener(false);
     const selectionRange = this.selection.getSelectedRange();
     const { from, to } = selectionRange.current();
@@ -216,7 +278,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     this._refreshBorders(null);
   });
 
-  this.selection.addLocalHook('afterSelectionFinished', (cellRanges) => {
+  selection.addLocalHook('afterSelectionFinished', (cellRanges) => {
     const selectionLayerLevel = cellRanges.length - 1;
     const { from, to } = cellRanges[selectionLayerLevel];
 
@@ -226,7 +288,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       from.row, instance.colToProp(from.col), to.row, instance.colToProp(to.col), selectionLayerLevel);
   });
 
-  this.selection.addLocalHook('afterIsMultipleSelection', (isMultiple) => {
+  selection.addLocalHook('afterIsMultipleSelection', (isMultiple) => {
     const changedIsMultiple = this.runHooks('afterIsMultipleSelection', isMultiple.value);
 
     if (isMultiple.value) {
@@ -234,19 +296,19 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
   });
 
-  this.selection.addLocalHook('beforeModifyTransformStart', (cellCoordsDelta) => {
+  selection.addLocalHook('beforeModifyTransformStart', (cellCoordsDelta) => {
     this.runHooks('modifyTransformStart', cellCoordsDelta);
   });
-  this.selection.addLocalHook('afterModifyTransformStart', (coords, rowTransformDir, colTransformDir) => {
+  selection.addLocalHook('afterModifyTransformStart', (coords, rowTransformDir, colTransformDir) => {
     this.runHooks('afterModifyTransformStart', coords, rowTransformDir, colTransformDir);
   });
-  this.selection.addLocalHook('beforeModifyTransformEnd', (cellCoordsDelta) => {
+  selection.addLocalHook('beforeModifyTransformEnd', (cellCoordsDelta) => {
     this.runHooks('modifyTransformEnd', cellCoordsDelta);
   });
-  this.selection.addLocalHook('afterModifyTransformEnd', (coords, rowTransformDir, colTransformDir) => {
+  selection.addLocalHook('afterModifyTransformEnd', (coords, rowTransformDir, colTransformDir) => {
     this.runHooks('afterModifyTransformEnd', coords, rowTransformDir, colTransformDir);
   });
-  this.selection.addLocalHook('afterDeselect', () => {
+  selection.addLocalHook('afterDeselect', () => {
     editorManager.destroyEditor();
 
     this._refreshBorders();
@@ -254,10 +316,10 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
     this.runHooks('afterDeselect');
   });
-  this.selection.addLocalHook('insertRowRequire', (totalRows) => {
+  selection.addLocalHook('insertRowRequire', (totalRows) => {
     this.alter('insert_row', totalRows, 1, 'auto');
   });
-  this.selection.addLocalHook('insertColRequire', (totalCols) => {
+  selection.addLocalHook('insertColRequire', (totalCols) => {
     this.alter('insert_col', totalCols, 1, 'auto');
   });
 
@@ -277,12 +339,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
      * @param {String} [source] Optional. Source of hook runner.
      * @param {Boolean} [keepEmptyRows] Optional. Flag for preventing deletion of empty rows.
      */
-    alter(action, index, amount = 1, source, keepEmptyRows) {
+    alter(action: string, index?: any, amount = 1, source?: string, keepEmptyRows?: boolean) { // eslint-disable-line @typescript-eslint/no-explicit-any -- a number or IndexGroup[]
       let delta;
 
-      function spliceWith(data, startIndex, count, toInject) {
+      function spliceWith(data: unknown[], startIndex: number, count: number, toInject?: string) {
         const valueFactory = () => {
-          let result;
+          let result: unknown[] | AnyObject | undefined;
 
           if (toInject === 'array') {
             result = [];
@@ -296,11 +358,10 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
         // `new Array(count)` (not `{ length: count }`) keeps how odd `amount` values behaved, e.g. a RangeError for 1.5.
         const spliceArgs = Array.from(new Array(count), () => valueFactory());
 
-        spliceArgs.unshift(startIndex, 0);
-        data.splice(...spliceArgs);
+        data.splice(startIndex, 0, ...spliceArgs);
       }
 
-      const normalizeIndexesGroup = (indexes) => {
+      const normalizeIndexesGroup = (indexes: IndexGroup[]): IndexGroup[] => {
         if (indexes.length === 0) {
           return [];
         }
@@ -352,8 +413,10 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
           spliceWith(priv.cellSettings, index, amount, 'array');
 
           if (delta) {
-            if (selection.isSelected() && selection.selectedRange.current().from.row >= index) {
-              selection.selectedRange.current().from.row += delta;
+            const currentRange = selection.selectedRange.current();
+
+            if (selection.isSelected() && currentRange && currentRange.from.row >= index) {
+              currentRange.from.row += delta;
               selection.transformEnd(delta, 0); // will call render() internally
             } else {
               instance._refreshBorders(); // it will call render and prepare methods
@@ -372,13 +435,14 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
           if (delta) {
             if (Array.isArray(instance.getSettings().colHeaders)) {
-              const spliceArray = [index, 0];
-              spliceArray.length += delta; // inserts empty (undefined) elements at the end of an array
-              Array.prototype.splice.apply(instance.getSettings().colHeaders, spliceArray); // inserts empty (undefined) elements into the colHeader array
+              // inserts empty (undefined) elements into the colHeader array
+              instance.getSettings().colHeaders.splice(index, 0, ...new Array(delta));
             }
 
-            if (selection.isSelected() && selection.selectedRange.current().from.col >= index) {
-              selection.selectedRange.current().from.col += delta;
+            const currentRange = selection.selectedRange.current();
+
+            if (selection.isSelected() && currentRange && currentRange.from.col >= index) {
+              currentRange.from.col += delta;
               selection.transformEnd(0, delta); // will call render() internally
             } else {
               instance._refreshBorders(); // it will call render and prepare methods
@@ -388,7 +452,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
         case 'remove_row':
 
-          const removeRow = (indexes) => {
+          const removeRow = (indexes: IndexGroup[]) => {
             let offset = 0;
 
             // Normalize the {index, amount} groups into bigger groups.
@@ -436,7 +500,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
         case 'remove_col':
 
-          const removeCol = (indexes) => {
+          const removeCol = (indexes: IndexGroup[]) => {
             let offset = 0;
 
             // Normalize the {index, amount} groups into bigger groups.
@@ -615,14 +679,15 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
      *                       Useful **only** when the type of handled cells is `numeric`.
      * @returns {Object|undefined} ending td in pasted area (only if any cell was changed).
      */
-    populateFromArray(start, input, end, source, method, direction, deltas) {
+    populateFromArray(start: Coords, input: any[][], end?: Coords, source?: string, method?: string, // eslint-disable-line @typescript-eslint/no-explicit-any -- any values
+      direction?: string, deltas?: unknown[]) {
       // TODO: either remove or implement the `direction` argument. Currently it's not working at all.
       let r;
       let rlen;
       let c;
       let clen;
-      const setData = [];
-      const current = {};
+      const setData: unknown[][] = [];
+      const current = {} as Coords;
 
       rlen = input.length;
 
@@ -689,7 +754,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
           let pushData = true;
           let cellMeta;
 
-          const getInputValue = function getInputValue(row, col = null) {
+          const getInputValue = function getInputValue(row: number, col: number | null = null) {
             const rowValue = input[row % input.length];
 
             if (col !== null) {
@@ -807,7 +872,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} languageCode Language code for specific language i.e. 'en-US', 'pt-BR', 'de-DE'
    * @fires Hooks#afterLanguageChange
    */
-  function setLanguage(languageCode) {
+  function setLanguage(languageCode: string) {
     const normalizedLanguageCode = normalizeLanguageCode(languageCode);
 
     if (hasLanguageDictionary(normalizedLanguageCode)) {
@@ -847,30 +912,6 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     instance.runHooks('afterInit');
   };
 
-  function ValidatorsQueue() { // moved this one level up so it can be used in any function here. Probably this should be moved to a separate file
-    let resolved = false;
-
-    return {
-      validatorsInQueue: 0,
-      valid: true,
-      addValidatorToQueue() {
-        this.validatorsInQueue += 1;
-        resolved = false;
-      },
-      removeValidatorFormQueue() {
-        this.validatorsInQueue = this.validatorsInQueue - 1 < 0 ? 0 : this.validatorsInQueue - 1;
-        this.checkIfQueueIsEmpty();
-      },
-      onQueueEmpty() { },
-      checkIfQueueIsEmpty() {
-        if (this.validatorsInQueue === 0 && resolved === false) {
-          resolved = true;
-          this.onQueueEmpty(this.valid);
-        }
-      }
-    };
-  }
-
   /**
    * Get parsed number from numeric string.
    *
@@ -878,7 +919,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} numericData Float (separated by a dot or a comma) or integer.
    * @returns {Number} Number if we get data in parsable format, not changed value otherwise.
    */
-  function getParsedNumber(numericData) {
+  function getParsedNumber(numericData: string) {
     // Unifying "float like" string. Change from value with comma determiner to value with dot determiner,
     // for example from `450,65` to `450.65`.
     const unifiedNumericData = numericData.replace(',', '.');
@@ -890,9 +931,9 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     return numericData;
   }
 
-  function validateChanges(changes, source, callback) {
+  function validateChanges(changes: (Change | null)[], source: string | undefined, callback: () => void) {
     const waitingForValidator = new ValidatorsQueue();
-    const isNumericData = value => value.length > 0 && /^\s*[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))\s*$/.test(value);
+    const isNumericData = (value: string) => value.length > 0 && /^\s*[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))\s*$/.test(value);
 
     waitingForValidator.onQueueEmpty = resolve;
 
@@ -900,19 +941,20 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       if (changes[i] === null) {
         changes.splice(i, 1);
       } else {
-        const [row, prop, , newValue] = changes[i];
+        const change = changes[i] as Change;
+        const [row, prop, , newValue] = change;
         const col = datamap.propToCol(prop);
         const cellProperties = instance.getCellMeta(row, col);
 
         if (cellProperties.type === 'numeric' && typeof newValue === 'string' && isNumericData(newValue)) {
-          changes[i][3] = getParsedNumber(newValue);
+          change[3] = getParsedNumber(newValue);
         }
 
         /* eslint-disable no-loop-func */
         if (instance.getCellValidator(cellProperties)) {
           waitingForValidator.addValidatorToQueue();
-          instance.validateCell(changes[i][3], cellProperties, (function(index, cellPropertiesReference) {
-            return function(result) {
+          instance.validateCell(change[3], cellProperties, (function(index: number, cellPropertiesReference: AnyObject) {
+            return function(result: unknown) {
               if (typeof result !== 'boolean') {
                 throw new Error('Validation error: result is not boolean');
               }
@@ -957,7 +999,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#beforeChangeRender
    * @fires Hooks#afterChange
    */
-  function applyChanges(changes, source) {
+  function applyChanges(changes: (Change | null)[], source?: string) {
     let i = changes.length - 1;
 
     if (i < 0) {
@@ -966,21 +1008,22 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
     for (; i >= 0; i--) {
       let skipThisChange = false;
+      const change = changes[i];
 
-      if (changes[i] === null) {
+      if (change === null) {
         changes.splice(i, 1);
         /* eslint-disable no-continue */
         continue;
       }
 
-      if ((changes[i][2] === null || changes[i][2] === void 0)
-        && (changes[i][3] === null || changes[i][3] === void 0)) {
+      if ((change[2] === null || change[2] === void 0)
+        && (change[3] === null || change[3] === void 0)) {
         /* eslint-disable no-continue */
         continue;
       }
 
       if (priv.settings.allowInsertRow) {
-        while (changes[i][0] > instance.countRows() - 1) {
+        while (change[0] > instance.countRows() - 1) {
           const numberOfCreatedRows = datamap.createRow(void 0, void 0, source);
 
           if (numberOfCreatedRows === 0) {
@@ -996,12 +1039,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       }
 
       if (instance.dataType === 'array' && (!priv.settings.columns || priv.settings.columns.length === 0) && priv.settings.allowInsertColumn) {
-        while (datamap.propToCol(changes[i][1]) > instance.countCols() - 1) {
+        while (datamap.propToCol(change[1]) > instance.countCols() - 1) {
           datamap.createCol(void 0, void 0, source);
         }
       }
 
-      datamap.set(changes[i][0], changes[i][1], changes[i][3]);
+      datamap.set(change[0], change[1], change[3]);
     }
 
     instance.forceFullRender = true; // used when data was changed
@@ -1028,11 +1071,11 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param callback
    * @param source
    */
-  this.validateCell = function(value, cellProperties, callback, source) {
+  this.validateCell = function(value: unknown, cellProperties: AnyObject, callback: (valid: boolean) => void, source?: string) {
     let validator = instance.getCellValidator(cellProperties);
 
     // the `canBeValidated = false` argument suggests, that the cell passes validation by default.
-    function done(valid, canBeValidated = true) {
+    function done(valid: boolean, canBeValidated = true) {
       // Fixes GH#3903
       if (!canBeValidated || cellProperties.hidden === true) {
         callback(valid);
@@ -1050,8 +1093,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
 
     if (isRegExp(validator)) {
-      validator = (function(expression) {
-        return function(cellValue, validatorCallback) {
+      validator = (function(expression: RegExp) {
+        return function(cellValue: string, validatorCallback: (valid: boolean) => void) {
           validatorCallback(expression.test(cellValue));
         };
       }(validator));
@@ -1063,7 +1106,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
       // To provide consistent behaviour, validation should be always asynchronous
       instance._registerTimeout(setTimeout(() => {
-        validator.call(cellProperties, value, (valid) => {
+        validator.call(cellProperties, value, (valid: boolean) => {
           // eslint-disable-next-line no-param-reassign
           valid = instance.runHooks('afterValidate', valid, value, cellProperties.visualRow, cellProperties.prop, source);
           cellProperties.valid = valid;
@@ -1082,7 +1125,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
   };
 
-  function setDataInputToArray(row, propOrCol, value) {
+  /** The changes `[[row, column or prop, value], ...]` of `setDataAtCell` / `setDataAtRowProp`'s arguments. */
+  function setDataInputToArray(row: number | unknown[][], propOrCol: unknown, value: unknown): any[][] { // eslint-disable-line @typescript-eslint/no-explicit-any -- user input
     if (typeof row === 'object') { // is it an array of changes
       return row;
     }
@@ -1103,9 +1147,9 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} [value] New value.
    * @param {String} [source] String that identifies how this change will be described in the changes array (useful in onAfterChange or onBeforeChange callback).
    */
-  this.setDataAtCell = function(row, column, value, source) {
+  this.setDataAtCell = function(row: number | unknown[][], column?: number | string, value?: unknown, source?: string) {
     const input = setDataInputToArray(row, column, value);
-    const changes = [];
+    const changes: Change[] = [];
     let changeSource = source;
     let i;
     let ilen;
@@ -1128,7 +1172,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
 
     if (!changeSource && typeof row === 'object') {
-      changeSource = column;
+      changeSource = column as string;
     }
 
     instance.runHooks('afterSetDataAtCell', changes, changeSource);
@@ -1150,9 +1194,9 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} value Value to be set.
    * @param {String} [source] String that identifies how this change will be described in changes array (useful in onChange callback).
    */
-  this.setDataAtRowProp = function(row, prop, value, source) {
+  this.setDataAtRowProp = function(row: number | unknown[][], prop: Prop, value?: unknown, source?: string) {
     const input = setDataInputToArray(row, prop, value);
-    const changes = [];
+    const changes: Change[] = [];
     let changeSource = source;
     let i;
     let ilen;
@@ -1167,7 +1211,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
 
     if (!changeSource && typeof row === 'object') {
-      changeSource = prop;
+      changeSource = prop as string;
     }
 
     instance.runHooks('afterSetDataAtRowProp', changes, changeSource);
@@ -1187,12 +1231,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *                                             to the document.body). Otherwise the active element does not lose its focus.
    * @fires Hooks#afterListen
    */
-  this.listen = function(modifyDocumentFocus = true) {
+  this.listen = function(modifyDocumentFocus: boolean = true) {
     if (modifyDocumentFocus) {
       const invalidActiveElement = !document.activeElement || (document.activeElement && document.activeElement.nodeName === void 0);
 
       if (document.activeElement && document.activeElement !== document.body && !invalidActiveElement) {
-        document.activeElement.blur();
+        (document.activeElement as HTMLElement).blur();
 
       } else if (invalidActiveElement) { // IE
         document.body.focus();
@@ -1238,7 +1282,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [revertOriginal=false] If `true`, the previous value will be restored. Otherwise, the edited value will be saved.
    * @param {Boolean} [prepareEditorIfNeeded=true] If `true` the editor under the selected cell will be prepared to open.
    */
-  this.destroyEditor = function(revertOriginal = false, prepareEditorIfNeeded = true) {
+  this.destroyEditor = function(revertOriginal: boolean = false, prepareEditorIfNeeded: boolean = true) {
     instance._refreshBorders(revertOriginal, prepareEditorIfNeeded);
   };
 
@@ -1261,7 +1305,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Array} deltas The deltas array. A difference between values of adjacent cells.
    *                       Useful **only** when the type of handled cells is `numeric`.
    */
-  this.populateFromArray = function(row, column, input, endRow, endCol, source, method, direction, deltas) {
+  this.populateFromArray = function(row: number, column: number, input: unknown[], endRow?: number, endCol?: number, source?: string, method?: string, direction?: string, deltas?: unknown[]) {
     if (!(typeof input === 'object' && typeof input[0] === 'object')) {
       throw new Error('populateFromArray parameter `input` must be an array of arrays'); // API changed in 0.9-beta2, let's check if you use it correctly
     }
@@ -1281,7 +1325,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed.
    * @param {...Number} [elements] The elements to add to the array. If you don't specify any elements, spliceCol simply removes elements from the array.
    */
-  this.spliceCol = function(column, index, amount, ...elements) {
+  this.spliceCol = function(column: number, index: number, amount: number, ...elements: unknown[]) {
     return datamap.spliceCol(column, index, amount, ...elements);
   };
 
@@ -1295,7 +1339,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed.
    * @param {...Number} [elements] The elements to add to the array. If you don't specify any elements, spliceCol simply removes elements from the array.
    */
-  this.spliceRow = function(row, index, amount, ...elements) {
+  this.spliceRow = function(row: number, index: number, amount: number, ...elements: unknown[]) {
     return datamap.spliceRow(row, index, amount, ...elements);
   };
 
@@ -1385,7 +1429,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     if (!selection.isSelected()) {
       return;
     }
-    const changes = [];
+    const changes: [number, number, string][] = [];
 
     arrayEach(selection.getSelectedRange(), (cellRange) => {
       const topLeft = cellRange.getTopLeftCorner();
@@ -1434,7 +1478,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#afterLoadData
    * @fires Hooks#afterChange
    */
-  this.loadData = function(data) {
+  this.loadData = function(data: any) { // eslint-disable-line @typescript-eslint/no-explicit-any -- an array, or a collection with push and splice
     if (Array.isArray(priv.settings.dataSchema)) {
       instance.dataType = 'array';
     } else if (isFunction(priv.settings.dataSchema)) {
@@ -1541,7 +1585,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.getData(2, 1, 3, 3);
    * ```
    */
-  this.getData = function(row, column, row2, column2) {
+  this.getData = function(row?: number, column?: number, row2?: number, column2?: number) {
     if (isUndefined(row)) {
       return datamap.getAll();
     }
@@ -1561,7 +1605,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} endCol To visual column index.
    * @returns {String}
    */
-  this.getCopyableText = function(startRow, startCol, endRow, endCol) {
+  this.getCopyableText = function(startRow: number, startCol: number, endRow: number, endCol: number) {
     return datamap.getCopyableText(new CellCoords(startRow, startCol), new CellCoords(endRow, endCol));
   };
 
@@ -1574,7 +1618,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @returns {String}
    */
-  this.getCopyableData = function(row, column) {
+  this.getCopyableData = function(row: number, column: number) {
     return datamap.getCopyable(row, datamap.colToProp(column));
   };
 
@@ -1612,7 +1656,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#afterCellMetaReset
    * @fires Hooks#afterUpdateSettings
    */
-  this.updateSettings = function(settings, init = false) {
+  this.updateSettings = function(settings: AnyObject, init: boolean = false) {
     let columnsAsFunc = false;
     let i;
     let j;
@@ -1814,14 +1858,15 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     }
   };
 
-  function expandType(obj) {
+  /** The settings of `obj.type` (a cell type name or object) that `obj` does not set itself. */
+  function expandType(obj: AnyObject): AnyObject {
     if (!hasOwnProperty(obj, 'type')) {
       // ignore obj.prototype.type
-      return;
+      return {};
     }
 
-    const expandedType = {};
-    let type;
+    const expandedType: AnyObject = {};
+    let type: AnyObject | undefined;
 
     if (typeof obj.type === 'object') {
       type = obj.type;
@@ -1889,7 +1934,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.alter('remove_row', [[1, 3], [5, 2]]);
    * ```
    */
-  this.alter = function(action, index, amount, source, keepEmptyRows) {
+  this.alter = function(action: string, index: number | number[], amount?: number, source?: string, keepEmptyRows?: boolean) {
     grid.alter(action, index, amount, source, keepEmptyRows);
   };
 
@@ -1905,7 +1950,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * if the wanted cell is in the range of fixed rows, it will return a TD element from the `top` overlay.
    * @returns {HTMLTableCellElement|null} The cell's TD element.
    */
-  this.getCell = function(row, column, topmost = false) {
+  this.getCell = function(row: number, column: number, topmost: boolean = false) {
     return instance.view.getCellAtCoords(new CellCoords(row, column), topmost);
   };
 
@@ -1922,7 +1967,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * // it returns CellCoords object instance with props row: 1 and col: 1.
    * ```
    */
-  this.getCoords = function(element) {
+  this.getCoords = function(element: HTMLTableCellElement) {
     return this.view.wt.wtTable.getCoords.call(this.view.wt.wtTable, element);
   };
 
@@ -1935,7 +1980,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @returns {String|Number} Column property or physical column index.
    */
-  this.colToProp = function(column) {
+  this.colToProp = function(column: number) {
     return datamap.colToProp(column);
   };
 
@@ -1947,7 +1992,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String|Number} prop Property name or physical column index.
    * @returns {Number} Visual column index.
    */
-  this.propToCol = function(prop) {
+  this.propToCol = function(prop: string | number) {
     return datamap.propToCol(prop);
   };
 
@@ -1962,7 +2007,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Physical row index.
    * @returns {Number} Returns visual row index.
    */
-  this.toVisualRow = row => recordTranslator.toVisualRow(row);
+  this.toVisualRow = (row: number) => recordTranslator.toVisualRow(row);
 
   /**
    * Translate physical column index into visual.
@@ -1975,7 +2020,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Physical column index.
    * @returns {Number} Returns visual column index.
    */
-  this.toVisualColumn = column => recordTranslator.toVisualColumn(column);
+  this.toVisualColumn = (column: number) => recordTranslator.toVisualColumn(column);
 
   /**
    * Translate visual row index into physical.
@@ -1988,7 +2033,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Visual row index.
    * @returns {Number} Returns physical row index.
    */
-  this.toPhysicalRow = row => recordTranslator.toPhysicalRow(row);
+  this.toPhysicalRow = (row: number) => recordTranslator.toPhysicalRow(row);
 
   /**
    * Translate visual column index into physical.
@@ -2001,7 +2046,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @returns {Number} Returns physical column index.
    */
-  this.toPhysicalColumn = column => recordTranslator.toPhysicalColumn(column);
+  this.toPhysicalColumn = (column: number) => recordTranslator.toPhysicalColumn(column);
 
   /**
    * @description
@@ -2015,7 +2060,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @returns {*} Data at cell.
    */
-  this.getDataAtCell = function(row, column) {
+  this.getDataAtCell = function(row: number, column: number) {
     return datamap.get(row, datamap.colToProp(column));
   };
 
@@ -2030,7 +2075,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} prop Property name.
    * @returns {*} Cell value.
    */
-  this.getDataAtRowProp = function(row, prop) {
+  this.getDataAtRowProp = function(row: number, prop: string) {
     return datamap.get(row, prop);
   };
 
@@ -2045,8 +2090,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @returns {Array} Array of cell values.
    */
-  this.getDataAtCol = function(column) {
-    return [].concat(...datamap.getRange(new CellCoords(0, column), new CellCoords(priv.settings.data.length - 1, column), datamap.DESTINATION_RENDERER));
+  this.getDataAtCol = function(column: number) {
+    return ([] as unknown[]).concat(...datamap.getRange(new CellCoords(0, column), new CellCoords(priv.settings.data.length - 1, column), datamap.DESTINATION_RENDERER));
   };
 
   /**
@@ -2059,13 +2104,13 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @returns {Array} Array of cell values.
    */
   // TODO: Getting data from `datamap` should work on visual indexes.
-  this.getDataAtProp = function(prop) {
+  this.getDataAtProp = function(prop: Prop) {
     const range = datamap.getRange(
       new CellCoords(0, datamap.propToCol(prop)),
       new CellCoords(priv.settings.data.length - 1, datamap.propToCol(prop)),
       datamap.DESTINATION_RENDERER);
 
-    return [].concat(...range);
+    return ([] as unknown[]).concat(...range);
   };
 
   /**
@@ -2084,7 +2129,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} [column2] To physical column index (or visual index, if data type is an array of objects).
    * @returns {Array[]|Object[]} The table data.
    */
-  this.getSourceData = function(row, column, row2, column2) {
+  this.getSourceData = function(row?: number, column?: number, row2?: number, column2?: number) {
     let data;
 
     if (row === void 0) {
@@ -2112,7 +2157,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} [column2] To physical column index (or visual index, if data type is an array of objects).
    * @returns {Array} An array of arrays.
    */
-  this.getSourceDataArray = function(row, column, row2, column2) {
+  this.getSourceDataArray = function(row?: number, column?: number, row2?: number, column2?: number) {
     let data;
 
     if (row === void 0) {
@@ -2133,7 +2178,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @returns {Array} Array of the column's cell values.
    */
   // TODO: Getting data from `sourceData` should work always on physical indexes.
-  this.getSourceDataAtCol = function(column) {
+  this.getSourceDataAtCol = function(column: number) {
     return dataSource.getAtColumn(column);
   };
 
@@ -2148,7 +2193,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Physical row index.
    * @returns {Array|Object} Single row of data.
    */
-  this.getSourceDataAtRow = function(row) {
+  this.getSourceDataAtRow = function(row: number) {
     return dataSource.getAtRow(row);
   };
 
@@ -2162,7 +2207,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @returns {*} Cell data.
    */
   // TODO: Getting data from `sourceData` should work always on physical indexes.
-  this.getSourceDataAtCell = function(row, column) {
+  this.getSourceDataAtCell = function(row: number, column: number) {
     return dataSource.getAtCell(row, column);
   };
 
@@ -2177,7 +2222,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Visual row index.
    * @returns {Array} Array of row's cell data.
    */
-  this.getDataAtRow = function(row) {
+  this.getDataAtRow = function(row: number) {
     const data = datamap.getRange(new CellCoords(row, 0), new CellCoords(row, this.countCols() - 1), datamap.DESTINATION_RENDERER);
 
     return data[0] || [];
@@ -2198,12 +2243,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} columnTo To visual column index.
    * @returns {String} Cell type (e.q: `'mixed'`, `'text'`, `'numeric'`, `'autocomplete'`).
    */
-  this.getDataType = function(rowFrom, columnFrom, rowTo, columnTo) {
+  this.getDataType = function(rowFrom: number, columnFrom: number, rowTo: number, columnTo: number) {
     const coords = rowFrom === void 0 ? [0, 0, this.countRows(), this.countCols()] : [rowFrom, columnFrom, rowTo, columnTo];
     const [rowStart, columnStart] = coords;
     let [,, rowEnd, columnEnd] = coords;
-    let previousType = null;
-    let currentType = null;
+    let previousType: unknown = null;
+    let currentType: unknown = null;
 
     if (rowEnd === void 0) {
       rowEnd = rowStart;
@@ -2211,7 +2256,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     if (columnEnd === void 0) {
       columnEnd = columnStart;
     }
-    let type = 'mixed';
+    let type: unknown = 'mixed';
 
     rangeEach(Math.min(rowStart, rowEnd), Math.max(rowStart, rowEnd), (row) => {
       let isTypeEqual = true;
@@ -2248,8 +2293,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#beforeRemoveCellMeta
    * @fires Hooks#afterRemoveCellMeta
    */
-  this.removeCellMeta = function(row, column, key) {
-    const [physicalRow, physicalColumn] = recordTranslator.toPhysical(row, column);
+  this.removeCellMeta = function(row: number, column: number, key: string) {
+    const [physicalRow, physicalColumn] = recordTranslator.toPhysical(row, column) as [number, number];
     let cachedValue = priv.cellSettings[physicalRow][physicalColumn][key];
 
     const hookResult = instance.runHooks('beforeRemoveCellMeta', row, column, key, cachedValue);
@@ -2271,7 +2316,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} deleteAmount The number of items to be removed. If set to 0, no items will be removed.
    * @param {Array} items The new items to be added to the array.
    */
-  this.spliceCellsMeta = function(index, deleteAmount, ...items) {
+  this.spliceCellsMeta = function(index: number, deleteAmount: number, ...items: AnyObject[][]) {
     priv.cellSettings.splice(index, deleteAmount, ...items);
   };
 
@@ -2284,7 +2329,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Visual column index.
    * @param {Object} prop Meta object.
    */
-  this.setCellMetaObject = function(row, column, prop) {
+  this.setCellMetaObject = function(row: number, column: number, prop: AnyObject) {
     if (typeof prop === 'object') {
       objectEach(prop, (value, key) => {
         this.setCellMeta(row, column, key, value);
@@ -2303,8 +2348,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} value Property value.
    * @fires Hooks#afterSetCellMeta
    */
-  this.setCellMeta = function(row, column, key, value) {
-    const [physicalRow, physicalColumn] = recordTranslator.toPhysical(row, column);
+  this.setCellMeta = function(row: number, column: number, key: string, value: string) {
+    const [physicalRow, physicalColumn] = recordTranslator.toPhysical(row, column) as [number, number];
 
     if (!priv.columnSettings[physicalColumn]) {
       priv.columnSettings[physicalColumn] = columnFactory(GridSettings, priv.columnsSettingConflicts);
@@ -2314,7 +2359,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       priv.cellSettings[physicalRow] = [];
     }
     if (!priv.cellSettings[physicalRow][physicalColumn]) {
-      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]();
+      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]() as AnyObject;
     }
     priv.cellSettings[physicalRow][physicalColumn][key] = value;
     instance.runHooks('afterSetCellMeta', row, column, key, value);
@@ -2342,9 +2387,9 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#beforeGetCellMeta
    * @fires Hooks#afterGetCellMeta
    */
-  this.getCellMeta = function(row, column) {
+  this.getCellMeta = function(row: number, column: number) {
     const prop = datamap.colToProp(column);
-    const [potentialPhysicalRow, physicalColumn] = recordTranslator.toPhysical(row, column);
+    const [potentialPhysicalRow, physicalColumn] = recordTranslator.toPhysical(row, column) as [number, number];
     let physicalRow = potentialPhysicalRow;
 
     // Workaround for #11. Connected also with #3849. It should be fixed within #4497.
@@ -2360,7 +2405,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       priv.cellSettings[physicalRow] = [];
     }
     if (!priv.cellSettings[physicalRow][physicalColumn]) {
-      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]();
+      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]() as AnyObject;
     }
 
     const cellProperties = priv.cellSettings[physicalRow][physicalColumn]; // retrieve cellProperties from cache
@@ -2397,7 +2442,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Physical row index.
    * @returns {Array}
    */
-  this.getCellMetaAtRow = function(row) {
+  this.getCellMetaAtRow = function(row: number) {
     return priv.cellSettings[row];
   };
 
@@ -2430,8 +2475,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.getCellRenderer(hot.getCellMeta(1, 1));
    * ```
    */
-  this.getCellRenderer = function(row, column) {
-    return getRenderer(rendererLookup.call(this, row, column));
+  this.getCellRenderer = function(row: number | AnyObject, column: number) {
+    return getRenderer(rendererLookup.call(this, row, column) as Parameters<typeof getRenderer>[0]);
   };
 
   /**
@@ -2470,7 +2515,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.getCellValidator(hot.getCellMeta(1, 1));
    * ```
    */
-  this.getCellValidator = function(row, column) {
+  this.getCellValidator = function(row: number | AnyObject, column: number) {
     let validator = validatorLookup.call(this, row, column);
 
     if (typeof validator === 'string') {
@@ -2498,7 +2543,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * })
    * ```
    */
-  this.validateCells = function(callback) {
+  this.validateCells = function(callback?: AnyFunction) {
     this._validateCells(callback);
   };
 
@@ -2521,7 +2566,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * })
    * ```
    */
-  this.validateRows = function(rows, callback) {
+  this.validateRows = function(rows?: unknown[], callback?: AnyFunction) {
     if (!Array.isArray(rows)) {
       throw new Error('validateRows parameter `rows` must be an array');
     }
@@ -2547,7 +2592,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * })
    * ```
    */
-  this.validateColumns = function(columns, callback) {
+  this.validateColumns = function(columns?: unknown[], callback?: AnyFunction) {
     if (!Array.isArray(columns)) {
       throw new Error('validateColumns parameter `columns` must be an array');
     }
@@ -2568,7 +2613,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Array} [rows] An array of validation target visual row indexes.
    * @param {Array} [columns] An array of validation target visual column indexes.
    */
-  this._validateCells = function(callback, rows, columns) {
+  this._validateCells = function(callback?: AnyFunction, rows?: unknown[], columns?: unknown[]) {
     const waitingForValidator = new ValidatorsQueue();
 
     if (callback) {
@@ -2591,7 +2636,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
         }
         waitingForValidator.addValidatorToQueue();
 
-        instance.validateCell(instance.getDataAtCell(i, j), instance.getCellMeta(i, j), (result) => {
+        instance.validateCell(instance.getDataAtCell(i, j), instance.getCellMeta(i, j), (result: unknown) => {
           if (typeof result !== 'boolean') {
             throw new Error('Validation error: result is not boolean');
           }
@@ -2616,7 +2661,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#modifyRowHeader
    * @returns {Array|String|Number} Array of header values / single header value.
    */
-  this.getRowHeader = function(row) {
+  this.getRowHeader = function(row?: number) {
     let rowHeader = priv.settings.rowHeaders;
     let physicalRow = row;
 
@@ -2683,7 +2728,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @fires Hooks#modifyColHeader
    * @returns {Array|String|Number} The column header(s).
    */
-  this.getColHeader = function(column) {
+  this.getColHeader = function(column?: number) {
     const columnsAsFunc = priv.settings.columns && isFunction(priv.settings.columns);
     const columnIndex = instance.runHooks('modifyColHeader', column);
     let result = priv.settings.colHeaders;
@@ -2699,7 +2744,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       result = out;
 
     } else {
-      const translateVisualIndexToColumns = function(visualColumnIndex) {
+      const translateVisualIndexToColumns = function(visualColumnIndex: number) {
         const arr = [];
         const columnsLen = instance.countSourceCols();
         let index = 0;
@@ -2749,7 +2794,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} col Visual col index.
    * @returns {Number}
    */
-  this._getColWidthFromSettings = function(col) {
+  this._getColWidthFromSettings = function(col: number) {
     const cellProperties = instance.getCellMeta(0, col);
     let width = cellProperties.width;
 
@@ -2785,7 +2830,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @returns {Number} Column width.
    * @fires Hooks#modifyColWidth
    */
-  this.getColWidth = function(column) {
+  this.getColWidth = function(column: number) {
     let width = instance._getColWidthFromSettings(column);
 
     width = instance.runHooks('modifyColWidth', width, column);
@@ -2806,7 +2851,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Visual row index.
    * @returns {Number}
    */
-  this._getRowHeightFromSettings = function(row) {
+  this._getRowHeightFromSettings = function(row: number) {
     // let cellProperties = instance.getCellMeta(row, 0);
     // let height = cellProperties.height;
     //
@@ -2844,7 +2889,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @returns {Number} The given row's height.
    * @fires Hooks#modifyRowHeight
    */
-  this.getRowHeight = function(row) {
+  this.getRowHeight = function(row: number) {
     let height = instance._getRowHeightFromSettings(row);
 
     height = instance.runHooks('modifyRowHeight', height, row);
@@ -3020,7 +3065,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [ending=false] If `true`, will only count empty rows at the end of the data source.
    * @returns {Number} Count empty rows.
    */
-  this.countEmptyRows = function(ending = false) {
+  this.countEmptyRows = function(ending: boolean = false) {
     let emptyRows = 0;
 
     rangeEachReverse(instance.countRows() - 1, (visualIndex) => {
@@ -3044,7 +3089,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [ending=false] If `true`, will only count empty columns at the end of the data source row.
    * @returns {Number} Count empty cols.
    */
-  this.countEmptyCols = function(ending = false) {
+  this.countEmptyCols = function(ending: boolean = false) {
     if (instance.countRows() < 1) {
       return 0;
     }
@@ -3071,7 +3116,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} row Visual row index.
    * @returns {Boolean} `true` if the row at the given `row` is empty, `false` otherwise.
    */
-  this.isEmptyRow = function(row) {
+  this.isEmptyRow = function(row: number) {
     return priv.settings.isEmptyRow.call(instance, row);
   };
 
@@ -3083,7 +3128,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} column Column index.
    * @returns {Boolean} `true` if the column at the given `col` is empty, `false` otherwise.
    */
-  this.isEmptyCol = function(column) {
+  this.isEmptyCol = function(column: number) {
     return priv.settings.isEmptyCol.call(instance, column);
   };
 
@@ -3118,7 +3163,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  this.selectCell = function(row, column, endRow, endColumn, scrollToCell = true, changeListener = true) {
+  this.selectCell = function(row: number, column: number | string, endRow?: number, endColumn?: number | string, scrollToCell: boolean = true, changeListener: boolean = true) {
     if (isUndefined(row) || isUndefined(column)) {
       return false;
     }
@@ -3159,12 +3204,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  this.selectCells = function(coords = [[]], scrollToCell = true, changeListener = true) {
+  this.selectCells = function(coords: unknown[][] | CellRange[] = [[]], scrollToCell: boolean = true, changeListener: boolean = true) {
     if (scrollToCell === false) {
       preventScrollingToCell = true;
     }
 
-    const wasSelected = selection.selectCells(coords);
+    const wasSelected = selection.selectCells(coords as Parameters<typeof selection.selectCells>[0]);
 
     if (wasSelected && changeListener) {
       instance.listen();
@@ -3189,7 +3234,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [changeListener=true] If `false`, FreeGrid will not change keyboard events listener to himself.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  this.selectCellByProp = function(row, prop, endRow, endProp, scrollToCell = true, changeListener = true) {
+  this.selectCellByProp = function(row: number, prop: string, endRow?: number, endProp?: string, scrollToCell: boolean = true, changeListener: boolean = true) {
     warn(toSingleLine`Deprecation warning: This method is going to be removed in the next release.
       If you want to select a cell using props, please use the \`selectCell\` method.`);
 
@@ -3219,7 +3264,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *                                         is not defined the column defined by `startColumn` will be selected.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  this.selectColumns = function(startColumn, endColumn = startColumn) {
+  this.selectColumns = function(startColumn: number, endColumn: number = startColumn) {
     return selection.selectColumns(startColumn, endColumn);
   };
 
@@ -3242,7 +3287,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *                                   is not defined the row defined by `startRow` will be selected.
    * @returns {Boolean} `true` if selection was successful, `false` otherwise.
    */
-  this.selectRows = function(startRow, endRow = startRow) {
+  this.selectRows = function(startRow: number, endRow: number = startRow) {
     return selection.selectRows(startRow, endRow);
   };
 
@@ -3280,7 +3325,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [snapToRight = false] If `true`, viewport is scrolled to show the cell on the right side of the table.
    * @returns {Boolean} `true` if scroll was successful, `false` otherwise.
    */
-  this.scrollViewportTo = function(row, column, snapToBottom = false, snapToRight = false) {
+  this.scrollViewportTo = function(row?: number, column?: number, snapToBottom: boolean = false, snapToRight: boolean = false) {
     const snapToTop = !snapToBottom;
     const snapToLeft = !snapToRight;
     let result = false;
@@ -3315,7 +3360,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     if (dataSource) {
       dataSource.destroy();
     }
-    dataSource = null;
+    // The grid is dead after destroy: the references go (the methods above throw from now on).
+    dataSource = null as never;
 
     keyStateStopObserving();
 
@@ -3348,13 +3394,13 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
     if (datamap) {
       datamap.destroy();
     }
-    datamap = null;
-    priv = null;
-    grid = null;
-    selection = null;
-    editorManager = null;
+    datamap = null as never;
+    priv = null as never;
+    grid = null as never;
+    selection = null as never;
+    editorManager = null as never;
     instance = null;
-    GridSettings = null;
+    GridSettings = null as never;
   };
 
   /**
@@ -3362,7 +3408,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    *
    * @private
    */
-  function postMortem(method) {
+  function postMortem(method: string) {
     return () => {
       throw new Error(`The "${method}" method cannot be called because this FreeGrid instance has been destroyed`);
     };
@@ -3387,7 +3433,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {String} pluginName The plugin name.
    * @returns {BasePlugin} The plugin instance.
    */
-  this.getPlugin = function(pluginName) {
+  this.getPlugin = function(pluginName: string) {
     return getPlugin(this, pluginName);
   };
 
@@ -3415,7 +3461,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.addHook('beforeInit', myCallback);
    * ```
    */
-  this.addHook = function(key, callback) {
+  this.addHook = function(key: string, callback: HookCallback | HookCallback[]) {
     Hooks.getSingleton().add(key, callback, instance);
   };
 
@@ -3434,7 +3480,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * const hasBeforeInitListeners = hot.hasHook('beforeInit');
    * ```
    */
-  this.hasHook = function(key) {
+  this.hasHook = function(key: string) {
     return Hooks.getSingleton().has(key, instance);
   };
 
@@ -3452,7 +3498,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.addHookOnce('beforeInit', myCallback);
    * ```
    */
-  this.addHookOnce = function(key, callback) {
+  this.addHookOnce = function(key: string, callback: HookCallback | HookCallback[]) {
     Hooks.getSingleton().once(key, callback, instance);
   };
 
@@ -3470,7 +3516,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.removeHook('beforeInit', myCallback);
    * ```
    */
-  this.removeHook = function(key, callback) {
+  this.removeHook = function(key: string, callback: HookCallback) {
     Hooks.getSingleton().remove(key, callback, instance);
   };
 
@@ -3497,7 +3543,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * hot.runHooks('customAction', 10, 'foo');
    * ```
    */
-  this.runHooks = function(key, p1, p2, p3, p4, p5, p6) {
+  this.runHooks = function(key: string, p1?: unknown, p2?: unknown, p3?: unknown, p4?: unknown, p5?: unknown, p6?: unknown) {
     return Hooks.getSingleton().run(instance, key, p1, p2, p3, p4, p5, p6);
   };
 
@@ -3511,7 +3557,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {*} extraArguments Arguments which will be handled by formatters.
    * @returns {String}
    */
-  this.getTranslatedPhrase = function(dictionaryKey, extraArguments) {
+  this.getTranslatedPhrase = function(dictionaryKey: string, extraArguments?: unknown) {
     return getTranslatedPhrase(priv.settings.language, dictionaryKey, extraArguments);
   };
 
@@ -3525,7 +3571,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Number} [delay=0] If first argument is passed as a function this argument set delay of the execution of that function.
    * @private
    */
-  this._registerTimeout = function(handle, delay = 0) {
+  this._registerTimeout = function(handle: number | AnyFunction, delay: number = 0) {
     let handleFunc = handle;
 
     if (typeof handleFunc === 'function') {
@@ -3541,7 +3587,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @private
    */
   this._clearTimeouts = function() {
-    arrayEach(this.timeouts, (handler) => {
+    arrayEach(this.timeouts as number[], (handler) => {
       clearTimeout(handler);
     });
   };
@@ -3554,7 +3600,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Function} callback Function to be delayed in execution.
    * @private
    */
-  this._registerImmediate = function(callback) {
+  this._registerImmediate = function(callback: AnyFunction) {
     this.immediates.push(setImmediate(callback));
   };
 
@@ -3564,7 +3610,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @private
    */
   this._clearImmediates = function() {
-    arrayEach(this.immediates, (handler) => {
+    arrayEach(this.immediates as number[], (handler) => {
       clearImmediate(handler);
     });
   };
@@ -3576,7 +3622,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {Boolean} [revertOriginal=false] If `true`, the previous value will be restored. Otherwise, the edited value will be saved.
    * @param {Boolean} [prepareEditorIfNeeded=true] If `true` the editor under the selected cell will be prepared to open.
    */
-  this._refreshBorders = function(revertOriginal = false, prepareEditorIfNeeded = true) {
+  this._refreshBorders = function(revertOriginal: boolean = false, prepareEditorIfNeeded: boolean = true) {
     editorManager.destroyEditor(revertOriginal);
     instance.view.render();
 
@@ -3587,3 +3633,8 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
   Hooks.getSingleton().run(instance, 'construct');
 }
+
+/** `new Core(rootElement, settings)` creates a grid (FreeGrid() also calls `init`). */
+type CoreConstructor = new (rootElement: HTMLElement, userSettings: AnyObject, rootInstanceSymbol?: symbol | boolean) => Grid;
+
+export default Core as unknown as CoreConstructor;
