@@ -52,7 +52,10 @@ export const inherit = <C extends Constructor>(Child: C, Parent: Constructor): C
  */
 export const extend = <T extends object>(target: T, extension: object): T => {
   objectEach(extension as AnyObject, (value, key) => {
-    (target as AnyObject)[key] = value;
+    // A `__proto__` key (e.g. from JSON) would replace the target's prototype.
+    if (key !== '__proto__') {
+      (target as AnyObject)[key] = value;
+    }
   });
 
   return target;
@@ -63,8 +66,13 @@ export const extend = <T extends object>(target: T, extension: object): T => {
  */
 export const deepExtend = (target: AnyObject, extension: AnyObject): void => {
   objectEach(extension, (value, key) => {
+    // A `__proto__` key (e.g. from JSON) would reach Object.prototype.
+    if (key === '__proto__') {
+      return;
+    }
     if (extension[key] && typeof extension[key] === 'object') {
-      if (!target[key]) {
+      // Only the target's own values are merged into: an inherited one (`constructor`, …) is replaced by a new copy.
+      if (!hasOwnProperty(target, key) || !target[key]) {
         if (Array.isArray(extension[key])) {
           target[key] = [];
         } else if (Object.prototype.toString.call(extension[key]) === '[object Date]') {

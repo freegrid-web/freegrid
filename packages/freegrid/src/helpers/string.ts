@@ -52,6 +52,17 @@ export const substitute = (template: unknown, variables: Record<string, unknown>
 const STRIP_TAGS_REGEX = /<\/?\w+\/?>|<\w+[\s|/][^>]*>/gi;
 
 /**
- * Removes HTML tags from a string.
+ * Removes HTML tags from a string. It repeats until nothing changes, so removing a tag cannot put together a new one
+ * (`<<b>script>` → `<script>`).
  */
-export const stripTags = (string: unknown): string => `${string}`.replace(STRIP_TAGS_REGEX, '');
+export const stripTags = (string: unknown): string => {
+  let result = `${string}`;
+  let previous;
+
+  do {
+    previous = result;
+    result = result.replace(STRIP_TAGS_REGEX, '');
+  } while (result !== previous);
+
+  return result;
+};
