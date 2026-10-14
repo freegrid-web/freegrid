@@ -1040,34 +1040,41 @@ class Core {
     // Trimmed first: `\s*` on both sides of the optional sign made the test quadratic on long runs of spaces.
     const isNumericData = (value: string) => value.length > 0 && /^[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))$/.test(value.trim());
 
-    const resolve = () => {
-      let beforeChangeResult;
-
-      if (changes.length) {
-        beforeChangeResult = this.runHooks('beforeChange', changes, source || 'edit');
-        if (isFunction(beforeChangeResult)) {
-          warn('Your beforeChange callback returns a function. It\'s not supported (the returned function will not be executed).');
-        } else if (beforeChangeResult === false) {
-          changes.splice(0, changes.length); // invalidate all changes (remove everything from array)
-        }
-      }
-      callback(); // called when async validators are resolved and beforeChange was not async
-    };
-
-    waitingForValidator.onQueueEmpty = resolve;
-
+    // Numeric text becomes a number first (beforeChange gets the number).
     for (let i = changes.length - 1; i >= 0; i--) {
       if (changes[i] === null) {
         changes.splice(i, 1);
       } else {
         const change = changes[i] as Change;
         const [row, prop, , newValue] = change;
-        const col = this.#datamap.propToCol(prop);
-        const cellProperties = this.getCellMeta(row, col);
+        const cellProperties = this.getCellMeta(row, this.#datamap.propToCol(prop));
 
         if (cellProperties.type === 'numeric' && typeof newValue === 'string' && isNumericData(newValue)) {
           change[3] = getParsedNumber(newValue);
         }
+      }
+    }
+
+    // beforeChange runs before the validators, so a change it cancels (set to null, or all with `false`) is not
+    // validated.
+    if (changes.length) {
+      const beforeChangeResult = this.runHooks('beforeChange', changes, source || 'edit');
+
+      if (isFunction(beforeChangeResult)) {
+        warn('Your beforeChange callback returns a function. It\'s not supported (the returned function will not be executed).');
+      } else if (beforeChangeResult === false) {
+        changes.splice(0, changes.length); // invalidate all changes (remove everything from array)
+      }
+    }
+
+    waitingForValidator.onQueueEmpty = () => callback(); // called when async validators are resolved
+
+    for (let i = changes.length - 1; i >= 0; i--) {
+      if (changes[i] === null) {
+        changes.splice(i, 1);
+      } else {
+        const change = changes[i] as Change;
+        const cellProperties = this.getCellMeta(change[0], this.#datamap.propToCol(change[1]));
 
         if (this.getCellValidator(cellProperties)) {
           waitingForValidator.addValidatorToQueue();
@@ -1083,7 +1090,6 @@ class Core {
                 if (cell !== null) {
                   removeClass(cell, this.getSettings().invalidCellClassName);
                 }
-                // index -= 1;
               }
               waitingForValidator.removeValidatorFormQueue();
             };
@@ -1986,8 +1992,20 @@ class Core {
    * @function clear
    */
   clear() {
-    this.selectAll();
-    this.emptySelectedCells();
+    // Empties every cell that is not read-only, without changing the selection.
+    const changes: [number, number, string][] = [];
+
+    rangeEach(0, this.countRows() - 1, (row) => {
+      rangeEach(0, this.countCols() - 1, (column) => {
+        if (!this.getCellMeta(row, column).readOnly) {
+          changes.push([row, column, '']);
+        }
+      });
+    });
+
+    if (changes.length > 0) {
+      this.setDataAtCell(changes);
+    }
   }
 
 

@@ -2117,4 +2117,25 @@ describe('Core_validate', () => {
       done();
     }, 200);
   });
+
+  it('should not validate a change that beforeChange cancelled', async() => {
+    let validated = 0;
+
+    handsontable({
+      data: Handsontable.helper.createSpreadsheetData(2, 2),
+      validator(value, callback) {
+        validated += 1;
+        callback(true);
+      },
+      beforeChange(changes) {
+        changes[0] = null;
+      },
+    });
+
+    setDataAtCell([[0, 0, 'x'], [0, 1, 'y']]);
+    await sleep(50);
+
+    expect(validated).toBe(1);
+    expect(getDataAtRow(0)).toEqual(['A1', 'y']);
+  });
 });

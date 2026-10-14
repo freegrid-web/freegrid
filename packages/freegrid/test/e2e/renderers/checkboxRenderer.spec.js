@@ -850,4 +850,14 @@ describe('CheckboxRenderer', () => {
       }, 500);
     });
   });
+
+  it('should show an emptied checkbox cell as unchecked, not as #bad-value#', () => {
+    handsontable({ data: [[true]], columns: [{ type: 'checkbox' }] });
+    selectCell(0, 0);
+
+    emptySelectedCells();
+
+    expect(getCell(0, 0).textContent).not.toContain('#bad-value#');
+    expect(getCell(0, 0).querySelector('input[type=checkbox]').checked).toBe(false);
+  });
 });

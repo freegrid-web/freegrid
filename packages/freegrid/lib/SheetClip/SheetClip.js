@@ -54,7 +54,8 @@
               multiline = true;
             }
             else {
-              arr[a].push(rows[r][c].replace(/""/g, '"'));
+              // `""` is an escaped quote only inside a quoted cell; other text (e.g. JSON) stays as it is.
+              arr[a].push(rows[r][c].indexOf('"') === 0 ? rows[r][c].replace(/""/g, '"') : rows[r][c]);
               multiline = false;
             }
           }

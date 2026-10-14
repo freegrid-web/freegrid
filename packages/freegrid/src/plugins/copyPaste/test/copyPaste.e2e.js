@@ -739,4 +739,14 @@ describe('CopyPaste', () => {
         .toHaveBeenCalledWith([[0, 0, null, 'Kia'], [1, 0, null, 'Nissan'], [2, 0, null, 'Toyota']], 'CopyPaste.paste', void 0, void 0, void 0, void 0);
     });
   });
+
+  it('should paste JSON with an empty string as it is', async() => {
+    handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2) });
+    selectCell(0, 0);
+
+    getPlugin('copyPaste').paste('{"a":"","b":"x"}', '');
+    await sleep(50);
+
+    expect(getDataAtCell(0, 0)).toBe('{"a":"","b":"x"}');
+  });
 });

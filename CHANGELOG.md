@@ -73,6 +73,14 @@
     `deepExtend` no longer reaches `Object.prototype` through `__proto__` or `constructor.prototype`: it merges only
     into the target's own values.
   - `FreeGrid.helper.stripTags` repeats until no tag is left, so `<<b>script>` no longer becomes `<script>`.
+- Fixes:
+  - Pasting text with `""` outside a quoted cell (e.g. JSON with an empty string) no longer drops a quote (#75).
+  - `clear()` keeps the selection; it used to leave every cell selected (#82).
+  - The select editor keeps the order of options given as an array of numbers (#81).
+  - An emptied checkbox cell is unchecked instead of `#bad-value#` (#81).
+  - A non-strict autocomplete cell respects `allowEmpty: false` (#80).
+  - `beforeChange` runs before the validators, so a change it cancels is not validated (#80). Validators now get
+    the values `beforeChange` set.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
