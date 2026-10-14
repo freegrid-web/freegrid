@@ -15,6 +15,7 @@ import Walkontable from './3rdparty/walkontable/src';
 import { getRowHeight } from './helpers/dom/theme';
 import { handleMouseEvent } from './selection/mouseEventHandler';
 import type Core from './core';
+import type { GridSettings } from './types';
 
 type Grid = Core;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
@@ -52,8 +53,7 @@ const clearTextSelection = (): void => {
 class TableView {
   eventManager: EventManager;
   instance: Grid;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the grid's settings (core.js is not typed yet)
-  settings: any;
+  settings: GridSettings;
   selectionMouseDown = false;
   THEAD: HTMLTableSectionElement;
   TBODY: HTMLTableSectionElement;

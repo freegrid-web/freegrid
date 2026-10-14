@@ -60,6 +60,11 @@
   - Plugins declare what they add to the grid (`undo()`, `pauseObservingChanges()`, …) with
     `declare module './core' { interface Core … }`; `Core` is also exported by name for that.
   - Where the code relied on a selection being there, it says so with `!` (the behavior is the same as before).
+- Cleanup, part 1: lint reports a disable comment that disables nothing (`reportUnusedDisableDirectives`), and the
+  66 such comments (for airbnb rules this config does not enable) are gone. The remaining disables are fixed in the
+  code (case blocks with braces, `prefer-const`, `_` for parameters only overriding methods use). `any` is down
+  from 31 to 20 places: the open types (settings, cell meta, callbacks) are in `src/types.ts`, and the "core.js is
+  not typed yet" stand-ins point at the real types.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

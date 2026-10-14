@@ -37,8 +37,7 @@ export type MenuOptions = {
 };
 
 /** The menu's own grid (the list of items). */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type MenuGrid = any;
+type MenuGrid = Core;
 
 /**
  * @class Menu
@@ -63,7 +62,7 @@ class Menu {
   container: HTMLElement;
 
   /** The menu's grid, while it is open. */
-  hotMenu: MenuGrid = null;
+  hotMenu: MenuGrid | null = null;
 
   /** The open submenus, by item key. */
   hotSubMenus: Record<string, Menu> = {};
@@ -191,10 +190,10 @@ class Menu {
     this.origOutsideClickDeselects = this.hot.getSettings().outsideClickDeselects;
     this.hot.getSettings().outsideClickDeselects = false;
     this.hotMenu = new Core(this.container, settings);
-    this.hotMenu.addHook('afterInit', () => this.onAfterInit());
-    this.hotMenu.addHook('afterSelection', (...args: Parameters<Menu['onAfterSelection']>) => this.onAfterSelection(...args));
-    this.hotMenu.init();
-    this.hotMenu.listen();
+    this.hotMenu!.addHook('afterInit', () => this.onAfterInit());
+    this.hotMenu!.addHook('afterSelection', (...args: Parameters<Menu['onAfterSelection']>) => this.onAfterSelection(...args));
+    this.hotMenu!.init();
+    this.hotMenu!.listen();
     this.blockMainTableCallbacks();
     this.runLocalHooks('afterOpen');
   }
@@ -214,13 +213,13 @@ class Menu {
       this.closeAllSubMenus();
       this.container.style.display = 'none';
       this.releaseMainTableCallbacks();
-      this.hotMenu.destroy();
+      this.hotMenu!.destroy();
       this.hotMenu = null;
       this.hot.getSettings().outsideClickDeselects = this.origOutsideClickDeselects;
       this.runLocalHooks('afterClose');
 
       if (this.parentMenu) {
-        this.parentMenu.hotMenu.listen();
+        this.parentMenu.hotMenu!.listen();
       }
     }
   }
@@ -235,14 +234,14 @@ class Menu {
     if (!this.hotMenu) {
       return false;
     }
-    const cell = this.hotMenu.getCell(row, 0);
+    const cell = this.hotMenu!.getCell(row, 0);
 
     this.closeAllSubMenus();
 
     if (!cell || !hasSubMenu(cell)) {
       return false;
     }
-    const dataItem = this.hotMenu.getSourceDataAtRow(row);
+    const dataItem = this.hotMenu!.getSourceDataAtRow(row);
     const subMenu = new Menu(this.hot, {
       parent: this,
       name: dataItem.name,
@@ -263,7 +262,7 @@ class Menu {
    * @param row Row index.
    */
   closeSubMenu(row: number): void {
-    const dataItem = this.hotMenu.getSourceDataAtRow(row);
+    const dataItem = this.hotMenu!.getSourceDataAtRow(row);
     const menus = this.hotSubMenus[dataItem.key];
 
     if (menus) {
@@ -276,7 +275,7 @@ class Menu {
    * Close all opened sub menus.
    */
   closeAllSubMenus(): void {
-    this.hotMenu.getData().forEach((value: unknown, row: number) => this.closeSubMenu(row));
+    this.hotMenu!.getData().forEach((value: unknown, row: number) => this.closeSubMenu(row));
   }
 
   /**
@@ -312,10 +311,10 @@ class Menu {
    * @param [event]
    */
   executeCommand(event?: Event): void {
-    if (!this.isOpened() || !this.hotMenu.getSelectedLast()) {
+    if (!this.isOpened() || !this.hotMenu!.getSelectedLast()) {
       return;
     }
-    const selectedItem: MenuItem = this.hotMenu.getSourceDataAtRow(this.hotMenu.getSelectedLast()[0]);
+    const selectedItem: MenuItem = this.hotMenu!.getSourceDataAtRow(this.hotMenu!.getSelectedLast()![0]);
 
     this.runLocalHooks('select', selectedItem, event);
 
@@ -433,12 +432,12 @@ class Menu {
    * Select first cell in opened menu.
    */
   selectFirstCell(): void {
-    const cell = this.hotMenu.getCell(0, 0);
+    const cell = this.hotMenu!.getCell(0, 0)!;
 
     if (isSeparator(cell) || isDisabled(cell) || isSelectionDisabled(cell)) {
       this.selectNextCell(0, 0);
     } else {
-      this.hotMenu.selectCell(0, 0);
+      this.hotMenu!.selectCell(0, 0);
     }
   }
 
@@ -446,13 +445,13 @@ class Menu {
    * Select last cell in opened menu.
    */
   selectLastCell(): void {
-    const lastRow = this.hotMenu.countRows() - 1;
-    const cell = this.hotMenu.getCell(lastRow, 0);
+    const lastRow = this.hotMenu!.countRows() - 1;
+    const cell = this.hotMenu!.getCell(lastRow, 0)!;
 
     if (isSeparator(cell) || isDisabled(cell) || isSelectionDisabled(cell)) {
       this.selectPrevCell(lastRow, 0);
     } else {
-      this.hotMenu.selectCell(lastRow, 0);
+      this.hotMenu!.selectCell(lastRow, 0);
     }
   }
 
@@ -464,7 +463,7 @@ class Menu {
    */
   selectNextCell(row: number, col: number): void {
     const nextRow = row + 1;
-    const cell = nextRow < this.hotMenu.countRows() ? this.hotMenu.getCell(nextRow, col) : null;
+    const cell = nextRow < this.hotMenu!.countRows() ? this.hotMenu!.getCell(nextRow, col) : null;
 
     if (!cell) {
       return;
@@ -472,7 +471,7 @@ class Menu {
     if (isSeparator(cell) || isDisabled(cell) || isSelectionDisabled(cell)) {
       this.selectNextCell(nextRow, col);
     } else {
-      this.hotMenu.selectCell(nextRow, col);
+      this.hotMenu!.selectCell(nextRow, col);
     }
   }
 
@@ -484,7 +483,7 @@ class Menu {
    */
   selectPrevCell(row: number, col: number): void {
     const prevRow = row - 1;
-    const cell = prevRow >= 0 ? this.hotMenu.getCell(prevRow, col) : null;
+    const cell = prevRow >= 0 ? this.hotMenu!.getCell(prevRow, col) : null;
 
     if (!cell) {
       return;
@@ -492,7 +491,7 @@ class Menu {
     if (isSeparator(cell) || isDisabled(cell) || isSelectionDisabled(cell)) {
       this.selectPrevCell(prevRow, col);
     } else {
-      this.hotMenu.selectCell(prevRow, col);
+      this.hotMenu!.selectCell(prevRow, col);
     }
   }
 
@@ -637,7 +636,7 @@ class Menu {
    * @param event
    */
   onBeforeKeyDown(event: KeyboardEvent): void {
-    const selection = this.hotMenu.getSelectedLast();
+    const selection = this.hotMenu!.getSelectedLast();
     let stopEvent = false;
     this.keyEvent = true;
 
@@ -649,7 +648,7 @@ class Menu {
 
       case KEY_CODES.ENTER:
         if (selection) {
-          if (this.hotMenu.getSourceDataAtRow(selection[0]).submenu) {
+          if (this.hotMenu!.getSourceDataAtRow(selection[0]).submenu) {
             stopEvent = true;
           } else {
             this.executeCommand(event);
@@ -693,7 +692,7 @@ class Menu {
           this.close();
 
           if (this.parentMenu) {
-            this.parentMenu.hotMenu.listen();
+            this.parentMenu.hotMenu!.listen();
           }
           stopEvent = true;
         }
@@ -715,9 +714,9 @@ class Menu {
    * @private
    */
   onAfterInit(): void {
-    const data: MenuItem[] = this.hotMenu.getSettings().data;
-    const hiderStyle = this.hotMenu.view.wt.wtTable.hider.style;
-    const holderStyle = this.hotMenu.view.wt.wtTable.holder.style;
+    const data: MenuItem[] = this.hotMenu!.getSettings().data;
+    const hiderStyle = this.hotMenu!.view.wt.wtTable.hider.style;
+    const holderStyle = this.hotMenu!.view.wt.wtTable.holder.style;
     const currentHiderWidth = parseInt(hiderStyle.width, 10);
 
     const realHeight = data.reduce((accumulator, value) => accumulator + (value.name === SEPARATOR ? 1 : 26), 0);
@@ -757,7 +756,7 @@ class Menu {
       this.executeCommand(event);
     }
     // Close menu when clicked element is not belongs to menu itself
-    if (this.options.standalone && this.hotMenu && !isChildOf(event.target as Node, this.hotMenu.rootElement)) {
+    if (this.options.standalone && this.hotMenu && !isChildOf(event.target as Node, this.hotMenu!.rootElement)) {
       this.close(true);
 
     // Automatically close menu when clicked element is not belongs to menu or submenu (not necessarily to itself)

@@ -17,12 +17,9 @@ import { rangeEach } from './helpers/number';
 import MultiMap from './multiMap';
 import type { SourceRow } from './dataSource';
 import type Core from './core';
+import type { GridPrivate, GridSettingsConstructor } from './core';
 
 type Grid = Core;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type GridPrivate = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- the settings constructor of core.js
-type GridSettingsConstructor = any;
 
 /** A column's data property: an index, an object key (dots go into nested objects) or a getter/setter function. */
 export type Prop = number | string | ((row: SourceRow, value?: unknown) => unknown);
@@ -869,8 +866,8 @@ class DataMap {
 
     this.interval = null;
     this.instance = null!;
-    this.priv = null;
-    this.GridSettings = null;
+    this.priv = null!;
+    this.GridSettings = null!;
     this.dataSource = null as unknown as SourceRow[];
     this.cachedLength = null;
     this.duckSchema = null;

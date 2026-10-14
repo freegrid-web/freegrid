@@ -243,7 +243,7 @@ class ContextMenu extends BasePlugin {
     });
 
     // ContextMenu is not detected HotTableEnv correctly because is injected outside hot-table
-    this.menu.hotMenu.isHotTableEnv = this.hot.isHotTableEnv;
+    this.menu.hotMenu!.isHotTableEnv = this.hot.isHotTableEnv;
     // FreeGrid.eventManager.isHotTableEnv = this.hot.isHotTableEnv;
   }
 

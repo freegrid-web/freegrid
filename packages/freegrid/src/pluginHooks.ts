@@ -12,9 +12,15 @@ export type HookCallback = ((...args: any[]) => unknown) & {
 /** The listeners of each hook name. */
 export type HookBucket = Record<string, HookCallback[]>;
 
-/** A grid instance (a hook's `this`), which keeps its own bucket. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type HookContext = any;
+/** A grid (a hook's `this`), which keeps its own bucket; `null` for the global hooks. */
+type HookContext = { pluginHookBucket?: HookBucket } | null;
+
+declare module './core' {
+  interface Core {
+    /** The grid's own hook listeners (see Hooks#getBucket). */
+    pluginHookBucket?: HookBucket;
+  }
+}
 
 /**
  * @description

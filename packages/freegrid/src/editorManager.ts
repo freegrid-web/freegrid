@@ -7,12 +7,12 @@ import { EditorState } from './editors/editorBase';
 import type EditorBase from './editors/editorBase';
 import type { EditorHost } from './editors/editorBase';
 import type Selection from './selection/selection';
+import type { GridPrivate } from './core';
 
 /** How far Enter or Tab moves the selection: rows and columns, or a function of the key event. */
 type Moves = { row: number; col: number } | ((event?: KeyboardEvent) => { row: number; col: number });
 
 /** The grid's private state that the editor manager reads (its settings) and writes (the last key). */
-type GridPrivate = { settings: { enterMoves: Moves; tabMoves: Moves }; lastKeyCode?: number };
 
 /** The editor manager of each grid. */
 const instances = new WeakMap<EditorHost, EditorManager>();
@@ -224,7 +224,7 @@ class EditorManager {
 
   /** Moves the selection after Enter (by `enterMoves`; up with Shift). */
   #moveSelectionAfterEnter(shiftKey: boolean, event: KeyboardEvent): void {
-    const { enterMoves } = this.#priv.settings;
+    const enterMoves: Moves = this.#priv.settings.enterMoves;
     const moves = typeof enterMoves === 'function' ? enterMoves(event) : enterMoves;
 
     if (shiftKey) {
@@ -304,7 +304,7 @@ class EditorManager {
         break;
 
       case KEY_CODES.TAB: {
-        const { tabMoves } = this.#priv.settings;
+        const tabMoves: Moves = this.#priv.settings.tabMoves;
         const moves = typeof tabMoves === 'function' ? tabMoves(event) : tabMoves;
 
         if (event.shiftKey) {

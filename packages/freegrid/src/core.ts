@@ -46,28 +46,28 @@ import { warnUserAboutLanguageRegistration, applyLanguageSetting, normalizeLangu
 import { startObserving as keyStateStartObserving, stopObserving as keyStateStopObserving } from './utils/keyStateObserver';
 import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
+import type { AnyFunction, AnyObject, GridSettings } from './types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- the grid is typed when Core becomes a class */
-type AnyObject = Record<string, any>;
-type AnyFunction = (...args: any[]) => any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable's CellRange (Walkontable is not typed yet)
 type CellRange = any;
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
-type Change = [number, Prop, any, any];
+type Change = [number, Prop, unknown, unknown];
 /** A cell position (visual indexes). */
 type Coords = { row: number; col: number };
 /** `spliceCol` / `spliceRow` arguments: `[index, start, amount, ...elements]`. */
 type SpliceArgs = [number, number, number, ...unknown[]];
 /** `[index, amount]`: rows or columns to remove (`alter` with an array index). */
 type IndexGroup = [number, number];
-/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** The constructor of the grid's settings chain (the defaults, then the grid's settings). */
+export type GridSettingsConstructor = SettingsConstructor & { prototype: AnyObject };
 
 /** The grid's private state, shared with DataMap and EditorManager. */
-type GridPrivate = {
+export type GridPrivate = {
   cellSettings: AnyObject[][];
   columnSettings: SettingsConstructor[];
   columnsSettingConflicts: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a GridSettings instance
-  settings: any;
+  settings: GridSettings;
   selRange: CellRange | null;
   isPopulated: boolean | null;
   scrollable: unknown;
@@ -241,7 +241,7 @@ class Core {
   #grid!: AnyObject;
   #editorManager!: EditorManager;
   /** The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's. */
-  #GridSettings!: SettingsConstructor & { prototype: AnyObject };
+  #GridSettings!: GridSettingsConstructor;
   #recordTranslator!: RecordTranslator;
   #eventManager!: EventManager;
   #preventScrollingToCell = false;
@@ -259,7 +259,7 @@ class Core {
     });
 
     // The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's.
-    this.#GridSettings = function() {} as unknown as SettingsConstructor & { prototype: AnyObject };
+    this.#GridSettings = function() {} as unknown as GridSettingsConstructor;
     this.#eventManager = new EventManager(this);
 
     extend(this.#GridSettings.prototype, DefaultSettings.prototype); // create grid settings as a copy of default settings
@@ -2901,8 +2901,9 @@ class Core {
       if (this.#priv.settings.colHeaders === false) {
         result = null;
 
-      } else if (this.#priv.settings.columns && isFunction(this.#priv.settings.columns) && this.#priv.settings.columns(prop) && this.#priv.settings.columns(prop).title) {
-        result = this.#priv.settings.columns(prop).title;
+      } else if (this.#priv.settings.columns && isFunction(this.#priv.settings.columns) &&
+        (this.#priv.settings.columns as AnyFunction)(prop) && (this.#priv.settings.columns as AnyFunction)(prop).title) {
+        result = (this.#priv.settings.columns as AnyFunction)(prop).title;
 
       } else if (this.#priv.settings.columns && this.#priv.settings.columns[physicalColumn] && this.#priv.settings.columns[physicalColumn].title) {
         result = this.#priv.settings.columns[physicalColumn].title;
