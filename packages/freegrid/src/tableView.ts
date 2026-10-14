@@ -12,6 +12,7 @@ import {
 import EventManager from './eventManager';
 import { stopPropagation, isImmediatePropagationStopped, isRightClick, isLeftClick } from './helpers/dom/event';
 import Walkontable from './3rdparty/walkontable/src';
+import type CellCoords from './3rdparty/walkontable/src/cell/coords';
 import { getRowHeight } from './helpers/dom/theme';
 import { handleMouseEvent } from './selection/mouseEventHandler';
 import type Core from './core';
@@ -20,8 +21,6 @@ import type { GridSettings } from './types';
 type Grid = Core;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
 type Wt = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
-type CellCoords = any;
 
 /** What a mouse handler may block: selecting the row, the column or the cell. */
 type BlockCalculations = { row: boolean; column: boolean; cell: boolean };

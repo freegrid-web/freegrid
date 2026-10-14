@@ -1,16 +1,23 @@
 import { fastInnerText } from './../../../helpers/dom/element';
 import { objectEach } from './../../../helpers/object';
 
+/** Settings accept data values, indexed arrays and callbacks, including custom keys. */
+export type SettingsValues = Record<string, unknown>;
+
 /**
  * @class Settings
  */
-class Settings {
+class Settings<Instance extends object = object> {
+  #instance: Instance;
+  declare instance: Instance;
+  declare defaults: SettingsValues;
+  declare settings: SettingsValues;
   /**
    * @param {Walkontable} wotInstance
    * @param {Object} settings
    */
-  constructor(wotInstance, settings) {
-    this.wot = wotInstance;
+  constructor(wotInstance: Instance, settings: SettingsValues) {
+    this.#instance = wotInstance;
 
     // legacy support
     this.instance = wotInstance;
@@ -48,10 +55,10 @@ class Settings {
       },
       totalRows: void 0,
       totalColumns: void 0,
-      cellRenderer: (row, column, TD) => {
+      cellRenderer: (row: number, column: number, TD: HTMLTableCellElement) => {
         const cellData = this.getSetting('data', row, column);
 
-        fastInnerText(TD, cellData === void 0 || cellData === null ? '' : cellData);
+        fastInnerText(TD, (cellData === void 0 || cellData === null ? '' : cellData) as string);
       },
 
       // columnWidth: 50,
@@ -88,7 +95,7 @@ class Settings {
       onScrollHorizontally: null,
       onBeforeTouchScroll: null,
       onAfterMomentumScroll: null,
-      onBeforeStretchingColumnWidth: width => width,
+      onBeforeStretchingColumnWidth: (width: number | undefined) => width,
       onModifyRowHeaderWidth: null,
       onModifyGetCellCoords: null,
 
@@ -126,15 +133,15 @@ class Settings {
    * @param {*} value
    * @returns {Walkontable}
    */
-  update(settings, value) {
+  update(settings: SettingsValues | string, value?: unknown) {
     if (value === void 0) { // settings is object
-      objectEach(settings, (settingValue, key) => {
+      objectEach(settings as SettingsValues, (settingValue, key) => {
         this.settings[key] = settingValue;
       });
     } else { // if value is defined then settings is the key
-      this.settings[settings] = value;
+      this.settings[settings as string] = value;
     }
-    return this.wot;
+    return this.#instance;
   }
 
   /**
@@ -147,14 +154,14 @@ class Settings {
    * @param {*} param4
    * @returns {*}
    */
-  getSetting(key, param1, param2, param3, param4) {
+  getSetting(key: string, param1?: unknown, param2?: unknown, param3?: unknown, param4?: unknown): unknown {
     if (typeof this.settings[key] === 'function') {
       // this is faster than .apply - https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
-      return this.settings[key](param1, param2, param3, param4);
+      return (this.settings[key] as (...params: unknown[]) => unknown)(param1, param2, param3, param4);
 
     } else if (param1 !== void 0 && Array.isArray(this.settings[key])) {
       // perhaps this can be removed, it is only used in tests
-      return this.settings[key][param1];
+      return (this.settings[key] as unknown[])[param1 as number];
 
     }
 
@@ -167,7 +174,7 @@ class Settings {
    * @param {Boolean} key
    * @returns {Boolean}
    */
-  has(key) {
+  has(key: string) {
     return !!this.settings[key];
   }
 }
