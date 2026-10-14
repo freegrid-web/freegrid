@@ -78,8 +78,6 @@ export type GridPrivate = {
 
 let activeGuid: string | null = null;
 
-/** Keys that are not cell indexes but lead to the prototypes. */
-const UNSAFE_INDEXES = new Set(['__proto__', 'constructor', 'prototype']);
 
 /** Counts the running cell validators and calls `onQueueEmpty(valid)` once all of them are done. */
 class ValidatorsQueue {
@@ -2527,12 +2525,14 @@ class Core {
     const [potentialPhysicalRow, physicalColumn] = this.#recordTranslator.toPhysical(row, column) as [number, number];
     let physicalRow = potentialPhysicalRow;
 
-    // Workaround for #11. Connected also with #3849. It should be fixed within #4497.
+    // A row that the modifyRow hook hides (null) keeps its meta under the visual index.
     if (physicalRow === null) {
       physicalRow = row;
     }
     // The meta is cached by index: a key like '__proto__' would reach Array.prototype or Object.prototype.
-    if (UNSAFE_INDEXES.has(String(physicalRow)) || UNSAFE_INDEXES.has(String(physicalColumn))) {
+    if ((physicalRow as unknown) === '__proto__' || (physicalRow as unknown) === 'constructor' ||
+      (physicalRow as unknown) === 'prototype' || (physicalColumn as unknown) === '__proto__' ||
+      (physicalColumn as unknown) === 'constructor' || (physicalColumn as unknown) === 'prototype') {
       throw new Error(`Invalid cell index: ${String(physicalRow)}, ${String(physicalColumn)}`);
     }
 
