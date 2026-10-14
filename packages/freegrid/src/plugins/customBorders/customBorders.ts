@@ -19,6 +19,7 @@ import {
   extendDefaultBorder,
 } from './utils';
 import type { CellBorders, Side, SideBorder } from './utils';
+import type { Selection as WalkontableSelection } from './../../3rdparty/walkontable/src';
 import {
   detectSelectionType,
   normalizeSelectionFactory,
@@ -39,8 +40,7 @@ type CustomBorderSetting = {
 };
 
 /** A custom selection of Walkontable that draws a cell's borders. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
-type BorderSelection = { settings: CellBorders; cellRange: CellRange | null; instanceBorders: Record<string, any>; clear(): void };
+type BorderSelection = Pick<WalkontableSelection, 'cellRange' | 'instanceBorders' | 'clear'> & { settings: CellBorders };
 
 /**
  * @class CustomBorders
@@ -560,7 +560,7 @@ class CustomBorders extends BasePlugin {
     const customSelection = this.#customSelections().find(selection => selection.settings.id === border.id);
 
     if (customSelection) {
-      Object.values(customSelection.instanceBorders).forEach(borderObject => borderObject.toggleHiddenClass(place, remove));
+      Object.values(customSelection.instanceBorders).forEach(borderObject => borderObject.toggleHiddenClass(place as Side, remove));
     }
 
     return !!customSelection;
@@ -588,7 +588,7 @@ class CustomBorders extends BasePlugin {
       customSelection.cellRange = cellRange;
 
       if (place) {
-        Object.values(customSelection.instanceBorders).forEach(borderObject => borderObject.changeBorderStyle(place, border));
+        Object.values(customSelection.instanceBorders).forEach(borderObject => borderObject.changeBorderStyle(place as Side, border));
       }
     }
 
