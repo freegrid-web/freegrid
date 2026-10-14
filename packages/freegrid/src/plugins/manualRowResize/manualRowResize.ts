@@ -154,7 +154,7 @@ class ManualRowResize extends BasePlugin {
   setupHandlePosition(TH: HTMLTableCellElement): void {
     this.currentTH = TH;
 
-    const { row } = this.hot.view.wt.wtTable.getCoords(TH);
+    const { row } = this.hot.view.wt.wtTable.getCoords(TH)!;
     const headerWidth = outerWidth(this.currentTH);
 
     // A column header has a negative row.

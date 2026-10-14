@@ -118,7 +118,7 @@ class EditorAutocomplete extends EditorHandsontable {
     });
 
     // Room for the list's scrollbar.
-    this.htEditor.view.wt.wtTable.holder.parentNode.style['padding-right'] = `${getScrollbarWidth() + 2}px`;
+    (this.htEditor.view.wt.wtTable.holder.parentNode.style as unknown as Record<string, string>)['padding-right'] = `${getScrollbarWidth() + 2}px`;
 
     this.instance._registerTimeout(() => {
       this.queryChoices(this.TEXTAREA.value);

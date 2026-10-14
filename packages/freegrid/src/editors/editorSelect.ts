@@ -146,13 +146,13 @@ class EditorSelect extends EditorBase {
     const currentOffset = offset(this.TD);
     const containerOffset = offset(this.instance.rootElement);
     const scrollableContainer = getScrollableElement(this.TD) as HTMLElement;
-    const overlay = {
+    const overlay = ({
       top: 'topOverlay',
       left: 'leftOverlay',
       'top-left-corner': 'topLeftCornerOverlay',
       'bottom-left-corner': 'bottomLeftCornerOverlay',
       bottom: 'bottomOverlay',
-    }[this.checkEditorSection()];
+    } as const)[this.checkEditorSection()];
     const cssTransformOffset = overlay ?
       getCssTransform(this.instance.view.wt.wtOverlays[overlay].clone.wtTable.holder.parentNode) : undefined;
     let width = outerWidth(this.TD) + 1;

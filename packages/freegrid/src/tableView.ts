@@ -18,8 +18,7 @@ import type Core from './core';
 import type { GridSettings } from './types';
 
 type Grid = Core;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
-type Wt = any;
+type Wt = Walkontable;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
 type CellCoords = any;
 
@@ -577,11 +576,11 @@ class TableView {
   getCellAtCoords(coords: CellCoords, topmost?: boolean): HTMLTableCellElement | null {
     const td = this.wt.getCell(coords, topmost);
 
-    if (td < 0) { // there was an exit code (cell is out of bounds)
+    if ((td as number) < 0) { // there was an exit code (cell is out of bounds)
       return null;
     }
 
-    return td;
+    return td as HTMLTableCellElement;
   }
 
   /**

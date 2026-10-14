@@ -1,3 +1,4 @@
+import type Walkontable from './core';
 import {
   getScrollbarWidth,
   getStyle,
@@ -14,13 +15,28 @@ import ViewportRowsCalculator from './calculator/viewportRows';
  * @class Viewport
  */
 class Viewport {
+  #engine: Walkontable;
+  declare instance: Walkontable;
+  declare oversizedRows: (number | undefined)[];
+  declare oversizedColumnHeaders: (number | undefined)[];
+  declare hasOversizedColumnHeadersMarked: Record<string, boolean | undefined>;
+  declare clientHeight: number;
+  declare containerWidth: number | null;
+  declare rowHeaderWidth: number;
+  declare columnHeaderHeight: number;
+  declare rowsVisibleCalculator: ViewportRowsCalculator;
+  declare columnsVisibleCalculator: ViewportColumnsCalculator;
+  declare rowsRenderCalculator: ViewportRowsCalculator;
+  declare columnsRenderCalculator: ViewportColumnsCalculator;
+  #eventManager: EventManager;
+
   /**
    * @param wotInstance
    */
-  constructor(wotInstance) {
-    this.wot = wotInstance;
+  constructor(wotInstance: Walkontable) {
+    this.#engine = wotInstance;
     // legacy support
-    this.instance = this.wot;
+    this.instance = this.#engine;
 
     this.oversizedRows = [];
     this.oversizedColumnHeaders = [];
@@ -28,11 +44,11 @@ class Viewport {
     this.clientHeight = 0;
     this.containerWidth = NaN;
     this.rowHeaderWidth = NaN;
-    this.rowsVisibleCalculator = null;
-    this.columnsVisibleCalculator = null;
+    this.rowsVisibleCalculator = null!;
+    this.columnsVisibleCalculator = null!;
 
-    this.eventManager = new EventManager(this.wot);
-    this.eventManager.addEventListener(window, 'resize', () => {
+    this.#eventManager = new EventManager(this.#engine);
+    this.#eventManager.addEventListener(window, 'resize', () => {
       this.clientHeight = this.getWorkspaceHeight();
     });
   }
@@ -49,9 +65,9 @@ class Viewport {
       height = document.documentElement.clientHeight;
 
     } else {
-      elemHeight = outerHeight(trimmingContainer);
+      elemHeight = outerHeight(trimmingContainer as HTMLElement);
       // returns height without DIV scrollbar
-      height = (elemHeight > 0 && trimmingContainer.clientHeight > 0) ? trimmingContainer.clientHeight : Infinity;
+      height = (elemHeight > 0 && (trimmingContainer as HTMLElement).clientHeight > 0) ? (trimmingContainer as HTMLElement).clientHeight : Infinity;
     }
 
     return height;
@@ -59,18 +75,18 @@ class Viewport {
 
   getWorkspaceWidth() {
     let width;
-    const totalColumns = this.wot.getSetting('totalColumns');
+    const totalColumns = this.#engine.getSetting('totalColumns');
     const trimmingContainer = this.instance.wtOverlays.leftOverlay.trimmingContainer;
     let overflow;
-    const stretchSetting = this.wot.getSetting('stretchH');
+    const stretchSetting = this.#engine.getSetting('stretchH');
     const docOffsetWidth = document.documentElement.offsetWidth;
-    const preventOverflow = this.wot.getSetting('preventOverflow');
+    const preventOverflow = this.#engine.getSetting('preventOverflow');
 
     if (preventOverflow) {
       return outerWidth(this.instance.wtTable.wtRootElement);
     }
 
-    if (this.wot.getSetting('freezeOverlays')) {
+    if (this.#engine.getSetting('freezeOverlays')) {
       width = Math.min(docOffsetWidth - this.getWorkspaceOffset().left, docOffsetWidth);
     } else {
       width = Math.min(this.getContainerFillWidth(), docOffsetWidth - this.getWorkspaceOffset().left, docOffsetWidth);
@@ -90,7 +106,7 @@ class Viewport {
       if (overflow === 'scroll' || overflow === 'hidden' || overflow === 'auto') {
         // this is used in `scroll.html`
         // TODO test me
-        return Math.max(width, trimmingContainer.clientWidth);
+        return Math.max(width, (trimmingContainer as HTMLElement).clientWidth);
       }
     }
 
@@ -126,8 +142,8 @@ class Viewport {
    * @param length
    * @returns {Number}
    */
-  sumColumnWidths(from, length) {
-    const wtTable = this.wot.wtTable;
+  sumColumnWidths(from: number, length: number) {
+    const wtTable = this.#engine.wtTable;
     let sum = 0;
     let column = from;
 
@@ -166,23 +182,23 @@ class Viewport {
    * @returns {Number}
    */
   getWorkspaceOffset() {
-    return offset(this.wot.wtTable.TABLE);
+    return offset(this.#engine.wtTable.TABLE);
   }
 
   /**
    * @returns {Number}
    */
   getWorkspaceActualHeight() {
-    return outerHeight(this.wot.wtTable.TABLE);
+    return outerHeight(this.#engine.wtTable.TABLE);
   }
 
   /**
    * @returns {Number}
    */
   getWorkspaceActualWidth() {
-    return outerWidth(this.wot.wtTable.TABLE) ||
-      outerWidth(this.wot.wtTable.TBODY) ||
-      outerWidth(this.wot.wtTable.THEAD); // IE8 reports 0 as <table> offsetWidth;
+    return outerWidth(this.#engine.wtTable.TABLE) ||
+      outerWidth(this.#engine.wtTable.TBODY) ||
+      outerWidth(this.#engine.wtTable.THEAD); // IE8 reports 0 as <table> offsetWidth;
   }
 
   /**
@@ -190,7 +206,7 @@ class Viewport {
    */
   getColumnHeaderHeight() {
     if (isNaN(this.columnHeaderHeight)) {
-      this.columnHeaderHeight = outerHeight(this.wot.wtTable.THEAD);
+      this.columnHeaderHeight = outerHeight(this.#engine.wtTable.THEAD);
     }
 
     return this.columnHeaderHeight;
@@ -218,7 +234,7 @@ class Viewport {
   /**
    * @returns {Number}
    */
-  getRowHeaderWidth() {
+  getRowHeaderWidth(): number {
     const rowHeadersHeightSetting = this.instance.getSetting('rowHeaderWidth');
     const rowHeaders = this.instance.getSetting('rowHeaders');
 
@@ -226,24 +242,24 @@ class Viewport {
       this.rowHeaderWidth = 0;
 
       for (let i = 0, len = rowHeaders.length; i < len; i++) {
-        this.rowHeaderWidth += rowHeadersHeightSetting[i] || rowHeadersHeightSetting;
+        this.rowHeaderWidth += (rowHeadersHeightSetting as number[])[i] || rowHeadersHeightSetting as number;
       }
     }
 
-    if (this.wot.cloneSource) {
-      return this.wot.cloneSource.wtViewport.getRowHeaderWidth();
+    if (this.#engine.cloneSource) {
+      return this.#engine.cloneSource.wtViewport.getRowHeaderWidth();
     }
 
     if (isNaN(this.rowHeaderWidth)) {
 
       if (rowHeaders.length) {
-        let TH = this.instance.wtTable.TABLE.querySelector('TH');
+        let TH: HTMLElement | null = this.instance.wtTable.TABLE.querySelector('TH');
         this.rowHeaderWidth = 0;
 
         for (let i = 0, len = rowHeaders.length; i < len; i++) {
           if (TH) {
             this.rowHeaderWidth += outerWidth(TH);
-            TH = TH.nextSibling;
+            TH = TH.nextSibling as HTMLElement | null;
 
           } else {
             // yes this is a cheat but it worked like that before, just taking assumption from CSS instead of measuring.
@@ -256,7 +272,7 @@ class Viewport {
       }
     }
 
-    this.rowHeaderWidth = this.instance.getSetting('onModifyRowHeaderWidth', this.rowHeaderWidth) || this.rowHeaderWidth;
+    this.rowHeaderWidth = this.instance.getSetting('onModifyRowHeaderWidth', this.rowHeaderWidth) as number || this.rowHeaderWidth;
 
     return this.rowHeaderWidth;
   }
@@ -294,35 +310,35 @@ class Viewport {
 
     this.rowHeaderWidth = NaN;
 
-    if (this.wot.wtSettings.settings.renderAllRows && !visible) {
+    if (this.#engine.wtSettings.settings.renderAllRows && !visible) {
       height = Infinity;
     } else {
       height = this.getViewportHeight();
     }
 
-    let pos = this.wot.wtOverlays.topOverlay.getScrollPosition() - this.wot.wtOverlays.topOverlay.getTableParentOffset();
+    let pos = this.#engine.wtOverlays.topOverlay.getScrollPosition() - this.#engine.wtOverlays.topOverlay.getTableParentOffset();
 
     if (pos < 0) {
       pos = 0;
     }
 
-    const fixedRowsTop = this.wot.getSetting('fixedRowsTop');
-    const fixedRowsBottom = this.wot.getSetting('fixedRowsBottom');
-    const totalRows = this.wot.getSetting('totalRows');
+    const fixedRowsTop = this.#engine.getSetting('fixedRowsTop');
+    const fixedRowsBottom = this.#engine.getSetting('fixedRowsBottom');
+    const totalRows = this.#engine.getSetting('totalRows');
 
     if (fixedRowsTop) {
-      fixedRowsHeight = this.wot.wtOverlays.topOverlay.sumCellSizes(0, fixedRowsTop);
+      fixedRowsHeight = this.#engine.wtOverlays.topOverlay.sumCellSizes(0, fixedRowsTop);
       pos += fixedRowsHeight;
       height -= fixedRowsHeight;
     }
 
-    if (fixedRowsBottom && this.wot.wtOverlays.bottomOverlay.clone) {
-      fixedRowsHeight = this.wot.wtOverlays.bottomOverlay.sumCellSizes(totalRows - fixedRowsBottom, totalRows);
+    if (fixedRowsBottom && this.#engine.wtOverlays.bottomOverlay.clone) {
+      fixedRowsHeight = this.#engine.wtOverlays.bottomOverlay.sumCellSizes(totalRows - fixedRowsBottom, totalRows);
 
       height -= fixedRowsHeight;
     }
 
-    if (this.wot.wtTable.holder.clientHeight === this.wot.wtTable.holder.offsetHeight) {
+    if (this.#engine.wtTable.holder.clientHeight === this.#engine.wtTable.holder.offsetHeight) {
       scrollbarHeight = 0;
     } else {
       scrollbarHeight = getScrollbarWidth();
@@ -331,14 +347,14 @@ class Viewport {
     return new ViewportRowsCalculator(
       height,
       pos,
-      this.wot.getSetting('totalRows'),
+      this.#engine.getSetting('totalRows'),
       // Rows without their own height use the configured default (FreeGrid's --fg-row-height), not the calculator's 23.
-      (sourceRow) => {
-        const height = this.wot.wtTable.getRowHeight(sourceRow);
+      (sourceRow: number) => {
+        const height = this.#engine.wtTable.getRowHeight(sourceRow);
 
-        return height === void 0 ? this.wot.wtSettings.settings.defaultRowHeight : height;
+        return height === void 0 ? this.#engine.wtSettings.settings.defaultRowHeight : height;
       },
-      visible ? null : this.wot.wtSettings.settings.viewportRowCalculatorOverride,
+      (visible ? null : this.#engine.wtSettings.settings.viewportRowCalculatorOverride) as ConstructorParameters<typeof ViewportRowsCalculator>[4],
       visible,
       scrollbarHeight
     );
@@ -353,7 +369,7 @@ class Viewport {
    */
   createColumnsCalculator(visible = false) {
     let width = this.getViewportWidth();
-    let pos = this.wot.wtOverlays.leftOverlay.getScrollPosition() - this.wot.wtOverlays.leftOverlay.getTableParentOffset();
+    let pos = this.#engine.wtOverlays.leftOverlay.getScrollPosition() - this.#engine.wtOverlays.leftOverlay.getTableParentOffset();
 
     this.columnHeaderHeight = NaN;
 
@@ -361,26 +377,27 @@ class Viewport {
       pos = 0;
     }
 
-    const fixedColumnsLeft = this.wot.getSetting('fixedColumnsLeft');
+    const fixedColumnsLeft = this.#engine.getSetting('fixedColumnsLeft');
 
     if (fixedColumnsLeft) {
-      const fixedColumnsWidth = this.wot.wtOverlays.leftOverlay.sumCellSizes(0, fixedColumnsLeft);
+      const fixedColumnsWidth = this.#engine.wtOverlays.leftOverlay.sumCellSizes(0, fixedColumnsLeft);
       pos += fixedColumnsWidth;
       width -= fixedColumnsWidth;
     }
-    if (this.wot.wtTable.holder.clientWidth !== this.wot.wtTable.holder.offsetWidth) {
+    if (this.#engine.wtTable.holder.clientWidth !== this.#engine.wtTable.holder.offsetWidth) {
       width -= getScrollbarWidth();
     }
 
     return new ViewportColumnsCalculator(
       width,
       pos,
-      this.wot.getSetting('totalColumns'),
-      sourceCol => this.wot.wtTable.getColumnWidth(sourceCol),
-      visible ? null : this.wot.wtSettings.settings.viewportColumnCalculatorOverride,
+      this.#engine.getSetting('totalColumns'),
+      (sourceCol: number) => this.#engine.wtTable.getColumnWidth(sourceCol),
+      (visible ? null : this.#engine.wtSettings.settings.viewportColumnCalculatorOverride) as ConstructorParameters<typeof ViewportColumnsCalculator>[4],
       visible,
-      this.wot.getSetting('stretchH'),
-      (stretchedWidth, column) => this.wot.getSetting('onBeforeStretchingColumnWidth', stretchedWidth, column)
+      // The unconverted calculator's JSDoc says boolean, although the runtime accepts a stretch mode string.
+      this.#engine.getSetting('stretchH') as unknown as ConstructorParameters<typeof ViewportColumnsCalculator>[6],
+      (stretchedWidth: number | undefined, column: number) => this.#engine.getSetting('onBeforeStretchingColumnWidth', stretchedWidth, column)
     );
   }
 
@@ -410,8 +427,8 @@ class Viewport {
       this.columnsRenderCalculator = this.createColumnsCalculator();
     }
     // delete temporarily to make sure that renderers always use rowsRenderCalculator, not rowsVisibleCalculator
-    this.rowsVisibleCalculator = null;
-    this.columnsVisibleCalculator = null;
+    this.rowsVisibleCalculator = null!;
+    this.columnsVisibleCalculator = null!;
 
     return runFastDraw;
   }
@@ -433,16 +450,16 @@ class Viewport {
    * @returns {Boolean} Returns `true` if all proposed visible rows are already rendered (meaning: redraw is not needed).
    *                    Returns `false` if at least one proposed visible row is not already rendered (meaning: redraw is needed)
    */
-  areAllProposedVisibleRowsAlreadyRendered(proposedRowsVisibleCalculator) {
+  areAllProposedVisibleRowsAlreadyRendered(proposedRowsVisibleCalculator: ViewportRowsCalculator) {
     if (this.rowsVisibleCalculator) {
-      if (proposedRowsVisibleCalculator.startRow < this.rowsRenderCalculator.startRow ||
-          (proposedRowsVisibleCalculator.startRow === this.rowsRenderCalculator.startRow &&
-          proposedRowsVisibleCalculator.startRow > 0)) {
+      if (proposedRowsVisibleCalculator.startRow! < this.rowsRenderCalculator.startRow! ||
+          (proposedRowsVisibleCalculator.startRow! === this.rowsRenderCalculator.startRow! &&
+          proposedRowsVisibleCalculator.startRow! > 0)) {
         return false;
 
-      } else if (proposedRowsVisibleCalculator.endRow > this.rowsRenderCalculator.endRow ||
-          (proposedRowsVisibleCalculator.endRow === this.rowsRenderCalculator.endRow &&
-          proposedRowsVisibleCalculator.endRow < this.wot.getSetting('totalRows') - 1)) {
+      } else if (proposedRowsVisibleCalculator.endRow! > this.rowsRenderCalculator.endRow! ||
+          (proposedRowsVisibleCalculator.endRow! === this.rowsRenderCalculator.endRow! &&
+          proposedRowsVisibleCalculator.endRow! < this.#engine.getSetting('totalRows') - 1)) {
         return false;
 
       }
@@ -461,16 +478,16 @@ class Viewport {
    * @returns {Boolean} Returns `true` if all proposed visible columns are already rendered (meaning: redraw is not needed).
    *                    Returns `false` if at least one proposed visible column is not already rendered (meaning: redraw is needed)
    */
-  areAllProposedVisibleColumnsAlreadyRendered(proposedColumnsVisibleCalculator) {
+  areAllProposedVisibleColumnsAlreadyRendered(proposedColumnsVisibleCalculator: ViewportColumnsCalculator) {
     if (this.columnsVisibleCalculator) {
-      if (proposedColumnsVisibleCalculator.startColumn < this.columnsRenderCalculator.startColumn ||
-          (proposedColumnsVisibleCalculator.startColumn === this.columnsRenderCalculator.startColumn &&
-          proposedColumnsVisibleCalculator.startColumn > 0)) {
+      if (proposedColumnsVisibleCalculator.startColumn! < this.columnsRenderCalculator.startColumn! ||
+          (proposedColumnsVisibleCalculator.startColumn! === this.columnsRenderCalculator.startColumn! &&
+          proposedColumnsVisibleCalculator.startColumn! > 0)) {
         return false;
 
-      } else if (proposedColumnsVisibleCalculator.endColumn > this.columnsRenderCalculator.endColumn ||
-          (proposedColumnsVisibleCalculator.endColumn === this.columnsRenderCalculator.endColumn &&
-          proposedColumnsVisibleCalculator.endColumn < this.wot.getSetting('totalColumns') - 1)) {
+      } else if (proposedColumnsVisibleCalculator.endColumn! > this.columnsRenderCalculator.endColumn! ||
+          (proposedColumnsVisibleCalculator.endColumn! === this.columnsRenderCalculator.endColumn! &&
+          proposedColumnsVisibleCalculator.endColumn! < this.#engine.getSetting('totalColumns') - 1)) {
         return false;
 
       }

@@ -159,7 +159,7 @@ class ManualColumnResize extends BasePlugin {
     }
     this.currentTH = TH;
 
-    const { col } = this.hot.view.wt.wtTable.getCoords(TH);
+    const { col } = this.hot.view.wt.wtTable.getCoords(TH)!;
     const headerHeight = outerHeight(this.currentTH);
 
     // A row header has a negative column.

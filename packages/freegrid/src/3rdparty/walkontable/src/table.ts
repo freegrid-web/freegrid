@@ -1,3 +1,5 @@
+import type { Coordinates, HeaderSize, TableSection, TableColumnGroup, TableRow, TableWrapper } from './types';
+import type Walkontable from './core';
 import { withLegacyClassNames } from './../../../helpers/classNames';
 import {
   getStyle,
@@ -17,33 +19,55 @@ import RowFilter from './filter/row';
 import TableRenderer from './tableRenderer';
 import Overlay from './overlay/_base';
 
+const isOverlayTypeOf = (overlay: unknown, type: string): boolean => Overlay.isOverlayTypeOf(overlay as Overlay, type);
+
 /**
  *
  */
 class Table {
+  declare wot: Walkontable;
+  declare instance: Walkontable;
+  declare TABLE: HTMLTableElement;
+  declare TBODY: TableSection;
+  declare THEAD: TableSection;
+  declare COLGROUP: TableColumnGroup;
+  declare spreader: TableWrapper;
+  declare hider: TableWrapper;
+  declare holder: TableWrapper;
+  declare wtRootElement: HTMLElement;
+  declare tableOffset: number | { top: number; left: number };
+  declare holderOffset: number | { top: number; left: number };
+  declare colgroupChildrenLength: number;
+  declare theadChildrenLength: number;
+  declare tbodyChildrenLength: number;
+  declare rowFilter: RowFilter;
+  declare columnFilter: ColumnFilter;
+  declare correctHeaderWidth: boolean;
+
   /**
    * @param {Walkontable} wotInstance
    * @param {HTMLTableElement} table
    */
-  constructor(wotInstance, table) {
+  constructor(wotInstance: Walkontable, table: HTMLTableElement, rootElement?: HTMLElement);
+  constructor(wotInstance: Walkontable, table: HTMLTableElement) {
     this.wot = wotInstance;
 
     // legacy support
     this.instance = this.wot;
     this.TABLE = table;
-    this.TBODY = null;
-    this.THEAD = null;
-    this.COLGROUP = null;
+    this.TBODY = null!;
+    this.THEAD = null!;
+    this.COLGROUP = null!;
     this.tableOffset = 0;
     this.holderOffset = 0;
 
-    removeTextNodes(this.TABLE);
+    (removeTextNodes as (element: Node) => void)(this.TABLE);
 
     this.spreader = this.createSpreader(this.TABLE);
     this.hider = this.createHider(this.spreader);
     this.holder = this.createHolder(this.hider);
 
-    this.wtRootElement = this.holder.parentNode;
+    this.wtRootElement = this.holder.parentNode as HTMLElement;
     this.alignOverlaysWithTrimmingContainer();
     this.fixTableDomTree();
 
@@ -51,8 +75,8 @@ class Table {
     this.theadChildrenLength = this.THEAD.firstChild ? this.THEAD.firstChild.childNodes.length : 0;
     this.tbodyChildrenLength = this.TBODY.childNodes.length;
 
-    this.rowFilter = null;
-    this.columnFilter = null;
+    this.rowFilter = null!;
+    this.columnFilter = null!;
     this.correctHeaderWidth = false;
 
     const origRowHeaderWidth = this.wot.wtSettings.settings.rowHeaderWidth;
@@ -65,22 +89,22 @@ class Table {
    *
    */
   fixTableDomTree() {
-    this.TBODY = this.TABLE.querySelector('tbody');
+    this.TBODY = this.TABLE.querySelector('tbody') as TableSection;
 
     if (!this.TBODY) {
-      this.TBODY = document.createElement('tbody');
+      this.TBODY = document.createElement('tbody') as TableSection;
       this.TABLE.appendChild(this.TBODY);
     }
-    this.THEAD = this.TABLE.querySelector('thead');
+    this.THEAD = this.TABLE.querySelector('thead') as TableSection;
 
     if (!this.THEAD) {
-      this.THEAD = document.createElement('thead');
+      this.THEAD = document.createElement('thead') as TableSection;
       this.TABLE.insertBefore(this.THEAD, this.TBODY);
     }
-    this.COLGROUP = this.TABLE.querySelector('colgroup');
+    this.COLGROUP = this.TABLE.querySelector('colgroup') as TableColumnGroup;
 
     if (!this.COLGROUP) {
-      this.COLGROUP = document.createElement('colgroup');
+      this.COLGROUP = document.createElement('colgroup') as TableColumnGroup;
       this.TABLE.insertBefore(this.COLGROUP, this.THEAD);
     }
 
@@ -93,12 +117,12 @@ class Table {
    * @param table
    * @returns {HTMLElement}
    */
-  createSpreader(table) {
+  createSpreader(table: HTMLTableElement) {
     const parent = table.parentNode;
-    let spreader;
+    let spreader!: TableWrapper;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
-      spreader = document.createElement('div');
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent as Element, 'fg-holder')) {
+      spreader = document.createElement('div') as TableWrapper;
       spreader.className = withLegacyClassNames('fg-spreader');
 
       if (parent) {
@@ -116,12 +140,12 @@ class Table {
    * @param spreader
    * @returns {HTMLElement}
    */
-  createHider(spreader) {
+  createHider(spreader: HTMLDivElement) {
     const parent = spreader.parentNode;
-    let hider;
+    let hider!: TableWrapper;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
-      hider = document.createElement('div');
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent as Element, 'fg-holder')) {
+      hider = document.createElement('div') as TableWrapper;
       hider.className = withLegacyClassNames('fg-hider');
 
       if (parent) {
@@ -139,12 +163,12 @@ class Table {
    * @param hider
    * @returns {HTMLElement}
    */
-  createHolder(hider) {
+  createHolder(hider: HTMLDivElement) {
     const parent = hider.parentNode;
-    let holder;
+    let holder!: TableWrapper;
 
-    if (!parent || parent.nodeType !== 1 || !hasClass(parent, 'fg-holder')) {
-      holder = document.createElement('div');
+    if (!parent || parent.nodeType !== 1 || !hasClass(parent as Element, 'fg-holder')) {
+      holder = document.createElement('div') as TableWrapper;
       holder.style.position = 'relative';
       holder.className = withLegacyClassNames('fg-holder');
 
@@ -153,7 +177,7 @@ class Table {
         parent.insertBefore(holder, hider);
       }
       if (!this.isWorkingOnClone()) {
-        holder.parentNode.className += withLegacyClassNames('fg-master', 'freegrid');
+        (holder.parentNode as HTMLElement).className += withLegacyClassNames('fg-master', 'freegrid');
       }
       holder.appendChild(hider);
     }
@@ -165,7 +189,7 @@ class Table {
     const trimmingElement = getTrimmingContainer(this.wtRootElement);
 
     if (!this.isWorkingOnClone()) {
-      this.holder.parentNode.style.position = 'relative';
+      (this.holder.parentNode as HTMLElement).style.position = 'relative';
 
       if (trimmingElement === window) {
         const preventOverflow = this.wot.getSetting('preventOverflow');
@@ -175,8 +199,8 @@ class Table {
           this.wtRootElement.style.overflow = 'visible';
         }
       } else {
-        this.holder.style.width = getStyle(trimmingElement, 'width');
-        this.holder.style.height = getStyle(trimmingElement, 'height');
+        this.holder.style.width = getStyle(trimmingElement, 'width')!;
+        this.holder.style.height = getStyle(trimmingElement, 'height')!;
         this.holder.style.overflow = '';
       }
     }
@@ -192,7 +216,7 @@ class Table {
    * @param {Boolean} fastDraw If TRUE, will try to avoid full redraw and only update the border positions. If FALSE or UNDEFINED, will perform a full redraw
    * @returns {Table}
    */
-  draw(fastDraw) {
+  draw(fastDraw?: boolean) {
     const { wtOverlays, wtViewport } = this.wot;
     const totalRows = this.instance.getSetting('totalRows');
     const rowHeaders = this.wot.getSetting('rowHeaders').length;
@@ -230,34 +254,34 @@ class Table {
       }
     } else {
       if (this.isWorkingOnClone()) {
-        this.tableOffset = this.wot.cloneSource.wtTable.tableOffset;
+        this.tableOffset = this.wot.cloneSource!.wtTable.tableOffset;
       } else {
         this.tableOffset = offset(this.TABLE);
       }
       let startRow;
 
-      if (Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_DEBUG) ||
-          Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP) ||
-          Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP_LEFT_CORNER)) {
+      if (isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_DEBUG) ||
+          isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP) ||
+          isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP_LEFT_CORNER)) {
         startRow = 0;
-      } else if (Overlay.isOverlayTypeOf(this.instance.cloneOverlay, Overlay.CLONE_BOTTOM) ||
-          Overlay.isOverlayTypeOf(this.instance.cloneOverlay, Overlay.CLONE_BOTTOM_LEFT_CORNER)) {
+      } else if (isOverlayTypeOf(this.instance.cloneOverlay, Overlay.CLONE_BOTTOM) ||
+          isOverlayTypeOf(this.instance.cloneOverlay, Overlay.CLONE_BOTTOM_LEFT_CORNER)) {
         startRow = Math.max(totalRows - this.wot.getSetting('fixedRowsBottom'), 0);
       } else {
         startRow = wtViewport.rowsRenderCalculator.startRow;
       }
       let startColumn;
 
-      if (Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_DEBUG) ||
-          Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_LEFT) ||
-          Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP_LEFT_CORNER) ||
-          Overlay.isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_BOTTOM_LEFT_CORNER)) {
+      if (isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_DEBUG) ||
+          isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_LEFT) ||
+          isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_TOP_LEFT_CORNER) ||
+          isOverlayTypeOf(this.wot.cloneOverlay, Overlay.CLONE_BOTTOM_LEFT_CORNER)) {
         startColumn = 0;
       } else {
         startColumn = wtViewport.columnsRenderCalculator.startColumn;
       }
-      this.rowFilter = new RowFilter(startRow, totalRows, columnHeaders);
-      this.columnFilter = new ColumnFilter(startColumn, this.wot.getSetting('totalColumns'), rowHeaders);
+      this.rowFilter = new RowFilter(startRow!, totalRows, columnHeaders);
+      this.columnFilter = new ColumnFilter(startColumn!, this.wot.getSetting('totalColumns'), rowHeaders);
 
       this.alignOverlaysWithTrimmingContainer();
       this._doDraw(); // creates calculator after draw
@@ -295,7 +319,7 @@ class Table {
     wtRenderer.render();
   }
 
-  removeClassFromCells(className) {
+  removeClassFromCells(className: string) {
     const nodes = this.TABLE.querySelectorAll(`.${className}`);
 
     for (let i = 0, len = nodes.length; i < len; i++) {
@@ -308,7 +332,7 @@ class Table {
    *
    * @param {Boolean} fastDraw If fast drawing is enabled than additionally className clearing is applied.
    */
-  refreshSelections(fastDraw) {
+  refreshSelections(fastDraw?: boolean) {
     if (!this.wot.selections) {
       return;
     }
@@ -316,7 +340,7 @@ class Table {
     const len = highlights.length;
 
     if (fastDraw) {
-      const classesToRemove = [];
+      const classesToRemove: string[] = [];
 
       for (let i = 0; i < len; i++) {
         const {
@@ -373,7 +397,7 @@ class Table {
    *  -1 row before viewport
    *  -2 row after viewport
    */
-  getCell(coords) {
+  getCell(coords: Coordinates): HTMLTableCellElement | -1 | -2 | undefined {
     let row = coords.row;
     let column = coords.col;
     const hookResult = this.wot.getSetting('onModifyGetCellCoords', row, column);
@@ -405,7 +429,7 @@ class Table {
    * @param {Number} [level=0] Header level (0 = most distant to the table)
    * @returns {Object} HTMLElement on success or undefined on error
    */
-  getColumnHeader(col, level = 0) {
+  getColumnHeader(col: number, level = 0) {
     const TR = this.THEAD.childNodes[level];
 
     if (TR) {
@@ -419,7 +443,7 @@ class Table {
    * @param {Number} row Row index
    * @returns {HTMLElement} HTMLElement on success or Number one of the exit codes on error: `null table doesn't have row headers`
    */
-  getRowHeader(row) {
+  getRowHeader(row: number) {
     if (this.columnFilter.sourceColumnToVisibleRowHeadedColumn(0) === 0) {
       return null;
     }
@@ -436,19 +460,19 @@ class Table {
    * @param {HTMLTableCellElement} TD A cell DOM element (or a child of one).
    * @returns {CellCoords|null} The coordinates of the provided TD element (or the closest TD element) or null, if the provided element is not applicable.
    */
-  getCoords(TD) {
-    let cellElement = TD;
+  getCoords(TD: EventTarget | null) {
+    let cellElement = TD as HTMLTableCellElement | null;
 
-    if (cellElement.nodeName !== 'TD' && cellElement.nodeName !== 'TH') {
-      cellElement = closest(cellElement, ['TD', 'TH']);
+    if (cellElement!.nodeName !== 'TD' && cellElement!.nodeName !== 'TH') {
+      cellElement = closest(cellElement, ['TD', 'TH']) as HTMLTableCellElement | null;
     }
 
     if (cellElement === null) {
       return null;
     }
 
-    const TR = cellElement.parentNode;
-    const CONTAINER = TR.parentNode;
+    const TR = cellElement.parentNode!;
+    const CONTAINER = TR.parentNode!;
     let row = index(TR);
     let col = cellElement.cellIndex;
 
@@ -474,68 +498,68 @@ class Table {
     return new CellCoords(row, col);
   }
 
-  getTrForRow(row) {
-    return this.TBODY.childNodes[this.rowFilter.sourceToRendered(row)];
+  getTrForRow(row: number) {
+    return this.TBODY.childNodes[this.rowFilter.sourceToRendered(row)] as TableRow;
   }
 
   getFirstRenderedRow() {
-    return this.wot.wtViewport.rowsRenderCalculator.startRow;
+    return this.wot.wtViewport.rowsRenderCalculator.startRow!;
   }
 
   getFirstVisibleRow() {
-    return this.wot.wtViewport.rowsVisibleCalculator.startRow;
+    return this.wot.wtViewport.rowsVisibleCalculator.startRow!;
   }
 
   getFirstRenderedColumn() {
-    return this.wot.wtViewport.columnsRenderCalculator.startColumn;
+    return this.wot.wtViewport.columnsRenderCalculator.startColumn!;
   }
 
   /**
    * @returns {Number} Returns -1 if no row is visible
    */
   getFirstVisibleColumn() {
-    return this.wot.wtViewport.columnsVisibleCalculator.startColumn;
+    return this.wot.wtViewport.columnsVisibleCalculator.startColumn!;
   }
 
   /**
    * @returns {Number} Returns -1 if no row is visible
    */
   getLastRenderedRow() {
-    return this.wot.wtViewport.rowsRenderCalculator.endRow;
+    return this.wot.wtViewport.rowsRenderCalculator.endRow!;
   }
 
   getLastVisibleRow() {
-    return this.wot.wtViewport.rowsVisibleCalculator.endRow;
+    return this.wot.wtViewport.rowsVisibleCalculator.endRow!;
   }
 
   getLastRenderedColumn() {
-    return this.wot.wtViewport.columnsRenderCalculator.endColumn;
+    return this.wot.wtViewport.columnsRenderCalculator.endColumn!;
   }
 
   /**
    * @returns {Number} Returns -1 if no column is visible
    */
   getLastVisibleColumn() {
-    return this.wot.wtViewport.columnsVisibleCalculator.endColumn;
+    return this.wot.wtViewport.columnsVisibleCalculator.endColumn!;
   }
 
-  isRowBeforeRenderedRows(row) {
+  isRowBeforeRenderedRows(row: number) {
     return this.rowFilter && (this.rowFilter.sourceToRendered(row) < 0 && row >= 0);
   }
 
-  isRowAfterViewport(row) {
+  isRowAfterViewport(row: number) {
     return this.rowFilter && (this.rowFilter.sourceToRendered(row) > this.getLastVisibleRow());
   }
 
-  isRowAfterRenderedRows(row) {
+  isRowAfterRenderedRows(row: number) {
     return this.rowFilter && (this.rowFilter.sourceToRendered(row) > this.getLastRenderedRow());
   }
 
-  isColumnBeforeViewport(column) {
+  isColumnBeforeViewport(column: number) {
     return this.columnFilter && (this.columnFilter.sourceToRendered(column) < 0 && column >= 0);
   }
 
-  isColumnAfterViewport(column) {
+  isColumnAfterViewport(column: number) {
     return this.columnFilter && (this.columnFilter.sourceToRendered(column) > this.getLastVisibleColumn());
   }
 
@@ -597,7 +621,7 @@ class Table {
    * @param {Number} sourceRow
    * @returns {Number}
    */
-  getRowHeight(sourceRow) {
+  getRowHeight(sourceRow: number) {
     let height = this.wot.wtSettings.settings.rowHeight(sourceRow);
     const oversizedHeight = this.wot.wtViewport.oversizedRows[sourceRow];
 
@@ -608,7 +632,7 @@ class Table {
     return height;
   }
 
-  getColumnHeaderHeight(level) {
+  getColumnHeaderHeight(level: number) {
     let height = this.wot.wtSettings.settings.defaultRowHeight;
     const oversizedHeight = this.wot.wtViewport.oversizedColumnHeaders[level];
 
@@ -627,20 +651,20 @@ class Table {
     return this.wot.getSetting('totalColumns') === this.getVisibleColumnsCount();
   }
 
-  getColumnWidth(sourceColumn) {
+  getColumnWidth(sourceColumn: number) {
     let width = this.wot.wtSettings.settings.columnWidth;
 
     if (typeof width === 'function') {
       width = width(sourceColumn);
 
     } else if (typeof width === 'object') {
-      width = width[sourceColumn];
+      width = (width as number[])[sourceColumn];
     }
 
     return width || this.wot.wtSettings.settings.defaultColumnWidth;
   }
 
-  getStretchedColumnWidth(sourceColumn) {
+  getStretchedColumnWidth(sourceColumn: number) {
     const columnWidth = this.getColumnWidth(sourceColumn);
     let width = (columnWidth === null || columnWidth === void 0) ? this.instance.wtSettings.settings.defaultColumnWidth : columnWidth;
     const calculator = this.wot.wtViewport.columnsRenderCalculator;
@@ -661,8 +685,8 @@ class Table {
    *
    * @private
    */
-  _modifyRowHeaderWidth(rowHeaderWidthFactory) {
-    let widths = isFunction(rowHeaderWidthFactory) ? rowHeaderWidthFactory() : null;
+  _modifyRowHeaderWidth(rowHeaderWidthFactory: HeaderSize | (() => HeaderSize)) {
+    let widths: HeaderSize = isFunction(rowHeaderWidthFactory) ? rowHeaderWidthFactory() as HeaderSize : null;
 
     if (Array.isArray(widths)) {
       widths = [...widths];
@@ -679,17 +703,17 @@ class Table {
    *
    * @private
    */
-  _correctRowHeaderWidth(width) {
+  _correctRowHeaderWidth(width: unknown): number {
     let rowHeaderWidth = width;
 
     if (typeof width !== 'number') {
       rowHeaderWidth = this.wot.getSetting('defaultColumnWidth');
     }
     if (this.correctHeaderWidth) {
-      rowHeaderWidth += 1;
+      (rowHeaderWidth as number) += 1;
     }
 
-    return rowHeaderWidth;
+    return rowHeaderWidth as number;
   }
 }
 

@@ -1,3 +1,5 @@
+import type { Coordinates } from './types';
+import type Walkontable from './core';
 import {
   innerHeight,
   innerWidth,
@@ -11,11 +13,14 @@ import { rangeEach, rangeEachReverse } from './../../../helpers/number';
  * @class Scroll
  */
 class Scroll {
+  #engine: Walkontable;
+  declare instance: Walkontable;
+
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
-    this.wot = wotInstance;
+  constructor(wotInstance: Walkontable) {
+    this.#engine = wotInstance;
 
     // legacy support
     this.instance = wotInstance;
@@ -31,7 +36,7 @@ class Scroll {
    * @param {Boolean} [snapToLeft]
    * @returns {Boolean}
    */
-  scrollViewport(coords, snapToTop, snapToRight, snapToBottom, snapToLeft) {
+  scrollViewport(coords: Coordinates, snapToTop?: boolean, snapToRight?: boolean, snapToBottom?: boolean, snapToLeft?: boolean) {
     const scrolledHorizontally = this.scrollViewportHorizontally(coords.col, snapToRight, snapToLeft);
     const scrolledVertically = this.scrollViewportVertically(coords.row, snapToTop, snapToBottom);
 
@@ -46,8 +51,8 @@ class Scroll {
    * @param {Boolean} [snapToLeft]
    * @returns {Boolean}
    */
-  scrollViewportHorizontally(column, snapToRight, snapToLeft) {
-    if (!this.wot.drawn) {
+  scrollViewportHorizontally(column: number, snapToRight?: boolean, snapToLeft?: boolean) {
+    if (!this.#engine.drawn) {
       return false;
     }
 
@@ -77,8 +82,8 @@ class Scroll {
    * @param {Boolean} [snapToBottom]
    * @returns {Boolean}
    */
-  scrollViewportVertically(row, snapToTop, snapToBottom) {
-    if (!this.wot.drawn) {
+  scrollViewportVertically(row: number, snapToTop?: boolean, snapToBottom?: boolean) {
+    if (!this.#engine.drawn) {
       return false;
     }
 
@@ -273,7 +278,7 @@ class Scroll {
    * @private
    */
   _getVariables() {
-    const wot = this.wot;
+    const wot = this.#engine;
     const topOverlay = wot.wtOverlays.topOverlay;
     const leftOverlay = wot.wtOverlays.leftOverlay;
     const wtTable = wot.wtTable;
