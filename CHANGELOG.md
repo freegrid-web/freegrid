@@ -46,6 +46,10 @@
 - Core, part 5 (TypeScript rewrite): the default settings (`FreeGrid.DefaultSettings`).
 - Core, part 6 (TypeScript rewrite): the grid itself (`core`), typed in place: still a constructor function, with
   parameter types from its JSDoc. Turning it into a class comes next.
+  Fixes (CodeQL):
+  - `getCellMeta('__proto__', 0)` (or `constructor` / `prototype` as an index) wrote into `Array.prototype`; such an
+    index throws now.
+  - Checking whether a numeric cell's text is a number took quadratic time on long runs of spaces.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

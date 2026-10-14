@@ -315,4 +315,16 @@ describe('Core_setDataAtCell', () => {
       delete Object.prototype.polluted;
     }
   });
+
+  it('should parse numeric text with spaces around it in numeric cells', async() => {
+    handsontable({
+      data: [[0, 0, 0]],
+      columns: [{ type: 'numeric' }, { type: 'numeric' }, { type: 'numeric' }],
+    });
+
+    setDataAtCell([[0, 0, '  12,5 '], [0, 1, ' - 3 '], [0, 2, `${' '.repeat(5000)}x`]]);
+    await sleep(100);
+
+    expect(getDataAtRow(0)).toEqual([12.5, ' - 3 ', `${' '.repeat(5000)}x`]);
+  });
 });

@@ -75,6 +75,9 @@ type GridPrivate = {
 
 let activeGuid: string | null = null;
 
+/** Keys that are not cell indexes but lead to the prototypes. */
+const UNSAFE_INDEXES = new Set(['__proto__', 'constructor', 'prototype']);
+
 /** Counts the running cell validators and calls `onQueueEmpty(valid)` once all of them are done. */
 class ValidatorsQueue {
   validatorsInQueue = 0;
@@ -933,7 +936,8 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
 
   function validateChanges(changes: (Change | null)[], source: string | undefined, callback: () => void) {
     const waitingForValidator = new ValidatorsQueue();
-    const isNumericData = (value: string) => value.length > 0 && /^\s*[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))\s*$/.test(value);
+    // Trimmed first: `\s*` on both sides of the optional sign made the test quadratic on long runs of spaces.
+    const isNumericData = (value: string) => value.length > 0 && /^[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))$/.test(value.trim());
 
     waitingForValidator.onQueueEmpty = resolve;
 
@@ -2395,6 +2399,10 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
     // Workaround for #11. Connected also with #3849. It should be fixed within #4497.
     if (physicalRow === null) {
       physicalRow = row;
+    }
+    // The meta is cached by index: a key like '__proto__' would reach Array.prototype or Object.prototype.
+    if (UNSAFE_INDEXES.has(String(physicalRow)) || UNSAFE_INDEXES.has(String(physicalColumn))) {
+      throw new Error(`Invalid cell index: ${String(physicalRow)}, ${String(physicalColumn)}`);
     }
 
     if (!priv.columnSettings[physicalColumn]) {
