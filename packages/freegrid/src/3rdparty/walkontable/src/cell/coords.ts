@@ -1,26 +1,32 @@
+export type Coordinate = { row: number; col: number };
+export type GridDimensions = { getSetting(key: 'totalRows' | 'totalColumns'): number };
+
 /**
  * CellCoords holds cell coordinates (row, column) and few method to validate them and retrieve as an array or an object.
  *
  * @util
  */
 class CellCoords {
-  constructor(row, column) {
+  // Empty coordinates retain null at runtime; grid consumers fill them before using indexes.
+  declare row: number;
+  declare col: number;
+  constructor(row?: number | null, column?: number | null) {
     /**
      * Row index.
      *
      * @type {Number}
      */
-    this.row = null;
+    this.row = null!;
     /**
      * Column index.
      *
      * @type {Number}
      */
-    this.col = null;
+    this.col = null!;
 
     if (typeof row !== 'undefined' && typeof column !== 'undefined') {
-      this.row = row;
-      this.col = column;
+      this.row = row!;
+      this.col = column!;
     }
   }
 
@@ -30,7 +36,7 @@ class CellCoords {
    * @param {Walkontable} wot A Walkontable instance.
    * @returns {Boolean}
    */
-  isValid(wot) {
+  isValid(wot: GridDimensions) {
     // is it a valid cell index (0 or higher)
     if (this.row < 0 || this.col < 0) {
       return false;
@@ -49,7 +55,7 @@ class CellCoords {
    * @param {CellCoords} cellCoords Cell coordinates to equal.
    * @returns {Boolean}
    */
-  isEqual(cellCoords) {
+  isEqual(cellCoords: Coordinate) {
     if (cellCoords === this) {
       return true;
     }
@@ -63,7 +69,7 @@ class CellCoords {
    * @param {Object} testedCoords Cell coordinates to check.
    * @returns {Boolean}
    */
-  isSouthEastOf(testedCoords) {
+  isSouthEastOf(testedCoords: Coordinate) {
     return this.row >= testedCoords.row && this.col >= testedCoords.col;
   }
 
@@ -73,7 +79,7 @@ class CellCoords {
    * @param {Object} testedCoords Cell coordinates to check.
    * @returns {Boolean}
    */
-  isNorthWestOf(testedCoords) {
+  isNorthWestOf(testedCoords: Coordinate) {
     return this.row <= testedCoords.row && this.col <= testedCoords.col;
   }
 
@@ -83,7 +89,7 @@ class CellCoords {
    * @param {Object} testedCoords Cell coordinates to check.
    * @returns {Boolean}
    */
-  isSouthWestOf(testedCoords) {
+  isSouthWestOf(testedCoords: Coordinate) {
     return this.row >= testedCoords.row && this.col <= testedCoords.col;
   }
 
@@ -93,7 +99,7 @@ class CellCoords {
    * @param {Object} testedCoords Cell coordinates to check.
    * @returns {Boolean}
    */
-  isNorthEastOf(testedCoords) {
+  isNorthEastOf(testedCoords: Coordinate) {
     return this.row <= testedCoords.row && this.col >= testedCoords.col;
   }
 

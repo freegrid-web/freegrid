@@ -1,4 +1,5 @@
 import CellCoords from './../cell/coords';
+import type { Coordinate, GridDimensions } from './coords';
 
 /**
  * CellRange holds cell coordinates as {@link CellCoords} instances. This object represent unit of the selection layer which
@@ -7,25 +8,29 @@ import CellCoords from './../cell/coords';
  * @util
  */
 class CellRange {
-  constructor(highlight, from = highlight, to = highlight) {
+  declare highlight: CellCoords;
+  declare from: CellCoords;
+  declare to: CellCoords;
+  // Custom borders also pass plain coordinate objects; keep their identity and runtime behavior.
+  constructor(highlight: Coordinate, from: Coordinate = highlight, to: Coordinate = highlight) {
     /**
      * Used to draw bold border around a cell where selection was started and to edit the cell when you press Enter.
      *
      * @type {CellCoords}
      */
-    this.highlight = highlight;
+    this.highlight = highlight as CellCoords;
     /**
      * Usually the same as highlight, but in Excel there is distinction - one can change highlight within a selection.
      *
      * @type {CellCoords}
      */
-    this.from = from;
+    this.from = from as CellCoords;
     /**
      * End selection.
      *
      * @type {CellCoords}
      */
-    this.to = to;
+    this.to = to as CellCoords;
   }
 
   /**
@@ -33,7 +38,7 @@ class CellRange {
    *
    * @param {CellCoords} coords Coordinates to use.
    */
-  setHighlight(coords) {
+  setHighlight(coords: CellCoords) {
     this.highlight = coords;
 
     return this;
@@ -44,7 +49,7 @@ class CellRange {
    *
    * @param {CellCoords} coords Coordinates to use.
    */
-  setFrom(coords) {
+  setFrom(coords: CellCoords) {
     this.from = coords;
 
     return this;
@@ -55,7 +60,7 @@ class CellRange {
    *
    * @param {CellCoords} coords Coordinates to use.
    */
-  setTo(coords) {
+  setTo(coords: CellCoords) {
     this.to = coords;
 
     return this;
@@ -67,7 +72,7 @@ class CellRange {
    * @param {Walkontable} wot The Walkontable instance.
    * @returns {Boolean}
    */
-  isValid(wot) {
+  isValid(wot: GridDimensions) {
     return this.from.isValid(wot) && this.to.isValid(wot);
   }
 
@@ -104,7 +109,7 @@ class CellRange {
    * @param {CellCoords} cellCoords The cell coordinates to check.
    * @returns {Boolean}
    */
-  includes(cellCoords) {
+  includes(cellCoords: Coordinate) {
     const { row, col } = cellCoords;
     const topLeft = this.getTopLeftCorner();
     const bottomRight = this.getBottomRightCorner();
@@ -118,7 +123,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  includesRange(cellRange) {
+  includesRange(cellRange: CellRange) {
     return this.includes(cellRange.getTopLeftCorner()) && this.includes(cellRange.getBottomRightCorner());
   }
 
@@ -128,7 +133,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  isEqual(cellRange) {
+  isEqual(cellRange: CellRange) {
     return (Math.min(this.from.row, this.to.row) === Math.min(cellRange.from.row, cellRange.to.row)) &&
       (Math.max(this.from.row, this.to.row) === Math.max(cellRange.from.row, cellRange.to.row)) &&
       (Math.min(this.from.col, this.to.col) === Math.min(cellRange.from.col, cellRange.to.col)) &&
@@ -142,7 +147,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  overlaps(cellRange) {
+  overlaps(cellRange: CellRange) {
     return cellRange.isSouthEastOf(this.getTopLeftCorner()) && cellRange.isNorthWestOf(this.getBottomRightCorner());
   }
 
@@ -152,7 +157,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  isSouthEastOf(cellRange) {
+  isSouthEastOf(cellRange: Coordinate) {
     return this.getTopLeftCorner().isSouthEastOf(cellRange) || this.getBottomRightCorner().isSouthEastOf(cellRange);
   }
 
@@ -162,7 +167,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  isNorthWestOf(cellRange) {
+  isNorthWestOf(cellRange: Coordinate) {
     return this.getTopLeftCorner().isNorthWestOf(cellRange) || this.getBottomRightCorner().isNorthWestOf(cellRange);
   }
 
@@ -173,7 +178,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  isOverlappingHorizontally(cellRange) {
+  isOverlappingHorizontally(cellRange: CellRange) {
     return (this.getTopRightCorner().col >= cellRange.getTopLeftCorner().col && this.getTopRightCorner().col <= cellRange.getTopRightCorner().col)
       || (this.getTopLeftCorner().col <= cellRange.getTopRightCorner().col && this.getTopLeftCorner().col >= cellRange.getTopLeftCorner().col);
   }
@@ -185,7 +190,7 @@ class CellRange {
    * @param {CellRange} cellRange The cells range to check.
    * @returns {Boolean}
    */
-  isOverlappingVertically(cellRange) {
+  isOverlappingVertically(cellRange: CellRange) {
     return (this.getBottomRightCorner().row >= cellRange.getTopRightCorner().row && this.getBottomRightCorner().row <= cellRange.getBottomRightCorner().row)
       || (this.getTopRightCorner().row <= cellRange.getBottomRightCorner().row && this.getTopRightCorner().row >= cellRange.getTopRightCorner().row);
   }
@@ -196,7 +201,7 @@ class CellRange {
    * @param {CellCoords} cellCoords
    * @returns {Boolean}
    */
-  expand(cellCoords) {
+  expand(cellCoords: Coordinate) {
     const topLeft = this.getTopLeftCorner();
     const bottomRight = this.getBottomRightCorner();
 
@@ -217,7 +222,7 @@ class CellRange {
    * @param {CellRange} expandingRange Object extending the range.
    * @returns {Boolean}
    */
-  expandByRange(expandingRange) {
+  expandByRange(expandingRange: CellRange) {
     if (this.includesRange(expandingRange) || !this.overlaps(expandingRange)) {
       return false;
     }
@@ -258,7 +263,8 @@ class CellRange {
    *
    * @returns {String} Returns one of the values: `'NW-SE'`, `'NE-SW'`, `'SE-NW'`, `'SW-NE'`.
    */
-  getDirection() {
+  getDirection(): string;
+  getDirection(): string | undefined {
     if (this.from.isNorthWestOf(this.to)) { // NorthWest - SouthEast
       return 'NW-SE';
 
@@ -278,7 +284,7 @@ class CellRange {
    *
    * @param {String} direction One of the values: `'NW-SE'`, `'NE-SW'`, `'SE-NW'`, `'SW-NE'`.
    */
-  setDirection(direction) {
+  setDirection(direction: string | undefined) {
     switch (direction) {
       case 'NW-SE':
         [this.from, this.to] = [this.getTopLeftCorner(), this.getBottomRightCorner()];
@@ -404,7 +410,7 @@ class CellRange {
    * @param {CellRange} [expandedRange]
    * @returns {Boolean}
    */
-  isCorner(coords, expandedRange) {
+  isCorner(coords: CellCoords, expandedRange?: CellRange) {
     if (expandedRange && expandedRange.includes(coords) &&
        (this.getTopLeftCorner().isEqual(new CellCoords(expandedRange.from.row, expandedRange.from.col)) ||
        this.getTopRightCorner().isEqual(new CellCoords(expandedRange.from.row, expandedRange.to.col)) ||
@@ -425,7 +431,7 @@ class CellRange {
    * @param {CellRange} [expandedRange]
    * @returns {CellCoords}
    */
-  getOppositeCorner(coords, expandedRange) {
+  getOppositeCorner(coords: unknown, expandedRange?: CellRange) {
     if (!(coords instanceof CellCoords)) {
       return false;
     }
@@ -465,7 +471,7 @@ class CellRange {
    * @param {CellRange} range
    * @returns {Array}
    */
-  getBordersSharedWith(range) {
+  getBordersSharedWith(range: CellRange) {
     if (!this.includesRange(range)) {
       return [];
     }
@@ -553,7 +559,7 @@ class CellRange {
    *
    * @param callback {Function}
    */
-  forAll(callback) {
+  forAll(callback: (row: number, column: number) => boolean | void) {
     const topLeft = this.getTopLeftCorner();
     const bottomRight = this.getBottomRightCorner();
 

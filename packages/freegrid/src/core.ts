@@ -36,6 +36,7 @@ import type { RecordTranslator } from './utils/recordTranslator';
 import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
+import type CellRange from './3rdparty/walkontable/src/cell/range';
 import Hooks from './pluginHooks';
 import type { HookCallback } from './pluginHooks';
 import DefaultSettings from './defaultSettings';
@@ -48,8 +49,6 @@ import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
 import type { AnyFunction, AnyObject, GridSettings } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable's CellRange (Walkontable is not typed yet)
-type CellRange = any;
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
 type Change = [number, Prop, unknown, unknown];
 /** A cell position (visual indexes). */

@@ -1,13 +1,16 @@
 /**
- * @class RowFilter
+ * @class ColumnFilter
  */
-class RowFilter {
+class ColumnFilter {
+  declare offset: number;
+  declare total: number;
+  declare countTH: number;
   /**
    * @param {Number} offset
    * @param {Number} total
    * @param {Number} countTH
    */
-  constructor(offset, total, countTH) {
+  constructor(offset: number, total: number, countTH: number) {
     this.offset = offset;
     this.total = total;
     this.countTH = countTH;
@@ -17,7 +20,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  offsetted(index) {
+  offsetted(index: number) {
     return index + this.offset;
   }
 
@@ -25,7 +28,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  unOffsetted(index) {
+  unOffsetted(index: number) {
     return index - this.offset;
   }
 
@@ -33,7 +36,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  renderedToSource(index) {
+  renderedToSource(index: number) {
     return this.offsetted(index);
   }
 
@@ -41,7 +44,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  sourceToRendered(index) {
+  sourceToRendered(index: number) {
     return this.unOffsetted(index);
   }
 
@@ -49,7 +52,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  offsettedTH(index) {
+  offsettedTH(index: number) {
     return index - this.countTH;
   }
 
@@ -57,7 +60,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  unOffsettedTH(index) {
+  unOffsettedTH(index: number) {
     return index + this.countTH;
   }
 
@@ -65,7 +68,7 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  visibleColHeadedRowToSourceRow(index) {
+  visibleRowHeadedColumnToSourceColumn(index: number) {
     return this.renderedToSource(this.offsettedTH(index));
   }
 
@@ -73,9 +76,9 @@ class RowFilter {
    * @param index
    * @returns {Number}
    */
-  sourceRowToVisibleColHeadedRow(index) {
+  sourceColumnToVisibleRowHeadedColumn(index: number) {
     return this.unOffsettedTH(this.sourceToRendered(index));
   }
 }
 
-export default RowFilter;
+export default ColumnFilter;
