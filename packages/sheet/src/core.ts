@@ -2539,6 +2539,33 @@ class Core {
     return arrayFlatten(this.#priv.cellSettings);
   }
 
+  /**
+   * Returns the column meta: the grid settings together with the column's settings from `columns`. Every cell meta
+   * of the column inherits from this object. Unlike {@link Core#getCellMeta}, it creates no cell meta and runs no
+   * hooks.
+   *
+   * @memberof Core#
+   * @function getColumnMeta
+   * @param {Number} column Visual column index.
+   * @returns {Object} The column meta object.
+   * @example
+   * ```js
+   * // columns: [{ type: 'numeric' }]
+   * hot.getColumnMeta(0).type; // 'numeric'
+   * ```
+   */
+  getColumnMeta(column: number) {
+    const physicalColumn = this.toPhysicalColumn(column);
+    // The cache key is a number, so no index can name a prototype property.
+    const columnKey = Number(physicalColumn === null ? column : physicalColumn);
+
+    if (!this.#priv.columnSettings[columnKey]) {
+      this.#priv.columnSettings[columnKey] = columnFactory(this.#GridSettings, this.#priv.columnsSettingConflicts);
+    }
+
+    return this.#priv.columnSettings[columnKey].prototype as AnyObject;
+  }
+
 
   /**
    * Returns the cell properties object for the given `row` and `column` coordinates.
