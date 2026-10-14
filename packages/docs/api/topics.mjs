@@ -30,7 +30,7 @@ export const TOPICS = [
     events: ['afterChange', 'beforeChange', 'afterLoadData', 'afterSetDataAtCell', 'afterSetDataAtRowProp',
       'modifyData', 'modifyRowData', 'afterChangesObserved'],
     settings: ['data', 'dataSchema', 'startRows', 'startCols', 'minRows', 'minCols', 'maxRows', 'maxCols',
-      'minSpareRows', 'minSpareCols', 'observeChanges', 'trimWhitespace'],
+      'minSpareRows', 'minSpareCols', 'observeChanges', 'trimWhitespace', 'isEmptyRow', 'isEmptyCol'],
     match: /^(set|get)(Source)?Data|^getDataAt|^getDataType/,
   },
   {

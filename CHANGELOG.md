@@ -42,6 +42,8 @@
 - Core, part 3 (TypeScript rewrite): the entry module (`FreeGrid(...)` and its `helper`, `dom`, `editors`,
   `renderers`, `validators`, `cellTypes`, `plugins` and `languages` objects). A build test pins every public name.
 - Docs, API reference:
+  - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
+    `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
     (e.g. ManualColumnResize's `isEnabled` showed the plugin's description).
