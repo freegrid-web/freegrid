@@ -1020,8 +1020,6 @@ describe('ContextMenu', () => {
         'Remove column',
         'Undo',
         'Redo',
-        'Read only',
-        'Alignment',
       ].join(''));
     });
 
@@ -3464,6 +3462,39 @@ describe('ContextMenu', () => {
       expect(keys).toEqual(['make_read_only', 'col_left']);
 
       Handsontable.hooks.remove('beforeContextMenuSetItems', hookListener);
+    });
+  });
+
+  describe('empty list, select-all and upward selections', () => {
+    it('should open no menu for an empty item list', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), contextMenu: [] });
+      selectCell(0, 0);
+
+      contextMenu();
+
+      expect($('.htContextMenu:visible').length).toBe(0);
+    });
+
+    it('should offer alignment and read-only after select-all', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 2), contextMenu: true, colHeaders: true, rowHeaders: true });
+      selectAll();
+
+      const items = getPlugin('contextMenu').itemsFactory.getItems();
+
+      expect(items.find(item => item.key === 'alignment').disabled.call(getInstance())).toBe(false);
+      expect(items.find(item => item.key === 'make_read_only').disabled.call(getInstance())).toBe(false);
+    });
+
+    it('should align every cell of a selection made upward', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 3), contextMenu: true });
+      selectCell(2, 2, 0, 0);
+
+      const alignment = getPlugin('contextMenu').itemsFactory.getItems().find(item => item.key === 'alignment');
+
+      alignment.submenu.items.find(item => item.key === 'alignment:right').callback.call(getInstance());
+
+      expect(getCellMeta(0, 0).className).toContain('fg-right');
+      expect(getCellMeta(2, 2).className).toContain('fg-right');
     });
   });
 });

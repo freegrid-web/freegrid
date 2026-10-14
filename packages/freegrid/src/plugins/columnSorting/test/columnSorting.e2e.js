@@ -2637,4 +2637,41 @@ describe('ColumnSorting', () => {
       expect(getHtCore().find('tbody tr:eq(0) td').length).toEqual(7);
     });
   });
+
+  describe('sorting booleans and times, and the sort config when columns change', () => {
+    it('should sort booleans with false first (checkbox and text columns)', () => {
+      handsontable({ data: [[true, true], [false, false], [true, true]], columns: [{ type: 'checkbox' }, {}], columnSorting: true });
+
+      getPlugin('columnSorting').sort({ column: 0, sortOrder: 'asc' });
+      expect(getDataAtCol(0)).toEqual([false, true, true]);
+
+      getPlugin('columnSorting').sort({ column: 1, sortOrder: 'asc' });
+      expect(getDataAtCol(1)).toEqual([false, true, true]);
+    });
+
+    it('should sort time cells by time, not as text', () => {
+      handsontable({
+        data: [['10:00:00 am'], ['9:00:00 am'], ['1:00:00 pm']],
+        columns: [{ type: 'time', timeFormat: 'h:mm:ss a' }],
+        columnSorting: true,
+      });
+
+      getPlugin('columnSorting').sort({ column: 0, sortOrder: 'asc' });
+
+      expect(getDataAtCol(0)).toEqual(['9:00:00 am', '10:00:00 am', '1:00:00 pm']);
+    });
+
+    it('should move the sort config with its column when a column is inserted or removed before it', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 3), colHeaders: true, columnSorting: { initialConfig: { column: 1, sortOrder: 'asc' } } });
+
+      alter('insert_col', 0);
+      expect(getPlugin('columnSorting').getSortConfig()).toEqual([{ column: 2, sortOrder: 'asc' }]);
+
+      alter('remove_col', 0);
+      expect(getPlugin('columnSorting').getSortConfig()).toEqual([{ column: 1, sortOrder: 'asc' }]);
+
+      alter('remove_col', 1);
+      expect(getPlugin('columnSorting').getSortConfig()).toEqual([]);
+    });
+  });
 });

@@ -100,6 +100,26 @@ class Highlight {
     this.customSelections.push(createHighlight(CUSTOM_SELECTION, { ...options }));
   }
 
+  /**
+   * New class names (from `updateSettings`): the highlights made later use them, and so do the header highlights that
+   * exist already.
+   */
+  setClassNames(classNames: Pick<HighlightOptions, 'headerClassName' | 'activeHeaderClassName' | 'rowClassName'
+    | 'columnClassName'>): void {
+    Object.assign(this.options, classNames);
+    this.headers.forEach((highlight) => {
+      Object.assign((highlight as unknown as { settings: Record<string, unknown> }).settings, {
+        highlightHeaderClassName: this.options.headerClassName,
+        highlightRowClassName: this.options.rowClassName,
+        highlightColumnClassName: this.options.columnClassName,
+      });
+    });
+    this.activeHeaders.forEach((highlight) => {
+      (highlight as unknown as { settings: Record<string, unknown> }).settings.highlightHeaderClassName =
+        this.options.activeHeaderClassName;
+    });
+  }
+
   /** Clears every highlight except the custom selections. */
   clear(): void {
     this.cell.clear();

@@ -81,6 +81,15 @@
   - A non-strict autocomplete cell respects `allowEmpty: false` (#80).
   - `beforeChange` runs before the validators, so a change it cancels is not validated (#80). Validators now get
     the values `beforeChange` set.
+  - The context menu opens nothing for an empty item list (`contextMenu: []`), offers alignment and "Read only" after
+    select-all, and aligns every cell of a selection made upward (#77).
+  - `updateSettings` replaces the old `className` and `tableClassName`, hides the column headers when `colHeaders`
+    is turned off, and applies a new `currentRowClassName` / `currentColClassName` / header class names (#79).
+  - A row or column removal that `beforeRemoveRow` / `beforeRemoveCol` cancels keeps the cell meta and the frozen
+    rows or columns; removing index groups removes the meta of every removed row (#79).
+  - Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column
+    when columns are inserted or removed (#76).
+  - `getCellMeta` rejects `__proto__`, `constructor` and `prototype` as indexes in a way CodeQL recognizes (#22).
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

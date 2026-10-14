@@ -160,6 +160,9 @@ class Overlay {
 
     if (changed && !this.needFullRender) {
       this.reset();
+    } else if (changed && this.clone) {
+      // Needed again (e.g. headers turned back on): show the clone that reset() hid.
+      this.clone.wtTable.holder.parentNode.style.display = '';
     }
 
     return changed;
@@ -264,6 +267,8 @@ class Overlay {
       style.width = '';
       style.height = '';
     });
+    // The clone keeps its last content (e.g. column headers after `colHeaders: false`): hide it.
+    rootStyle.display = 'none';
   }
 
   /**

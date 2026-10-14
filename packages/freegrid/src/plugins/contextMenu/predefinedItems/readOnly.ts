@@ -30,7 +30,7 @@ const readOnlyItem = (): MenuItem => ({
     this.render();
   },
   disabled(this: PluginHost) {
-    return !(this.getSelectedRange() && !this.selection.isSelectedByCorner());
+    return !this.getSelectedRange();
   },
 });
 

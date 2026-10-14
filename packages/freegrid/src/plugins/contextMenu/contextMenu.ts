@@ -237,6 +237,10 @@ class ContextMenu extends BasePlugin {
       return;
     }
     this.menu.open();
+
+    if (!this.menu.isOpened()) {
+      return;
+    }
     this.menu.setPosition({
       top: parseInt(String(pageY(position as MouseEvent)), 10) - getWindowScrollTop(),
       left: parseInt(String(pageX(position as MouseEvent)), 10) - getWindowScrollLeft(),

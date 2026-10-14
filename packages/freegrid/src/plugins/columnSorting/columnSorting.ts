@@ -166,8 +166,9 @@ class ColumnSorting extends BasePlugin {
     this.addHook('afterRemoveRow', (index: number, amount: number) => this.onAfterRemoveRow(index, amount));
     this.addHook('afterInit', () => this.loadOrSortBySettings());
     this.addHook('afterLoadData', (initialLoad: boolean) => this.onAfterLoadData(initialLoad));
-    this.addHook('afterCreateCol', () => this.onAfterCreateCol());
-    this.addHook('afterRemoveCol', () => this.onAfterRemoveCol());
+    this.addHook('afterCreateCol', (index: number, amount: number) => this.onAfterCreateCol(index, amount));
+    this.addHook('afterRemoveCol', (index: number, amount: number, physicalColumns: number[]) =>
+      this.onAfterRemoveCol(index, amount, physicalColumns));
 
     // Sort right away when the plugin is enabled on a grid that already renders (upstream workaround).
     if (this.hot.view) {
@@ -768,23 +769,39 @@ class ColumnSorting extends BasePlugin {
   // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
   // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
-   * Callback for the `afterCreateCol` hook.
+   * Callback for the `afterCreateCol` hook. The sort config moves with its columns.
    *
    * @private
    */
-  onAfterCreateCol(): void {
+  onAfterCreateCol(index?: number, amount = 0): void {
     this.columnMetaCache.clear();
+
+    if (index === undefined || amount <= 0) {
+      return;
+    }
+    const firstNewColumn = this.hot.toPhysicalColumn(index);
+
+    this.columnStatesManager.setSortStates(this.columnStatesManager.getSortStates()
+      .map(state => (state.column >= firstNewColumn ? { ...state, column: state.column + amount } : state)));
   }
 
   // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
   // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
-   * Callback for the `afterRemoveCol` hook.
+   * Callback for the `afterRemoveCol` hook. The sort config of a removed column goes; the others move with their
+   * columns.
    *
    * @private
    */
-  onAfterRemoveCol(): void {
+  onAfterRemoveCol(_index?: number, _amount?: number, physicalColumns: number[] = []): void {
     this.columnMetaCache.clear();
+
+    if (physicalColumns.length === 0) {
+      return;
+    }
+    this.columnStatesManager.setSortStates(this.columnStatesManager.getSortStates()
+      .filter(state => !physicalColumns.includes(state.column))
+      .map(state => ({ ...state, column: state.column - physicalColumns.filter(column => column < state.column).length })));
   }
 
   /**

@@ -4,14 +4,11 @@ import { DO_NOT_SWAP, FIRST_BEFORE_SECOND, FIRST_AFTER_SECOND } from '../sortSer
 import type { CompareFunctionFactory } from '../utils';
 
 /**
- * Date sorting compare function factory. Method get as parameters `sortOrder` and `columnMeta` and return compare function.
- *
- * @param sortOrder Sort order (`asc` for ascending, `desc` for descending).
- * @param columnMeta Column meta object.
- * @param columnPluginSettings Plugin settings for the column.
- * @returns The compare function.
+ * Makes the compare function factory for values read with a format from the column meta (`dateFormat` for dates,
+ * `timeFormat` for times; `fallbackFormat` when the column has none).
  */
-export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, columnMeta, columnPluginSettings) => (
+export const temporalCompareFunctionFactory = (formatKey: 'dateFormat' | 'timeFormat',
+  fallbackFormat?: string): CompareFunctionFactory => (sortOrder, columnMeta, columnPluginSettings) => (
   (value, nextValue) => {
     const { sortEmptyCells } = columnPluginSettings;
 
@@ -41,9 +38,9 @@ export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, column
       return FIRST_BEFORE_SECOND;
     }
 
-    const dateFormat = columnMeta.dateFormat as string | undefined;
-    const firstDate = parseDate(value as string, dateFormat);
-    const nextDate = parseDate(nextValue as string, dateFormat);
+    const format = (columnMeta[formatKey] as string | undefined) || fallbackFormat;
+    const firstDate = parseDate(value as string, format);
+    const nextDate = parseDate(nextValue as string, format);
 
     if (!firstDate) {
       return FIRST_AFTER_SECOND;
@@ -63,5 +60,10 @@ export const compareFunctionFactory: CompareFunctionFactory = (sortOrder, column
 
     return DO_NOT_SWAP;
   });
+
+/**
+ * Date sorting compare function factory. Method get as parameters `sortOrder` and `columnMeta` and return compare function.
+ */
+export const compareFunctionFactory = temporalCompareFunctionFactory('dateFormat');
 
 export const COLUMN_DATA_TYPE = 'date';
