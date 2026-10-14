@@ -145,7 +145,7 @@ export function generateASCIITable(context) {
   for (let r = 0; r < rowsLength; r++) {
     const stringCells = [];
     const columnsLength = masterTable.rows[0].cells.length;
-    let isLastColumn = false;
+    let isLastColumn;
     let insertTopOverlayRowSeparator = false;
 
     for (let c = 0; c < columnsLength; c++) {
@@ -212,7 +212,6 @@ export function generateASCIITable(context) {
       stringRows.push(TABLE_EDGES_SYMBOL + new Array(columnsLength).fill(COLUMN_HEADER_SEPARATOR).join(COLUMN_SEPARATOR) + TABLE_EDGES_SYMBOL);
     }
     if (insertTopOverlayRowSeparator) {
-      insertTopOverlayRowSeparator = false;
       stringRows.push(TABLE_EDGES_SYMBOL + new Array(columnsLength).fill(COLUMN_OVERLAY_SEPARATOR).join(COLUMN_SEPARATOR) + TABLE_EDGES_SYMBOL);
     }
   }

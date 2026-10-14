@@ -803,7 +803,7 @@ class Core {
        * @param {Object} [end] End selection position (only for drag-down mode). Visual indexes.
        * @param {String} [source="populateFromArray"] Source information string.
        * @param {String} [method="overwrite"] Populate method. Possible options: `shift_down`, `shift_right`, `overwrite`.
-       * @param {String} direction (left|right|up|down) String specifying the direction.
+       * @param {String} [direction] Not used (see #68).
        * @param {Array} deltas The deltas array. A difference between values of adjacent cells.
        *                       Useful **only** when the type of handled cells is `numeric`.
        * @returns {Object|undefined} ending td in pasted area (only if any cell was changed).
@@ -880,7 +880,6 @@ class Core {
             };
             let skippedRow = 0;
             let skippedColumn = 0;
-            let pushData = true;
             let cellMeta;
 
             const getInputValue = function getInputValue(row: number, col: number | null = null) {
@@ -945,6 +944,7 @@ class Core {
                   continue;
                 }
                 const visualColumn = c - skippedColumn;
+                let pushData = true;
                 let value = getInputValue(visualRow, visualColumn);
                 const orgValue = this.getDataAtCell(current.row, current.col);
                 const index = {
@@ -980,7 +980,6 @@ class Core {
                 if (pushData) {
                   setData.push([current.row, current.col, value]);
                 }
-                pushData = true;
                 current.col += 1;
               }
               current.row += 1;
@@ -1422,7 +1421,7 @@ class Core {
    * @param {Number} [endCol] End visual column index (use when you want to cut input when certain column is reached).
    * @param {String} [source=populateFromArray] Used to identify this call in the resulting events (beforeChange, afterChange).
    * @param {String} [method=overwrite] Populate method, possible values: `'shift_down'`, `'shift_right'`, `'overwrite'`.
-   * @param {String} direction Populate direction, possible values: `'left'`, `'right'`, `'up'`, `'down'`.
+   * @param {String} [direction] Not used: it has no effect and will be removed in 1.0.
    * @param {Array} deltas The deltas array. A difference between values of adjacent cells.
    *                       Useful **only** when the type of handled cells is `numeric`.
    */
@@ -1633,10 +1632,8 @@ class Core {
       const dataSchema = this.#datamap.getSchema();
       data = [];
       let row;
-      let r = 0;
-      let rlen = 0;
 
-      for (r = 0, rlen = this.#priv.settings.startRows; r < rlen; r++) {
+      for (let r = 0, rlen = this.#priv.settings.startRows; r < rlen; r++) {
         if ((this.dataType === 'object' || this.dataType === 'function') && this.#priv.settings.dataSchema) {
           row = deepClone(dataSchema);
           data.push(row);
@@ -2460,7 +2457,7 @@ class Core {
    */
   removeCellMeta(row: number, column: number, key: string) {
     const [physicalRow, physicalColumn] = this.#recordTranslator.toPhysical(row, column) as [number, number];
-    let cachedValue = this.#priv.cellSettings[physicalRow][physicalColumn][key];
+    const cachedValue = this.#priv.cellSettings[physicalRow][physicalColumn][key];
 
     const hookResult = this.runHooks('beforeRemoveCellMeta', row, column, key, cachedValue);
 
@@ -2469,8 +2466,6 @@ class Core {
 
       this.runHooks('afterRemoveCellMeta', row, column, key, cachedValue);
     }
-
-    cachedValue = null;
   }
 
 
@@ -3111,17 +3106,9 @@ class Core {
    * @returns {Number} Total number of columns.
    */
   countSourceCols() {
-    let len = 0;
     const obj = this.getSourceData() && this.getSourceData()[0] ? this.getSourceData()[0] : [];
 
-    if (isObject(obj)) {
-      len = deepObjectSize(obj);
-
-    } else {
-      len = obj.length || 0;
-    }
-
-    return len;
+    return isObject(obj) ? deepObjectSize(obj) : obj.length || 0;
   }
 
 

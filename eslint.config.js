@@ -21,15 +21,14 @@ export default [
       globals: { ...globals.browser, __FG_VERSION__: 'readonly', __FG_BUILD_DATE__: 'readonly', __FG_PACKAGE_NAME__: 'readonly' },
     },
     rules: {
-      // Upstream code; revisit in Stage 2.
-      'no-useless-assignment': 'off',
-      'no-unassigned-vars': 'off',
       // ESLint 4 (upstream) did not report unused catch bindings.
       'no-unused-vars': ['error', { caughtErrors: 'none' }],
-      // Possible upstream bugs (comments.js, selection/mouseEventHandler.js); kept visible, tracked for Stage 1.
-      'no-dupe-else-if': 'warn',
-      'no-constant-binary-expression': 'warn',
     },
+  },
+  {
+    // Walkontable keeps dead initial values until it is reworked (#71).
+    files: ['packages/freegrid/src/3rdparty/walkontable/**'],
+    rules: { 'no-useless-assignment': 'off' },
   },
   {
     files: ['packages/freegrid/test/**', 'packages/freegrid/src/**/test/**', 'packages/freegrid/src/**/*.unit.js', 'packages/freegrid/src/**/*.e2e.js'],

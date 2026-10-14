@@ -555,7 +555,6 @@ class MergeCells extends BasePlugin {
       row: delta.row,
       col: delta.col,
     };
-    let nextPosition = null;
     const currentPosition = new CellCoords(currentlySelectedRange.highlight.row, currentlySelectedRange.highlight.col);
     const mergedParent = this.mergedCellsCollection.get(currentPosition.row, currentPosition.col);
 
@@ -590,7 +589,7 @@ class MergeCells extends BasePlugin {
       }
     }
 
-    nextPosition = new CellCoords(currentlySelectedRange.highlight.row + newDelta.row, currentlySelectedRange.highlight.col + newDelta.col);
+    const nextPosition = new CellCoords(currentlySelectedRange.highlight.row + newDelta.row, currentlySelectedRange.highlight.col + newDelta.col);
 
     const nextParentIsMerged = this.mergedCellsCollection.get(nextPosition.row, nextPosition.col);
 
@@ -620,7 +619,7 @@ class MergeCells extends BasePlugin {
     const currentSelectionRange = this.hot.getSelectedRangeLast()!;
     const newDelta = clone(delta);
     const newSelectionRange = this.selectionCalculations.getUpdatedSelectionRange(currentSelectionRange, delta);
-    let tempDelta = clone(newDelta);
+    let tempDelta: typeof newDelta;
 
     const mergedCellsWithinRange = this.mergedCellsCollection.getWithinRange(newSelectionRange, true);
 
@@ -694,7 +693,7 @@ class MergeCells extends BasePlugin {
     const selRange = this.hot.getSelectedRangeLast()!;
     selRange.highlight = new CellCoords(selRange.highlight.row, selRange.highlight.col); // clone in case we will modify its reference
     selRange.to = coords;
-    let rangeExpanded = false;
+    let rangeExpanded: boolean;
 
     if ((selRange.from.row === 0 && selRange.to.row === this.hot.countRows() - 1) || (selRange.from.col === 0 && selRange.to.col === this.hot.countCols() - 1)) {
       return;

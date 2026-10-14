@@ -2,112 +2,94 @@
 
 ## Unreleased
 
-- **Breaking:** editors, renderers and validators have uniform names, the kind first: `FreeGrid.editors.EditorText`,
+### Breaking
+
+- Editors, renderers and validators have uniform names, the kind first: `FreeGrid.editors.EditorText`,
   `EditorAutocomplete`, `EditorDate`, …; `FreeGrid.renderers.RendererText`, `RendererNumeric`, …;
   `FreeGrid.validators.ValidatorDate`, `ValidatorTime`, … The old names (`TextEditor`, `TextRenderer`,
   `DateValidator`, `cellDecorator`, …) are removed. Names in settings (`type: 'date'`, `editor: 'text'`,
   `renderer: 'numeric'`) do not change. See [Migrating from Handsontable](https://freegrid-web.github.io/freegrid/guide/migrating-from-handsontable#editor-renderer-and-validator-names).
-- Editors are ES classes now (TypeScript rewrite). Custom editors made with `FreeGrid.editors.EditorText.prototype.extend()`
-  or `class MyEditor extends FreeGrid.editors.EditorText` keep working; one that calls a parent editor as a function
+- Editors are ES classes. A custom editor made with `FreeGrid.editors.EditorText.prototype.extend()` or
+  `class MyEditor extends FreeGrid.editors.EditorText` keeps working; one that calls a parent editor as a function
   (`EditorText.call(this, instance)`) must use `class … extends` instead.
-- The TypeScript definitions have `FreeGrid.validators` (with `Validator`), and `getRenderer`/`registerRenderer`.
-- Fixes:
-  - The date editor dropped `closeEditor`'s callback: after an async validation, the next cell's editor did not open.
-  - Case-sensitive autocomplete (`filteringCaseSensitive`) did not bold the typed text in the list.
-- Plugins (TypeScript rewrite, part 1: the plugin base and registry, touchScroll, dragToScroll, persistentState,
-  search). Fix: the `persistentStateReset` hook with a key cleared every saved value; it clears only that key now.
-- Plugins, part 2: manualColumnFreeze, observeChanges, multipleSelectionHandles, manualColumnResize, manualRowResize.
-  Fixes:
-  - Touch screens: when one of two dragged selection handles was released, the other one stopped being dragged.
-  - manualColumnResize: a column header with `colspan="1"` gets the resize handle too.
-- Plugins, part 3: autoColumnSize, autoRowSize, autofill, undoRedo (a class now; `UndoRedo.ChangeAction` and the other
-  actions stay available as static properties).
-- Plugins, part 4: copyPaste. A paste event without clipboard data is ignored (it threw an error).
-- **Security:** pasting HTML could run code from it (e.g. an image's `onerror`), because the pasted table was read through
-  an element's `innerHTML`. Pasted HTML is now parsed into an inert document.
-- Plugins, part 5: manualColumnMove, manualRowMove.
-- Plugins, part 6: customBorders, comments.
-- Plugins, part 7: columnSorting (with its sort functions and sort service).
-- Plugins, part 8: contextMenu (the menu, its items, commands and positioning). A submenu's class name replaces every
-  character other than a letter or a digit with `_` (the range `A-z` also kept ``[\]^_` ``).
-- Plugins, part 9: mergeCells, the last plugin: every plugin is TypeScript now. Fix: clearing the merged cells
-  (`clearCollections`, e.g. on `updateSettings`) left the cells a merged cell had covered invisible until the next render.
-- Core, part 1 (TypeScript rewrite): EventManager, EditorManager (a class now), DataSource, MultiMap and the compat
-  entry. Fix: a function in `enterMoves` got the browser's global `window.event` instead of the key event (the same
-  event during a key press, so it worked by chance).
-- Core, part 2 (TypeScript rewrite): DataMap and TableView are classes now. Fixes:
-  - A dotted data property through `__proto__`, `constructor` or `prototype` (e.g. `setDataAtRowProp(0,
-    '__proto__.x', 1)`) changed `Object.prototype`; such a property is ignored now.
-  - A column header that had to be rebuilt ran `afterGetColHeader` twice.
-- Core, part 3 (TypeScript rewrite): the entry module (`FreeGrid(...)` and its `helper`, `dom`, `editors`,
-  `renderers`, `validators`, `cellTypes`, `plugins` and `languages` objects). A build test pins every public name.
-- Core, part 4 (TypeScript rewrite): the hooks (`FreeGrid.hooks`, typed listeners and buckets). The docs read the
-  core modules as `.ts` or `.js`.
-- Core, part 5 (TypeScript rewrite): the default settings (`FreeGrid.DefaultSettings`).
-- Core, part 6 (TypeScript rewrite): the grid itself (`core`), typed in place: still a constructor function, with
-  parameter types from its JSDoc. Turning it into a class comes next.
-  Fixes (CodeQL):
+- `beforeChange` runs before the validators (it used to run after them), so a change it cancels is not validated,
+  and the validators get the values `beforeChange` set (#80).
+
+### Security
+
+- Pasting HTML could run code from it (e.g. an image's `onerror`): the pasted table was put into an element's
+  `innerHTML`. Pasted HTML is now parsed into an inert document.
+- Prototype pollution (CodeQL):
+  - a dotted data property through `__proto__`, `constructor` or `prototype` (e.g. `setDataAtRowProp(0,
+    '__proto__.x', 1)`) changed `Object.prototype`; such a property is ignored;
   - `getCellMeta('__proto__', 0)` (or `constructor` / `prototype` as an index) wrote into `Array.prototype`; such an
-    index throws now.
-  - Checking whether a numeric cell's text is a number took quadratic time on long runs of spaces.
-- Core, part 7 (TypeScript rewrite): `Core` is a class. Its state (`priv`, the data map, the editor manager, …) is in
-  `#private` fields, and the grid's methods are typed. Every method is still bound to its grid, as the closures were,
-  and now all of them work without `this` (`const { selectCell } = hot`): before, the ones that called another method
-  through `this` did not. After `destroy()`, every method throws, as before.
-- Core, part 8 (TypeScript rewrite): plugins, editors, renderers, validators, DataMap and TableView see the grid
-  as `Core` instead of `any`.
-  - `getPlugin('mergeCells')` returns the `MergeCells` type: the plugin types come from the plugin classes, by name.
-  - Plugins declare what they add to the grid (`undo()`, `pauseObservingChanges()`, …) with
-    `declare module './core' { interface Core … }`; `Core` is also exported by name for that.
-  - Where the code relied on a selection being there, it says so with `!` (the behavior is the same as before).
-- Cleanup, part 1: lint reports a disable comment that disables nothing (`reportUnusedDisableDirectives`), and the
-  66 such comments (for airbnb rules this config does not enable) are gone. The remaining disables are fixed in the
-  code (case blocks with braces, `prefer-const`, `_` for parameters only overriding methods use). `any` is down
-  from 31 to 20 places: the open types (settings, cell meta, callbacks) are in `src/types.ts`, and the "core.js is
-  not typed yet" stand-ins point at the real types.
-- Cleanup, part 2: no TODO/FIXME comments in the source. The open work they described is in issues #65–#71 (cell meta
-  inheritance, visual/physical indexes, undo/redo, `populateFromArray`'s `direction`, `modifyRowData`, render cycles,
-  Walkontable), and the code links to them; the rest became plain explanations or went away.
-- Fixes (CodeQL):
-  - `FreeGrid.helper.extend` skips a `__proto__` key (from JSON data it replaced the target's prototype), and
-    `deepExtend` no longer reaches `Object.prototype` through `__proto__` or `constructor.prototype`: it merges only
-    into the target's own values.
-  - `FreeGrid.helper.stripTags` repeats until no tag is left, so `<<b>script>` no longer becomes `<script>`.
-- Fixes:
-  - Pasting text with `""` outside a quoted cell (e.g. JSON with an empty string) no longer drops a quote (#75).
-  - `clear()` keeps the selection; it used to leave every cell selected (#82).
-  - The select editor keeps the order of options given as an array of numbers (#81).
-  - An emptied checkbox cell is unchecked instead of `#bad-value#` (#81).
-  - A non-strict autocomplete cell respects `allowEmpty: false` (#80).
-  - `beforeChange` runs before the validators, so a change it cancels is not validated (#80). Validators now get
-    the values `beforeChange` set.
-  - The context menu opens nothing for an empty item list (`contextMenu: []`), offers alignment and "Read only" after
-    select-all, and aligns every cell of a selection made upward (#77).
-  - `updateSettings` replaces the old `className` and `tableClassName`, hides the column headers when `colHeaders`
-    is turned off, and applies a new `currentRowClassName` / `currentColClassName` / header class names (#79).
-  - A row or column removal that `beforeRemoveRow` / `beforeRemoveCol` cancels keeps the cell meta and the frozen
-    rows or columns; removing index groups removes the meta of every removed row (#79).
-  - Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column
-    when columns are inserted or removed (#76).
-  - `getCellMeta` rejects `__proto__`, `constructor` and `prototype` as indexes in a way CodeQL recognizes (#22).
-  - Undo: an edit that changes nothing is no undo step; undoing a row removal brings back the values of read-only
-    cells and the rows' cell meta; undoing an inserted row or column keeps the frozen rows and columns (#74).
+    index throws;
+  - `FreeGrid.helper.extend` skips `__proto__` and `constructor` keys, and `deepExtend` merges only into the
+    target's own values (it could reach `Object.prototype`).
+- `FreeGrid.helper.stripTags` repeats until no tag is left, so `<<b>script>` no longer becomes `<script>`.
+- Checking whether a numeric cell's text is a number took quadratic time on long runs of spaces.
+
+### Fixes
+
+- Data and settings:
+  - `clear()` keeps the selection; it left every cell selected (#82).
   - `loadData` drops the row and column order a user made with `manualRowMove` / `manualColumnMove`; an order given
     in the settings (an array) applies to the new data (#78).
-  - A column frozen with `freezeColumn` keeps its place after `updateSettings` (#79).
-- Docs, API reference:
-  - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
-    `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
-  - A live example's sticky column header no longer covers the top bar when the page scrolls past it.
-  - Plugin methods show their TypeScript parameter and return types.
-  - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
-    (e.g. ManualColumnResize's `isEnabled` showed the plugin's description).
-  - The right-hand lists (Related API on guide pages, and an index on each reference page) are alphabetical, one
-    entry per line, in the order settings, methods, events, with plugin methods grouped by plugin. A filter box
-    narrows them while typing, and the group headings show a count.
-  - Every method, event and setting has code in a collapsible block: the source's examples ("Example"), or a usage
-    example written from its signature ("Usage").
-  - Links to entries the reference does not have (internal classes) are plain text.
+  - `updateSettings` replaces the old `className` and `tableClassName`, hides the column headers when `colHeaders`
+    is turned off, applies new `currentRowClassName` / `currentColClassName` / header class names, and keeps a column
+    frozen with `freezeColumn` in place (#79).
+  - A row or column removal that `beforeRemoveRow` / `beforeRemoveCol` cancels keeps the cell meta and the frozen
+    rows or columns; removing index groups removes the meta of every removed row (#79).
+  - A function in `enterMoves` gets the key event (it got the browser's global `window.event`).
+  - A column header that had to be rebuilt ran `afterGetColHeader` twice.
+- Undo: an edit that changes nothing is no undo step; undoing a row removal brings back the values of read-only
+  cells and the rows' cell meta; undoing an inserted row or column keeps the frozen rows and columns (#74).
+- Copy and paste: text with `""` outside a quoted cell (e.g. JSON with an empty string) keeps its quotes (#75); a
+  paste event without clipboard data is ignored (it threw an error).
+- Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column
+  when columns are inserted or removed (#76).
+- Context menu: an empty item list (`contextMenu: []`) opens nothing; alignment and "Read only" work after
+  select-all; alignment covers a selection made upward (#77).
+- Cell types and editors:
+  - the select editor keeps the order of options given as an array of numbers (#81);
+  - an emptied checkbox cell is unchecked instead of `#bad-value#` (#81);
+  - a non-strict autocomplete cell respects `allowEmpty: false` (#80);
+  - case-sensitive autocomplete (`filteringCaseSensitive`) bolds the typed text in the list;
+  - the date editor kept `closeEditor`'s callback from running: after an async validation, the next cell's editor
+    did not open.
+- Plugins:
+  - merged cells: clearing them (`clearCollections`, e.g. on `updateSettings`) left the cells a merged cell had
+    covered invisible until the next render;
+  - the `persistentStateReset` hook with a key cleared every saved value; it clears only that key;
+  - touch screens: releasing one of two dragged selection handles stopped the other one;
+  - manualColumnResize: a column header with `colspan="1"` gets the resize handle too;
+  - a context submenu's class name replaces any character other than a letter or a digit with `_`.
+
+### Deprecated (removed in 1.0)
+
+- The `modifyRowData` hook: use `modifyData`. Adding a listener to it logs a warning once (#69).
+- `populateFromArray`'s `direction` argument, which has no effect (#68).
+
+### Changed
+
+- Every grid method works without `this` (`const { selectCell } = hot`), and after `destroy()` every method throws.
+- The TypeScript definitions have `FreeGrid.validators` (with `Validator`), and `getRenderer`/`registerRenderer`.
+- Docs:
+  - the API reference lists the settings `isEmptyRow` and `isEmptyCol`, shows the right description for
+    `observeDOMVisibility`, and plugin methods with their TypeScript types; every entry has an example or a usage
+    block; the right-hand lists are alphabetical with a filter box;
+  - a live example's sticky column header stays under the top bar when the page scrolls;
+  - a roadmap with the current status.
+
+### Internal
+
+- The whole grid is TypeScript except the rendering engine (Walkontable): the core (`Core` is a class with
+  `#private` state), plugins, editors, renderers, validators, selection, helpers and utilities. Plugins declare
+  what they add to the grid, and `getPlugin('mergeCells')` returns the `MergeCells` type.
+- Cleanup: no unused `eslint-disable` comments (lint reports them now), no TODO/FIXME comments (the open work is in
+  issues #65–#71), fewer `any`, stricter lint rules; the four specs skipped since the move to current Chromium run
+  again (#1–#4).
+- `AGENTS.md` describes the commands and rules for coding agents.
 
 ## 0.2.0 (2026-10-13)
 

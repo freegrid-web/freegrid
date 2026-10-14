@@ -1,14 +1,17 @@
 # Roadmap
 
-FreeGrid is developed in stages. Each stage gets its own design document in the repository.
+FreeGrid is developed in stages. Larger stages get their own design document in the repository.
 
-| Stage | What |
-| --- | --- |
-| **0** ✅ | Repository with the full history of the MIT code, a modern toolchain (Vite, Vitest, Playwright, Node 24), every upstream test passing, CI and this site. |
-| **1** | First npm release, `0.1.0`. Bug fixes, Firefox and Safari test fixes, FreeGrid CSS class names (with a transition period), React, Vue and Angular wrappers, release automation. |
-| **2** | TypeScript rewrite, module by module. Fine-grained reactivity with signals (not a virtual DOM). Theming with CSS variables, including a dark theme and an optional Tailwind preset. Replace moment with FreeGrid's own date module and date picker. A generated API reference. |
-| **3+** | Features that were never part of the MIT release, written from scratch: filters, column dropdown menu, hidden rows and columns, nested headers, export, formulas. |
+| Stage | What | Status |
+| --- | --- | --- |
+| **0** | Repository with the full history of the MIT code, a modern toolchain (Vite, Vitest, Playwright, Node 24), every upstream test passing, CI and this site. | ✅ Done |
+| **1** | First npm release (`0.1.0`), Firefox and Safari test fixes, FreeGrid CSS class names (with a transition period), release automation. | ✅ Done |
+| **2** | TypeScript rewrite of the grid (core, plugins, editors, renderers, validators, selection, helpers). Theming with CSS variables and a dark theme. FreeGrid's own date and number formatting and date picker (no runtime dependencies). A generated API reference. A review of known bugs, with fixes. | ✅ Done (`0.2.0`, `0.3.0`) |
+| **3** | The package becomes `@freegrid/sheet`: FreeGrid is an Excel-style spreadsheet, and more components will follow under `@freegrid/*`. | Next, with `0.3.0` |
+| **4** | The rendering engine (Walkontable): first in TypeScript, then reworked — rendering straight to the DOM, `position: sticky` for frozen rows, columns and headers instead of cloned overlays, cell meta computed only when needed. | In progress |
+| **5** | Features that were never part of the MIT release, written from scratch: formulas (through a formula engine plugin), filters, a column dropdown menu, hidden rows and columns, nested headers, export, a new context menu. React, Vue and Angular wrappers. An optional Tailwind preset. | Planned |
 
-`1.0.0` will mark FreeGrid's own stable API. The Handsontable compatibility layer is removed then.
+`1.0.0` will mark FreeGrid's own stable API. The compatibility layer for older code and the deprecated APIs are
+removed then.
 
 Ideas and help are welcome on [GitHub](https://github.com/freegrid-web/freegrid/issues).

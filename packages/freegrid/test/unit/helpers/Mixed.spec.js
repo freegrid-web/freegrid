@@ -57,7 +57,7 @@ describe('Mixed helper', () => {
     });
 
     it('should convert properly `undefined` to `string`', () => {
-      let toConvert;
+      const toConvert = undefined;
 
       expect(stringify(toConvert)).toBe('');
     });
@@ -71,7 +71,7 @@ describe('Mixed helper', () => {
     });
 
     it('should return false when a variable is not defined', () => {
-      let toCheck;
+      const toCheck = undefined;
 
       expect(isDefined(toCheck)).toBeFalsy();
     });
@@ -79,7 +79,7 @@ describe('Mixed helper', () => {
 
   describe('isUndefined', () => {
     it('should check if a variable is defined', () => {
-      let toCheck;
+      const toCheck = undefined;
 
       expect(isUndefined(toCheck)).toBeTruthy();
     });

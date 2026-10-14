@@ -475,8 +475,8 @@ describe('AutoRowSize', () => {
     expect(parseInt(hot.getCell(2, -1).style.height, 10)).toBeInArray([22, 42]); // -1px of cell border
   });
 
-  // FG-SKIP: multi-line header measures 77px in Chromium 156 vs 75px in Chromium 72 (baseline); same fonts — https://github.com/freegrid-web/freegrid/issues/3
-  xit('should resize the column headers properly, according the their content sizes', () => {
+  // Text layout differs by a pixel or two between browser versions: the height is checked with a small margin.
+  it('should resize the column headers properly, according the their content sizes', () => {
     handsontable({
       data: Handsontable.helper.createSpreadsheetData(30, 30),
       colHeaders(index) {
@@ -491,7 +491,7 @@ describe('AutoRowSize', () => {
       height: 300
     });
 
-    expect(rowHeight(spec().$container, -1)).toBe(75);
+    expect(rowHeight(spec().$container, -1)).toBeAroundValue(75, 2);
   });
 
   it('should properly count height', async() => {
