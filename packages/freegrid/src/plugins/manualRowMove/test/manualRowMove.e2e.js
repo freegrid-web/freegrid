@@ -674,4 +674,23 @@ describe('manualRowMove', () => {
       expect(hot.getDataAtCell(3, 0)).toBe('A2');
     });
   });
+
+  describe('loadData', () => {
+    it('should drop the row order a user made', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 1), manualRowMove: true });
+
+      getPlugin('manualRowMove').moveRow(2, 0);
+      loadData([['x'], ['y'], ['z']]);
+
+      expect(getDataAtCol(0)).toEqual(['x', 'y', 'z']);
+    });
+
+    it('should keep the row order given in the settings', () => {
+      handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 1), manualRowMove: [2, 1, 0] });
+
+      loadData([['x'], ['y'], ['z']]);
+
+      expect(getDataAtCol(0)).toEqual(['z', 'y', 'x']);
+    });
+  });
 });

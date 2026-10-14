@@ -253,4 +253,14 @@ describe('manualColumnFreeze', () => {
     });
   });
 
+
+  it('should keep a frozen column in place after updateSettings', () => {
+    handsontable({ data: Handsontable.helper.createSpreadsheetData(2, 4), manualColumnFreeze: true });
+
+    getPlugin('manualColumnFreeze').freezeColumn(2);
+    updateSettings({});
+
+    expect(getInstance().getSettings().fixedColumnsLeft).toBe(1);
+    expect(getDataAtRow(0)).toEqual(['C1', 'A1', 'B1', 'D1']);
+  });
 });
