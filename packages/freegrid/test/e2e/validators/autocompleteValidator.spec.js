@@ -220,4 +220,13 @@ describe('autocompleteValidator', () => {
       }, 100);
     });
   });
+
+  it('should not accept an empty value with `allowEmpty: false` when `strict` is off', async() => {
+    handsontable({ data: [['a']], columns: [{ type: 'autocomplete', source: ['a', 'b'], strict: false, allowEmpty: false }] });
+
+    setDataAtCell(0, 0, '');
+    await sleep(100);
+
+    expect(getCellMeta(0, 0).valid).toBe(false);
+  });
 });

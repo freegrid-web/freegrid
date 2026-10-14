@@ -286,4 +286,14 @@ describe('SelectEditor', () => {
       expect(document.activeElement).toBe(document.querySelector('#HandsontableCopyPaste'));
     });
   });
+
+  it('should keep the order of numeric options given as an array', () => {
+    handsontable({ data: [[1]], columns: [{ editor: 'select', selectOptions: [3, 1, 2] }] });
+    selectCell(0, 0);
+    keyDownUp('enter');
+
+    const values = [...getActiveEditor().select.querySelectorAll('option')].map(option => option.value);
+
+    expect(values).toEqual(['3', '1', '2']);
+  });
 });

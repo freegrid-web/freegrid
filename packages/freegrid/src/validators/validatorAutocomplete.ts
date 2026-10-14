@@ -2,7 +2,7 @@ import type { ValidatorContext } from '../cellTypes/types';
 
 /**
  * Valid: with `strict` and a `source`, a value from the source (a list, or a function that gives one for the value);
- * without them, anything. An empty value is valid with `allowEmpty`.
+ * without them, anything but an empty value. An empty value is valid with `allowEmpty`.
  */
 export default function validatorAutocomplete(this: ValidatorContext, value: unknown,
   callback: (valid: boolean) => void): void {
@@ -14,7 +14,8 @@ export default function validatorAutocomplete(this: ValidatorContext, value: unk
     return;
   }
   if (!this.strict || !this.source) {
-    callback(true);
+    // Anything goes, except an empty value without `allowEmpty`.
+    callback(valueToValidate !== '');
 
     return;
   }

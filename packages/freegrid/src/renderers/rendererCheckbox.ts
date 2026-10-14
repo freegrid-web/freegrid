@@ -222,8 +222,8 @@ const rendererCheckbox: Renderer = (instance, TD, row, col, prop, value, cellPro
     input.checked = true;
   } else if (value === cellProperties.uncheckedTemplate || equalsIgnoreCase(value, cellProperties.uncheckedTemplate)) {
     input.checked = false;
-  } else if (value === null) {
-    // No value yet.
+  } else if (value === null || value === undefined || value === '') {
+    // No value yet (or emptied, e.g. with Delete).
     addClass(input, 'noValue');
   } else {
     input.style.display = 'none';

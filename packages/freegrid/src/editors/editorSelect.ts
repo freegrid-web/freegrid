@@ -15,7 +15,6 @@ import { KEY_CODES } from './../helpers/unicode';
 import EditorBase, { EditorState } from './editorBase';
 import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
-import { objectEach } from '../helpers/object';
 
 /** The cell's `selectOptions`: values, `{ value: label }`, or a function of the cell that gives either. */
 type SelectOptions = unknown[] | Record<string, unknown>;
@@ -65,12 +64,16 @@ class EditorSelect extends EditorBase {
     super.prepare(row, col, prop, td, originalValue, cellProperties);
 
     const { selectOptions } = this.cellProperties;
-    const options = this.prepareOptions(typeof selectOptions === 'function' ?
-      selectOptions(this.row, this.col, this.prop) : selectOptions as SelectOptions);
+    const rawOptions = typeof selectOptions === 'function' ?
+      selectOptions(this.row, this.col, this.prop) : selectOptions as SelectOptions;
+    // An array keeps its order (as an object, integer keys would come out sorted).
+    const options: [string, unknown][] = Array.isArray(rawOptions)
+      ? rawOptions.map(option => [String(option), option])
+      : Object.entries(this.prepareOptions(rawOptions));
 
     empty(this.select);
 
-    objectEach(options, (value: unknown, key: string) => {
+    options.forEach(([key, value]) => {
       const optionElement = document.createElement('OPTION') as HTMLOptionElement;
 
       optionElement.value = key;
