@@ -49,6 +49,21 @@ new FreeSheet(container, {
 });
 ```
 
+To read the settings of a level, use `getCellMeta(row, column)` for a cell and `getColumnMeta(column)` for a column
+(grid and column settings together).
+
+Each level inherits from the one above it, so an object or array value (for example `numericFormat`) is the
+**same object** in every cell that does not set its own. Do not change such a value in place: that changes it for
+all those cells. Give the cell a new value instead:
+
+```js
+// Changes the format of every cell that shares it:
+hot.getCellMeta(0, 1).numericFormat.pattern = '0.00';
+
+// Changes only this cell:
+hot.setCellMeta(0, 1, 'numericFormat', { ...hot.getCellMeta(0, 1).numericFormat, pattern: '0.00' });
+```
+
 ## Frequently used settings
 
 | Setting | What it does |

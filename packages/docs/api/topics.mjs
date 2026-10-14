@@ -62,7 +62,7 @@ export const TOPICS = [
       'filteringCaseSensitive', 'trimDropdown', 'visibleRows', 'allowHtml', 'checkedTemplate', 'uncheckedTemplate',
       'label', 'numericFormat', 'dateFormat', 'defaultDate', 'correctFormat', 'selectOptions', 'className',
       'readOnlyCellClassName', 'placeholder', 'placeholderCellClassName', 'noWordWrapClassName', 'wordWrap'],
-    match: /CellMeta|CellsMeta/,
+    match: /CellMeta|CellsMeta|ColumnMeta/,
   },
   {
     name: 'Rows and columns',

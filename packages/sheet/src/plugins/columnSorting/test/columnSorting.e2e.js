@@ -658,22 +658,23 @@ describe('ColumnSorting', () => {
     ]);
   });
 
-  it('should clear and generate a new column meta cache after calling `updateSettings` with a new set of data', async() => {
+  it('should use the settings of columns added by `updateSettings` with a new set of data', () => {
     handsontable({
       data: [['test']],
       columnSorting: true,
       colHeaders: true
     });
 
-    const plugin = getPlugin('columnSorting');
-
-    expect(plugin.columnMetaCache.size).toEqual(1);
-
     updateSettings({
-      data: [['first columns', 'second column', 'third column']]
+      data: [['b', 'z', '2'], ['a', 'y', '1']],
+      columns: [{}, {}, { columnSorting: { indicator: false } }],
     });
 
-    expect(plugin.columnMetaCache.size).toEqual(3);
+    getPlugin('columnSorting').sort({ column: 2, sortOrder: 'asc' });
+
+    expect(getDataAtCol(2)).toEqual(['1', '2']);
+    expect(window.getComputedStyle(spec().$container.find('th span.columnSorting')[2], ':before')
+      .getPropertyValue('background-image')).not.toMatch(/url/);
   });
 
   describe('isSorted', () => {
@@ -2602,7 +2603,31 @@ describe('ColumnSorting', () => {
     });
   });
 
-  // TODO: Remove tests when workaround will be removed.
+  describe('column settings', () => {
+    it('should merge the column\'s `columnSorting` object with the grid\'s one', () => {
+      handsontable({
+        data: arrayOfArrays(),
+        columns: [{ columnSorting: { indicator: false } }, {}],
+        colHeaders: true,
+        columnSorting: { headerAction: false },
+      });
+
+      const headers = spec().$container.find('th span.columnSorting');
+
+      // headerAction comes from the grid in both columns; indicator: false only in the first one.
+      expect($(headers[0]).hasClass('sortAction')).toBe(false);
+      expect($(headers[1]).hasClass('sortAction')).toBe(false);
+
+      getPlugin('columnSorting').sort({ column: 0, sortOrder: 'asc' });
+      expect(window.getComputedStyle(spec().$container.find('th span.columnSorting')[0], ':before')
+        .getPropertyValue('background-image')).not.toMatch(/url/);
+
+      getPlugin('columnSorting').sort({ column: 1, sortOrder: 'asc' });
+      expect(window.getComputedStyle(spec().$container.find('th span.columnSorting')[1], ':before')
+        .getPropertyValue('background-image')).toMatch(/url/);
+    });
+  });
+
   describe('workaround regression check', () => {
     it('should not break the dataset when inserted new row', () => {
       handsontable({

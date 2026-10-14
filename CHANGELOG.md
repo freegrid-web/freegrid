@@ -1,5 +1,23 @@
 # FreeGrid changelog
 
+## Unreleased
+
+### Added
+
+- `getColumnMeta(column)`: the column meta, the grid settings together with the column's settings from `columns`.
+  Every cell meta of the column inherits from it. Unlike `getCellMeta`, it creates no cell meta and runs no hooks.
+
+### Changed
+
+- Column sorting reads a column's settings (`type`, `dateFormat`, `columnSorting`, …) from the column meta, not from
+  the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
+  (#65).
+
+### Internal
+
+- Column sorting no longer keeps its own cache of the columns' settings, and no longer clears it when columns are
+  added or removed (#65).
+
 ## 0.4.0 (2026-10-14)
 
 The spreadsheet is now called FreeSheet: new names for the class, the global, the files and the CSS classes and

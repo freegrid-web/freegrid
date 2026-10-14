@@ -4,7 +4,6 @@ import {
 } from '../../helpers/dom/element';
 import { isUndefined, isDefined } from '../../helpers/mixed';
 import { isObject } from '../../helpers/object';
-import { rangeEach } from '../../helpers/number';
 import BasePlugin from '../_base';
 import type { PluginHost } from '../_base';
 import type { CellCoords } from '../../3rdparty/walkontable/src';
@@ -114,13 +113,6 @@ class ColumnSorting extends BasePlugin {
    * @private
    */
   blockPluginTranslation = true;
-
-  /**
-   * Cached column properties from plugin like i.e. `indicator`, `headerAction`.
-   *
-   * @private
-   */
-  columnMetaCache = new Map<number, SortSettings>();
 
   /**
    * Main settings key designed for the plugin.
@@ -457,67 +449,22 @@ class ColumnSorting extends BasePlugin {
   }
 
   /**
-   * Saves to cache part of plugins related properties, properly merged from cascade settings.
+   * The settings of a column for sorting: its column meta, with the plugin's settings merged from the defaults, the
+   * grid's `columnSorting` object and the column's own `columnSorting` object (in that order).
    *
    * @private
    * @param column Visual column index.
    */
-  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. Using this function we don't count
-  // merged properties few times.
-  setMergedPluginSettings(column: number): void {
-    const physicalColumnIndex = this.hot.toPhysicalColumn(column);
-    const pluginMainSettings = this.hot.getSettings()[this.pluginKey];
-    const storedColumnProperties = this.columnStatesManager.getAllColumnsProperties();
-    const cellMeta = this.hot.getCellMeta(0, column);
-    const columnMeta = Object.getPrototypeOf(cellMeta);
-    const columnMetaHasPluginSettings = Object.hasOwnProperty.call(columnMeta, this.pluginKey);
-    const pluginColumnConfig = columnMetaHasPluginSettings ? columnMeta[this.pluginKey] : {};
+  getColumnSettings(column: number): Record<string, unknown> {
+    const columnMeta = this.hot.getColumnMeta(column) as Record<string, unknown>;
+    const gridSettings = this.hot.getSettings()[this.pluginKey];
+    const columnSettings = Object.prototype.hasOwnProperty.call(columnMeta, this.pluginKey) ? columnMeta[this.pluginKey] : {};
+    const settings = Object.create(columnMeta);
 
-    this.columnMetaCache.set(physicalColumnIndex, Object.assign(storedColumnProperties, pluginMainSettings, pluginColumnConfig));
-  }
+    settings[this.pluginKey] = Object.assign(this.columnStatesManager.getAllColumnsProperties(),
+      isObject(gridSettings) ? gridSettings : {}, isObject(columnSettings) ? columnSettings : {});
 
-  /**
-   * Get copy of settings for first cell in the column.
-   *
-   * @private
-   * @param column Visual column index.
-   */
-  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. Instead of getting properties from
-  // column meta we call this function.
-  getFirstCellSettings(column: number): Record<string, unknown> {
-    // With #65 fixed, remove the spec "should not break the dataset when inserted new row" (upstream issue 5431).
-    const actualBlockTranslationFlag = this.blockPluginTranslation;
-
-    this.blockPluginTranslation = true;
-
-    if (this.columnMetaCache.size === 0 || this.columnMetaCache.size < this.hot.countCols()) {
-      this.rebuildColumnMetaCache();
-    }
-
-    const cellMeta = this.hot.getCellMeta(0, column);
-
-    this.blockPluginTranslation = actualBlockTranslationFlag;
-
-    const cellMetaCopy = Object.create(cellMeta);
-    cellMetaCopy[this.pluginKey] = this.columnMetaCache.get(this.hot.toPhysicalColumn(column));
-
-    return cellMetaCopy;
-  }
-
-  /**
-   * Rebuild the column meta cache for all the columns.
-   *
-   * @private
-   */
-  rebuildColumnMetaCache(): void {
-    const numberOfColumns = this.hot.countCols();
-
-    if (numberOfColumns === 0) {
-      this.columnMetaCache.clear();
-
-    } else {
-      rangeEach(numberOfColumns - 1, visualColumnIndex => this.setMergedPluginSettings(visualColumnIndex));
-    }
+    return settings;
   }
 
   /**
@@ -568,7 +515,7 @@ class ColumnSorting extends BasePlugin {
       indexesWithData,
       this.pluginKey,
       sortedColumnsList.map(physicalColumn => this.columnStatesManager.getSortOrderOfColumn(physicalColumn)),
-      sortedColumnsList.map(physicalColumn => this.getFirstCellSettings(this.hot.toVisualColumn(physicalColumn)))
+      sortedColumnsList.map(physicalColumn => this.getColumnSettings(this.hot.toVisualColumn(physicalColumn)))
     );
 
     // Append spareRows
@@ -589,8 +536,6 @@ class ColumnSorting extends BasePlugin {
    * @private
    */
   loadOrSortBySettings(): void {
-    this.columnMetaCache.clear();
-
     const storedAllSortSettings = this.getAllSavedSortSettings();
 
     if (isObject(storedAllSortSettings)) {
@@ -687,7 +632,7 @@ class ColumnSorting extends BasePlugin {
     }
 
     const physicalColumn = this.hot.toPhysicalColumn(column);
-    const pluginSettingsForColumn = this.getFirstCellSettings(column)[this.pluginKey] as SortSettings;
+    const pluginSettingsForColumn = this.getColumnSettings(column)[this.pluginKey] as SortSettings;
     const showSortIndicator = pluginSettingsForColumn.indicator;
     const headerActionEnabled = pluginSettingsForColumn.headerAction;
 
@@ -719,8 +664,6 @@ class ColumnSorting extends BasePlugin {
   onUpdateSettings(newSettings: Record<string, unknown>): void {
     super.onUpdateSettings();
 
-    this.columnMetaCache.clear();
-
     if (isDefined(newSettings[this.pluginKey])) {
       this.sortBySettings(newSettings[this.pluginKey]);
     }
@@ -734,8 +677,6 @@ class ColumnSorting extends BasePlugin {
    */
   onAfterLoadData(initialLoad: boolean): void {
     this.rowsMapper.clearMap();
-    this.columnMetaCache.clear();
-
     if (initialLoad === true) {
       // Sort right away when the settings change on a grid that already renders (upstream workaround).
       if (this.hot.view) {
@@ -766,16 +707,12 @@ class ColumnSorting extends BasePlugin {
     this.rowsMapper.unshiftItems(removedRows, amount);
   }
 
-  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
-  // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
    * Callback for the `afterCreateCol` hook. The sort config moves with its columns.
    *
    * @private
    */
   onAfterCreateCol(index?: number, amount = 0): void {
-    this.columnMetaCache.clear();
-
     if (index === undefined || amount <= 0) {
       return;
     }
@@ -785,8 +722,6 @@ class ColumnSorting extends BasePlugin {
       .map(state => (state.column >= firstNewColumn ? { ...state, column: state.column + amount } : state)));
   }
 
-  // Workaround (see #65): non-primitive cell meta values are shared through the settings chain. We clear the cache after action which reorganize sequence of columns.
-  // With #65 fixed, remove the spec "should add new columns properly when the `columnSorting` plugin is enabled (inheriting of non-primitive cell meta values)".
   /**
    * Callback for the `afterRemoveCol` hook. The sort config of a removed column goes; the others move with their
    * columns.
@@ -794,8 +729,6 @@ class ColumnSorting extends BasePlugin {
    * @private
    */
   onAfterRemoveCol(_index?: number, _amount?: number, physicalColumns: number[] = []): void {
-    this.columnMetaCache.clear();
-
     if (physicalColumns.length === 0) {
       return;
     }
@@ -812,7 +745,7 @@ class ColumnSorting extends BasePlugin {
    * @param column Visual column index.
    */
   wasClickableHeaderClicked(event: GridMouseEvent, column: number): boolean {
-    const pluginSettingsForColumn = this.getFirstCellSettings(column)[this.pluginKey] as SortSettings;
+    const pluginSettingsForColumn = this.getColumnSettings(column)[this.pluginKey] as SortSettings;
 
     return !!pluginSettingsForColumn.headerAction && event.realTarget.nodeName === 'SPAN';
   }

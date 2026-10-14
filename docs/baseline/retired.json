@@ -22,5 +22,8 @@
     "mergeSort should not change the order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
     "mergeSort should sort the numbers in ascending order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)",
     "mergeSort should sort the numbers in descending order when such comparator is provided": "mergeSort removed: column sorting uses the browser's stable Array.prototype.sort (utils TS conversion)"
+  },
+  "e2e": {
+    "ColumnSorting should clear and generate a new column meta cache after calling `updateSettings` with a new set of data": "the column meta cache was a workaround and is removed (#65); replaced by a spec that sorts a column added by updateSettings"
   }
 }

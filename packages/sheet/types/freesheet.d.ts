@@ -26,6 +26,7 @@ declare namespace _FreeSheet {
     getCell(row: number, col: number, topmost?: boolean): Element;
     getCellEditor<T extends FreeSheet._editors.Base>(row: number, col: number): T;
     getCellMeta(row: number, col: number): FreeSheet.GridSettings;
+    getColumnMeta(column: number): FreeSheet.GridSettings;
     getCellMetaAtRow(row: number): FreeSheet.GridSettings[];
     getCellRenderer(row: number, col: number): FreeSheet.renderers.Base;
     getCellValidator(row: number, col: number): (value: any, callback: (valid: boolean) => void) => void | RegExp | undefined;
