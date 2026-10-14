@@ -44,6 +44,21 @@ describe('MergeCells', () => {
         hot.getPlugin('mergeCells').clearCollections();
       }).not.toThrow();
     });
+
+    it('should show the cells a merged cell hid when the collection is cleared', () => {
+      const hot = handsontable({
+        data: Handsontable.helper.createSpreadsheetData(5, 5),
+        mergeCells: [{ row: 1, col: 1, rowspan: 2, colspan: 2 }],
+      });
+
+      // While merged, getCell() of a hidden cell gives the merged cell.
+      hot.getPlugin('mergeCells').clearCollections();
+
+      expect(getCell(1, 1).getAttribute('rowspan')).toBeNull();
+      expect(getCell(1, 2).style.display).toBe('');
+      expect(getCell(2, 1).style.display).toBe('');
+      expect(getCell(2, 2).style.display).toBe('');
+    });
   });
 
   describe('mergeCells updateSettings', () => {

@@ -30,6 +30,8 @@
 - Plugins, part 7: columnSorting (with its sort functions and sort service).
 - Plugins, part 8: contextMenu (the menu, its items, commands and positioning). A submenu's class name replaces every
   character other than a letter or a digit with `_` (the range `A-z` also kept ``[\]^_` ``).
+- Plugins, part 9: mergeCells, the last plugin: every plugin is TypeScript now. Fix: clearing the merged cells
+  (`clearCollections`, e.g. on `updateSettings`) left the cells a merged cell had covered invisible until the next render.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
