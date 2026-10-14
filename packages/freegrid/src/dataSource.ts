@@ -1,45 +1,54 @@
 import { getProperty } from './helpers/object';
-import { arrayEach } from './helpers/array';
 import { rangeEach } from './helpers/number';
+import type { PluginHost } from './plugins/_base';
+
+/** A row of the source data: an array, or an object (with properties). */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- rows hold any values
+export type SourceRow = any;
+
+/** A column's property: an index, a path (`a.b`), or a function of the row. */
+type ColumnProp = number | string | ((row: SourceRow) => unknown);
 
 /**
  * @class DataSource
  * @private
  */
 class DataSource {
-  constructor(hotInstance, dataSource = []) {
-    /**
-     * Instance of FreeGrid.
-     *
-     * @type {FreeGrid}
-     */
-    this.hot = hotInstance;
-    /**
-     * Data source
-     *
-     * @type {Array}
-     */
-    this.data = dataSource;
-    /**
-     * Type of data source.
-     *
-     * @type {String}
-     * @default 'array'
-     */
-    this.dataType = 'array';
+  /**
+   * Instance of FreeGrid.
+   */
+  hot: PluginHost;
 
-    this.colToProp = () => {};
-    this.propToCol = () => {};
+  /**
+   * Data source
+   */
+  data: SourceRow[];
+
+  /**
+   * Type of data source: `array` (rows are arrays) or `object`.
+   *
+   * @default 'array'
+   */
+  dataType = 'array';
+
+  /** A visual column's property (set by the grid's data map). */
+  colToProp: (column: number) => ColumnProp = () => undefined as unknown as ColumnProp;
+
+  /** A property's visual column (set by the grid's data map). */
+  propToCol: (prop: ColumnProp) => number = () => undefined as unknown as number;
+
+  constructor(hotInstance: PluginHost, dataSource: SourceRow[] = []) {
+    this.hot = hotInstance;
+    this.data = dataSource;
   }
 
   /**
    * Get all data.
    *
-   * @param {Boolean} [toArray=false] If `true` return source data as an array of arrays even when source data was provided
+   * @param [toArray=false] If `true` return source data as an array of arrays even when source data was provided
    *                                  in another format.
-   * @returns {Array}
    */
-  getData(toArray = false) {
+  getData(toArray = false): SourceRow[] {
     let result = this.data;
 
     if (toArray) {
@@ -56,22 +65,21 @@ class DataSource {
   /**
    * Set new data source.
    *
-   * @param data {Array}
+   * @param data The rows.
    */
-  setData(data) {
+  setData(data: SourceRow[]): void {
     this.data = data;
   }
 
   /**
    * Returns array of column values from the data source. `column` is the index of the row in the data source.
    *
-   * @param {Number} column Visual column index.
-   * @returns {Array}
+   * @param column Visual column index.
    */
-  getAtColumn(column) {
-    const result = [];
+  getAtColumn(column: number): unknown[] {
+    const result: unknown[] = [];
 
-    arrayEach(this.data, (row) => {
+    this.data.forEach((row) => {
       const property = this.colToProp(column);
       let value;
 
@@ -92,26 +100,25 @@ class DataSource {
   /**
    * Returns a single row of the data (array or object, depending on what you have). `row` is the index of the row in the data source.
    *
-   * @param {Number} row Physical row index.
-   * @returns {Array|Object}
+   * @param row Physical row index.
    */
-  getAtRow(row) {
+  getAtRow(row: number): SourceRow {
     return this.data[row];
   }
 
   /**
    * Returns a single value from the data.
    *
-   * @param {Number} row Physical row index.
-   * @param {Number} column Visual column index.
-   * @returns {*}
+   * @param row Physical row index.
+   * @param column Visual column index.
    */
-  getAtCell(row, column) {
-    let result = null;
+  getAtCell(row: number, column: number): unknown {
+    let result: unknown = null;
 
     const modifyRowData = this.hot.runHooks('modifyRowData', row);
 
-    const dataRow = isNaN(modifyRowData) ? modifyRowData : this.data[row];
+    // A hook may give the row's data itself (instead of the row index).
+    const dataRow = Number.isNaN(Number(modifyRowData)) ? modifyRowData : this.data[row];
 
     if (dataRow) {
       const prop = this.colToProp(column);
@@ -133,22 +140,21 @@ class DataSource {
   /**
    * Returns source data by passed range.
    *
-   * @param {Object} start Object with physical `row` and `col` keys (or visual column index, if data type is an array of objects).
-   * @param {Object} end Object with physical `row` and `col` keys (or visual column index, if data type is an array of objects).
-   * @param {Boolean} [toArray=false] If `true` return source data as an array of arrays even when source data was provided
+   * @param start Object with physical `row` and `col` keys (or visual column index, if data type is an array of objects).
+   * @param end Object with physical `row` and `col` keys (or visual column index, if data type is an array of objects).
+   * @param [toArray=false] If `true` return source data as an array of arrays even when source data was provided
    *                                  in another format.
-   * @returns {Array}
    */
-  getByRange(start, end, toArray = false) {
+  getByRange(start: { row: number; col: number }, end: { row: number; col: number }, toArray = false): SourceRow[] {
     const startRow = Math.min(start.row, end.row);
     const startCol = Math.min(start.col, end.col);
     const endRow = Math.max(start.row, end.row);
     const endCol = Math.max(start.col, end.col);
-    const result = [];
+    const result: SourceRow[] = [];
 
     rangeEach(startRow, endRow, (currentRow) => {
       const row = this.getAtRow(currentRow);
-      let newRow;
+      let newRow: SourceRow;
 
       if (this.dataType === 'array') {
         newRow = row.slice(startCol, endCol + 1);
@@ -157,7 +163,7 @@ class DataSource {
         newRow = toArray ? [] : {};
 
         rangeEach(startCol, endCol, (column) => {
-          const prop = this.colToProp(column);
+          const prop = this.colToProp(column) as string | number;
 
           if (toArray) {
             newRow.push(row[prop]);
@@ -176,18 +182,16 @@ class DataSource {
   /**
    * Count number of rows.
    *
-   * @returns {Number}
    */
-  countRows() {
+  countRows(): number {
     return Array.isArray(this.data) ? this.data.length : 0;
   }
 
   /**
    * Count number of columns.
    *
-   * @returns {Number}
    */
-  countColumns() {
+  countColumns(): number {
     let result = 0;
 
     if (Array.isArray(this.data)) {
@@ -205,8 +209,8 @@ class DataSource {
   /**
    * Destroy instance.
    */
-  destroy() {
-    this.data = null;
+  destroy(): void {
+    this.data = null!;
     this.hot = null;
   }
 }

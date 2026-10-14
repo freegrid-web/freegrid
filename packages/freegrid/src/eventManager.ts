@@ -2,10 +2,28 @@ import { polymerWrap, closest } from './helpers/dom/element';
 import { hasOwnProperty } from './helpers/object';
 import { stopImmediatePropagation as _stopImmediatePropagation } from './helpers/dom/event';
 
+/** An event as listeners get it: with the element it happened on (`realTarget`; inside a `<hot-table>` too). */
+export type ExtendedEvent = Event & {
+  realTarget: EventTarget | null;
+  isTargetWebComponent: boolean;
+  path?: (Element & { shadowRoot?: ShadowRoot | null })[];
+};
+
+/** A registered listener. */
+type Listener = {
+  element: EventTarget;
+  event: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- listeners take the event type they listen to
+  callback: (event: any) => void;
+  callbackProxy: (event: Event) => void;
+};
+
+/** The object that keeps the listeners: a grid, a plugin, Walkontable or the manager itself. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+type Context = { eventListeners?: Listener[]; [key: string]: any };
+
 /**
  * Counter which tracks unregistered listeners (useful for detecting memory leaks).
- *
- * @type {Number}
  */
 let listenersCounter = 0;
 
@@ -16,34 +34,50 @@ let listenersCounter = 0;
  * @util
  */
 class EventManager {
+  /** Whether the grid is inside a `<hot-table>` web component (set by the grid). */
+  static isHotTableEnv = false;
+
+  /** The object whose `eventListeners` keep the listeners. */
+  context: Context | null;
+
+  // Set when the manager keeps its own listeners.
+  declare eventListeners?: Listener[];
+
   /**
-   * @param {Object} [context=null] The object whose `eventListeners` keep the listeners (e.g. a grid, which removes
+   * @param [context=null] The object whose `eventListeners` keep the listeners (e.g. a grid, which removes
    * them when it is destroyed); the manager itself by default.
    */
-  constructor(context = null) {
-    this.context = context || this;
+  constructor(context: object | null = null) {
+    this.context = (context || this) as Context;
 
     if (!this.context.eventListeners) {
       this.context.eventListeners = [];
     }
   }
 
+  /** The registered listeners. */
+  get #listeners(): Listener[] {
+    return this.context!.eventListeners!;
+  }
+
   /**
    * Register specified listener (`eventName`) to the element.
    *
-   * @param {EventTarget} element Target element (an element, the document or the window).
-   * @param {String} eventName Event name.
-   * @param {Function} callback Function which will be called after event occur.
-   * @returns {Function} Returns function which you can easily call to remove that event
+   * @param element Target element (an element, the document or the window).
+   * @param eventName Event name.
+   * @param callback Function which will be called after event occur.
+   * @returns Returns function which you can easily call to remove that event
    */
-  addEventListener(element, eventName, callback) {
-    const context = this.context;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- listeners take the event type they listen to
+  addEventListener(element: EventTarget, eventName: string, callback: (event: any) => void): () => void {
+    const { context } = this;
 
-    function callbackProxy(event) {
-      callback.call(this, extendEvent(context, event));
+    // A function, not an arrow: `this` is the element.
+    function callbackProxy(this: EventTarget, event: Event) {
+      callback.call(this, extendEvent(context!, event));
     }
 
-    this.context.eventListeners.push({
+    this.#listeners.push({
       element,
       event: eventName,
       callback,
@@ -61,24 +95,20 @@ class EventManager {
   /**
    * Remove the event listener previously registered.
    *
-   * @param {EventTarget} element Target element.
-   * @param {String} eventName Event name.
-   * @param {Function} callback Function to remove from the event target. It must be the same as during registration listener.
+   * @param element Target element.
+   * @param eventName Event name.
+   * @param [callback] Function to remove from the event target. It must be the same as during registration
+   * listener. Without it, every listener of the event is removed.
    */
-  removeEventListener(element, eventName, callback) {
-    let len = this.context.eventListeners.length;
-    let tmpEvent;
+  removeEventListener(element: EventTarget, eventName: string, callback?: Listener['callback']): void {
+    const listeners = this.#listeners;
 
-    while (len) {
-      len -= 1;
-      tmpEvent = this.context.eventListeners[len];
+    for (let len = listeners.length - 1; len >= 0; len -= 1) {
+      const tmpEvent = listeners[len];
 
-      if (tmpEvent.event === eventName && tmpEvent.element === element) {
-        if (callback && callback !== tmpEvent.callback) {
-          /* eslint-disable no-continue */
-          continue;
-        }
-        this.context.eventListeners.splice(len, 1);
+      if (tmpEvent.event === eventName && tmpEvent.element === element &&
+        (!callback || callback === tmpEvent.callback)) {
+        listeners.splice(len, 1);
         tmpEvent.element.removeEventListener(tmpEvent.event, tmpEvent.callbackProxy, false);
         listenersCounter -= 1;
       }
@@ -91,15 +121,14 @@ class EventManager {
    * @private
    * @since 0.15.0-beta3
    */
-  clearEvents() {
+  clearEvents(): void {
     if (!this.context) {
       return;
     }
-    let len = this.context.eventListeners.length;
+    const listeners = this.#listeners;
 
-    while (len) {
-      len -= 1;
-      const event = this.context.eventListeners[len];
+    for (let len = listeners.length - 1; len >= 0; len -= 1) {
+      const event = listeners[len];
 
       if (event) {
         this.removeEventListener(event.element, event.event, event.callback);
@@ -110,14 +139,14 @@ class EventManager {
   /**
    * Clear all previously registered events.
    */
-  clear() {
+  clear(): void {
     this.clearEvents();
   }
 
   /**
    * Destroy instance of EventManager.
    */
-  destroy() {
+  destroy(): void {
     this.clearEvents();
     this.context = null;
   }
@@ -125,10 +154,10 @@ class EventManager {
   /**
    * Trigger event at the specified target element.
    *
-   * @param {Element} element Target element.
-   * @param {String} eventName Event name.
+   * @param element Target element.
+   * @param eventName Event name.
    */
-  fireEvent(element, eventName) {
+  fireEvent(element: Element, eventName: string): void {
     const options = {
       bubbles: true,
       cancelable: (eventName !== 'mousemove'),
@@ -151,32 +180,31 @@ class EventManager {
       options.view, options.detail,
       options.screenX, options.screenY, options.clientX, options.clientY,
       options.ctrlKey, options.altKey, options.shiftKey, options.metaKey,
-      options.button, options.relatedTarget || document.body.parentNode);
+      options.button, (options.relatedTarget || document.body.parentNode) as EventTarget);
 
     element.dispatchEvent(event);
   }
 }
 
 /**
- * @param {Object} context
- * @param {Event} event
+ * The event with `realTarget` (the element it happened on, also inside a `<hot-table>` web component) and a
+ * `stopImmediatePropagation()` that FreeGrid's handlers see too.
+ *
  * @private
- * @returns {*}
  */
-function extendEvent(context, event) {
+const extendEvent = (context: Context, nativeEvent: Event): ExtendedEvent => {
   const componentName = 'HOT-TABLE';
-  let isHotTableSpotted;
-  let fromElement;
-  let realTarget;
-  let target;
-  let len;
+  let event = nativeEvent as ExtendedEvent;
+  let isHotTableSpotted = false;
+  let fromElement: Element | null = null;
+  let target: EventTarget | null | undefined;
 
   event.isTargetWebComponent = false;
   event.realTarget = event.target;
 
   const nativeStopImmediatePropagation = event.stopImmediatePropagation;
 
-  event.stopImmediatePropagation = function() {
+  event.stopImmediatePropagation = function stopImmediatePropagation(this: Event) {
     nativeStopImmediatePropagation.apply(this);
     _stopImmediatePropagation(this);
   };
@@ -184,23 +212,21 @@ function extendEvent(context, event) {
   if (!EventManager.isHotTableEnv) {
     return event;
   }
-  // eslint-disable-next-line no-param-reassign
-  event = polymerWrap(event);
-  len = event.path ? event.path.length : 0;
+  event = polymerWrap(event) as ExtendedEvent;
 
-  while (len) {
-    len -= 1;
+  const path = event.path || [];
 
-    if (event.path[len].nodeName === componentName) {
+  for (let len = path.length - 1; len >= 0; len -= 1) {
+    if (path[len].nodeName === componentName) {
       isHotTableSpotted = true;
 
-    } else if (isHotTableSpotted && event.path[len].shadowRoot) {
-      target = event.path[len];
+    } else if (isHotTableSpotted && path[len].shadowRoot) {
+      target = path[len];
 
       break;
     }
     if (len === 0 && !target) {
-      target = event.path[len];
+      target = path[len];
     }
   }
   if (!target) {
@@ -223,10 +249,10 @@ function extendEvent(context, event) {
       // Walkontable
       fromElement = context.wtTable.TABLE.parentNode.parentNode;
     }
-    realTarget = closest(event.target, [componentName], fromElement);
+    const realTarget = closest(event.target as Node, [componentName], fromElement);
 
     if (realTarget) {
-      event.realTarget = fromElement.querySelector(componentName) || event.target;
+      event.realTarget = fromElement!.querySelector(componentName) || event.target;
     } else {
       event.realTarget = event.target;
     }
@@ -241,10 +267,9 @@ function extendEvent(context, event) {
   });
 
   return event;
-}
+};
 
 export default EventManager;
 
-export function getListenersCounter() {
-  return listenersCounter;
-}
+/** How many listeners are registered and not removed (useful for detecting memory leaks). */
+export const getListenersCounter = (): number => listenersCounter;
