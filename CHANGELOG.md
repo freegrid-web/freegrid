@@ -35,6 +35,10 @@
 - Core, part 1 (TypeScript rewrite): EventManager, EditorManager (a class now), DataSource, MultiMap and the compat
   entry. Fix: a function in `enterMoves` got the browser's global `window.event` instead of the key event (the same
   event during a key press, so it worked by chance).
+- Core, part 2 (TypeScript rewrite): DataMap and TableView are classes now. Fixes:
+  - A dotted data property through `__proto__`, `constructor` or `prototype` (e.g. `setDataAtRowProp(0,
+    '__proto__.x', 1)`) changed `Object.prototype`; such a property is ignored now.
+  - A column header that had to be rebuilt ran `afterGetColHeader` twice.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code

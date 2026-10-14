@@ -298,4 +298,21 @@ describe('Core_setDataAtCell', () => {
     expect(getDataAtRowProp(1, 'id')).toBe(33);
     expect(getData()).toEqual([['bar', 1], ['b', 33], ['c', 3]]);
   });
+
+  it('should not change Object.prototype through a `__proto__` or `constructor` path in the prop', () => {
+    handsontable({
+      data: [{ name: 'a' }, { name: 'b' }],
+    });
+
+    try {
+      setDataAtRowProp(0, '__proto__.polluted', 'yes');
+      setDataAtRowProp(1, 'constructor.prototype.polluted', 'yes');
+
+      expect({}.polluted).toBeUndefined();
+      expect(getSourceDataAtRow(0)).toEqual({ name: 'a' });
+      expect(getSourceDataAtRow(1)).toEqual({ name: 'b' });
+    } finally {
+      delete Object.prototype.polluted;
+    }
+  });
 });

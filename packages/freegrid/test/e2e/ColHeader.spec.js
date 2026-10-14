@@ -355,4 +355,30 @@ describe('ColHeader', () => {
     expect(spec().$container.find('.handsontable.ht_clone_top tr:nth-child(1) th:nth-child(1)').height()).toEqual(45);
     expect(spec().$container.find('.handsontable.ht_clone_top tr:nth-child(2) th:nth-child(1)').height()).toEqual(65);
   });
+
+  it('should run `afterGetColHeader` once per header when the header content has to be rebuilt', () => {
+    let calls = 0;
+    const headers = new Set();
+
+    handsontable({
+      data: Handsontable.helper.createSpreadsheetData(3, 3),
+      colHeaders: true,
+      afterGetColHeader(column, TH) {
+        if (column === 0) {
+          calls += 1;
+          headers.add(TH);
+          TH.innerHTML = '<b>custom</b>';
+        }
+      },
+    });
+
+    calls = 0;
+    headers.clear();
+    render();
+
+    expect(headers.size).toBeGreaterThan(0);
+    expect(calls).toBe(headers.size);
+    expect(getInstance().view.wt.wtTable.THEAD.querySelector('th b').textContent).toBe('custom');
+  });
 });
+
