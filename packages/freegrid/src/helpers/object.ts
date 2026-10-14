@@ -52,8 +52,8 @@ export const inherit = <C extends Constructor>(Child: C, Parent: Constructor): C
  */
 export const extend = <T extends object>(target: T, extension: object): T => {
   objectEach(extension as AnyObject, (value, key) => {
-    // A `__proto__` key (e.g. from JSON) would replace the target's prototype.
-    if (key !== '__proto__') {
+    // A `__proto__` key (e.g. from JSON) would replace the target's prototype, and `constructor` leads to it.
+    if (key !== '__proto__' && key !== 'constructor') {
       (target as AnyObject)[key] = value;
     }
   });

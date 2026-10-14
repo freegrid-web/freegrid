@@ -311,12 +311,13 @@ describe('Object helper', () => {
       delete Object.prototype.polluted;
     });
 
-    it('extend should not change the target\'s prototype through a `__proto__` key', () => {
+    it('extend should not change the target\'s prototype through a `__proto__` or `constructor` key', () => {
       const target = {};
 
-      extend(target, JSON.parse('{"__proto__": {"polluted": "yes"}, "a": 1}'));
+      extend(target, JSON.parse('{"__proto__": {"polluted": "yes"}, "constructor": {"prototype": {}}, "a": 1}'));
 
       expect(Object.getPrototypeOf(target)).toBe(Object.prototype);
+      expect(target.constructor).toBe(Object);
       expect(target.polluted).toBeUndefined();
       expect(target.a).toBe(1);
     });
