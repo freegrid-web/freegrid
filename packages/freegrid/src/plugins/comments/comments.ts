@@ -390,9 +390,9 @@ class Comments extends BasePlugin {
       return;
     }
     const scrollableElement = getScrollableElement(this.hot.view.wt.wtTable.TABLE);
-    const TD = this.hot.view.wt.wtTable.getCell(this.range.from);
+    const TD = this.hot.view.wt.wtTable.getCell(this.range.from!);
     const { row, col: column } = this.range.from!;
-    const cellOffset = offset(TD);
+    const cellOffset = offset(TD as HTMLTableCellElement);
     const lastColWidth = this.hot.view.wt.wtTable.getStretchedColumnWidth(column);
     let cellTopOffset = cellOffset.top < 0 ? 0 : cellOffset.top;
     let cellLeftOffset = cellOffset.left;
@@ -513,7 +513,7 @@ class Comments extends BasePlugin {
     if (this.targetIsCellWithComment(event)) {
       const coordinates = this.hot.view.wt.wtTable.getCoords(event.target);
       const range = {
-        from: new CellCoords(coordinates.row, coordinates.col)
+        from: new CellCoords(coordinates!.row, coordinates!.col)
       };
 
       this.displaySwitch.show(range);

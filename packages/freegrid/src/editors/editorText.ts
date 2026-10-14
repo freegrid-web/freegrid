@@ -277,7 +277,7 @@ class EditorText extends EditorBase {
         break;
     }
 
-    return editedCell !== -1 && editedCell !== -2 ? editedCell : void 0;
+    return (editedCell !== -1 && editedCell !== -2 ? editedCell : void 0) as HTMLTableCellElement | undefined;
   }
 
   refreshValue(): void {
@@ -309,8 +309,8 @@ class EditorText extends EditorBase {
     const scrollableContainerTop = this.instance.view.wt.wtOverlays.topOverlay.mainTableScrollableElement;
     const scrollableContainerLeft = this.instance.view.wt.wtOverlays.leftOverlay.mainTableScrollableElement;
     const totalRowsCount = this.instance.countRows();
-    const containerScrollTop = scrollableContainerTop !== window ? scrollableContainerTop.scrollTop : 0;
-    const containerScrollLeft = scrollableContainerLeft !== window ? scrollableContainerLeft.scrollLeft : 0;
+    const containerScrollTop = scrollableContainerTop !== window ? (scrollableContainerTop as HTMLElement).scrollTop : 0;
+    const containerScrollLeft = scrollableContainerLeft !== window ? (scrollableContainerLeft as HTMLElement).scrollLeft : 0;
     const editorSection = this.checkEditorSection();
 
     const scrollTop = ['', 'left'].includes(editorSection) ? containerScrollTop : 0;
@@ -373,12 +373,12 @@ class EditorText extends EditorBase {
     const verticalScrollPosition = this.instance.view.wt.wtOverlays.topOverlay.getScrollPosition();
     const scrollbarWidth = getScrollbarWidth();
 
-    const cellTopOffset = this.TD.offsetTop + firstRowOffset - verticalScrollPosition;
-    const cellLeftOffset = this.TD.offsetLeft + firstColumnOffset - horizontalScrollPosition;
+    const cellTopOffset = this.TD.offsetTop + firstRowOffset! - verticalScrollPosition;
+    const cellLeftOffset = this.TD.offsetLeft + firstColumnOffset! - horizontalScrollPosition;
 
     const width = innerWidth(this.TD) - 8;
-    const actualVerticalScrollbarWidth = hasVerticalScrollbar(scrollableContainerTop) ? scrollbarWidth : 0;
-    const actualHorizontalScrollbarWidth = hasHorizontalScrollbar(scrollableContainerLeft) ? scrollbarWidth : 0;
+    const actualVerticalScrollbarWidth = hasVerticalScrollbar(scrollableContainerTop as HTMLElement) ? scrollbarWidth : 0;
+    const actualHorizontalScrollbarWidth = hasHorizontalScrollbar(scrollableContainerLeft as HTMLElement) ? scrollbarWidth : 0;
     const maxWidth = this.instance.view.maximumVisibleElementWidth(cellLeftOffset) - 9 - actualVerticalScrollbarWidth;
     const height = this.TD.scrollHeight + 1;
     const maxHeight = Math.max(this.instance.view.maximumVisibleElementHeight(cellTopOffset) - actualHorizontalScrollbarWidth,

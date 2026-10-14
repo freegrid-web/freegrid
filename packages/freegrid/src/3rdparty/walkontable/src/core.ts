@@ -12,16 +12,33 @@ import Scroll from './scroll';
 import Settings from './settings';
 import Table from './table';
 import Viewport from './viewport';
+import type { Coordinates, EngineSettings, OverlayManager, OverlaySurface, SelectionCollection, SettingResults, WalkontableOptions } from './types';
 
 /**
  * @class Walkontable
  */
 class Walkontable {
+  declare guid: string;
+  declare cloneSource?: Walkontable;
+  declare cloneOverlay?: OverlaySurface;
+  declare wtSettings: EngineSettings;
+  declare wtTable: Table;
+  declare wtScroll: Scroll;
+  declare wtViewport: Viewport;
+  declare wtEvent: Event;
+  declare selections: SelectionCollection;
+  declare wtOverlays: OverlayManager;
+  declare drawn: boolean;
+  declare drawInterrupted: boolean;
+  declare lastMouseOver?: HTMLTableCellElement;
+  declare touchApplied?: boolean;
+  declare momentumScrolling?: { _timeout?: number; ongoing?: boolean };
+
   /**
    * @param {Object} settings
    */
-  constructor(settings) {
-    const originalHeaders = [];
+  constructor(settings: WalkontableOptions) {
+    const originalHeaders: string[] = [];
 
     // this is the namespace for global events
     this.guid = `wt_${randomString()}`;
@@ -34,27 +51,27 @@ class Walkontable {
       this.wtTable = new Table(this, settings.table, settings.wtRootElement);
       this.wtScroll = new Scroll(this);
       this.wtViewport = settings.cloneSource.wtViewport;
-      this.wtEvent = new Event(this);
+      this.wtEvent = new Event(this as unknown as ConstructorParameters<typeof Event>[0]);
       this.selections = this.cloneSource.selections;
     } else {
-      this.wtSettings = new Settings(this, settings);
+      this.wtSettings = new Settings(this, settings) as unknown as EngineSettings;
       this.wtTable = new Table(this, settings.table);
       this.wtScroll = new Scroll(this);
       this.wtViewport = new Viewport(this);
-      this.wtEvent = new Event(this);
+      this.wtEvent = new Event(this as unknown as ConstructorParameters<typeof Event>[0]);
       this.selections = this.getSetting('selections');
-      this.wtOverlays = new Overlays(this);
+      this.wtOverlays = new Overlays(this) as unknown as OverlayManager;
       this.exportSettingsAsClassNames();
     }
 
     // find original headers
     if (this.wtTable.THEAD.childNodes.length && this.wtTable.THEAD.childNodes[0].childNodes.length) {
       for (let c = 0, clen = this.wtTable.THEAD.childNodes[0].childNodes.length; c < clen; c++) {
-        originalHeaders.push(this.wtTable.THEAD.childNodes[0].childNodes[c].innerHTML);
+        originalHeaders.push((this.wtTable.THEAD.childNodes[0].childNodes[c] as HTMLElement).innerHTML);
       }
       if (!this.getSetting('columnHeaders').length) {
         this.update('columnHeaders', [
-          function(column, TH) {
+          function(column: number, TH: HTMLTableCellElement) {
             fastInnerText(TH, originalHeaders[column]);
           }
         ]);
@@ -93,15 +110,15 @@ class Walkontable {
    * @param {Boolean} [topmost=false]
    * @returns {Object}
    */
-  getCell(coords, topmost = false) {
+  getCell(coords: Coordinates, topmost = false): HTMLTableCellElement | -1 | -2 | undefined {
     if (!topmost) {
       return this.wtTable.getCell(coords);
     }
 
-    const totalRows = this.wtSettings.getSetting('totalRows');
-    const fixedRowsTop = this.wtSettings.getSetting('fixedRowsTop');
-    const fixedRowsBottom = this.wtSettings.getSetting('fixedRowsBottom');
-    const fixedColumns = this.wtSettings.getSetting('fixedColumnsLeft');
+    const totalRows = this.wtSettings.getSetting('totalRows') as number;
+    const fixedRowsTop = this.wtSettings.getSetting('fixedRowsTop') as number;
+    const fixedRowsBottom = this.wtSettings.getSetting('fixedRowsBottom') as number;
+    const fixedColumns = this.wtSettings.getSetting('fixedColumnsLeft') as number;
 
     if (coords.row < fixedRowsTop && coords.col < fixedColumns) {
       return this.wtOverlays.topLeftCornerOverlay.clone.wtTable.getCell(coords);
@@ -132,7 +149,7 @@ class Walkontable {
    * @param {*} value
    * @returns {Walkontable}
    */
-  update(settings, value) {
+  update(settings: Record<string, unknown> | string, value?: unknown) {
     return this.wtSettings.update(settings, value);
   }
 
@@ -146,7 +163,7 @@ class Walkontable {
    * @param {Boolean} [snapToLeft]
    * @returns {Boolean}
    */
-  scrollViewport(coords, snapToTop, snapToRight, snapToBottom, snapToLeft) {
+  scrollViewport(coords: Coordinates, snapToTop?: boolean, snapToRight?: boolean, snapToBottom?: boolean, snapToLeft?: boolean) {
     return this.wtScroll.scrollViewport(coords, snapToTop, snapToRight, snapToBottom, snapToLeft);
   }
 
@@ -158,7 +175,7 @@ class Walkontable {
    * @param {Boolean} [snapToLeft]
    * @returns {Boolean}
    */
-  scrollViewportHorizontally(column, snapToRight, snapToLeft) {
+  scrollViewportHorizontally(column: number, snapToRight?: boolean, snapToLeft?: boolean) {
     return this.wtScroll.scrollViewportHorizontally(column, snapToRight, snapToLeft);
   }
 
@@ -170,7 +187,7 @@ class Walkontable {
    * @param {Boolean} [snapToBottom]
    * @returns {Boolean}
    */
-  scrollViewportVertically(row, snapToTop, snapToBottom) {
+  scrollViewportVertically(row: number, snapToTop?: boolean, snapToBottom?: boolean) {
     return this.wtScroll.scrollViewportVertically(row, snapToTop, snapToBottom);
   }
 
@@ -201,7 +218,7 @@ class Walkontable {
    * @param {String} name Clone type @see {Overlay.CLONE_TYPES}.
    * @returns {Boolean}
    */
-  isOverlayName(name) {
+  isOverlayName(name: string) {
     if (this.cloneOverlay) {
       return this.cloneOverlay.type === name;
     }
@@ -217,17 +234,17 @@ class Walkontable {
       rowHeaders: ['array'],
       columnHeaders: ['array']
     };
-    const allClassNames = [];
-    const newClassNames = [];
+    const allClassNames: string[] = [];
+    const newClassNames: string[] = [];
 
     objectEach(toExport, (optionType, key) => {
-      if (optionType.indexOf('array') > -1 && this.getSetting(key).length) {
+      if (optionType.indexOf('array') > -1 && (this.getSetting(key) as unknown[]).length) {
         newClassNames.push(`ht${toUpperCaseFirst(key)}`);
       }
       allClassNames.push(`ht${toUpperCaseFirst(key)}`);
     });
-    removeClass(this.wtTable.wtRootElement.parentNode, allClassNames);
-    addClass(this.wtTable.wtRootElement.parentNode, newClassNames);
+    removeClass(this.wtTable.wtRootElement.parentNode as HTMLElement, allClassNames);
+    addClass(this.wtTable.wtRootElement.parentNode as HTMLElement, newClassNames);
   }
 
   /**
@@ -240,7 +257,9 @@ class Walkontable {
    * @param {*} [param4]
    * @returns {*}
    */
-  getSetting(key, param1, param2, param3, param4) {
+  getSetting<Key extends keyof SettingResults>(key: Key, param1?: unknown, param2?: unknown, param3?: unknown, param4?: unknown): SettingResults[Key];
+  getSetting(key: string, param1?: unknown, param2?: unknown, param3?: unknown, param4?: unknown): unknown;
+  getSetting(key: string, param1?: unknown, param2?: unknown, param3?: unknown, param4?: unknown): unknown {
     // this is faster than .apply - https://github.com/handsontable/handsontable/wiki/JavaScript-&-DOM-performance-tips
     return this.wtSettings.getSetting(key, param1, param2, param3, param4);
   }
@@ -251,7 +270,7 @@ class Walkontable {
    * @param {String} key
    * @returns {Boolean}
    */
-  hasSetting(key) {
+  hasSetting(key: string) {
     return this.wtSettings.has(key);
   }
 

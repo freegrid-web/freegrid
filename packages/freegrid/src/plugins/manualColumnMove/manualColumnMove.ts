@@ -346,9 +346,9 @@ class ManualColumnMove extends BasePlugin {
     const lastVisible = this.hot.view.wt.wtTable.getLastVisibleColumn();
     const wtTable = this.hot.view.wt.wtTable;
     const scrollableElement = this.hot.view.wt.wtOverlays.scrollableElement;
-    const scrollLeft = typeof scrollableElement.scrollX === 'number' ? scrollableElement.scrollX : scrollableElement.scrollLeft;
+    const scrollLeft = typeof (scrollableElement as Window).scrollX === 'number' ? (scrollableElement as Window).scrollX : (scrollableElement as HTMLElement).scrollLeft;
     let tdOffsetLeft = this.hot.view.THEAD.offsetLeft + this.getColumnsWidth(0, priv.coordsColumn);
-    const mouseOffsetLeft = priv.target.eventPageX - (priv.rootElementOffset - (scrollableElement.scrollX === undefined ? scrollLeft : 0));
+    const mouseOffsetLeft = priv.target.eventPageX - (priv.rootElementOffset - ((scrollableElement as Window).scrollX === undefined ? scrollLeft : 0));
     const hiderWidth = wtTable.hider.offsetWidth;
     const tbodyOffsetLeft = wtTable.TBODY.offsetLeft;
     const backlightElemMarginLeft = this.backlight.getOffset().left;
@@ -362,7 +362,7 @@ class ManualColumnMove extends BasePlugin {
     }
 
     if (priv.hasRowHeaders) {
-      rowHeaderWidth = this.hot.view.wt.wtOverlays.leftOverlay.clone.wtTable.getColumnHeader(-1).offsetWidth;
+      rowHeaderWidth = this.hot.view.wt.wtOverlays.leftOverlay.clone.wtTable.getColumnHeader(-1)!.offsetWidth;
     }
     if (this.isFixedColumnsLeft(priv.coordsColumn)) {
       tdOffsetLeft += scrollLeft;
@@ -421,8 +421,8 @@ class ManualColumnMove extends BasePlugin {
       // guideline has got `margin-left: -1px` as default
       guidelineLeft = 1;
 
-    } else if (scrollableElement.scrollX !== undefined && priv.coordsColumn < priv.fixedColumns) {
-      guidelineLeft -= ((priv.rootElementOffset <= scrollableElement.scrollX) ? priv.rootElementOffset : 0);
+    } else if ((scrollableElement as Window).scrollX !== undefined && priv.coordsColumn < priv.fixedColumns) {
+      guidelineLeft -= ((priv.rootElementOffset <= (scrollableElement as Window).scrollX) ? priv.rootElementOffset : 0);
     }
 
     this.backlight.setPosition(undefined, backlightLeft);
@@ -533,7 +533,7 @@ class ManualColumnMove extends BasePlugin {
       const topPos = wtTable.holder.scrollTop + wtTable.getColumnHeaderHeight(0) + 1;
       const fixedColumns = coords.col < priv.fixedColumns;
       const scrollableElement = this.hot.view.wt.wtOverlays.scrollableElement;
-      const wrapperIsWindow = scrollableElement.scrollX ? scrollableElement.scrollX - priv.rootElementOffset : 0;
+      const wrapperIsWindow = (scrollableElement as Window).scrollX ? (scrollableElement as Window).scrollX - priv.rootElementOffset : 0;
 
       const mouseOffset = event.layerX - (fixedColumns ? wrapperIsWindow : 0);
       const leftOffset = Math.abs(this.getColumnsWidth(start, coords.col) + mouseOffset);

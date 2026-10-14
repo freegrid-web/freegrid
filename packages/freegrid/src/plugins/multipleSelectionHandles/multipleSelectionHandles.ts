@@ -126,7 +126,7 @@ class MultipleSelectionHandles extends BasePlugin {
       }
 
       if (endTarget.nodeName === 'TD' || endTarget.nodeName === 'TH') {
-        const targetCoords: CellCoords = this.hot.getCoords(endTarget);
+        const targetCoords: CellCoords = this.hot.getCoords(endTarget)!;
 
         if (targetCoords.col === -1) {
           targetCoords.col = 0;
