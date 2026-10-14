@@ -9,9 +9,12 @@ export const SOURCE = new URL('../../freegrid/src/', import.meta.url).pathname;
 
 const read = file => readFileSync(join(SOURCE, file), 'utf8');
 
+/** `name.ts`, or `name.js` while the module is not converted yet. */
+const moduleFile = name => [`${name}.ts`, `${name}.js`].find(file => existsSync(join(SOURCE, file)));
+
 /** The source files the reference is read from (for watching). */
-export const sourceFiles = () => ['core.js', 'pluginHooks.js', 'defaultSettings.js', ...pluginFiles()]
-  .map(file => join(SOURCE, file));
+export const sourceFiles = () => [moduleFile('core'), moduleFile('pluginHooks'), moduleFile('defaultSettings'),
+  ...pluginFiles()].map(file => join(SOURCE, file));
 
 function pluginFiles() {
   return readdirSync(join(SOURCE, 'plugins'), { withFileTypes: true })
@@ -23,13 +26,13 @@ function pluginFiles() {
 const withTopic = page => entry => ({ ...entry, topic: topicOf(entry.kind, entry.name), page, anchor: anchor(entry.name) });
 
 export const buildReference = () => {
-  const methods = parseBlocks(read('core.js'))
+  const methods = parseBlocks(read(moduleFile('core')))
     .filter(block => block.kind === 'method' && block.owner === 'Core' && !block.private)
     .map(withTopic('methods'));
-  const events = parseBlocks(read('pluginHooks.js'))
+  const events = parseBlocks(read(moduleFile('pluginHooks')))
     .filter(block => block.kind === 'event' && !block.private && !UNAVAILABLE.has(block.name))
     .map(withTopic('events'));
-  const settings = readSettings(read('defaultSettings.js'))
+  const settings = readSettings(read(moduleFile('defaultSettings')))
     .filter(setting => !UNAVAILABLE.has(setting.name))
     .map(withTopic('settings'));
   const plugins = pluginFiles()

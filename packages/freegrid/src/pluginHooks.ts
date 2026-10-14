@@ -1,5 +1,20 @@
-import { arrayEach } from './helpers/array';
-import { objectEach } from './helpers/object';
+/** A hook listener, with the flags Hooks keeps on it. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- each hook passes its own arguments
+export type HookCallback = ((...args: any[]) => unknown) & {
+  /** Removed: skipped until the bucket is rebuilt. */
+  skip?: boolean;
+  /** Removed after its first run (`once`). */
+  runOnce?: boolean;
+  /** A settings callback: a newer `initialHook` replaces it in place. */
+  initialHook?: boolean;
+};
+
+/** The listeners of each hook name. */
+export type HookBucket = Record<string, HookCallback[]>;
+
+/** A grid instance (a hook's `this`), which keeps its own bucket. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+type HookContext = any;
 
 /**
  * @description
@@ -49,7 +64,7 @@ import { objectEach } from './helpers/object';
  */
 
 // @TODO: Move plugin description hooks to plugin?
-const REGISTERED_HOOKS = [
+const REGISTERED_HOOKS: string[] = [
   /**
    * Fired after resetting a cell's meta. This happens when the {@link Core#updateSettings} method is called.
    *
@@ -1686,13 +1701,14 @@ const REGISTERED_HOOKS = [
 ];
 
 class Hooks {
-  static getSingleton() {
-    return getGlobalSingleton();
+  /** The global hooks (`FreeGrid.hooks`). */
+  static getSingleton(): Hooks {
+    return globalSingleton;
   }
 
-  /**
-   *
-   */
+  /** The listeners added without a grid instance (they run for every grid). */
+  globalBucket: HookBucket;
+
   constructor() {
     this.globalBucket = this.createEmptyBucket();
   }
@@ -1715,11 +1731,12 @@ class Hooks {
    * }
    * ```
    */
-  createEmptyBucket() {
-    const bucket = Object.create(null);
+  createEmptyBucket(): HookBucket {
+    const bucket: HookBucket = Object.create(null);
 
-    // eslint-disable-next-line no-return-assign
-    arrayEach(REGISTERED_HOOKS, hook => (bucket[hook] = []));
+    REGISTERED_HOOKS.forEach((hook) => {
+      bucket[hook] = [];
+    });
 
     return bucket;
   }
@@ -1730,7 +1747,7 @@ class Hooks {
    * @param {Object} [context=null] A FreeGrid instance.
    * @returns {Object} Returns a global or FreeGrid instance bucket.
    */
-  getBucket(context = null) {
+  getBucket(context: HookContext = null): HookBucket {
     if (context) {
       if (!context.pluginHookBucket) {
         context.pluginHookBucket = this.createEmptyBucket();
@@ -1770,9 +1787,9 @@ class Hooks {
    * FreeGrid.hooks.add('beforeInit', [myCallback, anotherCallback]);
    * ```
    */
-  add(key, callback, context = null) {
+  add(key: string, callback: HookCallback | HookCallback[], context: HookContext = null): this {
     if (Array.isArray(callback)) {
-      arrayEach(callback, c => this.add(key, c, context));
+      callback.forEach(c => this.add(key, c, context));
 
     } else {
       const bucket = this.getBucket(context);
@@ -1783,23 +1800,14 @@ class Hooks {
       }
       callback.skip = false;
 
+      // only add a hook if it has not already been added (adding the same hook twice is now silently ignored)
       if (bucket[key].indexOf(callback) === -1) {
-        // only add a hook if it has not already been added (adding the same hook twice is now silently ignored)
-        let foundInitialHook = false;
+        const initialHookIndex = callback.initialHook ? bucket[key].findIndex(cb => cb.initialHook) : -1;
 
-        if (callback.initialHook) {
-          arrayEach(bucket[key], (cb, i) => {
-            if (cb.initialHook) {
-              bucket[key][i] = callback;
-              foundInitialHook = true;
-
-              return false;
-            }
-          });
-        }
-
-        if (!foundInitialHook) {
+        if (initialHookIndex === -1) {
           bucket[key].push(callback);
+        } else {
+          bucket[key][initialHookIndex] = callback;
         }
       }
     }
@@ -1820,9 +1828,9 @@ class Hooks {
    * FreeGrid.hooks.once('beforeInit', myCallback, hotInstance);
    * ```
    */
-  once(key, callback, context = null) {
+  once(key: string, callback: HookCallback | HookCallback[], context: HookContext = null): void {
     if (Array.isArray(callback)) {
-      arrayEach(callback, c => this.once(key, c, context));
+      callback.forEach(c => this.once(key, c, context));
 
     } else {
       callback.runOnce = true;
@@ -1844,7 +1852,7 @@ class Hooks {
    * FreeGrid.hooks.remove('beforeInit', myCallback);
    * ```
    */
-  remove(key, callback, context = null) {
+  remove(key: string, callback: HookCallback, context: HookContext = null): boolean {
     const bucket = this.getBucket(context);
 
     if (typeof bucket[key] !== 'undefined') {
@@ -1866,7 +1874,7 @@ class Hooks {
    * @param {Object} [context=null] A FreeGrid instance.
    * @returns {Boolean} `true` for success, `false` otherwise.
    */
-  has(key, context = null) {
+  has(key: string, context: HookContext = null): boolean {
     const bucket = this.getBucket(context);
 
     return !!(bucket[key] !== void 0 && bucket[key].length);
@@ -1892,7 +1900,8 @@ class Hooks {
    * FreeGrid.hooks.run(hot, 'beforeInit');
    * ```
    */
-  run(context, key, p1, p2, p3, p4, p5, p6) {
+  run(context: HookContext, key: string, p1?: unknown, p2?: unknown, p3?: unknown, p4?: unknown, p5?: unknown,
+    p6?: unknown): any { // eslint-disable-line @typescript-eslint/no-explicit-any -- each hook returns its own type
     {
       const globalHandlers = this.globalBucket[key];
       const length = globalHandlers ? globalHandlers.length : 0;
@@ -1966,9 +1975,10 @@ class Hooks {
    * FreeGrid.hooks.destroy(hotInstance);
    * ```
    */
-  destroy(context = null) {
-    // eslint-disable-next-line no-return-assign
-    objectEach(this.getBucket(context), (value, key, bucket) => (bucket[key].length = 0));
+  destroy(context: HookContext = null): void {
+    Object.values(this.getBucket(context)).forEach((callbacks) => {
+      callbacks.length = 0;
+    });
   }
 
   /**
@@ -1983,7 +1993,7 @@ class Hooks {
    * FreeGrid.hooks.register('myHook');
    * ```
    */
-  register(key) {
+  register(key: string): void {
     if (!this.isRegistered(key)) {
       REGISTERED_HOOKS.push(key);
     }
@@ -1999,7 +2009,7 @@ class Hooks {
    * FreeGrid.hooks.deregister('myHook');
    * ```
    */
-  deregister(key) {
+  deregister(key: string): void {
     if (this.isRegistered(key)) {
       REGISTERED_HOOKS.splice(REGISTERED_HOOKS.indexOf(key), 1);
     }
@@ -2019,7 +2029,7 @@ class Hooks {
    * true
    * ```
    */
-  isRegistered(key) {
+  isRegistered(key: string): boolean {
     return REGISTERED_HOOKS.indexOf(key) >= 0;
   }
 
@@ -2044,15 +2054,11 @@ class Hooks {
    * ]
    * ```
    */
-  getRegistered() {
+  getRegistered(): string[] {
     return REGISTERED_HOOKS;
   }
 }
 
 const globalSingleton = new Hooks();
-
-function getGlobalSingleton() {
-  return globalSingleton;
-}
 
 export default Hooks;
