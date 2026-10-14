@@ -1,3 +1,4 @@
+import type { OverlayEngine } from './types';
 import { withLegacyClassNames } from './../../../../helpers/classNames';
 import {
   getScrollableElement,
@@ -8,7 +9,8 @@ import { arrayEach } from './../../../../helpers/array';
 import EventManager from './../../../../eventManager';
 import Walkontable from './../core';
 
-const registeredOverlays = {};
+type OverlayConstructor = new (instance: Walkontable) => Overlay;
+const registeredOverlays: Record<string, OverlayConstructor> = {};
 
 /**
  * Creates an overlay over the original Walkontable instance. The overlay renders the clone of the original Walkontable
@@ -17,6 +19,20 @@ const registeredOverlays = {};
  * @class Overlay
  */
 class Overlay {
+  declare readonly wot: OverlayEngine;
+  declare instance: OverlayEngine;
+  declare type: string;
+  declare mainTableScrollableElement: HTMLElement | Window;
+  declare TABLE: HTMLTableElement;
+  declare hider: OverlayEngine['wtTable']['hider'];
+  declare spreader: OverlayEngine['wtTable']['spreader'];
+  declare holder: OverlayEngine['wtTable']['holder'];
+  declare wtRootElement: HTMLElement;
+  declare trimmingContainer: HTMLElement | Window;
+  declare areElementSizesAdjusted: boolean;
+  declare needFullRender: boolean;
+  declare clone?: OverlayEngine;
+
   /**
    * @type {String}
    */
@@ -81,7 +97,7 @@ class Overlay {
    * @param {String} type Overlay type, one of the CLONE_TYPES value
    * @param {Overlay} overlayClass Overlay class extended from base overlay class {@link Overlay}
    */
-  static registerOverlay(type, overlayClass) {
+  static registerOverlay(type: string, overlayClass: OverlayConstructor) {
     if (Overlay.CLONE_TYPES.indexOf(type) === -1) {
       throw new Error(`Unsupported overlay (${type}).`);
     }
@@ -94,8 +110,8 @@ class Overlay {
    * @param {String} type Overlay type, one of the CLONE_TYPES value
    * @param {Walkontable} wot Walkontable instance
    */
-  static createOverlay(type, wot) {
-    return new registeredOverlays[type](wot);
+  static createOverlay<T extends Overlay = Overlay>(type: string, wot: Walkontable): T {
+    return new registeredOverlays[type](wot) as T;
   }
 
   /**
@@ -104,7 +120,7 @@ class Overlay {
    * @param {String} type Overlay type, one of the CLONE_TYPES value
    * @returns {Boolean}
    */
-  static hasOverlay(type) {
+  static hasOverlay(type: string) {
     return registeredOverlays[type] !== void 0;
   }
 
@@ -115,7 +131,7 @@ class Overlay {
    * @param {String} type Overlay type, one of the CLONE_TYPES value
    * @returns {Boolean}
    */
-  static isOverlayTypeOf(overlay, type) {
+  static isOverlayTypeOf(overlay: unknown, type: string) {
     if (!overlay || !registeredOverlays[type]) {
       return false;
     }
@@ -126,7 +142,7 @@ class Overlay {
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     defineGetter(this, 'wot', wotInstance, {
       writable: false,
     });
@@ -135,7 +151,7 @@ class Overlay {
     this.instance = this.wot;
 
     this.type = '';
-    this.mainTableScrollableElement = null;
+    this.mainTableScrollableElement = null!;
     this.TABLE = this.wot.wtTable.TABLE;
     this.hider = this.wot.wtTable.hider;
     this.spreader = this.wot.wtTable.spreader;
@@ -198,7 +214,7 @@ class Overlay {
    *                           `Overlay.CLONE_TOP_LEFT_CORNER`, `Overlay.CLONE_DEBUG`
    * @returns {Walkontable}
    */
-  makeClone(direction) {
+  makeClone(direction: string): OverlayEngine {
     if (Overlay.CLONE_TYPES.indexOf(direction) === -1) {
       throw new Error(`Clone type "${direction}" is not supported.`);
     }
@@ -207,8 +223,8 @@ class Overlay {
 
     clone.className = withLegacyClassNames(`fg-clone-${direction.replace(/_/g, '-')}`, 'freegrid');
     clone.style.position = 'absolute';
-    clone.style.top = 0;
-    clone.style.left = 0;
+    clone.style.top = 0 as unknown as string;
+    clone.style.left = 0 as unknown as string;
     clone.style.overflow = 'hidden';
 
     clonedTable.className = this.wot.wtTable.TABLE.className;
@@ -232,7 +248,7 @@ class Overlay {
       cloneSource: this.wot,
       cloneOverlay: this,
       table: clonedTable,
-    });
+    } as unknown as ConstructorParameters<typeof Walkontable>[0]) as unknown as OverlayEngine;
   }
 
   /**

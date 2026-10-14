@@ -3,8 +3,10 @@ import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { isTouchSupported } from './../../helpers/feature';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable is not typed yet
-type Overlay = any;
+import type Walkontable from '../../3rdparty/walkontable/src';
+import type { TopOverlay } from '../../3rdparty/walkontable/src';
+
+type Overlay = Pick<TopOverlay, 'refresh' | 'resetFixedPosition'> & { clone: Walkontable };
 
 /**
  * @private
@@ -85,7 +87,7 @@ class TouchScroll extends BasePlugin {
     }
     const { topOverlay, bottomOverlay, leftOverlay, topLeftCornerOverlay, bottomLeftCornerOverlay } =
       this.hot.view.wt.wtOverlays;
-    const element = (overlay: Overlay): HTMLElement => overlay.clone.wtTable.holder.parentNode;
+    const element = (overlay: Overlay): HTMLElement => overlay.clone.wtTable.holder.parentNode as HTMLElement;
 
     this.lockedCollection = true;
     this.scrollbars = [
