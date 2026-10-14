@@ -41,7 +41,7 @@ Hooks.getSingleton().register('afterContextMenuExecute');
 /**
  * @description
  * This plugin creates the FreeSheet Context Menu. It allows to create a new row or column at any place in the
- * grid among [other features](https://github.com/freegrid-web/freegrid).
+ * grid among [other features](https://github.com/freegrid-web/sheet).
  * Possible values:
  * * `true` (to enable default options),
  * * `false` (to disable completely)
@@ -62,7 +62,7 @@ Hooks.getSingleton().register('afterContextMenuExecute');
  * * `'commentsAddEdit'` (with {@link Options#comments} turned on)
  * * `'commentsRemove'` (with {@link Options#comments} turned on)
  *
- * See [the context menu demo](https://github.com/freegrid-web/freegrid) for examples.
+ * See [the context menu demo](https://github.com/freegrid-web/sheet) for examples.
  *
  * @example
  * ```js

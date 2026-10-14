@@ -27,4 +27,4 @@ Copyright (c) 2015 Handsoncode sp. z o.o. <hello@handsoncode.net>
 Copyright (c) 2026 FreeGrid contributors
 ```
 
-The full text is in the [LICENSE](https://github.com/freegrid-web/freegrid/blob/main/LICENSE) file.
+The full text is in the [LICENSE](https://github.com/freegrid-web/sheet/blob/main/LICENSE) file.

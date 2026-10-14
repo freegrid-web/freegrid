@@ -96,7 +96,7 @@ DefaultSettings.prototype = {
    * Initial data source that will be bound to the data grid __by reference__ (editing data grid alters the data source).
    * Can be declared as an array of arrays, array of objects or a function.
    *
-   * See [Understanding binding as reference](https://github.com/freegrid-web/freegrid).
+   * See [Understanding binding as reference](https://github.com/freegrid-web/sheet).
    *
    * @type {Array[]|Object[]|Function}
    * @default undefined
@@ -125,7 +125,7 @@ DefaultSettings.prototype = {
    * @description
    * Defines the structure of a new row when data source is an array of objects.
    *
-   * See [data-schema](https://github.com/freegrid-web/freegrid) for more options.
+   * See [data-schema](https://github.com/freegrid-web/sheet) for more options.
    *
    * @type {Object}
    * @default undefined
@@ -428,7 +428,7 @@ DefaultSettings.prototype = {
    * To initialize FreeSheet with predefined comments, provide cell coordinates and comment text values in a form of
    * an array.
    *
-   * See [Comments](https://github.com/freegrid-web/freegrid) demo for examples.
+   * See [Comments](https://github.com/freegrid-web/sheet) demo for examples.
    *
    * @type {Boolean|Object[]}
    * @default false
@@ -459,7 +459,7 @@ DefaultSettings.prototype = {
    * menu (configurable with context menu key `borders`). To initialize FreeSheet with predefined custom borders,
    * provide cell coordinates and border styles in a form of an array.
    *
-   * See [Custom Borders](https://github.com/freegrid-web/freegrid) demo for examples.
+   * See [Custom Borders](https://github.com/freegrid-web/sheet) demo for examples.
    *
    * @type {Boolean|Object[]}
    * @default false
@@ -1000,7 +1000,7 @@ DefaultSettings.prototype = {
   /**
    * @description
    * Defines how the columns react, when the declared table width is different than the calculated sum of all column widths.
-   * [See more](https://github.com/freegrid-web/freegrid) mode. Possible values:
+   * [See more](https://github.com/freegrid-web/sheet) mode. Possible values:
    *  * `'none'` Disable stretching
    *  * `'last'` Stretch only the last column
    *  * `'all'` Stretch all the columns evenly
@@ -1198,7 +1198,7 @@ DefaultSettings.prototype = {
    * * `password`.
    * * `text`.
    *
-   * Or you can [register](https://github.com/freegrid-web/freegrid) the custom renderer under specified name and use its name as an alias in your
+   * Or you can [register](https://github.com/freegrid-web/sheet) the custom renderer under specified name and use its name as an alias in your
    * configuration.
    *
    * If a function is provided, it will receive the following arguments:
@@ -1206,7 +1206,7 @@ DefaultSettings.prototype = {
    * function(instance, TD, row, col, prop, value, cellProperties) {}
    * ```
    *
-   * You can read more about custom renderes [in the documentation](https://github.com/freegrid-web/freegrid).
+   * You can read more about custom renderes [in the documentation](https://github.com/freegrid-web/sheet).
    *
    * @type {String|Function}
    * @default undefined
@@ -1277,7 +1277,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Makes cell [read only](https://github.com/freegrid-web/freegrid).
+   * Makes cell [read only](https://github.com/freegrid-web/sheet).
    *
    * @type {Boolean}
    * @default false
@@ -1341,15 +1341,15 @@ DefaultSettings.prototype = {
    * Shortcut to define the combination of the cell renderer, editor and validator for the column, cell or whole table.
    *
    * Possible values:
-   *  * [autocomplete](https://github.com/freegrid-web/freegrid)
-   *  * [checkbox](https://github.com/freegrid-web/freegrid)
-   *  * [date](https://github.com/freegrid-web/freegrid)
-   *  * [dropdown](https://github.com/freegrid-web/freegrid)
-   *  * [FreeSheet](https://github.com/freegrid-web/freegrid)
-   *  * [numeric](https://github.com/freegrid-web/freegrid)
-   *  * [password](https://github.com/freegrid-web/freegrid)
+   *  * [autocomplete](https://github.com/freegrid-web/sheet)
+   *  * [checkbox](https://github.com/freegrid-web/sheet)
+   *  * [date](https://github.com/freegrid-web/sheet)
+   *  * [dropdown](https://github.com/freegrid-web/sheet)
+   *  * [FreeSheet](https://github.com/freegrid-web/sheet)
+   *  * [numeric](https://github.com/freegrid-web/sheet)
+   *  * [password](https://github.com/freegrid-web/sheet)
    *  * text
-   *  * [time](https://github.com/freegrid-web/freegrid)
+   *  * [time](https://github.com/freegrid-web/sheet)
    *
    * Or you can register the custom cell type under specified name and use
    * its name as an alias in your configuration.
@@ -1414,17 +1414,17 @@ DefaultSettings.prototype = {
    * Defines the editor for the table/column/cell.
    *
    * If a string is provided, it may be one of the following predefined values:
-   *  * [autocomplete](https://github.com/freegrid-web/freegrid)
-   *  * [checkbox](https://github.com/freegrid-web/freegrid)
-   *  * [date](https://github.com/freegrid-web/freegrid)
-   *  * [dropdown](https://github.com/freegrid-web/freegrid)
-   *  * [FreeSheet](https://github.com/freegrid-web/freegrid)
-   *  * [mobile](https://github.com/freegrid-web/freegrid)
-   *  * [password](https://github.com/freegrid-web/freegrid)
-   *  * [select](https://github.com/freegrid-web/freegrid)
+   *  * [autocomplete](https://github.com/freegrid-web/sheet)
+   *  * [checkbox](https://github.com/freegrid-web/sheet)
+   *  * [date](https://github.com/freegrid-web/sheet)
+   *  * [dropdown](https://github.com/freegrid-web/sheet)
+   *  * [FreeSheet](https://github.com/freegrid-web/sheet)
+   *  * [mobile](https://github.com/freegrid-web/sheet)
+   *  * [password](https://github.com/freegrid-web/sheet)
+   *  * [select](https://github.com/freegrid-web/sheet)
    *  * text
    *
-   * Or you can [register](https://github.com/freegrid-web/freegrid) the custom editor under specified name and use its name as an alias in your
+   * Or you can [register](https://github.com/freegrid-web/sheet) the custom editor under specified name and use its name as an alias in your
    * configuration.
    *
    * To disable cell editing completely set `editor` property to `false`.
@@ -1539,14 +1539,14 @@ DefaultSettings.prototype = {
   /**
    * @description
    * Defines if the right-click context menu should be enabled. Context menu allows to create new row or column at any
-   * place in the grid among [other features](https://github.com/freegrid-web/freegrid).
+   * place in the grid among [other features](https://github.com/freegrid-web/sheet).
    * Possible values:
    * * `true` (to enable default options),
    * * `false` (to disable completely)
-   * * an array of [predefined options](https://github.com/freegrid-web/freegrid),
-   * * an object [with defined structure](https://github.com/freegrid-web/freegrid)
+   * * an array of [predefined options](https://github.com/freegrid-web/sheet),
+   * * an object [with defined structure](https://github.com/freegrid-web/sheet)
    *
-   * See [the context menu demo](https://github.com/freegrid-web/freegrid) for examples.
+   * See [the context menu demo](https://github.com/freegrid-web/sheet) for examples.
    *
    * @type {Boolean|String[]|Object}
    * @default undefined
@@ -1616,7 +1616,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Turns on [Column sorting](https://github.com/freegrid-web/freegrid). Can be either a boolean (`true` / `false`) or an object with a declared sorting options:
+   * Turns on [Column sorting](https://github.com/freegrid-web/sheet). Can be either a boolean (`true` / `false`) or an object with a declared sorting options:
    * * `initialConfig` - Object with predefined keys:
    *   * `column` - sorted column
    *   * `sortOrder` - order in which column will be sorted
@@ -1665,7 +1665,7 @@ DefaultSettings.prototype = {
   columnSorting: void 0,
 
   /**
-   * Turns on [Manual column move](https://github.com/freegrid-web/freegrid), if set to a boolean or define initial column order (as an array of column indexes).
+   * Turns on [Manual column move](https://github.com/freegrid-web/sheet), if set to a boolean or define initial column order (as an array of column indexes).
    *
    * @type {Boolean|Number[]}
    * @default undefined
@@ -1684,7 +1684,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Turns on [Manual column resize](https://github.com/freegrid-web/freegrid), if set to a boolean or define initial column resized widths (an an array of widths).
+   * Turns on [Manual column resize](https://github.com/freegrid-web/sheet), if set to a boolean or define initial column resized widths (an an array of widths).
    *
    * @type {Boolean|Number[]}
    * @default undefined
@@ -1703,7 +1703,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Turns on [Manual row move](https://github.com/freegrid-web/freegrid), if set to a boolean or define initial row order (as an array of row indexes).
+   * Turns on [Manual row move](https://github.com/freegrid-web/sheet), if set to a boolean or define initial row order (as an array of row indexes).
    *
    * @type {Boolean|Number[]}
    * @default undefined
@@ -1722,7 +1722,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Turns on [Manual row resize](https://github.com/freegrid-web/freegrid), if set to a boolean or define initial row resized heights (as an array of heights).
+   * Turns on [Manual row resize](https://github.com/freegrid-web/sheet), if set to a boolean or define initial row resized heights (as an array of heights).
    *
    * @type {Boolean|Number[]}
    * @default undefined
@@ -1765,7 +1765,7 @@ DefaultSettings.prototype = {
 
   /**
    * @description
-   * Turns on [Multi-column sorting](https://github.com/freegrid-web/freegrid). Can be either a boolean (`true` / `false`) or an object with a declared sorting options:
+   * Turns on [Multi-column sorting](https://github.com/freegrid-web/sheet). Can be either a boolean (`true` / `false`) or an object with a declared sorting options:
    * * `initialConfig` - Array containing objects, every with predefined keys:
    *   * `column` - sorted column
    *   * `sortOrder` - order in which column will be sorted
@@ -1864,10 +1864,10 @@ DefaultSettings.prototype = {
    * * `numeric`,
    * * `time`.
    *
-   * Or you can [register](https://github.com/freegrid-web/freegrid) the validator function under specified name and use its name as an alias in your
+   * Or you can [register](https://github.com/freegrid-web/sheet) the validator function under specified name and use its name as an alias in your
    * configuration.
    *
-   * See more [in the demo](https://github.com/freegrid-web/freegrid).
+   * See more [in the demo](https://github.com/freegrid-web/sheet).
    *
    * @type {Function|RegExp|String}
    * @default undefined
@@ -2041,9 +2041,9 @@ DefaultSettings.prototype = {
    * @description
    * Object which describes if renderer should create checkbox element with label element as a parent.
    *
-   * __Note__, this option only works for [checkbox-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [checkbox-typed](https://github.com/freegrid-web/sheet) cells.
    *
-   * By default the [checkbox](https://github.com/freegrid-web/freegrid) renderer renders the checkbox without a label.
+   * By default the [checkbox](https://github.com/freegrid-web/sheet) renderer renders the checkbox without a label.
    *
    * Possible object properties:
    *  * `property` - Defines the property name of the data object, which will to be used as a label.
@@ -2069,7 +2069,7 @@ DefaultSettings.prototype = {
   /**
    * Display format for numeric typed renderers.
    *
-   * __Note__, this option only works for [numeric-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [numeric-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * Format is described by:
    * * `pattern` - A numbro-style pattern, such as `0,0.00`, `$0,0.00`, `0.0%` or `0.0a`.
@@ -2099,7 +2099,7 @@ DefaultSettings.prototype = {
   numericFormat: void 0,
 
   /**
-   * Language for FreeSheet translation. Possible language codes are [listed here](https://github.com/freegrid-web/freegrid).
+   * Language for FreeSheet translation. Possible language codes are [listed here](https://github.com/freegrid-web/sheet).
    *
    * @type {String}
    * @default 'en-US'
@@ -2113,9 +2113,9 @@ DefaultSettings.prototype = {
   language: 'en-US',
 
   /**
-   * Data source for [select-typed](https://github.com/freegrid-web/freegrid) cells.
+   * Data source for [select-typed](https://github.com/freegrid-web/sheet) cells.
    *
-   * __Note__, this option only works for [select-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [select-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {String[]}
    * @default undefined
@@ -2189,7 +2189,7 @@ DefaultSettings.prototype = {
   /**
    * Date validation format.
    *
-   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {String}
    * @default 'DD/MM/YYYY'
@@ -2208,7 +2208,7 @@ DefaultSettings.prototype = {
   /**
    * If `true` then dates will be automatically formatted to match the desired format.
    *
-   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default false
@@ -2228,7 +2228,7 @@ DefaultSettings.prototype = {
   /**
    * Definition of default value which will fill the empty cells.
    *
-   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [date-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {String}
    * @default undefined
@@ -2251,7 +2251,7 @@ DefaultSettings.prototype = {
    * Otherwise, cell won't pass the validation. When filtering the autocomplete source list, the editor will
    * be working in case-insensitive mode.
    *
-   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default undefined
@@ -2273,7 +2273,7 @@ DefaultSettings.prototype = {
    *
    * __Warning:__ Enabling this option can cause serious XSS vulnerabilities.
    *
-   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default false
@@ -2385,7 +2385,7 @@ DefaultSettings.prototype = {
    *  * `'average'`
    *  * `'custom'` - add `customFunction`
    *
-   * [See the demo for more information](https://github.com/freegrid-web/freegrid).
+   * [See the demo for more information](https://github.com/freegrid-web/sheet).
    *
    * @pro
    * @type {Object[]|Function}
@@ -2665,7 +2665,7 @@ DefaultSettings.prototype = {
    * If defined as `true`, the Autocomplete's suggestion list would be sorted by relevance (the closer to the left the
    * match is, the higher the suggestion).
    *
-   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default true
@@ -2689,7 +2689,7 @@ DefaultSettings.prototype = {
    * include those choices starting with what has been typed; if defined as `false` all suggestions remain shown, with
    * those matching what has been typed marked in bold.
    *
-   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default true
@@ -2711,7 +2711,7 @@ DefaultSettings.prototype = {
   /**
    * If defined as `true`, filtering in the Autocomplete Editor will be case-sensitive.
    *
-   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/freegrid) cells.
+   * __Note__, this option only works for [autocomplete-typed](https://github.com/freegrid-web/sheet) cells.
    *
    * @type {Boolean}
    * @default: false

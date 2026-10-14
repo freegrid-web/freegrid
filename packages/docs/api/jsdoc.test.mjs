@@ -229,8 +229,8 @@ test('keeps paragraphs and lists of a description, and does not turn indented li
 test('drops "see the docs" sentences and placeholder links to the repository, and resolves Options#name links', () => {
   const [block] = parseBlocks(`
   /**
-   * Makes cell [read only](https://github.com/freegrid-web/freegrid). See [data-schema](https://github.com/freegrid-web/freegrid) for more options.
-   * You can read more about renderers [in the documentation](https://github.com/freegrid-web/freegrid). Uses the [Options#type](https://github.com/freegrid-web/freegrid) key.
+   * Makes cell [read only](https://github.com/freegrid-web/sheet). See [data-schema](https://github.com/freegrid-web/sheet) for more options.
+   * You can read more about renderers [in the documentation](https://github.com/freegrid-web/sheet). Uses the [Options#type](https://github.com/freegrid-web/sheet) key.
    * @event Hooks#x
    */`);
 

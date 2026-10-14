@@ -41,7 +41,7 @@ export type CopyableRange = { startRow: number; startCol: number; endRow: number
  * * `'rowsLimit'` (see {@link CopyPaste#rowsLimit})
  * * `'pasteMode'` (see {@link CopyPaste#pasteMode})
  *
- * See [the copy/paste demo](https://github.com/freegrid-web/freegrid) for examples.
+ * See [the copy/paste demo](https://github.com/freegrid-web/sheet) for examples.
  *
  * @example
  * ```js

@@ -23,7 +23,7 @@ const linkTo = (target, text) => {
 };
 
 // Upstream links to its documentation were replaced with links to the repository; they lead nowhere useful.
-const PLACEHOLDER = '\\]\\(https://github\\.com/freegrid-web/freegrid\\)';
+const PLACEHOLDER = '\\]\\(https://github\\.com/freegrid-web/sheet\\)';
 const SEE_DOCS = new RegExp(`(^|[.!?][ \\t]+|\\n)[ \\t]*(See|You can read more|See more|Read more)[^.\\n]*${PLACEHOLDER}[^.\\n]*\\.[ \\t]*`, 'g');
 const PLACEHOLDER_LINK = new RegExp(`\\[([^\\]]+)${PLACEHOLDER}`, 'g');
 

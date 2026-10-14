@@ -53,7 +53,7 @@ type BorderSelection = Pick<WalkontableSelection, 'cellRange' | 'instanceBorders
  * To initialize FreeSheet with predefined custom borders, provide cell coordinates and border styles in a form
  * of an array.
  *
- * See [Custom Borders](https://github.com/freegrid-web/freegrid) demo for more examples.
+ * See [Custom Borders](https://github.com/freegrid-web/sheet) demo for more examples.
  *
  * @example
  * ```js

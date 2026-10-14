@@ -12,13 +12,13 @@
     "datagrid",
     "editable table"
   ],
-  "homepage": "https://freegrid-web.github.io/freegrid/",
+  "homepage": "https://freegrid-web.github.io/sheet/",
   "bugs": {
-    "url": "https://github.com/freegrid-web/freegrid/issues"
+    "url": "https://github.com/freegrid-web/sheet/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/freegrid-web/freegrid.git",
+    "url": "git+https://github.com/freegrid-web/sheet.git",
     "directory": "packages/sheet"
   },
   "type": "module",

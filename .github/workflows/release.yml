@@ -2,7 +2,7 @@ name: Release
 
 # Publishes @freegrid/sheet to npm when a version tag (v0.1.0, v0.2.0, …) is pushed.
 # npm trusted publishing: npmjs.com → @freegrid/sheet → Settings → Trusted Publisher must name this repository
-# (freegrid-web/freegrid) and this workflow file (release.yml). No npm token is stored in the repository.
+# (freegrid-web/sheet) and this workflow file (release.yml). No npm token is stored in the repository.
 on:
   push:
     tags: ['v*']

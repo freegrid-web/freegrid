@@ -17,7 +17,7 @@ hero:
       link: /examples/basics
     - theme: alt
       text: View on GitHub
-      link: https://github.com/freegrid-web/freegrid
+      link: https://github.com/freegrid-web/sheet
 
 features:
   - title: Feels like a spreadsheet

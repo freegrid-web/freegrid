@@ -42,7 +42,7 @@ export class ColumnStatesManager {
   /**
    * Update column properties which affect the sorting result.
    *
-   * **Note**: All column properties can be overwritten by [columns](https://github.com/freegrid-web/freegrid) option.
+   * **Note**: All column properties can be overwritten by [columns](https://github.com/freegrid-web/sheet) option.
    *
    * @param allSortSettings Column sorting plugin's configuration object.
    */

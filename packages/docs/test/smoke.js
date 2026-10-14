@@ -7,7 +7,7 @@ import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
-const BASE = '/freegrid/';
+const BASE = '/sheet/';
 const dist = fileURLToPath(new URL('../.vitepress/dist', import.meta.url));
 const PAGES = [
   { path: '', grids: 1 },

@@ -9,8 +9,8 @@ undo and redo, sorting, merged cells, comments, validation, frozen rows and colu
 FreeSheet is an independent project that started from the code of Handsontable 6.2.2, the last MIT-licensed
 release. It is not affiliated with or endorsed by Handsoncode.
 
-- **Documentation and live examples:** https://freegrid-web.github.io/freegrid/
-- **Source and issues:** https://github.com/freegrid-web/freegrid
+- **Documentation and live examples:** https://freegrid-web.github.io/sheet/
+- **Source and issues:** https://github.com/freegrid-web/sheet
 
 ```js
 import FreeSheet from '@freegrid/sheet';

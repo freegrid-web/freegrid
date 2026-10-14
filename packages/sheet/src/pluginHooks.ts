@@ -88,7 +88,7 @@ const REGISTERED_HOOKS: string[] = [
    *
    * @event Hooks#afterChange
    * @param {Array} changes 2D array containing information about each of the edited cells `[[row, prop, oldVal, newVal], ...]`.
-   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    * @example
    * ```js
    * new FreeSheet(element, {
@@ -197,7 +197,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Represents the visual index of first newly created column in the data source array.
    * @param {Number} amount Number of newly created columns in the data source array.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeCreateCol',
 
@@ -208,7 +208,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Represents the visual index of first newly created column in the data source.
    * @param {Number} amount Number of newly created columns in the data source.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterCreateCol',
 
@@ -219,7 +219,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Represents the visual index of first newly created row in the data source array.
    * @param {Number} amount Number of newly created rows in the data source array.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeCreateRow',
 
@@ -230,7 +230,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Represents the visual index of first newly created row in the data source array.
    * @param {Number} amount Number of newly created rows in the data source array.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterCreateRow',
 
@@ -418,7 +418,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Visual index of starter column.
    * @param {Number} amount An amount of removed columns.
    * @param {Number[]} physicalColumns An array of physical columns removed from the data source.
-   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterRemoveCol',
 
@@ -429,7 +429,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Visual index of starter row.
    * @param {Number} amount An amount of removed rows.
    * @param {Number[]} physicalRows An array of physical rows removed from the data source.
-   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterRemoveRow',
 
@@ -582,7 +582,7 @@ const REGISTERED_HOOKS: string[] = [
    * @event Hooks#afterSetDataAtCell
    * @param {Array} changes An array of changes in format `[[row, column, oldValue, value], ...]`.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterSetDataAtCell',
 
@@ -592,7 +592,7 @@ const REGISTERED_HOOKS: string[] = [
    * @event Hooks#afterSetDataAtRowProp
    * @param {Array} changes An array of changes in format `[[row, prop, oldValue, value], ...]`.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterSetDataAtRowProp',
 
@@ -617,7 +617,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} row Visual row index.
    * @param {String|Number} prop Property name / visual column index.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'afterValidate',
 
@@ -676,7 +676,7 @@ const REGISTERED_HOOKS: string[] = [
    * @event Hooks#beforeChange
    * @param {Array[]} changes 2D array containing information about each of the edited cells.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    * @example
    * ```js
    * // To disregard a single change, set changes[i] to null or remove it from array using changes.splice(i, 1).
@@ -710,7 +710,7 @@ const REGISTERED_HOOKS: string[] = [
    * @event Hooks#beforeChangeRender
    * @param {Array[]} changes Array in form of `[row, prop, oldValue, newValue]`.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeChangeRender',
 
@@ -834,7 +834,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Visual index of starter column.
    * @param {Number} amount Amount of columns to be removed.
    * @param {Number[]} physicalColumns An array of physical columns removed from the data source.
-   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeRemoveCol',
 
@@ -845,7 +845,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} index Visual index of starter column.
    * @param {Number} amount Amount of columns to be removed.
    * @param {Number[]} physicalRows An array of physical rows removed from the data source.
-   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   * @param {String} [source] String that identifies source of hook call ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeRemoveRow',
 
@@ -900,7 +900,7 @@ const REGISTERED_HOOKS: string[] = [
    * @param {Number} row Visual row index.
    * @param {String|Number} prop Property name / column index.
    * @param {String} [source] String that identifies source of hook call
-   *                          ([list of all available sources]{@link https://github.com/freegrid-web/freegrid}).
+   *                          ([list of all available sources]{@link https://github.com/freegrid-web/sheet}).
    */
   'beforeValidate',
 
@@ -1338,7 +1338,7 @@ const REGISTERED_HOOKS: string[] = [
   'beforeStretchingColumnWidth',
 
   /**
-   * Fired by {@link Filters} plugin before applying [filtering]{@link https://github.com/freegrid-web/freegrid}. This hook is fired when
+   * Fired by {@link Filters} plugin before applying [filtering]{@link https://github.com/freegrid-web/sheet}. This hook is fired when
    * {@link Options#filters} option is enabled.
    *
    * @pro
@@ -1368,7 +1368,7 @@ const REGISTERED_HOOKS: string[] = [
   'beforeFilter',
 
   /**
-   * Fired by {@link Filters} plugin after applying [filtering]{@link https://github.com/freegrid-web/freegrid}. This hook is fired when
+   * Fired by {@link Filters} plugin after applying [filtering]{@link https://github.com/freegrid-web/sheet}. This hook is fired when
    * {@link Options#filters} option is enabled.
    *
    * @pro
@@ -2000,7 +2000,7 @@ class Hooks {
   /**
    * Registers a hook name (adds it to the list of the known hook names). Used by plugins.
    * It is not necessary to call register, but if you use it, your plugin hook will be used returned by
-   * the `getRegistered` method. (which itself is used in the demo https://github.com/freegrid-web/freegrid).
+   * the `getRegistered` method. (which itself is used in the demo https://github.com/freegrid-web/sheet).
    *
    * @param key {String} The hook name.
    *

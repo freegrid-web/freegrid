@@ -18,7 +18,8 @@
 ### Internal
 
 - The rendering engine (Walkontable) is written in TypeScript; the whole library is TypeScript now.
-- The package's folder in the repository is `packages/sheet` (was `packages/freegrid`).
+- The repository is `freegrid-web/sheet` (was `freegrid-web/freegrid`), and the docs are at
+  https://freegrid-web.github.io/sheet/. The package's folder is `packages/sheet` (was `packages/freegrid`).
 
 ## 0.3.0 (2026-10-14)
 
@@ -36,7 +37,7 @@ the context menu and `updateSettings`. Several security fixes for pasted HTML an
   `EditorAutocomplete`, `EditorDate`, …; `FreeGrid.renderers.RendererText`, `RendererNumeric`, …;
   `FreeGrid.validators.ValidatorDate`, `ValidatorTime`, … The old names (`TextEditor`, `TextRenderer`,
   `DateValidator`, `cellDecorator`, …) are removed. Names in settings (`type: 'date'`, `editor: 'text'`,
-  `renderer: 'numeric'`) do not change. See [Migrating from Handsontable](https://freegrid-web.github.io/freegrid/guide/migrating-from-handsontable#editor-renderer-and-validator-names).
+  `renderer: 'numeric'`) do not change. See [Migrating from Handsontable](https://freegrid-web.github.io/sheet/guide/migrating-from-handsontable#editor-renderer-and-validator-names).
 - Editors are ES classes. A custom editor made with `FreeGrid.editors.EditorText.prototype.extend()` or
   `class MyEditor extends FreeGrid.editors.EditorText` keeps working; one that calls a parent editor as a function
   (`EditorText.call(this, instance)`) must use `class … extends` instead.
@@ -127,7 +128,7 @@ FreeGrid has no runtime dependencies now: its own date and number formatting and
 moment, numbro and Pikaday. Theming with CSS variables, a dark theme, the Modern style and a complete API reference.
 
 - Docs: a complete API reference, generated from the source code at every docs build:
-  - [Methods](https://freegrid-web.github.io/freegrid/api/methods): every method, with parameters, return value and
+  - [Methods](https://freegrid-web.github.io/sheet/api/methods): every method, with parameters, return value and
     examples.
   - Events: every event, with its arguments.
   - Settings: every setting, with its type and default.

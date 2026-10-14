@@ -14,4 +14,4 @@ FreeSheet is developed in stages. Larger stages get their own design document in
 `1.0.0` will mark FreeSheet's own stable API. The compatibility layer for older code and the deprecated APIs are
 removed then.
 
-Ideas and help are welcome on [GitHub](https://github.com/freegrid-web/freegrid/issues).
+Ideas and help are welcome on [GitHub](https://github.com/freegrid-web/sheet/issues).
