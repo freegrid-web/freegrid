@@ -1,48 +1,42 @@
-function MultiMap() {
-  const map = {
-    arrayMap: [],
-    weakMap: new WeakMap(),
-  };
+const canBeAnArrayMapKey = (key: unknown): key is string | number => key !== null && !Number.isNaN(key) &&
+  (typeof key === 'string' || typeof key === 'number');
 
-  return {
-    get(key) {
-      if (canBeAnArrayMapKey(key)) {
-        return map.arrayMap[key];
-      } else if (canBeAWeakMapKey(key)) {
-        return map.weakMap.get(key);
-      }
-    },
+const canBeAWeakMapKey = (key: unknown): key is object => key !== null &&
+  (typeof key === 'object' || typeof key === 'function');
 
-    set(key, value) {
-      if (canBeAnArrayMapKey(key)) {
-        map.arrayMap[key] = value;
-      } else if (canBeAWeakMapKey(key)) {
-        map.weakMap.set(key, value);
-      } else {
-        throw new Error('Invalid key type');
-      }
-    },
+/**
+ * A map with any kind of key: numbers and strings (not `NaN`), and objects and functions (held weakly). Other keys
+ * are ignored by `get` and `delete`, and rejected by `set`.
+ */
+class MultiMap<V = unknown> {
+  #arrayMap: Record<string | number, V> = [] as unknown as Record<string | number, V>;
 
-    delete(key) {
-      if (canBeAnArrayMapKey(key)) {
-        delete map.arrayMap[key];
-      } else if (canBeAWeakMapKey(key)) {
-        map.weakMap.delete(key);
-      }
-    },
-  };
+  #weakMap = new WeakMap<object, V>();
 
-  function canBeAnArrayMapKey(obj) {
-    return obj !== null && !isNaNSymbol(obj) && (typeof obj === 'string' || typeof obj === 'number');
+  get(key: unknown): V | undefined {
+    if (canBeAnArrayMapKey(key)) {
+      return this.#arrayMap[key];
+    }
+
+    return canBeAWeakMapKey(key) ? this.#weakMap.get(key) : undefined;
   }
 
-  function canBeAWeakMapKey(obj) {
-    return obj !== null && (typeof obj === 'object' || typeof obj === 'function');
+  set(key: unknown, value: V): void {
+    if (canBeAnArrayMapKey(key)) {
+      this.#arrayMap[key] = value;
+    } else if (canBeAWeakMapKey(key)) {
+      this.#weakMap.set(key, value);
+    } else {
+      throw new Error('Invalid key type');
+    }
   }
 
-  function isNaNSymbol(obj) {
-    /* eslint-disable no-self-compare */
-    return obj !== obj; // NaN === NaN is always false
+  delete(key: unknown): void {
+    if (canBeAnArrayMapKey(key)) {
+      delete this.#arrayMap[key];
+    } else if (canBeAWeakMapKey(key)) {
+      this.#weakMap.delete(key);
+    }
   }
 }
 
