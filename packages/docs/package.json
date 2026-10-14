@@ -10,7 +10,7 @@
     "test:smoke": "node test/smoke.js"
   },
   "dependencies": {
-    "@freegrid/core": "workspace:*"
+    "@freegrid/sheet": "workspace:*"
   },
   "devDependencies": {
     "playwright": "1.64.0",

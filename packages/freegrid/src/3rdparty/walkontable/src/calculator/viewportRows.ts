@@ -1,5 +1,3 @@
-const privatePool = new WeakMap();
-
 /**
  * Calculates indexes of rows to render OR rows that are visible.
  * To redo the calculation, you need to create a new calculator.
@@ -7,6 +5,20 @@ const privatePool = new WeakMap();
  * @class ViewportRowsCalculator
  */
 class ViewportRowsCalculator {
+  #options: {
+    viewportHeight: number;
+    scrollOffset: number;
+    totalRows: number;
+    rowHeightFn: (index: number) => number | undefined;
+    overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null;
+    onlyFullyVisible?: boolean;
+    horizontalScrollbarHeight?: number;
+  };
+  declare count: number;
+  declare startRow: number | null;
+  declare endRow: number | null;
+  declare startPosition: number | null;
+
   /**
    * Default row height
    *
@@ -25,8 +37,10 @@ class ViewportRowsCalculator {
    * @param {Boolean} onlyFullyVisible if `true`, only startRow and endRow will be indexes of rows that are fully in viewport
    * @param {Number} horizontalScrollbarHeight
    */
-  constructor(viewportHeight, scrollOffset, totalRows, rowHeightFn, overrideFn, onlyFullyVisible, horizontalScrollbarHeight) {
-    privatePool.set(this, {
+  constructor(viewportHeight: number, scrollOffset: number, totalRows: number,
+              rowHeightFn: (row: number) => number | undefined, overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null,
+              onlyFullyVisible?: boolean, horizontalScrollbarHeight?: number) {
+    this.#options = {
       viewportHeight,
       scrollOffset,
       totalRows,
@@ -34,7 +48,7 @@ class ViewportRowsCalculator {
       overrideFn,
       onlyFullyVisible,
       horizontalScrollbarHeight
-    });
+    };
 
     /**
      * Number of rendered/visible rows
@@ -73,21 +87,21 @@ class ViewportRowsCalculator {
   calculate() {
     let sum = 0;
     let needReverse = true;
-    const startPositions = [];
+    const startPositions: number[] = [];
 
-    const priv = privatePool.get(this);
-    const onlyFullyVisible = priv.onlyFullyVisible;
-    const overrideFn = priv.overrideFn;
-    const rowHeightFn = priv.rowHeightFn;
-    const scrollOffset = priv.scrollOffset;
-    const totalRows = priv.totalRows;
-    const viewportHeight = priv.viewportHeight;
-    const horizontalScrollbarHeight = priv.horizontalScrollbarHeight || 0;
-    let rowHeight;
+    const options = this.#options;
+    const onlyFullyVisible = options.onlyFullyVisible;
+    const overrideFn = options.overrideFn;
+    const rowHeightFn = options.rowHeightFn;
+    const scrollOffset = options.scrollOffset;
+    const totalRows = options.totalRows;
+    const viewportHeight = options.viewportHeight;
+    const horizontalScrollbarHeight = options.horizontalScrollbarHeight || 0;
+    let rowHeight!: number;
 
     // Calculate the number (start and end index) of rows needed
     for (let i = 0; i < totalRows; i++) {
-      rowHeight = rowHeightFn(i);
+      rowHeight = rowHeightFn(i) as number;
 
       if (isNaN(rowHeight)) {
         rowHeight = ViewportRowsCalculator.DEFAULT_HEIGHT;
@@ -122,7 +136,7 @@ class ViewportRowsCalculator {
 
       while (this.startRow > 0) {
         // rowHeight is the height of the last row
-        const viewportSum = startPositions[this.endRow] + rowHeight - startPositions[this.startRow - 1];
+        const viewportSum = startPositions[this.endRow!] + rowHeight - startPositions[this.startRow - 1];
 
         if (viewportSum <= viewportHeight - horizontalScrollbarHeight || !onlyFullyVisible) {
           this.startRow -= 1;
@@ -136,13 +150,13 @@ class ViewportRowsCalculator {
     if (this.startRow !== null && overrideFn) {
       overrideFn(this);
     }
-    this.startPosition = startPositions[this.startRow];
+    this.startPosition = startPositions[this.startRow!];
 
     if (this.startPosition === void 0) {
       this.startPosition = null;
     }
     if (this.startRow !== null) {
-      this.count = this.endRow - this.startRow + 1;
+      this.count = this.endRow! - this.startRow + 1;
     }
   }
 }

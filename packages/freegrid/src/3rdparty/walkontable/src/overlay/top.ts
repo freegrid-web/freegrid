@@ -1,3 +1,7 @@
+import type Highlight from '../../../../selection/highlight/highlight';
+import type { OverlayEngine } from './types';
+import type Selection from '../selection';
+import type Walkontable from '../core';
 import {
   addClass,
   getScrollbarWidth,
@@ -17,10 +21,11 @@ import Overlay from './_base';
  * @class TopOverlay
  */
 class TopOverlay extends Overlay {
+  declare clone: OverlayEngine;
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     super(wotInstance);
     this.clone = this.makeClone(Overlay.CLONE_TOP);
   }
@@ -50,8 +55,8 @@ class TopOverlay extends Overlay {
       const box = this.wot.wtTable.hider.getBoundingClientRect();
       const top = Math.ceil(box.top);
       const bottom = Math.ceil(box.bottom);
-      let finalLeft;
-      let finalTop;
+      let finalLeft: number | string;
+      let finalTop: number | string;
 
       finalLeft = this.wot.wtTable.hider.style.left;
       finalLeft = finalLeft === '' ? 0 : finalLeft;
@@ -62,9 +67,9 @@ class TopOverlay extends Overlay {
         finalTop = 0;
       }
       headerPosition = finalTop;
-      finalTop += 'px';
+      (finalTop as number | string) += 'px';
 
-      setOverlayPosition(overlayRoot, finalLeft, finalTop);
+      setOverlayPosition(overlayRoot, finalLeft as unknown as string, finalTop as unknown as string);
 
     } else {
       headerPosition = this.getScrollPosition();
@@ -81,15 +86,15 @@ class TopOverlay extends Overlay {
    * @param {Number} pos
    * @returns {Boolean}
    */
-  setScrollPosition(pos) {
+  setScrollPosition(pos: number) {
     let result = false;
 
     if (this.mainTableScrollableElement === window && window.scrollY !== pos) {
       window.scrollTo(getWindowScrollLeft(), pos);
       result = true;
 
-    } else if (this.mainTableScrollableElement.scrollTop !== pos) {
-      this.mainTableScrollableElement.scrollTop = pos;
+    } else if ((this.mainTableScrollableElement as HTMLElement).scrollTop !== pos) {
+      (this.mainTableScrollableElement as HTMLElement).scrollTop = pos;
       result = true;
     }
 
@@ -110,7 +115,7 @@ class TopOverlay extends Overlay {
    * @param {Number} to Row index where calculation is finished.
    * @returns {Number} Height sum.
    */
-  sumCellSizes(from, to) {
+  sumCellSizes(from: number, to: number): number {
     const defaultRowHeight = this.wot.wtSettings.settings.defaultRowHeight;
     let row = from;
     let sum = 0;
@@ -230,7 +235,7 @@ class TopOverlay extends Overlay {
    * @param {Boolean} [bottomEdge] if `true`, scrolls according to the bottom edge (top edge is by default).
    * @returns {Boolean}
    */
-  scrollTo(sourceRow, bottomEdge) {
+  scrollTo(sourceRow: number, bottomEdge?: boolean) {
     let newY = this.getTableParentOffset();
     const sourceInstance = this.wot.cloneSource ? this.wot.cloneSource : this.wot;
     const mainHolder = sourceInstance.wtTable.holder;
@@ -262,7 +267,7 @@ class TopOverlay extends Overlay {
    *
    * @returns {Number}
    */
-  getTableParentOffset() {
+  getTableParentOffset(): number {
     if (this.mainTableScrollableElement === window) {
       return this.wot.wtTable.holderOffset.top;
 
@@ -276,7 +281,7 @@ class TopOverlay extends Overlay {
    *
    * @returns {Number} Main table's vertical scroll position.
    */
-  getScrollPosition() {
+  getScrollPosition(): number {
     return getScrollTop(this.mainTableScrollableElement);
   }
 
@@ -285,7 +290,7 @@ class TopOverlay extends Overlay {
    *
    * @param {WalkontableSelection} selection Selection for redraw.
    */
-  redrawSelectionBorders(selection) {
+  redrawSelectionBorders(selection: Selection) {
     if (selection && selection.cellRange) {
       const border = selection.getBorder(this.wot);
       const corners = selection.getCorners();
@@ -299,11 +304,11 @@ class TopOverlay extends Overlay {
    * Redrawing borders of all selections.
    */
   redrawAllSelectionsBorders() {
-    const selections = this.wot.selections;
+    const selections = this.wot.selections as unknown as Pick<Highlight, 'getCell' | 'getAreas' | 'getFill'>;
 
     this.redrawSelectionBorders(selections.getCell());
 
-    arrayEach(selections.getAreas(), (area) => {
+    arrayEach(selections.getAreas(), (area: Selection) => {
       this.redrawSelectionBorders(area);
     });
     this.redrawSelectionBorders(selections.getFill());
@@ -316,7 +321,7 @@ class TopOverlay extends Overlay {
    *
    * @param {Number} position Header Y position if trimming container is window or scroll top if not.
    */
-  adjustHeaderBordersPosition(position) {
+  adjustHeaderBordersPosition(position: number) {
     const masterParent = this.wot.wtTable.holder.parentNode;
     const totalColumns = this.wot.getSetting('totalColumns');
 
@@ -336,7 +341,7 @@ class TopOverlay extends Overlay {
       }
 
       if (!previousState && position || previousState && !position) {
-        this.wot.wtOverlays.adjustElementsSize();
+        this.wot.wtOverlays!.adjustElementsSize();
 
         // cell borders should be positioned once again,
         // because we added / removed 1px border from table header
@@ -346,11 +351,11 @@ class TopOverlay extends Overlay {
 
     // nasty workaround for double border in the header, TODO: find a pure-css solution
     if (this.wot.getSetting('rowHeaders').length === 0) {
-      const secondHeaderCell = this.clone.wtTable.THEAD.querySelectorAll('th:nth-of-type(2)');
+      const secondHeaderCell = this.clone.wtTable.THEAD.querySelectorAll<HTMLTableCellElement>('th:nth-of-type(2)');
 
       if (secondHeaderCell) {
         for (let i = 0; i < secondHeaderCell.length; i++) {
-          secondHeaderCell[i].style['border-left-width'] = 0;
+          (secondHeaderCell[i].style as unknown as Record<string, string>)['border-left-width'] = 0 as unknown as string;
         }
       }
     }

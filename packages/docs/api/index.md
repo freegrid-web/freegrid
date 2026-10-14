@@ -24,8 +24,8 @@ screens, the list is at the end of the page.
 ## Constructor
 
 ```js
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/dist/freegrid.css';
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freegrid.css';
 
 const grid = new FreeGrid(element, settings);
 ```

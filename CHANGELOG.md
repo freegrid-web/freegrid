@@ -1,9 +1,17 @@
 # FreeGrid changelog
 
-## Unreleased
+## 0.3.0 (2026-10-14)
+
+The package is now `@freegrid/sheet`. The whole grid is written in TypeScript (only the rendering engine is still
+JavaScript). A review of known bugs brought more than twenty fixes, among them pasting, undo, sorting, validation,
+the context menu and `updateSettings`. Several security fixes for pasted HTML and prototype pollution.
 
 ### Breaking
 
+- The npm package is renamed from `@freegrid/core` to `@freegrid/sheet`: FreeGrid is an Excel-style spreadsheet, and
+  `@freegrid/core` is kept for a core shared by future FreeGrid components. Install `@freegrid/sheet` and change the
+  imports (`import FreeGrid from '@freegrid/sheet'`, `@freegrid/sheet/dist/freegrid.css`,
+  `@freegrid/sheet/languages/…`). `FreeGrid.packageName` is `'@freegrid/sheet'`. The API does not change.
 - Editors, renderers and validators have uniform names, the kind first: `FreeGrid.editors.EditorText`,
   `EditorAutocomplete`, `EditorDate`, …; `FreeGrid.renderers.RendererText`, `RendererNumeric`, …;
   `FreeGrid.validators.ValidatorDate`, `ValidatorTime`, … The old names (`TextEditor`, `TextRenderer`,
@@ -44,6 +52,8 @@
   - A column header that had to be rebuilt ran `afterGetColHeader` twice.
 - Undo: an edit that changes nothing is no undo step; undoing a row removal brings back the values of read-only
   cells and the rows' cell meta; undoing an inserted row or column keeps the frozen rows and columns (#74).
+- Undo of a column removal restores the column order made with `manualColumnMove` (it scrambled the columns and
+  could lose a value), and puts columns back in the right place when their indexes have two digits (#67).
 - Copy and paste: text with `""` outside a quoted cell (e.g. JSON with an empty string) keeps its quotes (#75); a
   paste event without clipboard data is ignored (it threw an error).
 - Column sorting: booleans sort `false` first, time cells sort by time, and the sort config moves with its column

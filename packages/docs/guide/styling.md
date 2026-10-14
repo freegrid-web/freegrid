@@ -2,8 +2,8 @@
 
 Include one of the stylesheets:
 
-- `@freegrid/core/dist/freegrid.full.css` also contains the date picker styles.
-- `@freegrid/core/dist/freegrid.css` contains the grid only (bring your own Pikaday styles).
+- `@freegrid/sheet/dist/freegrid.full.css` also contains the date picker styles.
+- `@freegrid/sheet/dist/freegrid.css` contains the grid only (bring your own Pikaday styles).
 
 To change colors and fonts, or to use the dark theme, see [Theming](./theming).
 

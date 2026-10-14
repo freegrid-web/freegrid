@@ -27,7 +27,7 @@ const removeRowItem = (): MenuItem => ({
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_REMOVE_ROW, pluralForm);
   },
   callback(this: PluginHost) {
-    // The amount `1` with index groups is upstream's; removing several rows still has problems (see #66).
+    // With index groups, alter takes the amounts from the groups (the `1` is not used).
     this.alter('remove_row', transformSelectionToRowDistance(this.getSelected()!), 1, 'ContextMenu.removeRow');
   },
   disabled(this: PluginHost) {

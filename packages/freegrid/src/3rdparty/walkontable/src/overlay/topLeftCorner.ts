@@ -1,3 +1,5 @@
+import type { OverlayEngine } from './types';
+import type Walkontable from '../core';
 
 import {
   outerHeight,
@@ -11,10 +13,11 @@ import Overlay from './_base';
  * @class TopLeftCornerOverlay
  */
 class TopLeftCornerOverlay extends Overlay {
+  declare clone: OverlayEngine;
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     super(wotInstance);
     this.clone = this.makeClone(Overlay.CLONE_TOP_LEFT_CORNER);
   }
@@ -64,7 +67,7 @@ class TopLeftCornerOverlay extends Overlay {
           finalTop = `${-top}px`;
         }
       }
-      setOverlayPosition(overlayRoot, finalLeft, finalTop);
+      setOverlayPosition(overlayRoot, finalLeft as unknown as string, finalTop as unknown as string);
     } else {
       resetCssTransform(overlayRoot);
     }

@@ -36,6 +36,7 @@ import type { RecordTranslator } from './utils/recordTranslator';
 import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
+import type CellRange from './3rdparty/walkontable/src/cell/range';
 import Hooks from './pluginHooks';
 import type { HookCallback } from './pluginHooks';
 import DefaultSettings from './defaultSettings';
@@ -48,8 +49,6 @@ import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
 import type { AnyFunction, AnyObject, GridSettings } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable's CellRange (Walkontable is not typed yet)
-type CellRange = any;
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
 type Change = [number, Prop, unknown, unknown];
 /** A cell position (visual indexes). */
@@ -581,7 +580,7 @@ class Core {
 
                 const rowsBefore = this.countSourceRows();
 
-                // datamap.removeRow needs the index as it is, with undefined and null values (see #66).
+                // datamap.removeRow needs the index as it is, with undefined and null values.
                 this.#datamap.removeRow(groupIndex, groupAmount, source);
 
                 const removedRows = rowsBefore - this.countSourceRows();
@@ -638,7 +637,7 @@ class Core {
 
                 const columnsBefore = this.countCols();
 
-                // datamap.removeCol needs the index as it is, with undefined and null values (see #66).
+                // datamap.removeCol needs the index as it is, with undefined and null values.
                 this.#datamap.removeCol(groupIndex, groupAmount, source);
 
                 // beforeRemoveCol cancelled it: the cell meta, frozen columns and headers stay as they are.
@@ -2257,7 +2256,7 @@ class Core {
    * @param {String|Number} prop Property name or physical column index.
    * @returns {Array} Array of cell values.
    */
-  // Reads physical rows from `datamap` (it should take visual indexes; see #66).
+  // The values in visual row order (as getDataAtCol), read through the column's property.
   getDataAtProp(prop: Prop) {
     const range = this.#datamap.getRange(
       new CellCoords(0, this.#datamap.propToCol(prop)),
@@ -2334,7 +2333,7 @@ class Core {
    * @param {Number} column Visual column index.
    * @returns {Array} Array of the column's cell values.
    */
-  // It should always take physical indexes (see #66).
+  // Rows in source order; the column goes through `columns` and moved columns (a visual index).
   getSourceDataAtCol(column: number) {
     return this.#dataSource.getAtColumn(column);
   }
@@ -2365,7 +2364,7 @@ class Core {
    * @param {Number} column Visual column index.
    * @returns {*} Cell data.
    */
-  // It should always take physical indexes (see #66).
+  // A physical row with a visual column, as the other getSourceData* methods.
   getSourceDataAtCell(row: number, column: number) {
     return this.#dataSource.getAtCell(row, column);
   }

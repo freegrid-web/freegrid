@@ -1,3 +1,5 @@
+import type { OverlayEngine } from './types';
+import type Walkontable from '../core';
 import {
   addClass,
   getScrollbarWidth,
@@ -16,10 +18,11 @@ import Overlay from './_base';
  * @class LeftOverlay
  */
 class LeftOverlay extends Overlay {
+  declare clone: OverlayEngine;
   /**
    * @param {Walkontable} wotInstance
    */
-  constructor(wotInstance) {
+  constructor(wotInstance: Walkontable) {
     super(wotInstance);
     this.clone = this.makeClone(Overlay.CLONE_LEFT);
   }
@@ -49,8 +52,8 @@ class LeftOverlay extends Overlay {
       const box = this.wot.wtTable.hider.getBoundingClientRect();
       const left = Math.ceil(box.left);
       const right = Math.ceil(box.right);
-      let finalLeft;
-      let finalTop;
+      let finalLeft: number | string;
+      let finalTop: number | string;
 
       finalTop = this.wot.wtTable.hider.style.top;
       finalTop = finalTop === '' ? 0 : finalTop;
@@ -61,9 +64,9 @@ class LeftOverlay extends Overlay {
         finalLeft = 0;
       }
       headerPosition = finalLeft;
-      finalLeft += 'px';
+      (finalLeft as number | string) += 'px';
 
-      setOverlayPosition(overlayRoot, finalLeft, finalTop);
+      setOverlayPosition(overlayRoot, finalLeft as unknown as string, finalTop as unknown as string);
 
     } else {
       headerPosition = this.getScrollPosition();
@@ -79,15 +82,15 @@ class LeftOverlay extends Overlay {
    * @param {Number} pos
    * @returns {Boolean}
    */
-  setScrollPosition(pos) {
+  setScrollPosition(pos: number) {
     let result = false;
 
     if (this.mainTableScrollableElement === window && window.scrollX !== pos) {
       window.scrollTo(pos, getWindowScrollTop());
       result = true;
 
-    } else if (this.mainTableScrollableElement.scrollLeft !== pos) {
-      this.mainTableScrollableElement.scrollLeft = pos;
+    } else if ((this.mainTableScrollableElement as HTMLElement).scrollLeft !== pos) {
+      (this.mainTableScrollableElement as HTMLElement).scrollLeft = pos;
       result = true;
     }
 
@@ -108,8 +111,8 @@ class LeftOverlay extends Overlay {
    * @param {Number} to Column index where calculation is finished.
    * @returns {Number} Width sum.
    */
-  sumCellSizes(from, to) {
-    const defaultColumnWidth = this.wot.wtSettings.defaultColumnWidth;
+  sumCellSizes(from: number, to: number): number {
+    const defaultColumnWidth = this.wot.wtSettings.defaultColumnWidth as number;
     let column = from;
     let sum = 0;
 
@@ -225,7 +228,7 @@ class LeftOverlay extends Overlay {
    * @param {Boolean} [beyondRendered]  if `true`, scrolls according to the bottom edge (top edge is by default).
    * @returns {Boolean}
    */
-  scrollTo(sourceCol, beyondRendered) {
+  scrollTo(sourceCol: number, beyondRendered?: boolean) {
     let newX = this.getTableParentOffset();
     const sourceInstance = this.wot.cloneSource ? this.wot.cloneSource : this.wot;
     const mainHolder = sourceInstance.wtTable.holder;
@@ -252,7 +255,7 @@ class LeftOverlay extends Overlay {
    *
    * @returns {Number}
    */
-  getTableParentOffset() {
+  getTableParentOffset(): number {
     const preventOverflow = this.wot.getSetting('preventOverflow');
     let offset = 0;
 
@@ -268,7 +271,7 @@ class LeftOverlay extends Overlay {
    *
    * @returns {Number} Main table's vertical scroll position.
    */
-  getScrollPosition() {
+  getScrollPosition(): number {
     return getScrollLeft(this.mainTableScrollableElement);
   }
 
@@ -277,7 +280,7 @@ class LeftOverlay extends Overlay {
    *
    * @param {Number} position Header X position if trimming container is window or scroll top if not.
    */
-  adjustHeaderBordersPosition(position) {
+  adjustHeaderBordersPosition(position: number) {
     const masterParent = this.wot.wtTable.holder.parentNode;
     const rowHeaders = this.wot.getSetting('rowHeaders');
     const fixedColumnsLeft = this.wot.getSetting('fixedColumnsLeft');
@@ -301,7 +304,7 @@ class LeftOverlay extends Overlay {
         removeClass(masterParent, 'innerBorderLeft');
       }
       if (!previousState && position || previousState && !position) {
-        this.wot.wtOverlays.adjustElementsSize();
+        this.wot.wtOverlays!.adjustElementsSize();
       }
     }
   }
