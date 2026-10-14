@@ -5,7 +5,7 @@ import { pkg } from '../../build/constants.js';
 describe('build info', () => {
   it('exposes version, packageName and buildDate from build constants', () => {
     expect(FreeGrid.version).toBe(pkg.version);
-    expect(FreeGrid.packageName).toBe('@freegrid/core');
+    expect(FreeGrid.packageName).toBe('@freegrid/sheet');
     expect(FreeGrid.buildDate).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/);
     expect(FreeGrid.baseVersion).toBeUndefined();
   });

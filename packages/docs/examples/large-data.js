@@ -1,5 +1,5 @@
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freegrid.full.css';
 
 function createRows(rows, cols) {
   return Array.from({ length: rows }, (_, r) => [

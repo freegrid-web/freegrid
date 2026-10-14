@@ -1,5 +1,5 @@
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freegrid.full.css';
 
 const green = { width: 2, color: '#1a7f37' };
 

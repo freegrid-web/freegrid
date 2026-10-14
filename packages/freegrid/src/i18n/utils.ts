@@ -38,7 +38,7 @@ export const normalizeLanguageCode = (languageCode: string): string => {
 export const warnUserAboutLanguageRegistration = (languageCode: string | undefined): void => {
   if (isDefined(languageCode)) {
     error(toSingleLine`Language with code "${languageCode}" was not found. You should register particular language 
-    before using it (for example, load dist/languages/${languageCode}.js or import '@freegrid/core/languages/${languageCode}').`);
+    before using it (for example, load dist/languages/${languageCode}.js or import '@freegrid/sheet/languages/${languageCode}').`);
   }
 };
 

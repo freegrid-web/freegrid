@@ -7,10 +7,10 @@
     "node": ">=24"
   },
   "scripts": {
-    "build": "pnpm --filter @freegrid/core build",
-    "test": "pnpm --filter @freegrid/core test",
+    "build": "pnpm --filter @freegrid/sheet build",
+    "test": "pnpm --filter @freegrid/sheet test",
     "lint": "eslint .",
-    "typecheck": "pnpm --filter @freegrid/core typecheck",
+    "typecheck": "pnpm --filter @freegrid/sheet typecheck",
     "docs:dev": "pnpm --filter @freegrid/docs dev",
     "docs:build": "pnpm --filter @freegrid/docs build"
   },

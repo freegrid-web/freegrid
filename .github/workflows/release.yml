@@ -1,7 +1,7 @@
 name: Release
 
-# Publishes @freegrid/core to npm when a version tag (v0.1.0, v0.2.0, …) is pushed.
-# npm trusted publishing: npmjs.com → @freegrid/core → Settings → Trusted Publisher must name this repository
+# Publishes @freegrid/sheet to npm when a version tag (v0.1.0, v0.2.0, …) is pushed.
+# npm trusted publishing: npmjs.com → @freegrid/sheet → Settings → Trusted Publisher must name this repository
 # (freegrid-web/freegrid) and this workflow file (release.yml). No npm token is stored in the repository.
 on:
   push:
@@ -30,10 +30,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm --filter @freegrid/core test:unit
-      - run: pnpm --filter @freegrid/core test:types
-      - run: pnpm --filter @freegrid/core build
-      - run: pnpm --filter @freegrid/core test:dist
+      - run: pnpm --filter @freegrid/sheet test:unit
+      - run: pnpm --filter @freegrid/sheet test:types
+      - run: pnpm --filter @freegrid/sheet build
+      - run: pnpm --filter @freegrid/sheet test:dist
       - name: Publish to npm
         working-directory: packages/freegrid
         run: npm publish --provenance --access public

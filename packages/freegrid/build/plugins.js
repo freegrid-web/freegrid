@@ -21,7 +21,7 @@ export function localeRegistration() {
     transform(code, id) {
       if (!/[\\/]src[\\/]i18n[\\/]languages[\\/][a-z]{2}-[A-Z]{2}\.(js|ts)$/.test(id)) return null;
       const rewritten = code
-        .replace(/import \* as C from '\.\.\/constants';/, "import FreeGrid from '@freegrid/core';\n\nconst C = FreeGrid.languages.dictionaryKeys;")
+        .replace(/import \* as C from '\.\.\/constants';/, "import FreeGrid from '@freegrid/sheet';\n\nconst C = FreeGrid.languages.dictionaryKeys;")
         .replace(/export default dictionary;/, 'FreeGrid.languages.registerLanguageDictionary(dictionary);\n\nexport default dictionary;');
 
       // A language file whose text no longer matches must not build without registering itself.

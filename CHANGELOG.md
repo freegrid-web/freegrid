@@ -4,6 +4,10 @@
 
 ### Breaking
 
+- The npm package is renamed from `@freegrid/core` to `@freegrid/sheet`: FreeGrid is an Excel-style spreadsheet, and
+  `@freegrid/core` is kept for a core shared by future FreeGrid components. Install `@freegrid/sheet` and change the
+  imports (`import FreeGrid from '@freegrid/sheet'`, `@freegrid/sheet/dist/freegrid.css`,
+  `@freegrid/sheet/languages/…`). `FreeGrid.packageName` is `'@freegrid/sheet'`. The API does not change.
 - Editors, renderers and validators have uniform names, the kind first: `FreeGrid.editors.EditorText`,
   `EditorAutocomplete`, `EditorDate`, …; `FreeGrid.renderers.RendererText`, `RendererNumeric`, …;
   `FreeGrid.validators.ValidatorDate`, `ValidatorTime`, … The old names (`TextEditor`, `TextRenderer`,

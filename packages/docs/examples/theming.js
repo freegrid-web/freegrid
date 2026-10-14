@@ -1,5 +1,5 @@
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freegrid.full.css';
 
 // A grid that shows most themed parts: headers, a selection, a read-only and an invalid cell, a comment, a date
 // column, and the context menu (right-click).
