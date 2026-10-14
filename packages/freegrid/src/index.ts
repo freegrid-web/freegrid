@@ -35,15 +35,34 @@ import { getTranslatedPhrase } from './i18n';
 import * as constants from './i18n/constants';
 import { registerLanguageDictionary, getLanguagesDictionaries, getLanguageDictionary } from './i18n/dictionariesManager';
 
-function FreeGrid(rootElement, userSettings) {
-  const instance = new Core(rootElement, userSettings || {}, rootInstanceSymbol);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+type GridInstance = any;
+type CoreConstructor = new (rootElement: Element, userSettings: object, rootInstance?: symbol) => GridInstance;
+
+/**
+ * Creates a grid in `rootElement` and initializes it.
+ *
+ * @param {HTMLElement} rootElement
+ * @param {Object} [userSettings]
+ * @returns {Core}
+ */
+function FreeGrid(rootElement: Element, userSettings?: object): GridInstance {
+  const instance = new (Core as unknown as CoreConstructor)(rootElement, userSettings || {}, rootInstanceSymbol);
 
   instance.init();
 
   return instance;
 }
 
-jQueryWrapper(FreeGrid);
+/** The public members of `modules` (names starting with `_` are internal). */
+const publicMembers = (modules: object[]): Record<string, unknown> => Object.fromEntries(modules.flatMap(module =>
+  Object.entries(module).filter(([key]) => key.charAt(0) !== '_')));
+
+/** `names` mapped to `{prefix}{Name}`, with the values `get` returns. */
+const byPrefixedName = (prefix: string, names: string[], get: (name: string) => unknown): Record<string, unknown> =>
+  Object.fromEntries(names.map(name => [`${prefix}${stringHelpers.toUpperCaseFirst(name)}`, get(name)]));
+
+jQueryWrapper(FreeGrid as unknown as Parameters<typeof jQueryWrapper>[0]);
 
 FreeGrid.Core = Core;
 FreeGrid.DefaultSettings = DefaultSettings;
@@ -62,7 +81,7 @@ FreeGrid.__GhostTable = GhostTable;
 //
 
 // Export all helpers to the FreeGrid object
-const HELPERS = [
+FreeGrid.helper = publicMembers([
   arrayHelpers,
   browserHelpers,
   dataHelpers,
@@ -75,95 +94,53 @@ const HELPERS = [
   settingHelpers,
   stringHelpers,
   unicodeHelpers,
-];
-const DOM = [
+]);
+FreeGrid.dom = publicMembers([
   domHelpers,
   domEventHelpers,
-];
-
-FreeGrid.helper = {};
-FreeGrid.dom = {};
-
-// Fill general helpers.
-arrayHelpers.arrayEach(HELPERS, (helper) => {
-  arrayHelpers.arrayEach(Object.getOwnPropertyNames(helper), (key) => {
-    if (key.charAt(0) !== '_') {
-      FreeGrid.helper[key] = helper[key];
-    }
-  });
-});
-
-// Fill DOM helpers.
-arrayHelpers.arrayEach(DOM, (helper) => {
-  arrayHelpers.arrayEach(Object.getOwnPropertyNames(helper), (key) => {
-    if (key.charAt(0) !== '_') {
-      FreeGrid.dom[key] = helper[key];
-    }
-  });
-});
+]);
 
 // Export cell types.
-FreeGrid.cellTypes = {};
-
-arrayHelpers.arrayEach(getRegisteredCellTypeNames(), (cellTypeName) => {
-  FreeGrid.cellTypes[cellTypeName] = getCellType(cellTypeName);
-});
-
-FreeGrid.cellTypes.registerCellType = registerCellType;
-FreeGrid.cellTypes.getCellType = getCellType;
+FreeGrid.cellTypes = {
+  ...Object.fromEntries(getRegisteredCellTypeNames().map(name => [name, getCellType(name)])),
+  registerCellType,
+  getCellType,
+};
 
 // Export all registered editors from the FreeGrid.
-FreeGrid.editors = {};
-
-arrayHelpers.arrayEach(getRegisteredEditorNames(), (editorName) => {
-  FreeGrid.editors[`Editor${stringHelpers.toUpperCaseFirst(editorName)}`] = getEditor(editorName);
-});
-
-FreeGrid.editors.registerEditor = registerEditor;
-FreeGrid.editors.getEditor = getEditor;
+FreeGrid.editors = {
+  ...byPrefixedName('Editor', getRegisteredEditorNames(), getEditor),
+  registerEditor,
+  getEditor,
+};
 
 // Export all registered renderers from the FreeGrid.
-FreeGrid.renderers = {};
-
-arrayHelpers.arrayEach(getRegisteredRendererNames(), (rendererName) => {
-  FreeGrid.renderers[`Renderer${stringHelpers.toUpperCaseFirst(rendererName)}`] = getRenderer(rendererName);
-});
-
-FreeGrid.renderers.registerRenderer = registerRenderer;
-FreeGrid.renderers.getRenderer = getRenderer;
+FreeGrid.renderers = {
+  ...byPrefixedName('Renderer', getRegisteredRendererNames(), getRenderer),
+  registerRenderer,
+  getRenderer,
+};
 
 // Export all registered validators from the FreeGrid.
-FreeGrid.validators = {};
+FreeGrid.validators = {
+  ...byPrefixedName('Validator', getRegisteredValidatorNames(), getValidator),
+  registerValidator,
+  getValidator,
+};
 
-arrayHelpers.arrayEach(getRegisteredValidatorNames(), (validatorName) => {
-  FreeGrid.validators[`Validator${stringHelpers.toUpperCaseFirst(validatorName)}`] = getValidator(validatorName);
-});
+// Export all registered plugins from the FreeGrid (`Base` as `BasePlugin`).
+FreeGrid.plugins = {
+  ...Object.fromEntries(Object.entries(plugins).map(([name, plugin]) => [name === 'Base' ? 'BasePlugin' : name, plugin])),
+  registerPlugin,
+};
 
-FreeGrid.validators.registerValidator = registerValidator;
-FreeGrid.validators.getValidator = getValidator;
-
-// Export all registered plugins from the FreeGrid.
-FreeGrid.plugins = {};
-
-arrayHelpers.arrayEach(Object.getOwnPropertyNames(plugins), (pluginName) => {
-  const plugin = plugins[pluginName];
-
-  if (pluginName === 'Base') {
-    FreeGrid.plugins[`${pluginName}Plugin`] = plugin;
-  } else {
-    FreeGrid.plugins[pluginName] = plugin;
-  }
-});
-
-FreeGrid.plugins.registerPlugin = registerPlugin;
-
-FreeGrid.languages = {};
-FreeGrid.languages.dictionaryKeys = constants;
-FreeGrid.languages.getLanguageDictionary = getLanguageDictionary;
-FreeGrid.languages.getLanguagesDictionaries = getLanguagesDictionaries;
-FreeGrid.languages.registerLanguageDictionary = registerLanguageDictionary;
-
-// Alias to `getTranslatedPhrase` function, for more information check it API.
-FreeGrid.languages.getTranslatedPhrase = (...args) => getTranslatedPhrase(...args);
+FreeGrid.languages = {
+  dictionaryKeys: constants,
+  getLanguageDictionary,
+  getLanguagesDictionaries,
+  registerLanguageDictionary,
+  // Alias to `getTranslatedPhrase` function, for more information check it API.
+  getTranslatedPhrase: (...args: Parameters<typeof getTranslatedPhrase>) => getTranslatedPhrase(...args),
+};
 
 export default FreeGrid;

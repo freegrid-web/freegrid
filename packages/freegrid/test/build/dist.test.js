@@ -53,6 +53,32 @@ describe('dist outputs', () => {
 
     expect(Object.keys(windowWith(read('freegrid.full.js')).FreeGrid.helper).sort()).toEqual(expected);
   });
+  it('FreeGrid exposes exactly the public names (top level, editors, renderers, validators, cell types, plugins, languages)', () => {
+    // A change here is a public API change: list it in the CHANGELOG.
+    const { FreeGrid } = windowWith(read('freegrid.full.js'));
+    const names = object => Object.keys(object).sort();
+
+    expect(names(FreeGrid)).toEqual(['Core', 'DefaultSettings', 'EventManager', '__GhostTable', '_getListenersCounter',
+      'buildDate', 'cellTypes', 'dom', 'editors', 'helper', 'hooks', 'languages', 'packageName', 'plugins', 'renderers',
+      'validators', 'version']);
+    expect(names(FreeGrid.editors)).toEqual(['EditorAutocomplete', 'EditorBase', 'EditorCheckbox', 'EditorDate',
+      'EditorDropdown', 'EditorHandsontable', 'EditorNumeric', 'EditorPassword', 'EditorSelect', 'EditorText',
+      'EditorTime', 'getEditor', 'registerEditor']);
+    expect(names(FreeGrid.renderers)).toEqual(['RendererAutocomplete', 'RendererBase', 'RendererCheckbox',
+      'RendererDate', 'RendererDropdown', 'RendererHandsontable', 'RendererHtml', 'RendererNumeric', 'RendererPassword',
+      'RendererText', 'RendererTime', 'getRenderer', 'registerRenderer']);
+    expect(names(FreeGrid.validators)).toEqual(['ValidatorAutocomplete', 'ValidatorDate', 'ValidatorDropdown',
+      'ValidatorNumeric', 'ValidatorTime', 'getValidator', 'registerValidator']);
+    expect(names(FreeGrid.cellTypes)).toEqual(['autocomplete', 'checkbox', 'date', 'dropdown', 'getCellType',
+      'handsontable', 'numeric', 'password', 'registerCellType', 'text', 'time']);
+    expect(names(FreeGrid.plugins)).toEqual([...PLUGINS_622, 'BasePlugin', 'registerPlugin'].sort());
+    expect(names(FreeGrid.languages)).toEqual(['dictionaryKeys', 'getLanguageDictionary', 'getLanguagesDictionaries',
+      'getTranslatedPhrase', 'registerLanguageDictionary']);
+    expect(FreeGrid.languages.getTranslatedPhrase).not.toBe(undefined);
+    expect(typeof FreeGrid.hooks.add).toBe('function');
+    expect(FreeGrid.version).toMatch(/^\d+\.\d+\.\d+/);
+  });
+
   it('produces every expected file', () => {
     ['esm/index.js', 'esm/compat.js', 'freegrid.js', 'freegrid.min.js', 'freegrid.full.js', 'freegrid.full.min.js',
       'freegrid.css', 'freegrid.min.css', 'freegrid.full.css', 'freegrid.full.min.css', 'compat.js',
