@@ -1,6 +1,9 @@
 import { isDefined } from './helpers/mixed';
 import { isObjectEqual } from './helpers/object';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+type Grid = any;
+
 /**
  * @alias Options
  * @constructor
@@ -72,7 +75,7 @@ import { isObjectEqual } from './helpers/object';
  * ---
  * __Important notice:__ In order for the data separation to work properly, make sure that each instance of FreeGrid has a unique `id`.
  */
-function DefaultSettings() {}
+function DefaultSettings(): void {}
 
 DefaultSettings.prototype = {
   /**
@@ -1028,18 +1031,13 @@ DefaultSettings.prototype = {
    * },
    * ```
    */
-  isEmptyRow(row) {
-    let col;
-    let colLen;
-    let value;
-    let meta;
-
-    for (col = 0, colLen = this.countCols(); col < colLen; col++) {
-      value = this.getDataAtCell(row, col);
+  isEmptyRow(this: Grid, row: number): boolean {
+    for (let col = 0, colLen = this.countCols(); col < colLen; col++) {
+      const value = this.getDataAtCell(row, col);
 
       if (value !== '' && value !== null && isDefined(value)) {
         if (typeof value === 'object') {
-          meta = this.getCellMeta(row, col);
+          const meta = this.getCellMeta(row, col);
 
           return isObjectEqual(this.getSchema()[meta.prop], value);
         }
@@ -1065,13 +1063,9 @@ DefaultSettings.prototype = {
    * },
    * ```
    */
-  isEmptyCol(col) {
-    let row;
-    let rowLen;
-    let value;
-
-    for (row = 0, rowLen = this.countRows(); row < rowLen; row++) {
-      value = this.getDataAtCell(row, col);
+  isEmptyCol(this: Grid, col: number): boolean {
+    for (let row = 0, rowLen = this.countRows(); row < rowLen; row++) {
+      const value = this.getDataAtCell(row, col);
 
       if (value !== '' && value !== null && isDefined(value)) {
         return false;
