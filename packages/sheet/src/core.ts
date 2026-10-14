@@ -2567,18 +2567,22 @@ class Core {
       throw new Error(`Invalid cell index: ${String(physicalRow)}, ${String(physicalColumn)}`);
     }
 
-    if (!this.#priv.columnSettings[physicalColumn]) {
-      this.#priv.columnSettings[physicalColumn] = columnFactory(this.#GridSettings, this.#priv.columnsSettingConflicts);
+    // The cache keys are numbers, so no index can name a prototype property.
+    const rowKey = Number(physicalRow);
+    const columnKey = Number(physicalColumn);
+
+    if (!this.#priv.columnSettings[columnKey]) {
+      this.#priv.columnSettings[columnKey] = columnFactory(this.#GridSettings, this.#priv.columnsSettingConflicts);
     }
 
-    if (!this.#priv.cellSettings[physicalRow]) {
-      this.#priv.cellSettings[physicalRow] = [];
+    if (!this.#priv.cellSettings[rowKey]) {
+      this.#priv.cellSettings[rowKey] = [];
     }
-    if (!this.#priv.cellSettings[physicalRow][physicalColumn]) {
-      this.#priv.cellSettings[physicalRow][physicalColumn] = new this.#priv.columnSettings[physicalColumn]() as AnyObject;
+    if (!this.#priv.cellSettings[rowKey][columnKey]) {
+      this.#priv.cellSettings[rowKey][columnKey] = new this.#priv.columnSettings[columnKey]() as AnyObject;
     }
 
-    const cellProperties = this.#priv.cellSettings[physicalRow][physicalColumn]; // retrieve cellProperties from cache
+    const cellProperties = this.#priv.cellSettings[rowKey][columnKey]; // retrieve cellProperties from cache
 
     cellProperties.row = physicalRow;
     cellProperties.col = physicalColumn;
