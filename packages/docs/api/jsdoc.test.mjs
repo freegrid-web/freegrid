@@ -76,6 +76,39 @@ test('reads an event, says FreeGrid instead of the upstream name, keeps deprecat
   assert.equal(event.since, '0.35.0');
 });
 
+test('reads settings written as methods, and does not let a method body run into the next setting', () => {
+  const settings = readSettings(`
+  DefaultSettings.prototype = {
+    /**
+     * Checks if a row is empty.
+     *
+     * @type {Function}
+     * @param {Number} row Visual row index.
+     * @returns {Boolean}
+     */
+    isEmptyRow(row) {
+      /* a comment in the body */
+      return row === 0;
+    },
+
+    /**
+     * Re-renders the table when it becomes visible.
+     *
+     * @type {Boolean}
+     * @default true
+     */
+    observeDOMVisibility: true,
+  };`);
+
+  assert.deepEqual(settings.map(({ name, type, default: value }) => [name, type, value]), [
+    ['isEmptyRow', 'Function', 'function'],
+    ['observeDOMVisibility', 'Boolean', 'true'],
+  ]);
+  assert.equal(settings[0].description, 'Checks if a row is empty.');
+  assert.equal(settings[1].description, 'Re-renders the table when it becomes visible.');
+  assert.deepEqual(settings[1].examples, []);
+});
+
 test('reads settings with their default value from the line after the comment', () => {
   const settings = readSettings(`
   const DefaultSettings = function() {};

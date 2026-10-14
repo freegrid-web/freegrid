@@ -149,12 +149,13 @@ export const parseBlock = (text) => {
 export const parseBlocks = source => [...source.matchAll(BLOCK)].map(([, text]) => parseBlock(text));
 
 /**
- * The settings of defaultSettings.js: each comment followed by `name: value,`. The default is `@default` or the value.
+ * The settings of defaultSettings: each comment followed by `name: value,` or by a method `name(…) {` (a function
+ * setting, default `function`). The default is `@default` or the value.
  */
-export const readSettings = source => [...source.matchAll(/\/\*\*([\s\S]*?)\*\/\s*\n\s*(\w+)\s*:\s*([^\n]*)/g)]
+export const readSettings = source => [...source.matchAll(/\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/\s*\n\s*(\w+)\s*(?::\s*([^\n]*)|\()/g)]
   .map(([, text, name, value]) => {
     const block = parseBlock(text);
-    const shown = value.trim().replace(/,$/, '');
+    const shown = value === undefined ? 'function' : value.trim().replace(/,$/, '');
 
     return {
       ...block,
