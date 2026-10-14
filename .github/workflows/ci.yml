@@ -1,4 +1,11 @@
 name: CI
+# The run's title in the Actions list: the pull request, the merge queue entry (its ref names the pull request,
+# e.g. gh-readonly-queue/main/pr-89-<sha>), or the pushed commit.
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('PR #{0}: {1}', github.event.pull_request.number, github.event.pull_request.title)
+  || github.event_name == 'merge_group' && format('Merge queue: {0}', github.event.merge_group.head_ref)
+  || github.event_name == 'push' && github.event.head_commit.message
+  || format('Manual run on {0}', github.ref_name) }}
 
 # Fast checks (lint, types, unit, build, dist, docs) run on every pull request push. The browser tests (E2E in
 # Chromium, Firefox and WebKit, about 5–10 minutes) run in the merge queue, right before a pull request is merged into
