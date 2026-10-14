@@ -10,10 +10,10 @@ const undoItem = (): MenuItem => ({
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_UNDO);
   },
   callback(this: PluginHost) {
-    this.undo();
+    this.undo!();
   },
   disabled(this: PluginHost) {
-    return this.undoRedo && !this.undoRedo.isUndoAvailable();
+    return Boolean(this.undoRedo && !this.undoRedo.isUndoAvailable());
   },
 });
 

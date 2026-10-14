@@ -152,7 +152,7 @@ class MergedCellsCollection {
   clear(): void {
     const mergedCellsToClear = this.mergedCells
       .map(mergedCell => [this.hot.getCell(mergedCell.row, mergedCell.col), mergedCell] as const)
-      .filter(([TD]) => TD);
+      .filter((pair): pair is readonly [HTMLTableCellElement, typeof pair[1]] => pair[0] !== null);
 
     this.mergedCells.length = 0;
 

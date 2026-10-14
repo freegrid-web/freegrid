@@ -5,6 +5,13 @@ import { CellCoords } from './../3rdparty/walkontable/src';
 import { getRenderer } from './index';
 import type { Renderer } from '../cellTypes/types';
 
+declare module '../core' {
+  interface Core {
+    /** The autocomplete renderer's arrow listener (one per grid). */
+    acArrowListener?: (event: MouseEvent) => void;
+  }
+}
+
 // Cloned for every cell: faster than creating the element.
 const clonableARROW = document.createElement('DIV');
 

@@ -6,6 +6,14 @@ import { stopImmediatePropagation, isImmediatePropagationStopped } from './../he
 import EditorText from './editorText';
 import type { EditorHost } from './editorBase';
 import type { CellProperties } from '../cellTypes/types';
+import type Core from './../core';
+
+declare module '../core' {
+  interface Core {
+    /** The dropdown grid opens above the cell (set by the autocomplete editor). */
+    flipped?: boolean;
+  }
+}
 
 // A grid hook: `this` is the grid. The arrow keys move the selection in the list while the focus stays in the
 // editor's textarea.
@@ -128,7 +136,7 @@ class EditorHandsontable extends EditorText {
       this.htContainer.style.display = '';
     }
 
-    this.htEditor = new this.instance.constructor(this.htContainer, this.htOptions);
+    this.htEditor = new (this.instance.constructor as typeof Core)(this.htContainer, this.htOptions);
     this.htEditor.init();
     this.htEditor.rootElement.style.display = '';
 

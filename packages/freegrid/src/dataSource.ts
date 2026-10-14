@@ -211,7 +211,7 @@ class DataSource {
    */
   destroy(): void {
     this.data = null!;
-    this.hot = null;
+    this.hot = null!;
   }
 }
 

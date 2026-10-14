@@ -2,13 +2,10 @@ import { defineGetter, objectEach } from './../helpers/object';
 import { getTranslator } from './../utils/recordTranslator';
 import { getRegistredPluginNames, getPluginName } from './../plugins';
 import type EventManager from './../eventManager';
+import type Core from './../core';
 
-/**
- * The grid, as plugins use it. src/core.js is not typed yet, and plugins reach deep into it (the view, Walkontable's
- * overlays).
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-export type PluginHost = any;
+/** The grid, as plugins use it. */
+export type PluginHost = Core;
 
 type HookCallback = (...args: never[]) => unknown;
 

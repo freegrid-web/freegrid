@@ -666,7 +666,7 @@ class CustomBorders extends BasePlugin {
 
   /** Walkontable's custom selections (the cells' borders). */
   #customSelections(): BorderSelection[] {
-    return this.hot.selection.highlight.customSelections;
+    return this.hot.selection.highlight.customSelections as unknown as BorderSelection[];
   }
 }
 

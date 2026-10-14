@@ -18,7 +18,7 @@ const readOnlyItem = (): MenuItem => ({
     return label;
   },
   callback(this: PluginHost) {
-    const ranges = this.getSelectedRange();
+    const ranges = this.getSelectedRange()!;
     const atLeastOneReadOnly = checkSelectionConsistency(ranges, (row, col) => this.getCellMeta(row, col).readOnly);
 
     ranges.forEach((range: { forAll(callback: (row: number, col: number) => void): void }) => {

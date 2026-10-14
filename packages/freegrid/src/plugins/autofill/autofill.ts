@@ -130,7 +130,7 @@ class Autofill extends BasePlugin {
    * @returns Array with the data.
    */
   getSelectionData(): unknown[][] {
-    const { from, to } = this.hot.getSelectedRangeLast();
+    const { from, to } = this.hot.getSelectedRangeLast()!;
 
     return this.hot.getData(from.row, from.col, to.row, to.col);
   }
@@ -149,7 +149,7 @@ class Autofill extends BasePlugin {
       return false;
     }
 
-    let cornersOfSelectionAndDragAreas: Corners = this.hot.selection.highlight.getFill().getCorners();
+    let cornersOfSelectionAndDragAreas = this.hot.selection.highlight.getFill().getCorners() as Corners;
 
     this.resetSelectionOfDraggedArea();
 
@@ -229,8 +229,8 @@ class Autofill extends BasePlugin {
    * @param coordsOfSelection `CellCoords` coord object.
    */
   getCoordsOfDragAndDropBorders(coordsOfSelection: CellCoords): CellCoords | undefined {
-    const topLeftCorner = this.hot.getSelectedRangeLast().getTopLeftCorner();
-    const bottomRightCorner = this.hot.getSelectedRangeLast().getBottomRightCorner();
+    const topLeftCorner = this.hot.getSelectedRangeLast()!.getTopLeftCorner();
+    const bottomRightCorner = this.hot.getSelectedRangeLast()!.getBottomRightCorner();
     let coords;
 
     if (this.directions.includes(DIRECTIONS.vertical) &&
@@ -282,7 +282,7 @@ class Autofill extends BasePlugin {
    */
   addNewRowIfNeeded(): void {
     if (this.hot.selection.highlight.getFill().cellRange && this.addingStarted === false && this.autoInsertRow) {
-      const cornersOfSelectedCells = this.hot.getSelectedLast();
+      const cornersOfSelectedCells = this.hot.getSelectedLast()!;
       const cornersOfSelectedDragArea = this.hot.selection.highlight.getFill().getCorners();
       const nrOfTableRows = this.hot.countRows();
 
@@ -301,10 +301,10 @@ class Autofill extends BasePlugin {
    */
   getCornersOfSelectedCells(): Corners {
     if (this.hot.selection.isMultiple()) {
-      return this.hot.selection.highlight.createOrGetArea().getCorners();
+      return this.hot.selection.highlight.createOrGetArea().getCorners() as Corners;
     }
 
-    return this.hot.selection.highlight.getCell().getCorners();
+    return this.hot.selection.highlight.getCell().getCorners() as Corners;
   }
 
   /**
@@ -405,8 +405,8 @@ class Autofill extends BasePlugin {
   redrawBorders(coords: CellCoords): void {
     this.hot.selection.highlight.getFill()
       .clear()
-      .add(this.hot.getSelectedRangeLast().from)
-      .add(this.hot.getSelectedRangeLast().to)
+      .add(this.hot.getSelectedRangeLast()!.from)
+      .add(this.hot.getSelectedRangeLast()!.to)
       .add(coords);
 
     this.hot.view.render();

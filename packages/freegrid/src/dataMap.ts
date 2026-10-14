@@ -16,9 +16,9 @@ import Interval from './utils/interval';
 import { rangeEach } from './helpers/number';
 import MultiMap from './multiMap';
 import type { SourceRow } from './dataSource';
+import type Core from './core';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type Grid = any;
+type Grid = Core;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
 type GridPrivate = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the settings constructor of core.js
@@ -868,7 +868,7 @@ class DataMap {
     this.interval?.stop();
 
     this.interval = null;
-    this.instance = null;
+    this.instance = null!;
     this.priv = null;
     this.GridSettings = null;
     this.dataSource = null as unknown as SourceRow[];

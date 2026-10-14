@@ -27,7 +27,7 @@ const removeColumnItem = (): MenuItem => ({
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_REMOVE_COLUMN, pluralForm);
   },
   callback(this: PluginHost) {
-    this.alter('remove_col', transformSelectionToColumnDistance(this.getSelected()), null, 'ContextMenu.removeColumn');
+    this.alter('remove_col', transformSelectionToColumnDistance(this.getSelected()!), null, 'ContextMenu.removeColumn');
   },
   disabled(this: PluginHost) {
     const selected = getValidSelection(this);
