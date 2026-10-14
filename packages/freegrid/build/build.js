@@ -20,7 +20,7 @@ async function esm() {
     ...base,
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist/esm'), emptyOutDir: false, minify: false, sourcemap: true,
-      lib: { entry: { index: r('src/index.js'), compat: r('src/compat.ts') }, formats: ['es'], cssFileName: 'freegrid' },
+      lib: { entry: { index: r('src/index.ts'), compat: r('src/compat.ts') }, formats: ['es'], cssFileName: 'freegrid' },
       rollupOptions: { external: isDep, output: { banner: banner(buildDate) } },
     },
   });
@@ -34,7 +34,7 @@ async function umd({ full, minify }) {
     build: {
       target: browserTarget, cssTarget: browserTarget, commonjsOptions, outDir: r('dist'), emptyOutDir: false, minify: minify ? 'esbuild' : false,
       cssMinify: minify, sourcemap: true,
-      lib: { entry: full ? r('build/full-entry.js') : r('src/index.js'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
+      lib: { entry: full ? r('build/full-entry.js') : r('src/index.ts'), name: 'FreeGrid', formats: ['umd'], fileName: () => `${name}.js`, cssFileName: name },
       rollupOptions: {
         external: full ? [] : isDep,
         output: { exports: 'default', banner: banner(buildDate) },

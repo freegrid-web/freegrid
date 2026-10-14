@@ -39,6 +39,8 @@
   - A dotted data property through `__proto__`, `constructor` or `prototype` (e.g. `setDataAtRowProp(0,
     '__proto__.x', 1)`) changed `Object.prototype`; such a property is ignored now.
   - A column header that had to be rebuilt ran `afterGetColHeader` twice.
+- Core, part 3 (TypeScript rewrite): the entry module (`FreeGrid(...)` and its `helper`, `dom`, `editors`,
+  `renderers`, `validators`, `cellTypes`, `plugins` and `languages` objects). A build test pins every public name.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code
