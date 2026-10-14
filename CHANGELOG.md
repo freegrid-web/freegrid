@@ -1,6 +1,10 @@
 # FreeGrid changelog
 
-## Unreleased
+## 0.3.0 (2026-10-14)
+
+The package is now `@freegrid/sheet`. The whole grid is written in TypeScript (only the rendering engine is still
+JavaScript). A review of known bugs brought more than twenty fixes, among them pasting, undo, sorting, validation,
+the context menu and `updateSettings`. Several security fixes for pasted HTML and prototype pollution.
 
 ### Breaking
 

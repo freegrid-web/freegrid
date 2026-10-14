@@ -34,9 +34,17 @@ jobs:
       - run: pnpm --filter @freegrid/sheet test:types
       - run: pnpm --filter @freegrid/sheet build
       - run: pnpm --filter @freegrid/sheet test:dist
+      # A version published by hand (the first release of a new package name) is skipped.
       - name: Publish to npm
         working-directory: packages/freegrid
-        run: npm publish --provenance --access public
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm"
+          else
+            npm publish --provenance --access public
+          fi
       - name: GitHub release with the changelog section
         env:
           GH_TOKEN: ${{ github.token }}
