@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-restricted-globals */
 
 // These helpers do nothing (instead of throwing) where no `console` object is exposed.
 

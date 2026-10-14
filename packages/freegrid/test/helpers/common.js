@@ -22,9 +22,7 @@ export function handsontableMethodFactory(method) {
     try {
       instance = spec().$container.handsontable('getInstance');
     } catch (err) {
-      /* eslint-disable */
       console.error(err);
-      /* eslint-enable */
     }
 
     if (instance) {

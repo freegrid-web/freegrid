@@ -21,7 +21,6 @@ const getFormattedPhrase = (phrasePropositions: Phrase, argumentsForFormatters: 
  * The phrase of `dictionaryKey` in `languageCode` (`null` when the language or the key is unknown), formatted with
  * `argumentsForFormatters` (e.g. a count for plural forms).
  */
-// eslint-disable-next-line import/prefer-default-export
 export const getTranslatedPhrase = (languageCode: string, dictionaryKey: string,
   argumentsForFormatters?: unknown): string | null => {
   const languageDictionary = getLanguageDictionary(languageCode);

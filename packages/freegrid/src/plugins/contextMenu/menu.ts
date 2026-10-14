@@ -737,7 +737,6 @@ class Menu {
    * @param preventScrolling Object with `value` property where its value change will be observed.
    * @param selectionLayerLevel The number which indicates what selection layer is currently modified.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAfterSelection(r: number, c: number, r2: number, c2: number, preventScrolling: { value: boolean }): void {
     if (this.keyEvent === false) {
       preventScrolling.value = true;

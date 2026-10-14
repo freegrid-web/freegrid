@@ -8,7 +8,6 @@ import type { MergedCellInfo } from './cellCoords';
  * @param row Row index.
  * @param col Column index.
  */
-// eslint-disable-next-line import/prefer-default-export
 export const applySpanProperties = (TD: HTMLTableCellElement, mergedCellInfo: MergedCellInfo | null | false | undefined,
   row: number, col: number): void => {
   if (mergedCellInfo && mergedCellInfo.row === row && mergedCellInfo.col === col) {

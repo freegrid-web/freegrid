@@ -316,7 +316,6 @@ class AutoColumnSize extends BasePlugin {
       const { syncLimit } = setting as AutoColumnSizeSettings;
 
       // A percentage of the columns, or a number (anything else is 0).
-      // eslint-disable-next-line no-bitwise
       limit = isPercentValue(syncLimit) ? valueAccordingPercent(colsLimit, syncLimit as string) : (syncLimit as number) >> 0;
     }
 

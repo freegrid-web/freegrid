@@ -87,7 +87,6 @@ class ValidatorsQueue {
   valid = true;
   #resolved = false;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   onQueueEmpty: (valid: boolean) => void = () => {};
 
   addValidatorToQueue(): void {
@@ -184,7 +183,6 @@ function expandType(obj: AnyObject): AnyObject {
     type = getCellType(obj.type);
   }
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const i in type) {
     if (hasOwnProperty(type, i) && !hasOwnProperty(obj, i)) {
       expandedType[i] = type[i];
@@ -261,7 +259,6 @@ class Core {
     });
 
     // The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's.
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.#GridSettings = function() {} as unknown as SettingsConstructor & { prototype: AnyObject };
     this.#eventManager = new EventManager(this);
 
@@ -529,7 +526,6 @@ class Core {
             if (this.getSettings().maxRows === numberOfSourceRows) {
               return;
             }
-            // eslint-disable-next-line no-param-reassign
             index = (isDefined(index)) ? index : numberOfSourceRows;
 
             delta = this.#datamap.createRow(index, amount, source);
@@ -585,7 +581,6 @@ class Core {
                 // If the 'index' is an integer decrease it by 'offset' otherwise pass it through to make the value
                 // compatible with datamap.removeCol method.
                 if (Number.isInteger(groupIndex)) {
-                  // eslint-disable-next-line no-param-reassign
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
@@ -635,7 +630,6 @@ class Core {
                 // If the 'index' is an integer decrease it by 'offset' otherwise pass it through to make the value
                 // compatible with datamap.removeCol method.
                 if (Number.isInteger(groupIndex)) {
-                  // eslint-disable-next-line no-param-reassign
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
@@ -829,7 +823,6 @@ class Core {
           case 'shift_down' :
             repeatCol = end ? end.col - start.col + 1 : 0;
             repeatRow = end ? end.row - start.row + 1 : 0;
-            // eslint-disable-next-line no-param-reassign
             input = translateRowsToColumns(input);
             for (c = 0, clen = input.length, cmax = Math.max(clen, repeatCol); c < cmax; c++) {
               if (c < clen) {
@@ -916,7 +909,6 @@ class Core {
                 skippedRow += 1;
                 current.row += 1;
                 rlen += 1;
-                /* eslint-disable no-continue */
                 continue;
               }
               skippedColumn = 0;
@@ -937,7 +929,6 @@ class Core {
                 }
                 if (cellMeta.readOnly) {
                   current.col += 1;
-                  /* eslint-disable no-continue */
                   continue;
                 }
                 const visualColumn = c - skippedColumn;
@@ -963,7 +954,6 @@ class Core {
                     const orgValueSchema = duckSchema((orgValue as AnyObject)[0] || orgValue);
                     const valueSchema = duckSchema(value[0] || value);
 
-                    /* eslint-disable max-depth */
                     if (isObjectEqual(orgValueSchema, valueSchema)) {
                       value = deepClone(value);
                     } else {
@@ -1079,7 +1069,6 @@ class Core {
           change[3] = getParsedNumber(newValue);
         }
 
-        /* eslint-disable no-loop-func */
         if (this.getCellValidator(cellProperties)) {
           waitingForValidator.addValidatorToQueue();
           this.validateCell(change[3], cellProperties, ((index: number, cellPropertiesReference: AnyObject) => {
@@ -1128,13 +1117,11 @@ class Core {
 
       if (change === null) {
         changes.splice(i, 1);
-        /* eslint-disable no-continue */
         continue;
       }
 
       if ((change[2] === null || change[2] === void 0)
         && (change[3] === null || change[3] === void 0)) {
-        /* eslint-disable no-continue */
         continue;
       }
 
@@ -1150,7 +1137,6 @@ class Core {
       }
 
       if (skipThisChange) {
-        /* eslint-disable no-continue */
         continue;
       }
 
@@ -1221,13 +1207,11 @@ class Core {
     }
 
     if (isFunction(validator)) {
-      // eslint-disable-next-line no-param-reassign
       value = this.runHooks('beforeValidate', value, cellProperties.visualRow, cellProperties.prop, source);
 
       // To provide consistent behaviour, validation should be always asynchronous
       this._registerTimeout(setTimeout(() => {
         validator.call(cellProperties, value, (valid: boolean) => {
-          // eslint-disable-next-line no-param-reassign
           valid = this.runHooks('afterValidate', valid, value, cellProperties.visualRow, cellProperties.prop, source);
           cellProperties.valid = valid;
 
@@ -1622,13 +1606,11 @@ class Core {
     if (typeof data === 'object' && data !== null) {
       if (!(data.push && data.splice)) { // check if data is array. Must use duck-type check so Backbone Collections also pass it
         // when data is not an array, attempt to make a single-row array of it
-        // eslint-disable-next-line no-param-reassign
         data = [data];
       }
 
     } else if (data === null) {
       const dataSchema = this.#datamap.getSchema();
-      // eslint-disable-next-line no-param-reassign
       data = [];
       let row;
       let r = 0;
@@ -1797,16 +1779,13 @@ class Core {
       throw new Error('"cols" setting is no longer supported. do you mean startCols, minCols or maxCols?');
     }
 
-    // eslint-disable-next-line no-restricted-syntax
     for (i in settings) {
       if (i === 'data') {
-        /* eslint-disable-next-line no-continue */
         continue; // loadData will be triggered later
 
       } else if (i === 'language') {
         this.#setLanguage(settings.language);
 
-        /* eslint-disable-next-line no-continue */
         continue;
 
       } else if (Hooks.getSingleton().getRegistered().indexOf(i) > -1) {
@@ -1852,7 +1831,6 @@ class Core {
 
       for (i = 0, j = 0; i < clen; i++) {
         if (columnsAsFunc && !columnSetting(i)) {
-          /* eslint-disable no-continue */
           continue;
         }
         this.#priv.columnSettings[j] = columnFactory(this.#GridSettings, this.#priv.columnsSettingConflicts);

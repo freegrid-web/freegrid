@@ -61,8 +61,6 @@ describe('Core_updateSettings', () => {
   });
 
   it('should ignore mixed in properties to the cell array option', () => {
-    /* eslint-disable no-array-constructor */
-    /* eslint-disable no-extend-native */
     Array.prototype.willFail = 'BOOM';
 
     handsontable({
@@ -79,8 +77,6 @@ describe('Core_updateSettings', () => {
   });
 
   it('should ignore mixed in properties to the cell array option when columns is a function', () => {
-    /* eslint-disable no-array-constructor */
-    /* eslint-disable no-extend-native */
     Array.prototype.willFail = 'BOOM';
 
     handsontable({

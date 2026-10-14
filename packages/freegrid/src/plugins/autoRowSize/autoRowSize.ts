@@ -291,7 +291,6 @@ class AutoRowSize extends BasePlugin {
       const { syncLimit } = setting as AutoRowSizeSettings;
 
       // A percentage of the rows, or a number (anything else is 0).
-      // eslint-disable-next-line no-bitwise
       limit = isPercentValue(syncLimit) ? valueAccordingPercent(rowsLimit, syncLimit as string) : (syncLimit as number) >> 0;
     }
 

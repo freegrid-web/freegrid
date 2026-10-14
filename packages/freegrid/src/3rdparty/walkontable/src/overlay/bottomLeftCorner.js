@@ -24,7 +24,6 @@ class BottomLeftCornerOverlay extends Overlay {
    * @returns {Boolean}
    */
   shouldBeRendered() {
-    /* eslint-disable no-unneeded-ternary */
     return this.wot.getSetting('fixedRowsBottom') &&
       (this.wot.getSetting('fixedColumnsLeft') || this.wot.getSetting('rowHeaders').length) ? true : false;
   }

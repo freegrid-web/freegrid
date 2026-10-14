@@ -809,7 +809,6 @@ class ColumnSorting extends BasePlugin {
    * @param TD
    * @param blockCalculations
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBeforeOnCellMouseDown(event: GridMouseEvent, coords: CellCoords, TD: HTMLTableCellElement,
     blockCalculations: { column?: boolean }): void {
     if (wasHeaderClickedProperly(coords.row, coords.col, event) === false) {

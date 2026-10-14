@@ -72,7 +72,6 @@ describe('persistentState', () => {
 
       storage.reset(1);
 
-      /* eslint-disable no-eq-null */
       expect(localStorage.getItem('example_1') == null).toBeTruthy();
     });
 

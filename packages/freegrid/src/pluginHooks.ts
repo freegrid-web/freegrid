@@ -1912,14 +1912,12 @@ class Hooks {
         while (index < length) {
           if (!globalHandlers[index] || globalHandlers[index].skip) {
             index += 1;
-            /* eslint-disable no-continue */
             continue;
           }
           // performance considerations - http://jsperf.com/call-vs-apply-for-a-plugin-architecture
           const res = globalHandlers[index].call(context, p1, p2, p3, p4, p5, p6);
 
           if (res !== void 0) {
-            // eslint-disable-next-line no-param-reassign
             p1 = res;
           }
           if (globalHandlers[index] && globalHandlers[index].runOnce) {
@@ -1940,14 +1938,12 @@ class Hooks {
         while (index < length) {
           if (!localHandlers[index] || localHandlers[index].skip) {
             index += 1;
-            /* eslint-disable no-continue */
             continue;
           }
           // performance considerations - http://jsperf.com/call-vs-apply-for-a-plugin-architecture
           const res = localHandlers[index].call(context, p1, p2, p3, p4, p5, p6);
 
           if (res !== void 0) {
-            // eslint-disable-next-line no-param-reassign
             p1 = res;
           }
           if (localHandlers[index] && localHandlers[index].runOnce) {

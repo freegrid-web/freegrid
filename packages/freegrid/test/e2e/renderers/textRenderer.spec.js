@@ -49,7 +49,6 @@ describe('TextRenderer', () => {
 
   it('should render undefined', () => {
     handsontable();
-    /* eslint-disable wrap-iife */
     setDataAtCell(2, 2, (function() {})());
 
     expect(getCell(2, 2).innerHTML).toEqual('');

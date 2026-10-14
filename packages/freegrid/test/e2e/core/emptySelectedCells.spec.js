@@ -36,7 +36,6 @@ describe('Core.emptySelectedCells', () => {
 
     emptySelectedCells();
 
-    /* eslint-disable no-multi-spaces, comma-spacing */
     const snapshot = [
       ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1'],
       ['A2',  '',   '',   '',   '',  'F2', 'G2', 'H2'],
@@ -48,7 +47,6 @@ describe('Core.emptySelectedCells', () => {
       ['A8', 'B8',  '',  'D8', 'E8', 'F8',  '',   '',],
       ['A9', 'B9', 'C9', 'D9', 'E9', 'F9',  '',   '',],
     ];
-    /* eslint-enable no-multi-spaces, comma-spacing */
 
     expect(getData()).toEqual(snapshot);
   });

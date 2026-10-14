@@ -11,7 +11,6 @@ export type RowWithValues = [number, ...unknown[]];
  * @param sortingOrders Sort orders (`asc` for ascending, `desc` for descending).
  * @param columnMetas Column meta objects.
  */
-// eslint-disable-next-line import/prefer-default-export
 export const rootComparator = (sortingOrders: SortOrder[], columnMetas: Record<string, unknown>[]) => (
   [, ...values]: RowWithValues, [, ...nextValues]: RowWithValues): number => {
   // Only the first column: ColumnSorting sorts by one column.

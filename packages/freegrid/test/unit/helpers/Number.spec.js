@@ -156,8 +156,8 @@ describe('Number helper', () => {
     });
 
     it('accepts Number objects (even NaN ones) but not dates or other objects', () => {
-      expect(isNumeric(new Number(5))).toBe(true); // eslint-disable-line no-new-wrappers
-      expect(isNumeric(new Number(NaN))).toBe(true); // eslint-disable-line no-new-wrappers
+      expect(isNumeric(new Number(5))).toBe(true);
+      expect(isNumeric(new Number(NaN))).toBe(true);
       expect(isNumeric(new Date())).toBe(false);
       expect(isNumeric({})).toBe(false);
       expect(isNumeric([])).toBe(false);
