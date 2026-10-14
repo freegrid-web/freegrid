@@ -13,7 +13,6 @@ const HEADER_ACTION_DEFAULT = true;
  * @class ColumnStatesManager
  * @plugin ColumnSorting
  */
-// eslint-disable-next-line import/prefer-default-export
 export class ColumnStatesManager {
   /**
    * Queue of sort states containing sorted columns and their orders (Array of objects containing `column` and `sortOrder` properties).

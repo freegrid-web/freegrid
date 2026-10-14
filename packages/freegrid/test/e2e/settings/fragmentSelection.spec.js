@@ -18,7 +18,6 @@ describe('settings', () => {
      * @returns {*}
      */
     function getSelected() {
-      /* eslint-disable no-else-return */
       let text = '';
 
       // IE8

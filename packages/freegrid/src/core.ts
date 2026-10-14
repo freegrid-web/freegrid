@@ -46,28 +46,28 @@ import { warnUserAboutLanguageRegistration, applyLanguageSetting, normalizeLangu
 import { startObserving as keyStateStartObserving, stopObserving as keyStateStopObserving } from './utils/keyStateObserver';
 import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
+import type { AnyFunction, AnyObject, GridSettings } from './types';
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- the grid is typed when Core becomes a class */
-type AnyObject = Record<string, any>;
-type AnyFunction = (...args: any[]) => any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Walkontable's CellRange (Walkontable is not typed yet)
 type CellRange = any;
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
-type Change = [number, Prop, any, any];
+type Change = [number, Prop, unknown, unknown];
 /** A cell position (visual indexes). */
 type Coords = { row: number; col: number };
 /** `spliceCol` / `spliceRow` arguments: `[index, start, amount, ...elements]`. */
 type SpliceArgs = [number, number, number, ...unknown[]];
 /** `[index, amount]`: rows or columns to remove (`alter` with an array index). */
 type IndexGroup = [number, number];
-/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** The constructor of the grid's settings chain (the defaults, then the grid's settings). */
+export type GridSettingsConstructor = SettingsConstructor & { prototype: AnyObject };
 
 /** The grid's private state, shared with DataMap and EditorManager. */
-type GridPrivate = {
+export type GridPrivate = {
   cellSettings: AnyObject[][];
   columnSettings: SettingsConstructor[];
   columnsSettingConflicts: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a GridSettings instance
-  settings: any;
+  settings: GridSettings;
   selRange: CellRange | null;
   isPopulated: boolean | null;
   scrollable: unknown;
@@ -87,7 +87,6 @@ class ValidatorsQueue {
   valid = true;
   #resolved = false;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   onQueueEmpty: (valid: boolean) => void = () => {};
 
   addValidatorToQueue(): void {
@@ -184,7 +183,6 @@ function expandType(obj: AnyObject): AnyObject {
     type = getCellType(obj.type);
   }
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const i in type) {
     if (hasOwnProperty(type, i) && !hasOwnProperty(obj, i)) {
       expandedType[i] = type[i];
@@ -243,7 +241,7 @@ class Core {
   #grid!: AnyObject;
   #editorManager!: EditorManager;
   /** The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's. */
-  #GridSettings!: SettingsConstructor & { prototype: AnyObject };
+  #GridSettings!: GridSettingsConstructor;
   #recordTranslator!: RecordTranslator;
   #eventManager!: EventManager;
   #preventScrollingToCell = false;
@@ -261,8 +259,7 @@ class Core {
     });
 
     // The grid's settings: a prototype chain of the defaults, the grid's settings, then each column's and cell's.
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.#GridSettings = function() {} as unknown as SettingsConstructor & { prototype: AnyObject };
+    this.#GridSettings = function() {} as unknown as GridSettingsConstructor;
     this.#eventManager = new EventManager(this);
 
     extend(this.#GridSettings.prototype, DefaultSettings.prototype); // create grid settings as a copy of default settings
@@ -520,16 +517,13 @@ class Core {
           return normalizedIndexes;
         };
 
-        /* eslint-disable no-case-declarations */
         switch (action) {
-          case 'insert_row':
-
+          case 'insert_row': {
             const numberOfSourceRows = this.countSourceRows();
 
             if (this.getSettings().maxRows === numberOfSourceRows) {
               return;
             }
-            // eslint-disable-next-line no-param-reassign
             index = (isDefined(index)) ? index : numberOfSourceRows;
 
             delta = this.#datamap.createRow(index, amount, source);
@@ -546,8 +540,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'insert_col':
+          case 'insert_col': {
             delta = this.#datamap.createCol(index, amount, source);
 
             for (let row = 0, len = this.countSourceRows(); row < len; row++) {
@@ -572,9 +567,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'remove_row':
-
+          case 'remove_row': {
             const removeRow = (indexes: IndexGroup[]) => {
               let offset = 0;
 
@@ -585,7 +580,6 @@ class Core {
                 // If the 'index' is an integer decrease it by 'offset' otherwise pass it through to make the value
                 // compatible with datamap.removeCol method.
                 if (Number.isInteger(groupIndex)) {
-                  // eslint-disable-next-line no-param-reassign
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
@@ -620,9 +614,9 @@ class Core {
             this.#grid.adjustRowsAndCols();
             this._refreshBorders(); // it will call render and prepare methods
             break;
+          }
 
-          case 'remove_col':
-
+          case 'remove_col': {
             const removeCol = (indexes: IndexGroup[]) => {
               let offset = 0;
 
@@ -635,7 +629,6 @@ class Core {
                 // If the 'index' is an integer decrease it by 'offset' otherwise pass it through to make the value
                 // compatible with datamap.removeCol method.
                 if (Number.isInteger(groupIndex)) {
-                  // eslint-disable-next-line no-param-reassign
                   groupIndex = Math.max(groupIndex - offset, 0);
                 }
 
@@ -675,8 +668,11 @@ class Core {
             this._refreshBorders(); // it will call render and prepare methods
 
             break;
-          default:
+          }
+
+          default: {
             throw new Error(`There is no such action "${action}"`);
+          }
         }
 
         if (!keepEmptyRows) {
@@ -823,13 +819,11 @@ class Core {
         let cmax;
         let rmax;
 
-        /* eslint-disable no-case-declarations */
         // insert data with specified pasteMode method
         switch (method) {
-          case 'shift_down' :
+          case 'shift_down': {
             repeatCol = end ? end.col - start.col + 1 : 0;
             repeatRow = end ? end.row - start.row + 1 : 0;
-            // eslint-disable-next-line no-param-reassign
             input = translateRowsToColumns(input);
             for (c = 0, clen = input.length, cmax = Math.max(clen, repeatCol); c < cmax; c++) {
               if (c < clen) {
@@ -844,8 +838,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'shift_right':
+          case 'shift_right': {
             repeatCol = end ? end.col - start.col + 1 : 0;
             repeatRow = end ? end.row - start.row + 1 : 0;
             for (r = 0, rlen = input.length, rmax = Math.max(rlen, repeatRow); r < rmax; r++) {
@@ -861,9 +856,10 @@ class Core {
               }
             }
             break;
+          }
 
           case 'overwrite':
-          default:
+          default: {
             // overwrite and other not specified options
             current.row = start.row;
             current.col = start.col;
@@ -916,7 +912,6 @@ class Core {
                 skippedRow += 1;
                 current.row += 1;
                 rlen += 1;
-                /* eslint-disable no-continue */
                 continue;
               }
               skippedColumn = 0;
@@ -937,7 +932,6 @@ class Core {
                 }
                 if (cellMeta.readOnly) {
                   current.col += 1;
-                  /* eslint-disable no-continue */
                   continue;
                 }
                 const visualColumn = c - skippedColumn;
@@ -963,7 +957,6 @@ class Core {
                     const orgValueSchema = duckSchema((orgValue as AnyObject)[0] || orgValue);
                     const valueSchema = duckSchema(value[0] || value);
 
-                    /* eslint-disable max-depth */
                     if (isObjectEqual(orgValueSchema, valueSchema)) {
                       value = deepClone(value);
                     } else {
@@ -984,6 +977,7 @@ class Core {
             }
             this.setDataAtCell(setData, null, null, source || 'populateFromArray');
             break;
+          }
         }
       },
     };
@@ -1079,7 +1073,6 @@ class Core {
           change[3] = getParsedNumber(newValue);
         }
 
-        /* eslint-disable no-loop-func */
         if (this.getCellValidator(cellProperties)) {
           waitingForValidator.addValidatorToQueue();
           this.validateCell(change[3], cellProperties, ((index: number, cellPropertiesReference: AnyObject) => {
@@ -1128,13 +1121,11 @@ class Core {
 
       if (change === null) {
         changes.splice(i, 1);
-        /* eslint-disable no-continue */
         continue;
       }
 
       if ((change[2] === null || change[2] === void 0)
         && (change[3] === null || change[3] === void 0)) {
-        /* eslint-disable no-continue */
         continue;
       }
 
@@ -1150,7 +1141,6 @@ class Core {
       }
 
       if (skipThisChange) {
-        /* eslint-disable no-continue */
         continue;
       }
 
@@ -1221,13 +1211,11 @@ class Core {
     }
 
     if (isFunction(validator)) {
-      // eslint-disable-next-line no-param-reassign
       value = this.runHooks('beforeValidate', value, cellProperties.visualRow, cellProperties.prop, source);
 
       // To provide consistent behaviour, validation should be always asynchronous
       this._registerTimeout(setTimeout(() => {
         validator.call(cellProperties, value, (valid: boolean) => {
-          // eslint-disable-next-line no-param-reassign
           valid = this.runHooks('afterValidate', valid, value, cellProperties.visualRow, cellProperties.prop, source);
           cellProperties.valid = valid;
 
@@ -1622,13 +1610,11 @@ class Core {
     if (typeof data === 'object' && data !== null) {
       if (!(data.push && data.splice)) { // check if data is array. Must use duck-type check so Backbone Collections also pass it
         // when data is not an array, attempt to make a single-row array of it
-        // eslint-disable-next-line no-param-reassign
         data = [data];
       }
 
     } else if (data === null) {
       const dataSchema = this.#datamap.getSchema();
-      // eslint-disable-next-line no-param-reassign
       data = [];
       let row;
       let r = 0;
@@ -1797,16 +1783,13 @@ class Core {
       throw new Error('"cols" setting is no longer supported. do you mean startCols, minCols or maxCols?');
     }
 
-    // eslint-disable-next-line no-restricted-syntax
     for (i in settings) {
       if (i === 'data') {
-        /* eslint-disable-next-line no-continue */
         continue; // loadData will be triggered later
 
       } else if (i === 'language') {
         this.#setLanguage(settings.language);
 
-        /* eslint-disable-next-line no-continue */
         continue;
 
       } else if (Hooks.getSingleton().getRegistered().indexOf(i) > -1) {
@@ -1852,7 +1835,6 @@ class Core {
 
       for (i = 0, j = 0; i < clen; i++) {
         if (columnsAsFunc && !columnSetting(i)) {
-          /* eslint-disable no-continue */
           continue;
         }
         this.#priv.columnSettings[j] = columnFactory(this.#GridSettings, this.#priv.columnsSettingConflicts);
@@ -2919,8 +2901,9 @@ class Core {
       if (this.#priv.settings.colHeaders === false) {
         result = null;
 
-      } else if (this.#priv.settings.columns && isFunction(this.#priv.settings.columns) && this.#priv.settings.columns(prop) && this.#priv.settings.columns(prop).title) {
-        result = this.#priv.settings.columns(prop).title;
+      } else if (this.#priv.settings.columns && isFunction(this.#priv.settings.columns) &&
+        (this.#priv.settings.columns as AnyFunction)(prop) && (this.#priv.settings.columns as AnyFunction)(prop).title) {
+        result = (this.#priv.settings.columns as AnyFunction)(prop).title;
 
       } else if (this.#priv.settings.columns && this.#priv.settings.columns[physicalColumn] && this.#priv.settings.columns[physicalColumn].title) {
         result = this.#priv.settings.columns[physicalColumn].title;

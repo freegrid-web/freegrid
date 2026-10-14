@@ -12,6 +12,5 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  /* eslint-disable no-unused-expressions */
   (window.scrollTo || window.scrollTo(0, 0));
 });

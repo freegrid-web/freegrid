@@ -335,7 +335,6 @@ class TableRenderer {
       currentHeader = this.wot.wtTable.getColumnHeader(sourceColIndex, level);
 
       if (!currentHeader) {
-        /* eslint-disable no-continue */
         continue;
       }
       currentHeaderHeight = innerHeight(currentHeader);

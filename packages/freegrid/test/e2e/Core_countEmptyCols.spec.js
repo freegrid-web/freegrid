@@ -1,4 +1,3 @@
-/* eslint-disable no-multi-spaces, array-bracket-spacing */
 
 describe('Core_countEmptyCols', () => {
   const id = 'testContainer';

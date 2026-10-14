@@ -2,10 +2,6 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-// Upstream code has eslint-disable comments for eslint-plugin-import rules (airbnb config). Register
-// no-op stand-ins so those comments stay valid without pulling in the plugin.
-const noop = { create: () => ({}) };
-const importStandIn = { rules: { 'no-unresolved': noop, 'prefer-default-export': noop } };
 const tsSources = ['packages/freegrid/src/**/*.ts'];
 const tsTypeTests = ['packages/freegrid/src/**/test/**'];
 
@@ -17,9 +13,8 @@ export default [
   },
   js.configs.recommended,
   {
-    plugins: { import: importStandIn },
-    // Upstream code carries many disable comments for airbnb rules that are not enabled here.
-    linterOptions: { reportUnusedDisableDirectives: 'off' },
+    // A disable comment for a rule that reports nothing there (e.g. an airbnb rule upstream used) is an error.
+    linterOptions: { reportUnusedDisableDirectives: 'error' },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -61,8 +56,9 @@ export default [
     files: tsSources,
     ignores: tsTypeTests,
     rules: {
-      // Same option as for JS: unused catch bindings are allowed.
-      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
+      // Same option as for JS: unused catch bindings are allowed. A parameter only overriding methods use (the base
+      // class ignores it) starts with `_`.
+      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none', argsIgnorePattern: '^_' }],
     },
   },
 ];

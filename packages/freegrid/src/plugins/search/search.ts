@@ -250,7 +250,6 @@ class Search extends BasePlugin {
    * @param value Value of the rendered cell.
    * @param cellProperties Object containing the cell's properties.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBeforeRenderer(TD: HTMLTableCellElement, row: number, col: number, prop: string | number, value: unknown,
     cellProperties: CellProperties): void {
     const { className = [] } = cellProperties;

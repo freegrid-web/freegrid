@@ -203,7 +203,6 @@ export const objectEach = <T extends object>(
 ): T => {
   const record = object as T & { hasOwnProperty?: unknown };
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const key in object) {
     if (!record.hasOwnProperty || Object.prototype.hasOwnProperty.call(object, key)) {
       if (iteratee(object[key], key, object) === false) {

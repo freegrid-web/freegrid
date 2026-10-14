@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import staticRegister from './../../../utils/staticRegister';
 import type { Selection } from './../../../3rdparty/walkontable/src';
 import type { CustomSelectionOptions, HighlightOptions } from './options';

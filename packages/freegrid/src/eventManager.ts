@@ -19,7 +19,7 @@ type Listener = {
 };
 
 /** The object that keeps the listeners: a grid, a plugin, Walkontable or the manager itself. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- a grid, a plugin (`hot`) or Walkontable (`wtTable`), told apart by duck typing
 type Context = { eventListeners?: Listener[]; [key: string]: any };
 
 /**

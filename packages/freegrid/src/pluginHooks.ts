@@ -12,9 +12,15 @@ export type HookCallback = ((...args: any[]) => unknown) & {
 /** The listeners of each hook name. */
 export type HookBucket = Record<string, HookCallback[]>;
 
-/** A grid instance (a hook's `this`), which keeps its own bucket. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- core.js is not typed yet
-type HookContext = any;
+/** A grid (a hook's `this`), which keeps its own bucket; `null` for the global hooks. */
+type HookContext = { pluginHookBucket?: HookBucket } | null;
+
+declare module './core' {
+  interface Core {
+    /** The grid's own hook listeners (see Hooks#getBucket). */
+    pluginHookBucket?: HookBucket;
+  }
+}
 
 /**
  * @description
@@ -1912,14 +1918,12 @@ class Hooks {
         while (index < length) {
           if (!globalHandlers[index] || globalHandlers[index].skip) {
             index += 1;
-            /* eslint-disable no-continue */
             continue;
           }
           // performance considerations - http://jsperf.com/call-vs-apply-for-a-plugin-architecture
           const res = globalHandlers[index].call(context, p1, p2, p3, p4, p5, p6);
 
           if (res !== void 0) {
-            // eslint-disable-next-line no-param-reassign
             p1 = res;
           }
           if (globalHandlers[index] && globalHandlers[index].runOnce) {
@@ -1940,14 +1944,12 @@ class Hooks {
         while (index < length) {
           if (!localHandlers[index] || localHandlers[index].skip) {
             index += 1;
-            /* eslint-disable no-continue */
             continue;
           }
           // performance considerations - http://jsperf.com/call-vs-apply-for-a-plugin-architecture
           const res = localHandlers[index].call(context, p1, p2, p3, p4, p5, p6);
 
           if (res !== void 0) {
-            // eslint-disable-next-line no-param-reassign
             p1 = res;
           }
           if (localHandlers[index] && localHandlers[index].runOnce) {

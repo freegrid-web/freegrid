@@ -5,9 +5,8 @@ import unfreezeColumnItem from './contextMenuItem/unfreezeColumn';
 import type { MenuItem } from './../contextMenu/menuItem';
 
 import './manualColumnFreeze.css';
+import type ManualColumnMove from './../manualColumnMove/manualColumnMove';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- ManualColumnMove is not typed yet
-type ManualColumnMove = any;
 
 /**
  * This plugin allows to manually "freeze" and "unfreeze" a column using an entry in the Context Menu or using API.
@@ -35,7 +34,7 @@ class ManualColumnFreeze extends BasePlugin {
    *
    * @private
    */
-  manualColumnMovePlugin: ManualColumnMove = undefined;
+  manualColumnMovePlugin: ManualColumnMove | undefined = undefined;
 
   /** Whether the next column move is made by freezing or unfreezing (it may cross the frozen area). */
   #moveByFreeze = false;
@@ -155,7 +154,7 @@ class ManualColumnFreeze extends BasePlugin {
   getBestColumnReturnPosition(column: number): number {
     const { columnsMapper } = this.getMovePlugin();
     const basePosition = this.frozenColumnsBasePositions[column];
-    const initialCol: number = basePosition ?? columnsMapper.getValueByIndex(column);
+    const initialCol: number = basePosition ?? columnsMapper.getValueByIndex(column)!;
     let i: number = this.hot.getSettings().fixedColumnsLeft;
     let j: number | null = columnsMapper.getValueByIndex(i);
 

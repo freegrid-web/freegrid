@@ -26,8 +26,6 @@ export function createDataArray(rows = 100, cols = 4) {
       row.push(i);
 
       for (let j = 0; j < cols - 1; j++) {
-        /* eslint-disable no-mixed-operators */
-        /* eslint-disable no-bitwise */
         row.push(String.fromCharCode(65 + j % 20).toLowerCase() + (j / 20 | 0 || '')); // | 0 is parseInt - see http://jsperf.com/math-floor-vs-math-round-vs-parseint/18
       }
     }

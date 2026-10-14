@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-restricted-globals */
 /* eslint-disable no-global-assign */
 
 import {

@@ -5,7 +5,7 @@ import staticRegister from '../../../utils/staticRegister';
 import type { CompareFunctionFactory } from '../utils';
 
 /** Makes the comparator of two rows for `Array.prototype.sort` (each root comparator takes its own arguments). */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- each root comparator takes its own arguments and rows
 export type RootComparatorFactory = (...args: any[]) => (row: any, nextRow: any) => number;
 
 const {

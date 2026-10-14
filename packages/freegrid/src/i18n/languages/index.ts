@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 
 import deCH from './de-CH';
 import deDE from './de-DE';

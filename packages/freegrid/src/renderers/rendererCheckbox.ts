@@ -157,7 +157,6 @@ const listenToKeys = (instance: GridInstance): void => {
         if (cachedCellProperties.type !== 'checkbox') {
           return;
         }
-        // eslint-disable-next-line no-continue
         if (cachedCellProperties.readOnly === true) {
           continue;
         }

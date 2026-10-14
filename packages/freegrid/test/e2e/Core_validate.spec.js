@@ -1806,7 +1806,6 @@ describe('Core_validate', () => {
         {
           data: 'id',
           validator(value, cb) {
-            // eslint-disable-next-line
             cb(value == parseInt(value, 10));
           },
           allowInvalid: false
@@ -1863,7 +1862,6 @@ describe('Core_validate', () => {
           colMeta = {
             data: 'id',
             validator(value, cb) {
-              // eslint-disable-next-line
               cb(value == parseInt(value, 10));
             },
             allowInvalid: false
