@@ -939,6 +939,20 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
     // Trimmed first: `\s*` on both sides of the optional sign made the test quadratic on long runs of spaces.
     const isNumericData = (value: string) => value.length > 0 && /^[+-.]?\s*(?:(?:\d+(?:(\.|,)\d+)?(?:e[+-]?\d+)?)|(?:0x[a-f\d]+))$/.test(value.trim());
 
+    const resolve = () => {
+      let beforeChangeResult;
+
+      if (changes.length) {
+        beforeChangeResult = instance.runHooks('beforeChange', changes, source || 'edit');
+        if (isFunction(beforeChangeResult)) {
+          warn('Your beforeChange callback returns a function. It\'s not supported (the returned function will not be executed).');
+        } else if (beforeChangeResult === false) {
+          changes.splice(0, changes.length); // invalidate all changes (remove everything from array)
+        }
+      }
+      callback(); // called when async validators are resolved and beforeChange was not async
+    };
+
     waitingForValidator.onQueueEmpty = resolve;
 
     for (let i = changes.length - 1; i >= 0; i--) {
@@ -957,8 +971,8 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
         /* eslint-disable no-loop-func */
         if (instance.getCellValidator(cellProperties)) {
           waitingForValidator.addValidatorToQueue();
-          instance.validateCell(change[3], cellProperties, (function(index: number, cellPropertiesReference: AnyObject) {
-            return function(result: unknown) {
+          instance.validateCell(change[3], cellProperties, ((index: number, cellPropertiesReference: AnyObject) => {
+            return (result: unknown) => {
               if (typeof result !== 'boolean') {
                 throw new Error('Validation error: result is not boolean');
               }
@@ -973,25 +987,11 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
               }
               waitingForValidator.removeValidatorFormQueue();
             };
-          }(i, cellProperties)), source);
+          })(i, cellProperties), source);
         }
       }
     }
     waitingForValidator.checkIfQueueIsEmpty();
-
-    function resolve() {
-      let beforeChangeResult;
-
-      if (changes.length) {
-        beforeChangeResult = instance.runHooks('beforeChange', changes, source || 'edit');
-        if (isFunction(beforeChangeResult)) {
-          warn('Your beforeChange callback returns a function. It\'s not supported (the returned function will not be executed).');
-        } else if (beforeChangeResult === false) {
-          changes.splice(0, changes.length); // invalidate all changes (remove everything from array)
-        }
-      }
-      callback(); // called when async validators are resolved and beforeChange was not async
-    }
   }
 
   /**
@@ -1079,7 +1079,7 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
     let validator = instance.getCellValidator(cellProperties);
 
     // the `canBeValidated = false` argument suggests, that the cell passes validation by default.
-    function done(valid: boolean, canBeValidated = true) {
+    const done = (valid: boolean, canBeValidated = true) => {
       // Fixes GH#3903
       if (!canBeValidated || cellProperties.hidden === true) {
         callback(valid);
@@ -1094,7 +1094,7 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
         instance.view.wt.wtSettings.settings.cellRenderer(row, col, td);
       }
       callback(valid);
-    }
+    };
 
     if (isRegExp(validator)) {
       validator = (function(expression: RegExp) {
@@ -1404,12 +1404,12 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
   };
 
   /**
-  * Returns the last coordinates applied to the table as a CellRange object.
-  *
-  * @memberof Core#
-  * @function getSelectedRangeLast
-  * @since 0.36.0
-  * @returns {CellRange|undefined} Selected range object or undefined` if there is no selection.
+   * Returns the last coordinates applied to the table as a CellRange object.
+   *
+   * @memberof Core#
+   * @function getSelectedRangeLast
+   * @since 0.36.0
+   * @returns {CellRange|undefined} Selected range object or undefined` if there is no selection.
    */
   this.getSelectedRangeLast = function() {
     const selectedRange = this.getSelectedRange();
@@ -1548,7 +1548,7 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
     dataSource.colToProp = datamap.colToProp.bind(datamap);
     dataSource.propToCol = datamap.propToCol.bind(datamap);
 
-    clearCellSettingCache();
+    priv.cellSettings.length = 0; // clear the cell settings cache
 
     grid.adjustRowsAndCols();
     instance.runHooks('afterLoadData', priv.firstRun);
@@ -1560,10 +1560,6 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
       instance.render();
     }
     priv.isPopulated = true;
-
-    function clearCellSettingCache() {
-      priv.cellSettings.length = 0;
-    }
   };
 
   /**
@@ -2752,7 +2748,7 @@ function Core(this: Grid, rootElement: HTMLElement, userSettings: AnyObject,
       result = out;
 
     } else {
-      const translateVisualIndexToColumns = function(visualColumnIndex: number) {
+      const translateVisualIndexToColumns = (visualColumnIndex: number) => {
         const arr = [];
         const columnsLen = instance.countSourceCols();
         let index = 0;
