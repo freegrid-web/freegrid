@@ -68,6 +68,11 @@
 - Cleanup, part 2: no TODO/FIXME comments in the source. The open work they described is in issues #65–#71 (cell meta
   inheritance, visual/physical indexes, undo/redo, `populateFromArray`'s `direction`, `modifyRowData`, render cycles,
   Walkontable), and the code links to them; the rest became plain explanations or went away.
+- Fixes (CodeQL):
+  - `FreeGrid.helper.extend` skips a `__proto__` key (from JSON data it replaced the target's prototype), and
+    `deepExtend` no longer reaches `Object.prototype` through `__proto__` or `constructor.prototype`: it merges only
+    into the target's own values.
+  - `FreeGrid.helper.stripTags` repeats until no tag is left, so `<<b>script>` no longer becomes `<script>`.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

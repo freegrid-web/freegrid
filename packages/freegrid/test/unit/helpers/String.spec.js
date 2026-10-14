@@ -53,5 +53,10 @@ describe('String helper', () => {
       expect(stripTags('<strong>Hello</strong> <span class="my">my</span> world<sup>2</sup>')).toBe('Hello my world2');
       expect(stripTags('This is my <a href="https://handsontable.com">link</a>')).toBe('This is my link');
     });
+
+    it('should not leave a tag that removing an inner tag puts together', () => {
+      expect(stripTags('<<b>script>alert(1)<</b>/script>')).toBe('alert(1)');
+      expect(stripTags('<<i></i>img src=x onerror=alert(1)>')).toBe('');
+    });
   });
 });

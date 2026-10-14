@@ -4,6 +4,7 @@ import {
   mixin,
   clone,
   deepExtend,
+  extend,
   deepObjectSize,
   createObjectPropListener,
 } from 'handsontable/helpers/object';
@@ -302,6 +303,40 @@ describe('Object helper', () => {
 
       expect(propListener.isTouched()).toBe(true);
       expect(propListener.value).toBe(void 0);
+    });
+  });
+
+  describe('prototype keys from data', () => {
+    afterEach(() => {
+      delete Object.prototype.polluted;
+    });
+
+    it('extend should not change the target\'s prototype through a `__proto__` or `constructor` key', () => {
+      const target = {};
+
+      extend(target, JSON.parse('{"__proto__": {"polluted": "yes"}, "constructor": {"prototype": {}}, "a": 1}'));
+
+      expect(Object.getPrototypeOf(target)).toBe(Object.prototype);
+      expect(target.constructor).toBe(Object);
+      expect(target.polluted).toBeUndefined();
+      expect(target.a).toBe(1);
+    });
+
+    it('deepExtend should not change Object.prototype through `__proto__` or `constructor.prototype`', () => {
+      deepExtend({}, JSON.parse('{"__proto__": {"polluted": "yes"}}'));
+      deepExtend({}, JSON.parse('{"constructor": {"prototype": {"polluted": "yes"}}}'));
+
+      expect({}.polluted).toBeUndefined();
+    });
+
+    it('deepExtend should still merge nested objects and copy a `constructor` key as data', () => {
+      const target = { a: { b: 1 } };
+
+      deepExtend(target, { a: { c: 2 }, constructor: { name: 'x' } });
+
+      expect(target.a).toEqual({ b: 1, c: 2 });
+      expect(Object.prototype.hasOwnProperty.call(target, 'constructor')).toBe(true);
+      expect(target.constructor.name).toBe('x');
     });
   });
 });
