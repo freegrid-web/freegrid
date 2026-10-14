@@ -96,7 +96,7 @@ class ItemsFactory {
     orderPattern.length = 0;
 
     objectEach(predefinedItemsCollection as Record<string, MenuItem>, (value: MenuItem, key: string) => {
-      let menuItemKey = '';
+      let menuItemKey: string;
 
       if (value.name === SEPARATOR) {
         items[SEPARATOR] = value;

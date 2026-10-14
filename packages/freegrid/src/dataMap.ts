@@ -236,7 +236,7 @@ class DataMap {
     const columnCount = this.instance.countCols();
 
     while (numberOfCreatedRows < amount && this.instance.countSourceRows() < maxRows) {
-      let row: SourceRow = null;
+      let row: SourceRow;
 
       if (this.instance.dataType === 'array') {
         if (this.instance.getSettings().dataSchema) {

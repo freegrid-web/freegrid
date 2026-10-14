@@ -354,4 +354,18 @@ describe('PluginHooks', () => {
 
     hooks.deregister('myCustomHook');
   });
+
+  it('should warn once when a listener is added to the deprecated modifyRowData hook', () => {
+    const hooks = new Hooks();
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    hooks.add('modifyRowData', () => {}, {});
+    hooks.add('modifyRowData', () => {}, {});
+    hooks.add('modifyData', () => {}, {});
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain('"modifyRowData" hook is deprecated');
+    warnSpy.mockRestore();
+  });
 });
+

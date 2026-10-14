@@ -18,7 +18,7 @@ describe('settings', () => {
      * @returns {*}
      */
     function getSelected() {
-      let text = '';
+      let text;
 
       // IE8
       if (window.getSelection && window.getSelection().toString() && $(window.getSelection()).attr('type') !== 'Caret') {

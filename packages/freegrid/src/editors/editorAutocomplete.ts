@@ -220,7 +220,7 @@ class EditorAutocomplete extends EditorHandsontable {
     }
     let tempHeight = 0;
     let i = 0;
-    let lastRowHeight = 0;
+    let lastRowHeight: number;
 
     do {
       lastRowHeight = this.htEditor.getRowHeight(i) || this.htEditor.view.wt.wtSettings.settings.defaultRowHeight;

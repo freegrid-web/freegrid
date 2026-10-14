@@ -1,3 +1,6 @@
+import { warn } from './helpers/console';
+import { hasOwnProperty } from './helpers/object';
+
 /** A hook listener, with the flags Hooks keeps on it. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- each hook passes its own arguments
 export type HookCallback = ((...args: any[]) => unknown) & {
@@ -1003,9 +1006,11 @@ const REGISTERED_HOOKS: string[] = [
   'modifyData',
 
   /**
-   * Fired when a data was retrieved or modified.
+   * Fired when a row's data is read or written. A callback that returns something other than a number gives the data
+   * of that row instead.
    *
    * @event Hooks#modifyRowData
+   * @deprecated Use {@link Hooks#modifyData} instead. It will be removed in 1.0.
    * @param {Number} row Physical row index.
    */
   'modifyRowData',
@@ -1705,6 +1710,12 @@ const REGISTERED_HOOKS: string[] = [
   'afterUnlisten',
 ];
 
+/** Hooks that still work but will go: the warning shown (once per page) when a listener is added. */
+const DEPRECATED_HOOKS: Record<string, string> = {
+  modifyRowData: 'The "modifyRowData" hook is deprecated and will be removed in 1.0: use "modifyData" instead.',
+};
+const warnedHooks = new Set<string>();
+
 class Hooks {
   /** The global hooks (`FreeGrid.hooks`). */
   static getSingleton(): Hooks {
@@ -1799,6 +1810,10 @@ class Hooks {
     } else {
       const bucket = this.getBucket(context);
 
+      if (hasOwnProperty(DEPRECATED_HOOKS, key) && !warnedHooks.has(key)) {
+        warnedHooks.add(key);
+        warn(DEPRECATED_HOOKS[key]);
+      }
       if (typeof bucket[key] === 'undefined') {
         this.register(key);
         bucket[key] = [];

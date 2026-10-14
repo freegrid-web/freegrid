@@ -95,6 +95,13 @@
   - `loadData` drops the row and column order a user made with `manualRowMove` / `manualColumnMove`; an order given
     in the settings (an array) applies to the new data (#78).
   - A column frozen with `freezeColumn` keeps its place after `updateSettings` (#79).
+- Deprecated (removed in 1.0):
+  - The `modifyRowData` hook: use `modifyData`. Adding a listener to it logs a warning once (#69).
+  - `populateFromArray`'s `direction` argument, which has no effect (#68).
+- Tests: the four specs skipped since the move to current Chromium run again (#1–#4). Text measurements allow a
+  1–2px margin, and the date sort spec uses a valid format (`MM/DD/YYYY`) instead of `mm/dd/yy`.
+- Lint: `no-useless-assignment`, `no-unassigned-vars`, `no-dupe-else-if` and `no-constant-binary-expression` are
+  errors (Walkontable keeps `no-useless-assignment` off until #71); the dead assignments they found are gone.
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.

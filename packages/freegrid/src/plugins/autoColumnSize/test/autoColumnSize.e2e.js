@@ -509,8 +509,7 @@ describe('AutoColumnSize', () => {
     expect(spy.calls.mostRecent().args[5]).toEqual([{ id: 1000 }]);
   });
 
-  // FG-SKIP: text width of 'Processing' rounds to 139px in Chromium 156 vs 140px in Chromium 72 (baseline); same fonts — https://github.com/freegrid-web/freegrid/issues/2
-  xit('should not change width after select/click cell', async() => {
+  it('should not change width after select/click cell', async() => {
     handsontable({
       data: [
         ['Canceled'],
@@ -527,14 +526,16 @@ describe('AutoColumnSize', () => {
     await sleep(300);
 
     const cloneTopHider = spec().$container.find('.ht_clone_top .wtHider');
+    const widthBefore = cloneTopHider.width();
 
-    expect(cloneTopHider.width()).toEqual(140);
+    // Text width differs by a pixel between browser versions; what matters is that clicking does not change it.
+    expect(widthBefore).toBeAroundValue(140, 2);
 
     selectCell(0, 0);
 
     await sleep(300);
 
-    expect(cloneTopHider.width()).toEqual(140);
+    expect(cloneTopHider.width()).toEqual(widthBefore);
   });
 
   it('should not calculate any column widths, if there are no columns in the dataset', () => {

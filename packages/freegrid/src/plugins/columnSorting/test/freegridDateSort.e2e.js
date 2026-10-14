@@ -1,5 +1,4 @@
-// FreeGrid: date sorting with a valid moment format. Replaces coverage of the upstream spec that used
-// the malformed format 'mm/dd/yy' (see the FG-SKIP in columnSorting.e2e.js).
+// FreeGrid: more date sorting specs with valid formats (next to the date spec in columnSorting.e2e.js).
 describe('ColumnSorting (FreeGrid) data type: date with a valid format', () => {
   const id = 'testContainer';
 

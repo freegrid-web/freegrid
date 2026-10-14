@@ -28,7 +28,7 @@ const jQueryWrapper = (FreeGrid: FreeGridLike): void => {
   // A function, not an arrow: jQuery calls it with `this` set to the jQuery object.
   function plugin(this: JQueryObject, action?: string | object, ...args: unknown[]): unknown {
     const $this = this.first(); // Use only first element from list
-    let instance = ($this.data('freegrid') || $this.data('handsontable')) as Instance | undefined;
+    const instance = ($this.data('freegrid') || $this.data('handsontable')) as Instance | undefined;
 
     // Init case
     if (typeof action !== 'string') {
@@ -42,7 +42,6 @@ const jQueryWrapper = (FreeGrid: FreeGridLike): void => {
 
         PLUGIN_NAMES.forEach(name => $this.data(name, created));
         created.init();
-        instance = created;
       }
 
       return $this;

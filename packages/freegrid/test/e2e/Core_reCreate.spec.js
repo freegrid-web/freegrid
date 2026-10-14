@@ -12,8 +12,8 @@ describe('Core_reCreate', () => {
     }
   });
 
-  // FG-SKIP: Chromium 156 (LayoutNG) lays out the two-line header 1px taller than Chromium 72 used by the 6.2.2 baseline; same fonts (DejaVu/Liberation) — https://github.com/freegrid-web/freegrid/issues/1
-  xit('should correctly re-render corner header when there is multiline content', () => {
+  // Text layout differs by a pixel between browser versions: the size is checked with a small margin.
+  it('should correctly re-render corner header when there is multiline content', () => {
     const settings = {
       rowHeaders: true,
       colHeaders(col) {
@@ -25,6 +25,6 @@ describe('Core_reCreate', () => {
     handsontable(settings);
 
     expect(getTopLeftClone().width()).toBe(54);
-    expect(getTopLeftClone().height()).toBe(45);
+    expect(getTopLeftClone().height()).toBeAroundValue(45, 2);
   });
 });

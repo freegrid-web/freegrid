@@ -259,7 +259,7 @@ class ManualColumnMove extends BasePlugin {
     let width = 0;
 
     for (let i = from; i < to; i++) {
-      let columnWidth = 0;
+      let columnWidth: number;
 
       if (i < 0) {
         columnWidth = this.hot.view.wt.wtViewport.getRowHeaderWidth() || 0;
