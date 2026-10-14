@@ -9,15 +9,15 @@ api: [Lifecycle]
 ::: code-group
 
 ```sh [npm]
-npm install @freegrid/core
+npm install @freegrid/sheet
 ```
 
 ```sh [pnpm]
-pnpm add @freegrid/core
+pnpm add @freegrid/sheet
 ```
 
 ```sh [yarn]
-yarn add @freegrid/core
+yarn add @freegrid/sheet
 ```
 
 :::
@@ -43,8 +43,8 @@ Load the build from a `<script>` tag. It defines a global `FreeGrid` and needs n
 numbers and dates and shows its date picker itself.
 
 ```html
-<link rel="stylesheet" href="@freegrid/core/dist/freegrid.min.css">
-<script src="@freegrid/core/dist/freegrid.min.js"></script>
+<link rel="stylesheet" href="@freegrid/sheet/dist/freegrid.min.css">
+<script src="@freegrid/sheet/dist/freegrid.min.js"></script>
 
 <div id="grid"></div>
 <script>

@@ -14,20 +14,20 @@ modernized step by step (TypeScript, signals-based reactivity, CSS-variable them
 
 ## Status
 
-FreeGrid is on npm as [`@freegrid/core`](https://www.npmjs.com/package/@freegrid/core) (latest: `0.2.0`). Until
+FreeGrid is on npm as [`@freegrid/sheet`](https://www.npmjs.com/package/@freegrid/sheet) (latest: `0.2.0`). Until
 `1.0.0` the API may still change between minor versions (see the [changelog](CHANGELOG.md)). What comes next:
 the [roadmap](https://freegrid-web.github.io/freegrid/project/roadmap).
 
 ## Usage
 
 ```bash
-npm install @freegrid/core
+npm install @freegrid/sheet
 ```
 
 
 ```js
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/dist/freegrid.full.css';
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freegrid.full.css';
 
 new FreeGrid(document.getElementById('grid'), {
   data: [['A1', 'B1'], ['A2', 'B2']],
@@ -39,12 +39,12 @@ new FreeGrid(document.getElementById('grid'), {
 Migrating from Handsontable 6.x (compatibility layer, available until FreeGrid 1.0):
 
 ```js
-import Handsontable from '@freegrid/core/compat'; // the rest of your code stays the same
+import Handsontable from '@freegrid/sheet/compat'; // the rest of your code stays the same
 ```
 
 With a `<script>` tag: load `dist/freegrid.full.js`, then optionally `dist/compat.js` to get
 `window.Handsontable`. Locales: `dist/languages/<code>.js` (or `all.js`) after the grid script; with a
-bundler, `import '@freegrid/core/languages/de-DE';` (or `@freegrid/core/languages/all`).
+bundler, `import '@freegrid/sheet/languages/de-DE';` (or `@freegrid/sheet/languages/all`).
 
 ## Development
 

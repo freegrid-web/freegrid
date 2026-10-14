@@ -11,8 +11,8 @@ languages: `de-CH`, `de-DE`, `es-MX`, `fr-FR`, `it-IT`, `ja-JP`, `ko-KR`, `lv-LV
 Load a language, then select it with the `language` setting:
 
 ```js
-import FreeGrid from '@freegrid/core';
-import '@freegrid/core/languages/de-DE'; // or '@freegrid/core/languages/all'
+import FreeGrid from '@freegrid/sheet';
+import '@freegrid/sheet/languages/de-DE'; // or '@freegrid/sheet/languages/all'
 
 new FreeGrid(container, { data, contextMenu: true, language: 'de-DE' });
 ```

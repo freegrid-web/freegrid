@@ -32,10 +32,10 @@ jobs:
       - run: pnpm lint
       - run: node --test tools/*.test.mjs
       - run: pnpm typecheck
-      - run: pnpm --filter @freegrid/core test:unit
-      - run: pnpm --filter @freegrid/core test:types
-      - run: pnpm --filter @freegrid/core build
-      - run: pnpm --filter @freegrid/core test:dist
+      - run: pnpm --filter @freegrid/sheet test:unit
+      - run: pnpm --filter @freegrid/sheet test:types
+      - run: pnpm --filter @freegrid/sheet build
+      - run: pnpm --filter @freegrid/sheet test:dist
 
   docs:
     needs: checks
@@ -99,11 +99,11 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version-file: .nvmrc, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @freegrid/core exec playwright install --with-deps
+      - run: pnpm --filter @freegrid/sheet exec playwright install --with-deps
       # The baseline resolved `sans-serif` to DejaVu Sans; layout specs depend on it.
       - run: sudo apt-get install -y --no-install-recommends fonts-dejavu-core
-      - run: pnpm --filter @freegrid/core build
-      - run: pnpm --filter @freegrid/core ${{ matrix.script }}
+      - run: pnpm --filter @freegrid/sheet build
+      - run: pnpm --filter @freegrid/sheet ${{ matrix.script }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

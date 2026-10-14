@@ -97,7 +97,7 @@ describe('dist outputs', () => {
     const w = windowWith(code);
 
     expect(typeof w.FreeGrid).toBe('function');
-    expect(w.FreeGrid.packageName).toBe('@freegrid/core');
+    expect(w.FreeGrid.packageName).toBe('@freegrid/sheet');
     expect(w.Handsontable).toBeUndefined();
     PLUGINS_622.forEach(p => expect(typeof w.FreeGrid.plugins[p], p).toBe('function'));
   });
@@ -236,7 +236,7 @@ describe('dist outputs', () => {
     const code = read('esm/languages/de-DE.js');
 
     expect(pkg.exports['./languages/*']).toBeDefined();
-    expect(code).toMatch(/from ["']@freegrid\/core["']/);
+    expect(code).toMatch(/from ["']@freegrid\/sheet["']/);
     expect(code).toMatch(/registerLanguageDictionary/);
     expect(existsSync(dist('esm/languages/all.js'))).toBe(true);
   });

@@ -5,7 +5,7 @@ FreeGrid is an independent, MIT-licensed, Excel-style spreadsheet component for 
 
 ## Repository
 
-- `packages/freegrid`: the library (`@freegrid/core` on npm today; it will be renamed to `@freegrid/sheet`).
+- `packages/freegrid`: the library (`@freegrid/sheet` on npm; `@freegrid/core` was its name up to 0.2.0).
   - `src/core.ts` is the grid (`Core` class); `src/tableView.ts` connects it to Walkontable.
   - `src/3rdparty/walkontable/`: the rendering engine (virtual rendering, overlays for frozen rows, columns and
     headers, selection borders). Still JavaScript.
