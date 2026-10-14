@@ -66,4 +66,35 @@ describe('Core_destroy', () => {
 
     expect(hot.isDestroyed).toBe(true);
   });
+
+  it('should make every method throw after destroy, also `destroy` and methods added to the instance', () => {
+    const hot = handsontable({ data: [[1, 2]] });
+
+    hot.myMethod = () => 'mine';
+    hot.destroy();
+    spec().$container.remove();
+    spec().$container = null; // afterEach must not destroy it again
+
+    ['getData', 'selectCell', 'render', 'getPlugin', 'destroy', 'myMethod', 'runHooks'].forEach((name) => {
+      expect(() => hot[name]()).toThrowError(
+        `The "${name}" method cannot be called because this FreeGrid instance has been destroyed`);
+    });
+  });
+
+  it('should drop the instance data after destroy, except the guid', () => {
+    const hot = handsontable({ data: [[1, 2]] });
+    const guid = hot.guid;
+
+    hot.destroy();
+    spec().$container.remove();
+    spec().$container = null; // afterEach must not destroy it again
+
+    expect(hot.guid).toBe(guid);
+    expect(hot.rootElement).toBe(null);
+    expect(hot.view).toBe(null);
+    expect(hot.selection).toBe(null);
+    expect(hot.container).toBe(null);
+    expect(hot.isDestroyed).toBe(true);
+  });
 });
+
