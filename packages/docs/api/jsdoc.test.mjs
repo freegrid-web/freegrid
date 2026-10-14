@@ -66,11 +66,11 @@ test('marks private entries', () => {
   assert.equal(hidden.private, true);
 });
 
-test('reads an event, says FreeGrid instead of the upstream name, keeps deprecation and version', () => {
+test('reads an event, says FreeSheet instead of the upstream name, keeps deprecation and version', () => {
   const event = parseBlocks(SOURCE).find(block => block.kind === 'event');
 
   assert.equal(event.name, 'afterChange');
-  assert.equal(event.description, 'Fired after one or more cells has been changed in FreeGrid.');
+  assert.equal(event.description, 'Fired after one or more cells has been changed in FreeSheet.');
   assert.equal(event.params[0].name, 'changes');
   assert.equal(event.deprecated, 'Use something else.');
   assert.equal(event.since, '0.35.0');
@@ -229,8 +229,8 @@ test('keeps paragraphs and lists of a description, and does not turn indented li
 test('drops "see the docs" sentences and placeholder links to the repository, and resolves Options#name links', () => {
   const [block] = parseBlocks(`
   /**
-   * Makes cell [read only](https://github.com/freegrid-web/freegrid). See [data-schema](https://github.com/freegrid-web/freegrid) for more options.
-   * You can read more about renderers [in the documentation](https://github.com/freegrid-web/freegrid). Uses the [Options#type](https://github.com/freegrid-web/freegrid) key.
+   * Makes cell [read only](https://github.com/freegrid-web/sheet). See [data-schema](https://github.com/freegrid-web/sheet) for more options.
+   * You can read more about renderers [in the documentation](https://github.com/freegrid-web/sheet). Uses the [Options#type](https://github.com/freegrid-web/sheet) key.
    * @event Hooks#x
    */`);
 

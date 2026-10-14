@@ -2,7 +2,7 @@ name: Release
 
 # Publishes @freegrid/sheet to npm when a version tag (v0.1.0, v0.2.0, …) is pushed.
 # npm trusted publishing: npmjs.com → @freegrid/sheet → Settings → Trusted Publisher must name this repository
-# (freegrid-web/freegrid) and this workflow file (release.yml). No npm token is stored in the repository.
+# (freegrid-web/sheet) and this workflow file (release.yml). No npm token is stored in the repository.
 on:
   push:
     tags: ['v*']
@@ -22,7 +22,7 @@ jobs:
       - run: npm install -g npm@^11.5.1
       - name: Tag matches the package version
         run: |
-          version=$(node -p "require('./packages/freegrid/package.json').version")
+          version=$(node -p "require('./packages/sheet/package.json').version")
           if [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
             exit 1
@@ -36,7 +36,7 @@ jobs:
       - run: pnpm --filter @freegrid/sheet test:dist
       # A version published by hand (the first release of a new package name) is skipped.
       - name: Publish to npm
-        working-directory: packages/freegrid
+        working-directory: packages/sheet
         run: |
           name=$(node -p "require('./package.json').name")
           version=$(node -p "require('./package.json').version")

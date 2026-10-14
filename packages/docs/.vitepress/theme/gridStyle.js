@@ -2,7 +2,7 @@
 // browser. Modern by default.
 import { ref, watch } from 'vue';
 
-const KEY = 'freegrid-docs-grid-style';
+const KEY = 'freesheet-docs-grid-style';
 
 export const GRID_STYLES = [
   { value: 'modern', label: 'Modern' },

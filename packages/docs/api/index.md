@@ -11,7 +11,7 @@ const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 # API reference
 
-The reference is generated from FreeGrid's source code, so it lists everything:
+The reference is generated from FreeSheet's source code, so it lists everything:
 
 - [Methods](./methods): every method of a grid.
 - [Events](./events): every event (hook) with its arguments.
@@ -24,10 +24,10 @@ screens, the list is at the end of the page.
 ## Constructor
 
 ```js
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.css';
 
-const grid = new FreeGrid(element, settings);
+const grid = new FreeSheet(element, settings);
 ```
 
 | Argument | Type | Description |
@@ -56,8 +56,8 @@ and remove the grid with [`grid.destroy()`](./methods#destroy).
 
 | Member | Description |
 | --- | --- |
-| `FreeGrid.version`, `FreeGrid.buildDate` | Build information |
-| `FreeGrid.languages` | `registerLanguageDictionary`, `getLanguageDictionary`, `dictionaryKeys` |
-| `FreeGrid.cellTypes`, `FreeGrid.editors`, `FreeGrid.renderers`, `FreeGrid.validators` | Built-ins and `register…` functions for your own |
-| `FreeGrid.hooks` | Global hooks: `FreeGrid.hooks.add(name, callback)` |
-| `FreeGrid.helper`, `FreeGrid.dom` | Utility functions, e.g. `FreeGrid.helper.createSpreadsheetData(rows, cols)` |
+| `FreeSheet.version`, `FreeSheet.buildDate` | Build information |
+| `FreeSheet.languages` | `registerLanguageDictionary`, `getLanguageDictionary`, `dictionaryKeys` |
+| `FreeSheet.cellTypes`, `FreeSheet.editors`, `FreeSheet.renderers`, `FreeSheet.validators` | Built-ins and `register…` functions for your own |
+| `FreeSheet.hooks` | Global hooks: `FreeSheet.hooks.add(name, callback)` |
+| `FreeSheet.helper`, `FreeSheet.dom` | Utility functions, e.g. `FreeSheet.helper.createSpreadsheetData(rows, cols)` |

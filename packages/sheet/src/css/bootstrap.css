@@ -1,0 +1,65 @@
+/**
+ * Fix for bootstrap styles
+ */
+.freesheet .table th, .freesheet .table td {
+  border-top: none;
+}
+
+.freesheet tr {
+  background: var(--fs-cell-background);
+}
+
+.freesheet td {
+  background-color: inherit;
+}
+
+.freesheet .table caption + thead tr:first-child th,
+.freesheet .table caption + thead tr:first-child td,
+.freesheet .table colgroup + thead tr:first-child th,
+.freesheet .table colgroup + thead tr:first-child td,
+.freesheet .table thead:first-child tr:first-child th,
+.freesheet .table thead:first-child tr:first-child td {
+  border-top: 1px solid var(--fs-cell-border-color);
+}
+
+/* table-bordered */
+.freesheet .table-bordered {
+  border: 0;
+  border-collapse: separate;
+}
+
+.freesheet .table-bordered th,
+.freesheet .table-bordered td {
+  border-left: none;
+}
+
+.freesheet .table-bordered th:first-child,
+.freesheet .table-bordered td:first-child {
+  border-left: 1px solid var(--fs-cell-border-color);
+}
+
+.freesheet .table > tbody > tr > td,
+.freesheet .table > tbody > tr > th,
+.freesheet .table > tfoot > tr > td,
+.freesheet .table > tfoot > tr > th,
+.freesheet .table > thead > tr > td,
+.freesheet .table > thead > tr > th {
+  line-height: calc(var(--fs-row-height) - 2px);
+  padding: 0 var(--fs-cell-padding-x);
+}
+
+.col-lg-1.freesheet, .col-lg-10.freesheet, .col-lg-11.freesheet, .col-lg-12.freesheet,
+.col-lg-2.freesheet, .col-lg-3.freesheet, .col-lg-4.freesheet, .col-lg-5.freesheet, .col-lg-6.freesheet, .col-lg-7.freesheet, .col-lg-8.freesheet, .col-lg-9.freesheet,
+.col-md-1.freesheet, .col-md-10.freesheet, .col-md-11.freesheet, .col-md-12.freesheet,
+.col-md-2.freesheet, .col-md-3.freesheet, .col-md-4.freesheet, .col-md-5.freesheet, .col-md-6.freesheet, .col-md-7.freesheet, .col-md-8.freesheet, .col-md-9.freesheet
+.col-sm-1.freesheet, .col-sm-10.freesheet, .col-sm-11.freesheet, .col-sm-12.freesheet,
+.col-sm-2.freesheet, .col-sm-3.freesheet, .col-sm-4.freesheet, .col-sm-5.freesheet, .col-sm-6.freesheet, .col-sm-7.freesheet, .col-sm-8.freesheet, .col-sm-9.freesheet
+.col-xs-1.freesheet, .col-xs-10.freesheet, .col-xs-11.freesheet, .col-xs-12.freesheet,
+.col-xs-2.freesheet, .col-xs-3.freesheet, .col-xs-4.freesheet, .col-xs-5.freesheet, .col-xs-6.freesheet, .col-xs-7.freesheet, .col-xs-8.freesheet, .col-xs-9.freesheet {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.freesheet .table-striped > tbody > tr:nth-of-type(even) {
+  background-color: var(--fs-cell-background);
+}

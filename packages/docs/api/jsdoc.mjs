@@ -1,4 +1,4 @@
-// Reads FreeGrid's JSDoc comments for the API reference (see api.data.mjs). Only what the reference shows is kept:
+// Reads FreeSheet's JSDoc comments for the API reference (see api.data.mjs). Only what the reference shows is kept:
 // description, parameters, return value, examples, and the deprecated/since/private markers.
 
 const BLOCK = /\/\*\*([\s\S]*?)\*\//g;
@@ -23,11 +23,11 @@ const linkTo = (target, text) => {
 };
 
 // Upstream links to its documentation were replaced with links to the repository; they lead nowhere useful.
-const PLACEHOLDER = '\\]\\(https://github\\.com/freegrid-web/freegrid\\)';
+const PLACEHOLDER = '\\]\\(https://github\\.com/freegrid-web/sheet\\)';
 const SEE_DOCS = new RegExp(`(^|[.!?][ \\t]+|\\n)[ \\t]*(See|You can read more|See more|Read more)[^.\\n]*${PLACEHOLDER}[^.\\n]*\\.[ \\t]*`, 'g');
 const PLACEHOLDER_LINK = new RegExp(`\\[([^\\]]+)${PLACEHOLDER}`, 'g');
 
-// Upstream wording and links: FreeGrid's own name; links to other sites keep only their text.
+// Upstream wording and links: FreeSheet's own name; links to other sites keep only their text.
 const clean = text => text
   .replace(/\[(Core|Hooks|Options)#(\w+)\]\(https?:[^)]*\)/g, (match, owner, member) => linkTo(`${owner}#${member}`))
   .replace(SEE_DOCS, '$1')
@@ -35,7 +35,7 @@ const clean = text => text
   .replace(/[ \t]+\n/g, '\n')
   .replace(/\[([^\]]+)\]\{@link\s+([^}\s]+)\s*\}/g, (match, label, target) => (/^https?:/.test(target) ? label : linkTo(target, label)))
   .replace(/\{@link\s+([^}\s]+)(?:\s+([^}]*))?\}/g, (match, target, label) => (/^https?:/.test(target) ? (label || '') : linkTo(target, label)))
-  .replace(/Handsontable/g, 'FreeGrid');
+  .replace(/Handsontable/g, 'FreeSheet');
 
 // Markdown text: paragraphs and lists stay; 4+ spaces of indentation (which markdown would show as code) go.
 const prose = lines => clean(lines

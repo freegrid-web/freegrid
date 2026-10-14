@@ -2,7 +2,7 @@
 // or `settings` list names it, or whose `match` pattern fits its name. Guide pages name topics in their frontmatter
 // (`api: [Data]`) to list them in the right-hand column.
 
-// Settings and events of features FreeGrid does not have (yet): the code still knows their names, the reference does
+// Settings and events of features FreeSheet does not have (yet): the code still knows their names, the reference does
 // not list them. See the roadmap.
 export const UNAVAILABLE = new Set([
   'licenseKey', 'collapsibleColumns', 'columnSummary', 'dropdownMenu', 'filters', 'formulas', 'ganttChart',

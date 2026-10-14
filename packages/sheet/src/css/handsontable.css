@@ -1,0 +1,751 @@
+/* Text color and font from the theme variables. While they are not set (the default), these declarations are
+   invalid at computed-value time and the properties are inherited from the page, as before. */
+.freesheet,
+.fs-context-menu,
+.fs-comments-container,
+.fs-datepicker-holder {
+  color: var(--fs-cell-text);
+  font-family: var(--fs-font-family, var(--fs-style-font-family));
+  font-size: var(--fs-font-size, var(--fs-style-font-size));
+}
+
+.freesheet {
+  position: relative;
+}
+
+.freesheet .hide{
+  display: none;
+}
+
+.freesheet .relative {
+  position: relative;
+}
+
+.freesheet.fs-auto-size {
+  visibility: hidden;
+  left: -99000px;
+  position: absolute;
+  top: -99000px;
+}
+
+.freesheet .fs-hider {
+  width: 0;
+}
+
+.freesheet .fs-spreader {
+  position: relative;
+  width: 0; /*must be 0, otherwise blank space appears in scroll demo after scrolling max to the right */
+  height: auto;
+}
+
+.freesheet table,
+.freesheet tbody,
+.freesheet thead,
+.freesheet td,
+.freesheet th,
+.freesheet input,
+.freesheet textarea,
+.freesheet div {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+}
+
+.freesheet input,
+.freesheet textarea {
+  min-height: initial;
+}
+
+.freesheet table.fs-core {
+  border-collapse: separate;
+  /* it must be separate, otherwise there are offset miscalculations in WebKit: http://stackoverflow.com/questions/2655987/border-collapse-differences-in-ff-and-webkit */
+  /* this actually only changes appearance of user selection - does not make text unselectable */
+  /* -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none; */ /* no browser supports unprefixed version */
+  border-spacing: 0;
+  margin: 0;
+  border-width: 0;
+  table-layout: fixed;
+  width: 0;
+  outline-width: 0;
+  cursor: default;
+  /* reset bootstrap table style. for more info see: https://github.com/handsontable/handsontable/issues/224 */
+  max-width: none;
+  max-height: none;
+}
+
+.freesheet col {
+  width: 50px;
+}
+
+.freesheet col.rowHeader {
+  width: 50px;
+}
+
+.freesheet th,
+.freesheet td {
+  border-top-width: 0;
+  border-left-width: 0;
+  border-right: 1px solid var(--fs-cell-border-color);
+  border-bottom: 1px solid var(--fs-cell-border-color);
+  height: calc(var(--fs-row-height) - 1px);
+  empty-cells: show;
+  line-height: calc(var(--fs-row-height) - 2px);
+  padding: 0 var(--fs-cell-padding-x);
+  /* top, bottom padding different than 0 is handled poorly by FF with HTML5 doctype */
+  background-color: var(--fs-cell-background);
+  vertical-align: top;
+  overflow: hidden;
+  outline-width: 0;
+  white-space: pre-line;
+  /* preserve new line character in cell */
+  background-clip: padding-box;
+}
+
+.freesheet td.fs-invalid {
+  background-color: var(--fs-invalid-background) !important; /*gives priority over td.area selection background*/
+}
+
+.freesheet td.fs-no-wrap {
+  white-space: nowrap;
+}
+
+.freesheet th:last-child {
+  /*Foundation framework fix*/
+  border-right: 1px solid var(--fs-cell-border-color);
+  border-bottom: 1px solid var(--fs-cell-border-color);
+}
+
+.freesheet tr:first-child th.fs-no-frame,
+.freesheet th:first-child.fs-no-frame,
+.freesheet th.fs-no-frame {
+  border-left-width: 0;
+  background-color: var(--fs-cell-background);
+  border-color: var(--fs-cell-background);
+}
+
+.freesheet th:first-child,
+.freesheet th:nth-child(2),
+.freesheet td:first-of-type,
+.freesheet .fs-no-frame + th,
+.freesheet .fs-no-frame + td {
+  border-left: 1px solid var(--fs-cell-border-color);
+}
+
+.freesheet.fs-row-headers thead tr th:nth-child(2) {
+  border-left: 1px solid var(--fs-cell-border-color);
+}
+
+.freesheet tr:first-child th,
+.freesheet tr:first-child td {
+  border-top: 1px solid var(--fs-cell-border-color);
+}
+
+.fs-master:not(.innerBorderLeft):not(.emptyColumns) ~ .freesheet tbody tr th,
+.fs-master:not(.innerBorderLeft):not(.emptyColumns) ~ .freesheet:not(.fs-clone-top) thead tr th:first-child {
+  border-right-width: 0;
+}
+
+.fs-master:not(.innerBorderTop) thead tr:last-child th,
+.fs-master:not(.innerBorderTop) ~ .freesheet thead tr:last-child th,
+.fs-master:not(.innerBorderTop) thead tr.lastChild th,
+.fs-master:not(.innerBorderTop) ~ .freesheet thead tr.lastChild th {
+  border-bottom-width: 0;
+}
+
+.freesheet th {
+  background-color: var(--fs-header-background);
+  color: var(--fs-header-text);
+  text-align: center;
+  font-weight: var(--fs-header-font-weight);
+  white-space: nowrap;
+}
+
+.freesheet thead th {
+  padding: 0;
+}
+
+.freesheet th.active {
+  background-color: var(--fs-header-active-background);
+}
+.freesheet thead th .relative {
+  padding: 2px 4px;
+}
+
+/* plugins */
+
+/* row + column resizer*/
+.freesheet .manualColumnResizer {
+  position: fixed;
+  top: 0;
+  cursor: col-resize;
+  z-index: 110;
+  width: 5px;
+  height: 25px;
+}
+
+.freesheet .manualRowResizer {
+  position: fixed;
+  left: 0;
+  cursor: row-resize;
+  z-index: 110;
+  height: 5px;
+  width: 50px;
+}
+
+.freesheet .manualColumnResizer:hover,
+.freesheet .manualColumnResizer.active,
+.freesheet .manualRowResizer:hover,
+.freesheet .manualRowResizer.active {
+  background-color: var(--fs-resizer-color);
+}
+
+.freesheet .manualColumnResizerGuide {
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: var(--fs-resizer-color);
+  display: none;
+  width: 0;
+  border-right: 1px dashed var(--fs-resizer-guide-border-color);
+  margin-left: 5px;
+}
+
+.freesheet .manualRowResizerGuide {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  background-color: var(--fs-resizer-color);
+  display: none;
+  height: 0;
+  border-bottom: 1px dashed var(--fs-resizer-guide-border-color);
+  margin-top: 5px;
+}
+
+.freesheet .manualColumnResizerGuide.active,
+.freesheet .manualRowResizerGuide.active {
+  display: block;
+  z-index: 199;
+}
+
+.freesheet .columnSorting {
+  position: relative;
+}
+
+.freesheet .columnSorting.sortAction:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.freesheet span.colHeader {
+  display: inline-block;
+  line-height: 1.1;
+}
+
+/* Arrow position */
+.freesheet span.colHeader.columnSorting::before {
+  /* Centering start */
+  top: 50%;
+  margin-top: -6px; /* One extra pixel for purpose of proper positioning of sorting arrow, when `font-size` set to default */
+  /* Centering end */
+
+  padding-left: 8px; /* For purpose of continuous mouse over experience, when moving between the `span` and the `::before` elements */
+  position: absolute;
+  right: -9px;
+
+  content: '';
+  height: 10px;
+  width: 5px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position-x: right;
+}
+
+.freesheet span.colHeader.columnSorting.ascending::before {
+  /* arrow up; 20 x 40 px, scaled to 5 x 10 px; base64 size: 0.3kB */
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAoCAMAAADJ7yrpAAAAKlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKE86IAAAADXRSTlMABBEmRGprlJW72e77tTkTKwAAAFNJREFUeAHtzjkSgCAUBNHPgsoy97+ulGXRqJE5L+xkxoYt2UdsLb5bqFINz+aLuuLn5rIu2RkO3fZpWENimNgiw6iBYRTPMLJjGFxQZ1hxxb/xBI1qC8k39CdKAAAAAElFTkSuQmCC");
+}
+
+.freesheet span.colHeader.columnSorting.descending::before {
+  /* arrow down; 20 x 40 px, scaled to 5 x 10 px; base64 size: 0.3kB */
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAoCAMAAADJ7yrpAAAAKlBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKE86IAAAADXRSTlMABBEmRGprlJW72e77tTkTKwAAAFJJREFUeAHtzjkSgCAQRNFmQYUZ7n9dKUvru0TmvPAn3br0QfgdZ5xx6x+rQn23GqTYnq1FDcnuzZIO2WmedVqIRVxgGKEyjNgYRjKGkZ1hFIZ3I70LyM0VtU8AAAAASUVORK5CYII=");
+}
+
+.fs-ghost-table .fs-core span.colHeader.columnSorting:not(.indicatorDisabled)::after {
+  content: '*';
+  display: inline-block;
+  position: relative;
+  /* The multi-line header and header with longer text need more padding to not hide arrow, 
+  we make header wider in `GhostTable` to make some space for arrow which is positioned absolutely in the main table */
+  padding-right: 20px;
+}
+
+/* Selection */
+.freesheet .fs-selection-border {
+  position: absolute;
+  font-size: 0;
+}
+.freesheet .fs-selection-border.hidden{
+  display:none !important;
+}
+
+/* A layer order of the selection types */
+.freesheet .fs-selection-border.current {
+  z-index: 10;
+}
+.freesheet .fs-selection-border.area {
+  z-index: 8;
+}
+.freesheet .fs-selection-border.fill {
+  z-index: 6;
+}
+
+.freesheet td.area,
+.freesheet td.area-1,
+.freesheet td.area-2,
+.freesheet td.area-3,
+.freesheet td.area-4,
+.freesheet td.area-5,
+.freesheet td.area-6,
+.freesheet td.area-7 {
+  position: relative;
+}
+
+.freesheet td.area:before,
+.freesheet td.area-1:before,
+.freesheet td.area-2:before,
+.freesheet td.area-3:before,
+.freesheet td.area-4:before,
+.freesheet td.area-5:before,
+.freesheet td.area-6:before,
+.freesheet td.area-7:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--fs-selection-area-background, var(--fs-style-selection-area-background));
+}
+
+.freesheet td.area:before {
+  opacity: 0.1;
+}
+.freesheet td.area-1:before {
+  opacity: 0.2;
+}
+.freesheet td.area-2:before {
+  opacity: 0.27;
+}
+.freesheet td.area-3:before {
+  opacity: 0.35;
+}
+.freesheet td.area-4:before {
+  opacity: 0.41;
+}
+.freesheet td.area-5:before {
+  opacity: 0.47;
+}
+.freesheet td.area-6:before {
+  opacity: 0.54;
+}
+.freesheet td.area-7:before {
+  opacity: 0.58;
+}
+
+.freesheet tbody th.fs-highlight,
+.freesheet thead th.fs-highlight {
+  background-color: var(--fs-header-highlight-background, var(--fs-style-header-highlight-background));
+}
+
+.freesheet tbody th.fs-active-highlight,
+.freesheet thead th.fs-active-highlight {
+  background-color: var(--fs-header-active-highlight-background, var(--fs-style-header-active-highlight-background));
+  color: var(--fs-header-active-highlight-text, var(--fs-style-header-active-highlight-text));
+}
+
+/* fill handle */
+
+.freesheet .fs-selection-border.corner {
+  font-size: 0;
+  cursor: crosshair;
+  border-radius: var(--fs-fill-handle-radius);
+}
+
+.freesheet .fs-border.fs-fill-border {
+  background: var(--fs-fill-border-color);
+  width: 1px;
+  height: 1px;
+}
+
+.fs-editor-input {
+  border: none;
+  outline-width: 0;
+  margin: 0;
+  padding: 1px 5px 0 5px;
+  font-family: inherit;
+  line-height: calc(var(--fs-row-height) - 2px);
+  font-size: inherit;
+  box-shadow: 0 0 0 2px var(--fs-editor-border-color, var(--fs-style-editor-border-color)) inset;
+  resize: none;
+  /*below are needed to overwrite stuff added by jQuery UI Bootstrap theme*/
+  display: block;
+  color: var(--fs-editor-text);
+  border-radius: 0;
+  background-color: var(--fs-editor-background);
+  /*overwrite styles potentionally made by a framework*/
+  border-radius: var(--fs-radius);
+}
+
+.fs-editor-holder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 104;
+}
+
+.fs-select-editor {
+  -webkit-appearance: menulist-button !important;
+  position: absolute;
+  width: auto;
+}
+
+/*
+TextRenderer readOnly cell
+*/
+
+.freesheet .fs-dimmed {
+  color: var(--fs-readonly-text);
+}
+
+.freesheet .fs-submenu {
+  position: relative;
+}
+
+.freesheet .fs-submenu :after{
+  content: '▶';
+  color: var(--fs-menu-arrow-color);
+  position: absolute;
+  right: 5px;
+  font-size: 9px;
+}
+
+
+/*
+TextRenderer horizontal alignment
+*/
+.freesheet .fs-left{
+  text-align: left;
+}
+.freesheet .fs-center{
+  text-align: center;
+}
+.freesheet .fs-right{
+  text-align: right;
+}
+.freesheet .fs-justify{
+  text-align: justify;
+}
+/*
+TextRenderer vertical alignment
+*/
+.freesheet .fs-top{
+  vertical-align: top;
+}
+.freesheet .fs-middle{
+  vertical-align: middle;
+}
+.freesheet .fs-bottom{
+  vertical-align: bottom;
+}
+
+/*
+TextRenderer placeholder value
+*/
+
+.freesheet .fs-placeholder {
+  color: var(--fs-placeholder-text);
+}
+
+/*
+AutocompleteRenderer down arrow
+*/
+
+.freesheet .fs-autocomplete-arrow {
+  float: right;
+  font-size: 10px;
+  color: var(--fs-autocomplete-arrow-color);
+  cursor: default;
+  width: 16px;
+  text-align: center;
+}
+
+.freesheet td .fs-autocomplete-arrow:hover {
+  color: var(--fs-autocomplete-arrow-hover-color);
+}
+
+.freesheet td.area .fs-autocomplete-arrow {
+  color: var(--fs-autocomplete-arrow-selected-color);
+}
+
+/*
+CheckboxRenderer
+*/
+.freesheet .fs-checkbox-renderer-input {
+  display: inline-block;
+  vertical-align: middle;
+}
+.freesheet .fs-checkbox-renderer-input.noValue {
+  opacity: 0.5;
+}
+.freesheet .fs-checkbox-renderer-label {
+  cursor: pointer;
+  display: inline-block;
+  width: 100%;
+}
+
+/**
+ * Handsontable in Handsontable
+ */
+
+.freesheet .freesheet.fs-clone-top .fs-hider {
+  padding: 0 0 5px 0;
+}
+
+/**
+* Autocomplete Editor
+*/
+.freesheet .autocompleteEditor.freesheet {
+  padding-right: 17px;
+}
+.freesheet .autocompleteEditor.freesheet.fs-mac-scroll {
+  padding-right: 15px;
+}
+
+
+/**
+ * Handsontable listbox theme
+ */
+
+.freesheet.listbox {
+  margin: 0;
+}
+
+.freesheet.listbox .fs-master table {
+  border: 1px solid var(--fs-listbox-border-color);
+  border-collapse: separate;
+  background: var(--fs-listbox-background);
+}
+
+.freesheet.listbox th,
+.freesheet.listbox tr:first-child th,
+.freesheet.listbox tr:last-child th,
+.freesheet.listbox tr:first-child td,
+.freesheet.listbox td {
+  border-color: transparent;
+}
+
+.freesheet.listbox th,
+.freesheet.listbox td {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.freesheet.listbox td.fs-dimmed {
+  cursor: default;
+  color: inherit;
+  font-style: inherit;
+}
+
+.freesheet.listbox .fs-selection-border {
+  visibility: hidden;
+}
+
+.freesheet.listbox tr td.current,
+.freesheet.listbox tr:hover td {
+  background: var(--fs-listbox-hover-background);
+}
+
+.fs-clone-top {
+  z-index: 101;
+}
+
+.fs-clone-left {
+  z-index: 102;
+}
+
+.fs-clone-top-left-corner,
+.fs-clone-bottom-left-corner {
+  z-index: 103;
+}
+
+.fs-clone-debug {
+  z-index: 103;
+}
+
+.freesheet td.fs-search-result {
+  background: var(--fs-search-result-background);
+  color: var(--fs-search-result-text);
+}
+
+/*
+Cell borders
+*/
+.fs-bordered{
+  /*box-sizing: border-box !important;*/
+  border-width: 1px;
+}
+.fs-bordered.fs-top-border-solid {
+  border-top-style: solid;
+  border-top-color: var(--fs-custom-border-color);
+}
+.fs-bordered.fs-right-border-solid {
+  border-right-style: solid;
+  border-right-color: var(--fs-custom-border-color);
+}
+.fs-bordered.fs-bottom-border-solid {
+  border-bottom-style: solid;
+  border-bottom-color: var(--fs-custom-border-color);
+}
+.fs-bordered.fs-left-border-solid {
+  border-left-style: solid;
+  border-left-color: var(--fs-custom-border-color);
+}
+
+.freesheet tbody tr th:nth-last-child(2) {
+  border-right: 1px solid var(--fs-cell-border-color);
+}
+
+.freesheet thead tr:nth-last-child(2) th.fs-group-indicator-container {
+  border-bottom: 1px solid var(--fs-cell-border-color);
+  padding-bottom: 5px;
+}
+
+
+.fs-clone-top-left-corner thead tr th:nth-last-child(2) {
+  border-right: 1px solid var(--fs-cell-border-color);
+}
+
+.fs-collapse-button {
+  width: 10px;
+  height: 10px;
+  line-height: 10px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid var(--fs-collapse-button-border-color);
+  -webkit-box-shadow: var(--fs-collapse-button-shadow);
+  box-shadow: var(--fs-collapse-button-shadow);
+  cursor: pointer;
+  margin-bottom: 3px;
+  position: relative;
+}
+
+.fs-collapse-button:after {
+  content: "";
+  height: 300%;
+  width: 1px;
+  display: block;
+  background: var(--fs-collapse-button-line-color);
+  margin-left: 4px;
+  position: absolute;
+  /*top: -300%;*/
+  bottom: 10px;
+}
+
+
+thead .fs-collapse-button {
+  right: 5px;
+  position: absolute;
+  top: 5px;
+  background: var(--fs-collapse-button-background);
+}
+
+thead .fs-collapse-button:after {
+  height: 1px;
+  width: 700%;
+  right: 10px;
+  top: 4px;
+}
+
+.freesheet tr th .fs-expand-button {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  line-height: 10px;
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid var(--fs-collapse-button-border-color);
+  -webkit-box-shadow: var(--fs-collapse-button-shadow);
+  box-shadow: var(--fs-collapse-button-shadow);
+  cursor: pointer;
+  top: 0;
+  display: none;
+}
+
+.freesheet thead tr th .fs-expand-button {
+  /*left: 5px;*/
+  top: 5px;
+}
+
+.freesheet tr th .fs-expand-button.clickable {
+  display: block;
+}
+
+.collapsibleIndicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(0% ,-50%);
+  right: 5px;
+  border: 1px solid var(--fs-collapsible-indicator-border-color);
+  line-height: 10px;
+  color: var(--fs-collapsible-indicator-text);
+  border-radius: 10px;
+  font-size: 10px;
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+  -webkit-box-shadow: 0 0 0 6px var(--fs-collapsible-indicator-ring);
+  -moz-box-shadow: 0 0 0 6px var(--fs-collapsible-indicator-ring);
+  box-shadow: 0 0 0 6px var(--fs-collapsible-indicator-ring);
+  background: var(--fs-collapsible-indicator-background);
+}
+
+.freesheet col.hidden {
+  width: 0 !important;
+}
+
+.freesheet table tr th.lightRightBorder {
+  border-right: 1px solid var(--fs-header-light-border-color);
+}
+
+.freesheet tr.hidden,
+.freesheet tr.hidden td,
+.freesheet tr.hidden th {
+  display: none;
+}
+
+.fs-master,
+.fs-clone-left,
+.fs-clone-top,
+.fs-clone-bottom {
+  overflow: hidden;
+}
+
+.fs-master .fs-holder {
+  overflow: auto;
+}
+
+.freesheet .fs-master thead,
+.freesheet .fs-master tr th,
+.freesheet .fs-clone-left thead {
+  visibility: hidden;
+}
+
+.fs-clone-top .fs-holder,
+.fs-clone-left .fs-holder,
+.fs-clone-bottom .fs-holder {
+  overflow: hidden;
+}

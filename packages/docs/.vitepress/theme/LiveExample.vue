@@ -1,5 +1,5 @@
 <script setup>
-// Renders packages/docs/examples/<name>.js in the browser only: FreeGrid needs `window` when imported.
+// Renders packages/docs/examples/<name>.js in the browser only: FreeSheet needs `window` when imported.
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useData } from 'vitepress';
 import { gridStyle, loadGridStyle } from './gridStyle';
@@ -39,7 +39,7 @@ onMounted(async() => {
   }
 });
 
-// A new grid for the new style, so the row height (--fg-row-height) and the column widths are measured again.
+// A new grid for the new style, so the row height (--fs-row-height) and the column widths are measured again.
 watch(gridStyle, async() => {
   await nextTick();
   if (create && container.value) {
@@ -56,8 +56,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="live-example vp-raw" :class="{ 'fg-theme-dark': mounted && isDark }"
-    :data-fg-style="mounted ? gridStyle : null">
+  <div class="live-example vp-raw" :class="{ 'fs-theme-dark': mounted && isDark }"
+    :data-fs-style="mounted ? gridStyle : null">
     <div ref="container" class="live-example__grid" :style="height ? { height, overflow: 'hidden' } : null" />
     <p v-if="error" class="live-example__error">{{ error }}</p>
   </div>

@@ -1,0 +1,42 @@
+.freesheet .fs-hider {
+  position: relative;
+}
+.freesheet.fs-manual-column-move.after-selection--columns thead th.fs-highlight {
+  cursor: move;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+.freesheet.fs-manual-column-move.on-moving--columns,
+.freesheet.fs-manual-column-move.on-moving--columns thead th.fs-highlight {
+  cursor: move;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+.freesheet.fs-manual-column-move.on-moving--columns .manualColumnResizer {
+  display: none;
+}
+.freesheet .fs-manual-column-move--guideline,
+.freesheet .fs-manual-column-move--backlight {
+  position: absolute;
+  height: 100%;
+  display: none;
+}
+.freesheet .fs-manual-column-move--guideline {
+  background: var(--fs-move-guideline-color);
+  width: 2px;
+  top: 0;
+  margin-left: -1px;
+  z-index: 105;
+}
+.freesheet .fs-manual-column-move--backlight {
+  background: var(--fs-move-backlight-background);
+  display: none;
+  z-index: 105;
+  pointer-events: none;
+}
+.freesheet.on-moving--columns.show-ui .fs-manual-column-move--guideline,
+.freesheet.on-moving--columns .fs-manual-column-move--backlight {
+  display: block;
+}

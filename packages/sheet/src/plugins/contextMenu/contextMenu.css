@@ -1,0 +1,89 @@
+/*!
+ * Handsontable ContextMenu
+ */
+
+.fs-context-menu:not(.fs-ghost-table) {
+  display: none;
+  position: absolute;
+  z-index: 1060; /* needs to be higher than 1050 - z-index for Twitter Bootstrap modal (#1569) */
+}
+
+.fs-context-menu .fs-clone-top,
+.fs-context-menu .fs-clone-left,
+.fs-context-menu .fs-clone-corner,
+.fs-context-menu .fs-clone-debug {
+  display: none;
+}
+
+.fs-context-menu table.fs-core {
+  border: 1px solid var(--fs-menu-border-color);
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-menu-shadow);
+}
+
+.fs-context-menu .fs-selection-border {
+  visibility: hidden;
+}
+
+.fs-context-menu table tbody tr td {
+  background: var(--fs-menu-background);
+  border-width: 0;
+  padding: 4px 6px 0 6px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fs-context-menu table tbody tr td:first-child {
+  border: 0;
+}
+
+.fs-context-menu table tbody tr td.fs-dimmed {
+  font-style: normal;
+  color: var(--fs-menu-dimmed-text);
+}
+
+.fs-context-menu table tbody tr td.current,
+.fs-context-menu table tbody tr td.zeroclipboard-is-hover {
+  background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background));
+}
+
+.fs-context-menu table tbody tr td.fs-separator {
+  border-top: 1px solid var(--fs-menu-separator-color);
+  height: 0;
+  padding: 0;
+  cursor: default;
+}
+
+.fs-context-menu table tbody tr td.fs-disabled {
+  color: var(--fs-menu-disabled-text);
+  cursor: default;
+}
+
+.fs-context-menu table tbody tr td.fs-disabled:hover {
+  background: var(--fs-menu-background);
+  color: var(--fs-menu-disabled-text);
+  cursor: default;
+}
+
+.fs-context-menu table tbody tr.fs-hidden {
+  display: none;
+}
+
+.fs-context-menu table tbody tr td .fs-item-wrapper {
+  margin-left: 10px;
+  margin-right: 6px;
+}
+
+.fs-context-menu table tbody tr td div span.selected {
+  margin-top: -2px;
+  position: absolute;
+  left: 4px;
+}
+
+.fs-context-menu .fs-master .fs-holder {
+  overflow: hidden;
+}

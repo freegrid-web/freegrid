@@ -1,11 +1,11 @@
-// The API reference model: FreeGrid's methods, events, settings and plugins read from the source code's JSDoc,
+// The API reference model: FreeSheet's methods, events, settings and plugins read from the source code's JSDoc,
 // each with its topic and its page and anchor in the docs.
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { anchor, parseBlocks, readPlugin, readSettings } from './jsdoc.mjs';
 import { TOPICS, UNAVAILABLE, topicOf } from './topics.mjs';
 
-export const SOURCE = new URL('../../freegrid/src/', import.meta.url).pathname;
+export const SOURCE = new URL('../../sheet/src/', import.meta.url).pathname;
 
 const read = file => readFileSync(join(SOURCE, file), 'utf8');
 

@@ -4,12 +4,12 @@ import baseConfig from 'vitepress-carbon/config';
 export default defineConfigWithTheme({
   // GitHub-style theme: https://carbon.breno.tech
   extends: baseConfig,
-  title: 'FreeGrid',
+  title: 'FreeSheet',
   description: 'A free, MIT-licensed, spreadsheet-like data grid for the web.',
-  base: '/freegrid/',
+  base: '/sheet/',
   lang: 'en-US',
   lastUpdated: true,
-  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/freegrid/logo.svg' }]],
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/sheet/logo.svg' }]],
   themeConfig: {
     logo: '/logo.svg',
     nav: [
@@ -77,10 +77,10 @@ export default defineConfigWithTheme({
         },
       ],
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/freegrid-web/freegrid' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/freegrid-web/sheet' }],
     search: { provider: 'local' },
     editLink: {
-      pattern: 'https://github.com/freegrid-web/freegrid/edit/main/packages/docs/:path',
+      pattern: 'https://github.com/freegrid-web/sheet/edit/main/packages/docs/:path',
       text: 'Edit this page on GitHub',
     },
     footer: {

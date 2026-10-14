@@ -1,8 +1,8 @@
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 export default function createGrid(container) {
-  return new FreeGrid(container, {
+  return new FreeSheet(container, {
     data: [
       { product: 'Laptop', price: 1299.99, released: '2026-03-14', inStock: true, category: 'Computers', city: 'Vilnius', code: 'secret1' },
       { product: 'Monitor', price: 249.5, released: '2025-11-02', inStock: false, category: 'Displays', city: 'Kaunas', code: 'secret2' },
@@ -14,7 +14,7 @@ export default function createGrid(container) {
       { data: 'product' },
       { data: 'price', type: 'numeric', numericFormat: { pattern: '0,0.00 $' } },
       { data: 'released', type: 'date', dateFormat: 'YYYY-MM-DD', correctFormat: true },
-      { data: 'inStock', type: 'checkbox', className: 'fg-center' },
+      { data: 'inStock', type: 'checkbox', className: 'fs-center' },
       { data: 'category', type: 'dropdown', source: ['Computers', 'Displays', 'Accessories', 'Software'] },
       { data: 'city', type: 'autocomplete', source: ['Vilnius', 'Kaunas', 'Klaipėda', 'Šiauliai', 'Riga', 'Tallinn', 'Warsaw'], strict: false },
       { data: 'code', type: 'password' },

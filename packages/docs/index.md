@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: FreeGrid
+  name: FreeSheet
   text: A free data grid for the web
   tagline: Spreadsheet-like editing, sorting, merged cells, comments and more. MIT-licensed, today and tomorrow.
   image:
     src: /logo.svg
-    alt: FreeGrid
+    alt: FreeSheet
   actions:
     - theme: brand
       text: Get started
@@ -17,7 +17,7 @@ hero:
       link: /examples/basics
     - theme: alt
       text: View on GitHub
-      link: https://github.com/freegrid-web/freegrid
+      link: https://github.com/freegrid-web/sheet
 
 features:
   - title: Feels like a spreadsheet
@@ -59,7 +59,7 @@ bun add @freegrid/sheet
 
 ## Quick start
 
-Give the grid an element, import FreeGrid and its styles, and create an instance:
+Give the grid an element, import FreeSheet and its styles, and create an instance:
 
 ```html
 <div id="grid"></div>
@@ -69,10 +69,10 @@ Give the grid an element, import FreeGrid and its styles, and create an instance
 
 <LiveExample name="getting-started" />
 
-No bundler? Load `freegrid.full.min.js` and `freegrid.full.min.css` with `<script>` and `<link>` tags.
+No bundler? Load `freesheet.full.min.js` and `freesheet.full.min.css` with `<script>` and `<link>` tags.
 The [getting started guide](./guide/getting-started#without-a-bundler) shows how.
 
-## Why FreeGrid
+## Why FreeSheet
 
 - **Free, without a catch.** MIT today and tomorrow. There is no license key, no paid tier and no
   "community edition".
@@ -85,7 +85,7 @@ The [getting started guide](./guide/getting-started#without-a-bundler) shows how
 
 ## Read the guide
 
-- [Introduction](./guide/introduction): what FreeGrid is and where it comes from
+- [Introduction](./guide/introduction): what FreeSheet is and where it comes from
 - [Getting started](./guide/getting-started): install it and build your first grid
 - [Examples](./examples/basics): every feature, live, with its code
 - [Roadmap](./project/roadmap): TypeScript, signals, theming, filters, formulas

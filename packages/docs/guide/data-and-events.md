@@ -28,7 +28,7 @@ grid.alter('remove_col', 0);    // remove the first column
 Pass a hook as a setting, or add it later with `addHook`:
 
 ```js
-const grid = new FreeGrid(container, {
+const grid = new FreeSheet(container, {
   data,
   afterChange(changes, source) {
     if (source === 'loadData') return;

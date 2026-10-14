@@ -1,11 +1,11 @@
-import FreeGrid from '@freegrid/sheet';
-import '@freegrid/sheet/dist/freegrid.full.css';
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
 const green = { width: 2, color: '#1a7f37' };
 
 export default function createGrid(container) {
-  return new FreeGrid(container, {
-    data: FreeGrid.helper.createSpreadsheetData(8, 8),
+  return new FreeSheet(container, {
+    data: FreeSheet.helper.createSpreadsheetData(8, 8),
     rowHeaders: true,
     colHeaders: true,
     contextMenu: true,

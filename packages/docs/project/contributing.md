@@ -4,7 +4,7 @@
 
 ```sh
 pnpm install
-pnpm build                              # build FreeGrid first; the docs use its dist
+pnpm build                              # build FreeSheet first; the docs use its dist
 pnpm --filter @freegrid/docs dev        # http://localhost:5173/freegrid/
 ```
 

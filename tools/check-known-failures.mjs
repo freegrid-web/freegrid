@@ -1,12 +1,12 @@
 // Usage: node tools/check-known-failures.mjs <firefox|webkit> <results.json>
 // Fails when a spec fails that is not listed for that browser in
-// packages/freegrid/test/runner/known-failures.json. Listed specs that now pass are reported so the
+// packages/sheet/test/runner/known-failures.json. Listed specs that now pass are reported so the
 // list can shrink.
 import { readFileSync } from 'node:fs';
 import { toMap, entriesOf } from './baseline/results-map.mjs';
 
 const [browser, file] = process.argv.slice(2);
-const known = JSON.parse(readFileSync(new URL('../packages/freegrid/test/runner/known-failures.json', import.meta.url), 'utf8'))[browser];
+const known = JSON.parse(readFileSync(new URL('../packages/sheet/test/runner/known-failures.json', import.meta.url), 'utf8'))[browser];
 
 if (!known) {
   console.error(`No known-failures entry for "${browser}".`);

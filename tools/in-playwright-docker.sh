@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Runs a command inside the Playwright image (browsers + system libraries + DejaVu fonts), with the
 # repo mounted. Useful where Playwright's system dependencies cannot be installed (e.g. WSL without
-# sudo). Example: tools/in-playwright-docker.sh pnpm --dir packages/freegrid test:e2e
+# sudo). Example: tools/in-playwright-docker.sh pnpm --dir packages/sheet test:e2e
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="$(node -p "require('$ROOT/packages/freegrid/node_modules/playwright/package.json').version")"
+VERSION="$(node -p "require('$ROOT/packages/sheet/node_modules/playwright/package.json').version")"
 PNPM="$(node -p "require('$ROOT/package.json').packageManager")"
-IMAGE="freegrid-playwright:${VERSION}"
+IMAGE="freesheet-playwright:${VERSION}"
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
   docker build -q --build-arg PLAYWRIGHT_VERSION="$VERSION" -t "$IMAGE" -f "$ROOT/tools/playwright.Dockerfile" "$ROOT/tools" >/dev/null
 fi

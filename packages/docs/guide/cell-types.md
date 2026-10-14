@@ -108,12 +108,12 @@ columns: [{
 ```
 
 `defaultDate` (a cell setting) is the date shown when the cell is empty. The calendar's colors come from the
-`--fg-datepicker-*` [theme variables](./theming).
+`--fs-datepicker-*` [theme variables](./theming).
 
 ## Date and time formats
 
 `dateFormat` (default `DD/MM/YYYY`) and `timeFormat` (default `h:mm:ss a`) use the same tokens as moment.js, so
-formats written for moment keep working. FreeGrid reads and writes them itself; no date library is needed.
+formats written for moment keep working. FreeSheet reads and writes them itself; no date library is needed.
 
 | Token | Meaning | Example |
 | --- | --- | --- |

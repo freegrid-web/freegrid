@@ -1,0 +1,39 @@
+{
+  "//": "Specs that fail in a browser for a known, documented reason. tools/check-known-failures.mjs fails CI only on failures not listed here. Chromium has none: it is gated on the upstream baseline instead.",
+  "firefox": {
+    "AutoColumnSize should correctly detect column width when table is hidden on init (display: none)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column width with columns.title": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column widths after update colHeaders when headers were passed as a function": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column widths after update colHeaders when headers were passed as an array": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should keep last columns width unchanged if all rows was removed": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should not wrap the cell values when the whole column has values with the same length": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should update column width after update value in cell (array of objects)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "Core.selectAll should select all cells and clear previous selection": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
+    "Core_selection should select the entire fixed column after column header is clicked, after scroll horizontally": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
+    "TextEditor IME support editor size should change after composition started": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "manualRowMove moving should properly scrolling viewport if mouse is over part-visible cell": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "settings fragmentSelection constructor should disallow fragmentSelection from one cell when set to `cell` and when user selects adjacent cell": "focus/timing: when the browser moves focus versus FreeSheet's deferred editor focus — to investigate (#7)",
+    "settings fragmentSelection constructor should disallow fragmentSelection when set to false": "focus/timing: when the browser moves focus versus FreeSheet's deferred editor focus — to investigate (#7)",
+    "settings fragmentSelection dynamic should disallow fragmentSelection when set to false": "focus/timing: when the browser moves focus versus FreeSheet's deferred editor focus — to investigate (#7)"
+  },
+  "webkit": {
+    "AutoColumnSize should correctly detect column width when table is hidden on init (display: none)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column width with columns.title": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column widths after update colHeaders when headers were passed as a function": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should correctly detect column widths after update colHeaders when headers were passed as an array": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should keep last columns width unchanged if all rows was removed": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should not wrap the cell values when the whole column has values with the same length": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "AutoColumnSize should update column width after update value in cell (array of objects)": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "ContextMenu afterContextMenuDefaultOptions hook should call afterContextMenuDefaultOptions hook with context menu options as the first param": "timing: flaky in this browser (opens the menu, then a fixed 200 ms wait), failed once in CI and passed on rerun (#7)",
+    "ContextMenu beforeContextMenuSetItems hook should add new menu item even when item is excluded from plugin settings": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu menu destroy should close context menu when HOT is being destroyed": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu menu hidden items should remove separators from top, bottom and duplicated": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu subMenu should not open subMenu immediately": "timing: flaky in this browser (context menu opening), passes in most runs (#7)",
+    "ContextMenu subMenu should open subMenu with delay": "timing: flaky in this browser (300 ms submenu debounce vs a 300 ms wait), passes in most runs (#7)",
+    "Core.selectAll should select all cells and clear previous selection": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
+    "Core_selection should select the entire fixed column after column header is clicked, after scroll horizontally": "layout: selection overlay after scrolling depends on scrollbar behaviour of this browser (#7)",
+    "TextEditor IME support editor size should change after composition started": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)",
+    "dateValidator correctFormat should rewrite the string to the correct format if a date-string in different format is provided (for non-default format)": "date parsing: this browser parses unformatted date strings differently in the moment fallback (#7)",
+    "manualRowMove moving should properly scrolling viewport if mouse is over part-visible cell": "layout: pixel values measured in 2018 Chrome; this browser measures text and layout slightly differently (#7)"
+  }
+}
