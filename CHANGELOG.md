@@ -1,6 +1,10 @@
 # FreeGrid changelog
 
-## Unreleased
+## 0.4.0 (2026-10-14)
+
+The spreadsheet is now called FreeSheet: new names for the class, the global, the files and the CSS classes and
+variables. The repository moved to `freegrid-web/sheet`, and the whole library, including the rendering engine, is
+written in TypeScript.
 
 ### Breaking
 
