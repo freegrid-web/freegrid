@@ -45,20 +45,20 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
 - **No license key.** The `licenseKey` setting is ignored, because there is nothing to unlock.
 - **CommonJS and IE are not supported.** FreeSheet ships ES modules and UMD bundles for Chrome/Edge
   107+, Firefox 104+ and Safari 16+.
-- **jQuery:** the plugin is `$(el).freegrid(...)`. `$(el).handsontable(...)` still works during `0.x`.
+- **jQuery:** the plugin is `$(el).freesheet(...)`. `$(el).handsontable(...)` still works during `0.x`.
 - **Dates:** FreeSheet no longer needs moment.js. `dateFormat` and `timeFormat` keep moment's tokens and parsing
   rules (see [Date and time formats](./cell-types#date-and-time-formats)); use real formats (`MM/DD/YYYY`, not
   `mm/dd/yy`). Week tokens (`w`, `W`, `gggg`) and locales other than English are not supported.
 - **Numbers:** FreeSheet no longer needs numbro. `numericFormat` patterns keep numbro's syntax and give the same text;
   the separators and the currency come from the browser, so no numbro language files are needed (see
   [Number formats](./cell-types#number-formats)).
-- **Date picker:** FreeSheet has its own calendar instead of Pikaday (classes `fg-datepicker*` instead of `pika-*`).
+- **Date picker:** FreeSheet has its own calendar instead of Pikaday (classes `fs-datepicker*` instead of `pika-*`).
   `datePickerConfig` keeps Pikaday's names for the common options (see [Date picker](./cell-types#date-picker));
   other Pikaday options are ignored. You no longer load Pikaday or its CSS.
-- **CSS class names** are now FreeSheet's own (`.freegrid`, `.fg-core`, `.fg-center`, …). During `0.x` the
+- **CSS class names** are now FreeSheet's own (`.freesheet`, `.fs-core`, `.fs-center`, …). During `0.x` the
   old names (`.handsontable`, `.htCore`, `.htCenter`, …) keep working, so your CSS does not break. Plan to
   switch before `1.0`; see the full list in [Styling](./styling#legacy-class-names). The context menu now
-  writes `fg-` alignment classes into `getCellMeta(...).className`.
+  writes `fs-` alignment classes into `getCellMeta(...).className`.
 - **Editor, renderer and validator names** have the kind first (see below).
 - **Pro features** (filters, dropdown menu, hidden rows and columns, nested headers, export, formulas)
   were never part of the MIT release. They are on the [roadmap](../project/roadmap), written from scratch.

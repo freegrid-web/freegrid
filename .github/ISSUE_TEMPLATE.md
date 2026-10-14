@@ -11,6 +11,6 @@
 ### Actual
 
 ### Environment
-* FreeGrid version:
+* FreeSheet version:
 * Browser name and version:
 * Operating system:

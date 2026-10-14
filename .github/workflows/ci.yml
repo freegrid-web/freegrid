@@ -115,7 +115,7 @@ jobs:
         if: always()
         with:
           name: results-${{ matrix.name }}
-          path: packages/freegrid/test-results
+          path: packages/sheet/test-results
 
   # The one browser-test check the branch rules require.
   e2e:

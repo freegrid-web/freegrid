@@ -186,7 +186,7 @@ importers:
     dependencies:
       '@freegrid/sheet':
         specifier: workspace:*
-        version: link:../freegrid
+        version: link:../sheet
     devDependencies:
       playwright:
         specifier: 1.64.0
@@ -201,7 +201,7 @@ importers:
         specifier: ^3.5.43
         version: 3.5.43(typescript@5.9.3)
 
-  packages/freegrid:
+  packages/sheet:
     devDependencies:
       jasmine-core:
         specifier: ^5.13.0

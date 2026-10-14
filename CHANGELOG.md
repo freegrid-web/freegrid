@@ -5,20 +5,20 @@
 ### Breaking
 
 - The spreadsheet is now called **FreeSheet**. FreeGrid stays the name of the project and of the `@freegrid/*`
-  package family, and later components will get their own names (for example FreeGantt). Change your code to use
-  the new names:
-  - `import FreeSheet from '@freegrid/sheet'`, `new FreeSheet(element, settings)`; the type declarations use
-    `FreeSheet` as well;
-  - with a `<script>` tag, the global is `window.FreeSheet`;
-  - the files in `dist/` are named `freesheet.js`, `freesheet.css`, `freesheet.full.min.js`, … (they were
-    `freegrid.*`), and the type declarations are `types/freesheet.d.ts`;
-  - the jQuery plugin is `$(element).freesheet(…)`.
+  package family; later components get their own names (for example FreeGantt).
+  - `import FreeSheet from '@freegrid/sheet'`, `new FreeSheet(element, settings)`. The global is
+    `window.FreeSheet`, and the type declarations use `FreeSheet` too.
+  - The files in `dist/` are `freesheet.js`, `freesheet.css`, `freesheet.full.min.js`, … (they were `freegrid.*`),
+    and the type declarations are `types/freesheet.d.ts`.
+  - The jQuery plugin is `$(element).freesheet(…)`.
+  - CSS: the root class is `freesheet` (was `freegrid`), class names start with `fs-` (were `fg-`), the CSS variables
+    start with `--fs-` (were `--fg-`), and the theme attributes are `data-fs-theme` and `data-fs-style` (were
+    `data-fg-…`). The old names are not kept: there were no users of them yet.
 
-  CSS class names (`.freegrid`, `fg-*`) and CSS variables (`--fg-*`) do not change.
+### Internal
 
-### Deprecated (removed in 1.0)
-
-- `window.FreeGrid` and `$.fn.freegrid` still work and refer to FreeSheet. The global warns once when it is used.
+- The rendering engine (Walkontable) is written in TypeScript; the whole library is TypeScript now.
+- The package's folder in the repository is `packages/sheet` (was `packages/freegrid`).
 
 ## 0.3.0 (2026-10-14)
 

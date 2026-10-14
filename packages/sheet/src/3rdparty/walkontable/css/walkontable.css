@@ -1,0 +1,163 @@
+.fs-holder {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.3em;
+  font-size: 13px;
+}
+
+.fs-holder table,
+.fs-holder tbody,
+.fs-holder thead,
+.fs-holder td,
+.fs-holder th,
+.fs-holder div {
+  box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+}
+
+.fs-holder table {
+  border-collapse: separate;
+  /*it must be separate, otherwise there are offset miscalculations in WebKit: http://stackoverflow.com/questions/2655987/border-collapse-differences-in-ff-and-webkit*/
+  /*position: relative;*/
+  /*this actually only changes appearance of user selection - does not make text unselectable
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  /*user-select: none; /*no browser supports unprefixed version*/
+  border-spacing: 0;
+  margin: 0;
+  border-width: 0;
+  table-layout: fixed;
+  width: 0;
+  outline-width: 0;
+  /* reset bootstrap table style. for more info see: https://github.com/handsontable/handsontable/issues/224 */
+  max-width: none;
+  max-height: none;
+}
+
+.fs-holder col {
+  width: 50px;
+}
+
+.fs-holder col.rowHeader {
+  width: 50px;
+}
+
+.fs-holder th,
+.fs-holder td {
+  border-right: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;
+  height: 22px;
+  empty-cells: show;
+  line-height: 21px;
+  padding: 0 4px 0 4px;
+  /* top, bottom padding different than 0 is handled poorly by FF with HTML5 doctype */
+  background-color: #FFF;
+  vertical-align: top;
+  overflow: hidden;
+  outline-width: 0;
+  white-space: pre-line;
+  /* preserve new line character in cell */
+}
+
+.fs-holder th:last-child {
+  /*Foundation framework fix*/
+  border-right: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;
+}
+
+.fs-holder tr:first-child th.fs-no-frame,
+.fs-holder th:first-child.fs-no-frame,
+.fs-holder th.fs-no-frame {
+  border-left-width: 0;
+  background-color: white;
+  border-color: #FFF;
+}
+
+.fs-holder th:first-child,
+.fs-holder td:first-child,
+.fs-holder .fs-no-frame + th,
+.fs-holder .fs-no-frame + td {
+  border-left: 1px solid #CCC;
+}
+
+.fs-holder tr:first-child th,
+.fs-holder tr:first-child td {
+  border-top: 1px solid #CCC;
+}
+
+.fs-holder thead tr:last-child th {
+  border-bottom-width: 0;
+}
+
+.fs-holder thead tr.lastChild th {
+  border-bottom-width: 0;
+}
+
+.fs-holder th {
+  background-color: #EEE;
+  color: #222;
+  text-align: center;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.fs-holder th .small {
+  font-size: 12px;
+}
+
+.fs-holder thead th {
+  padding: 0;
+}
+
+.fs-holder th.active {
+  background-color: #CCC;
+}
+
+.fs-holder thead th .relative {
+  position: relative;
+  padding: 2px 4px;
+}
+
+/* border line */
+.fs-holder .fs-selection-border {
+  position: absolute;
+  font-size: 0;
+}
+
+.fs-holder td.area {
+  background-color: #EEF4FF;
+}
+
+/* fill handle */
+.fs-holder .fs-selection-border.corner {
+  font-size: 0;
+  cursor: crosshair;
+}
+
+.fs-holder .fs-border.fs-fill-border {
+  background: red;
+  width: 1px;
+  height: 1px;
+}
+
+.fs-master .fs-holder {
+  overflow: auto;
+}
+
+.fs-clone-left .fs-holder {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.fs-clone-top .fs-holder {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* used for testing */
+.testOverflowHidden {
+  overflow: hidden;
+}

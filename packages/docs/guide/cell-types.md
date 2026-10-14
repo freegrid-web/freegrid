@@ -108,7 +108,7 @@ columns: [{
 ```
 
 `defaultDate` (a cell setting) is the date shown when the cell is empty. The calendar's colors come from the
-`--fg-datepicker-*` [theme variables](./theming).
+`--fs-datepicker-*` [theme variables](./theming).
 
 ## Date and time formats
 

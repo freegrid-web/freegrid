@@ -1,4 +1,0 @@
-.fg-row-headers .fg-master.innerBorderLeft ~ .fg-clone-top-left-corner th:nth-child(2),
-.fg-row-headers .fg-master.innerBorderLeft ~ .fg-clone-left td:first-of-type {
-  border-left: 0 none;
-}

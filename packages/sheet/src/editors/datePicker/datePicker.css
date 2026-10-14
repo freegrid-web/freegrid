@@ -1,0 +1,123 @@
+/* FreeSheet's date picker. Colors and sizes come from the --fs-datepicker-* variables (src/css/variables.css). */
+.fs-datepicker {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 16.5em;
+  padding: 0.5em;
+  font-family: var(--fs-font-family, var(--fs-style-font-family, inherit));
+  font-size: var(--fs-font-size, var(--fs-style-font-size, 13px));
+  color: var(--fs-datepicker-text);
+  background: var(--fs-datepicker-background);
+  border: 1px solid var(--fs-datepicker-border-color);
+  border-radius: var(--fs-datepicker-radius);
+  box-shadow: var(--fs-datepicker-shadow);
+}
+
+.fs-datepicker[hidden] {
+  display: none;
+}
+
+.fs-datepicker-header {
+  display: flex;
+  gap: 0.25em;
+  align-items: center;
+  margin-bottom: 0.4em;
+}
+
+.fs-datepicker-header select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.2em;
+  font: inherit;
+  color: inherit;
+  background: var(--fs-datepicker-background);
+  border: 1px solid var(--fs-datepicker-border-color);
+  border-radius: var(--fs-datepicker-radius);
+}
+
+.fs-datepicker-header .fs-datepicker-year {
+  flex: none;
+}
+
+.fs-datepicker-prev,
+.fs-datepicker-next {
+  flex: none;
+  width: 1.9em;
+  height: 1.9em;
+  padding: 0;
+  font: inherit;
+  font-size: 1.2em;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--fs-datepicker-radius);
+}
+
+.fs-datepicker-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.fs-datepicker-table th {
+  padding: 0.3em 0;
+  font-size: 0.85em;
+  font-weight: normal;
+  color: var(--fs-datepicker-muted-text);
+  text-align: center;
+}
+
+.fs-datepicker-table td {
+  padding: 1px;
+}
+
+.fs-datepicker-day {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 2em;
+  padding: 0;
+  font: inherit;
+  color: var(--fs-datepicker-day-text);
+  text-align: center;
+  cursor: pointer;
+  background: var(--fs-datepicker-day-background);
+  border: 0;
+  border-radius: var(--fs-datepicker-radius);
+}
+
+.fs-datepicker-day.is-outside {
+  color: var(--fs-datepicker-muted-text);
+}
+
+.fs-datepicker-day[aria-current="date"] {
+  font-weight: bold;
+  color: var(--fs-datepicker-today-text);
+}
+
+.fs-datepicker-prev:hover,
+.fs-datepicker-next:hover,
+.fs-datepicker-day:hover {
+  color: var(--fs-datepicker-hover-text);
+  background: var(--fs-datepicker-hover-background, var(--fs-style-datepicker-hover-background));
+}
+
+.fs-datepicker-day[aria-selected="true"] {
+  color: var(--fs-datepicker-selected-text);
+  background: var(--fs-datepicker-selected-background);
+}
+
+.fs-datepicker-day:disabled {
+  cursor: default;
+  opacity: 0.35;
+  background: var(--fs-datepicker-day-background);
+  color: var(--fs-datepicker-day-text);
+}
+
+.fs-datepicker button:focus-visible,
+.fs-datepicker select:focus-visible {
+  outline: 2px solid var(--fs-datepicker-focus-color);
+  outline-offset: -2px;
+}

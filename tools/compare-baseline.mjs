@@ -1,5 +1,5 @@
 // Usage: node tools/compare-baseline.mjs <unit|e2e|walkontable|production> <results.json>
-// Exits 1 when a test that passed in the upstream baseline does not pass now (and is not FG-SKIP'd), when a test
+// Exits 1 when a test that passed in the upstream baseline does not pass now (and is not FS-SKIP'd), when a test
 // that is not in the baseline fails, or when a test file fails to load.
 // Tests removed on purpose, together with the behavior they checked, are listed with a reason in
 // docs/baseline/retired.json; a listed test that still runs is an error, so the list stays accurate.
@@ -18,14 +18,14 @@ if (!baseline) {
   console.log(`No baseline for "${suite}" — every non-passing test needs an issue.`);
 }
 
-// Count FG-SKIP markers in FreeGrid sources (no git needed, so it also works inside containers).
+// Count FS-SKIP markers in FreeSheet sources (no git needed, so it also works inside containers).
 function countSkips(dir) {
   return readdirSync(dir, { withFileTypes: true }).reduce((n, e) => {
     if (e.isDirectory()) return ['node_modules', 'dist', 'test-results', 'lib'].includes(e.name) ? n : n + countSkips(join(dir, e.name));
-    return /\.(js|ts)$/.test(e.name) ? n + (readFileSync(join(dir, e.name), 'utf8').match(/\/\/ FG-SKIP:/g) || []).length : n;
+    return /\.(js|ts)$/.test(e.name) ? n + (readFileSync(join(dir, e.name), 'utf8').match(/\/\/ FS-SKIP:/g) || []).length : n;
   }, 0);
 }
-const pkgDir = fileURLToPath(new URL('../packages/freegrid', import.meta.url));
+const pkgDir = fileURLToPath(new URL('../packages/sheet', import.meta.url));
 const skipCount = countSkips(join(pkgDir, 'src')) + countSkips(join(pkgDir, 'test'));
 const regressions = [];
 const skippedNow = [];
@@ -58,8 +58,8 @@ for (const { name, status, message, assertionResults } of Array.isArray(raw) ? [
     regressions.push(`${name}  (test file failed: ${(message || '').split('\n')[0]})`);
   }
 }
-// A baseline-passing test may only become pending through an FG-SKIP marker.
-if (skippedNow.length > skipCount) regressions.push(...skippedNow.map(l => `${l}  (pending without enough FG-SKIP markers)`));
+// A baseline-passing test may only become pending through an FS-SKIP marker.
+if (skippedNow.length > skipCount) regressions.push(...skippedNow.map(l => `${l}  (pending without enough FS-SKIP markers)`));
 
 if (baseline) {
   for (const [name, status] of Object.entries(now)) {
@@ -68,7 +68,7 @@ if (baseline) {
 }
 
 console.log(`${suite}: ${Object.keys(now).length} now, ${baseline ? Object.keys(baseline).length : 0} in baseline`);
-console.log(`FG-SKIP markers in repo: ${skipCount}; baseline-passing tests now pending: ${skippedNow.length}; retired: ${Object.keys(retired).length}`);
+console.log(`FS-SKIP markers in repo: ${skipCount}; baseline-passing tests now pending: ${skippedNow.length}; retired: ${Object.keys(retired).length}`);
 if (newlyPassing.length) console.log(`Newly passing (${newlyPassing.length}):\n  ${newlyPassing.join('\n  ')}`);
 if (regressions.length) {
   console.log(`REGRESSIONS (${regressions.length}):\n  ${regressions.join('\n  ')}`);

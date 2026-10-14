@@ -1,0 +1,4 @@
+.fs-row-headers .fs-master.innerBorderLeft ~ .fs-clone-top-left-corner th:nth-child(2),
+.fs-row-headers .fs-master.innerBorderLeft ~ .fs-clone-left td:first-of-type {
+  border-left: 0 none;
+}

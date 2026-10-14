@@ -62,14 +62,14 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
 const failures = [];
 
-// Every page in the docs' dark and light appearance (live examples follow it: fg-theme-dark in dark only), with the
+// Every page in the docs' dark and light appearance (live examples follow it: fs-theme-dark in dark only), with the
 // Modern and the Classic grid style (the Grid switch in the top bar).
 for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'light']) for (const { path, grids } of PAGES) {
   const page = await browser.newPage({ colorScheme: appearance, viewport: { width: 1600, height: 900 } });
 
   await page.addInitScript(([value, gridStyle]) => {
     localStorage.setItem('vitepress-theme-appearance', value);
-    localStorage.setItem('freegrid-docs-grid-style', gridStyle);
+    localStorage.setItem('freesheet-docs-grid-style', gridStyle);
   }, [appearance, style]);
   const errors = [];
 
@@ -81,7 +81,7 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
   }
   const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
   // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeSheet's height
-  // (--fg-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
+  // (--fs-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
   const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {
     const table = el.querySelector('.ht_master table.htCore');
     const cell = el.querySelector('.ht_master td');
@@ -91,10 +91,10 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     const problems = [];
 
     if (getComputedStyle(table).display !== 'table') problems.push(`table display is ${getComputedStyle(table).display}`);
-    const rowHeight = parseInt(getComputedStyle(cell).getPropertyValue('--fg-row-height'), 10);
+    const rowHeight = parseInt(getComputedStyle(cell).getPropertyValue('--fs-row-height'), 10);
 
     if (Math.abs(cell.getBoundingClientRect().height - rowHeight) > 1) {
-      problems.push(`row height is ${cell.getBoundingClientRect().height}px, --fg-row-height is ${rowHeight}px`);
+      problems.push(`row height is ${cell.getBoundingClientRect().height}px, --fs-row-height is ${rowHeight}px`);
     }
     if (holder.getBoundingClientRect().height < 80) problems.push(`grid viewport is ${holder.getBoundingClientRect().height}px tall`);
     // Text must stay readable on the cell background in the light and the dark theme (WCAG AA: 4.5:1).
@@ -148,11 +148,11 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     if (rows < 50) failures.push(`${path}: the variable tables have ${rows} rows`);
   }
   const wrongTheme = await page.locator('.live-example').evaluateAll((els, dark) => els
-    .filter(el => el.classList.contains('fg-theme-dark') !== dark).length, appearance === 'dark');
+    .filter(el => el.classList.contains('fs-theme-dark') !== dark).length, appearance === 'dark');
 
   if (wrongTheme) failures.push(`${path || '/'} (${appearance}): ${wrongTheme} live example(s) with the wrong theme`);
   const wrongStyle = await page.locator('.live-example').evaluateAll((els, gridStyle) => els
-    .filter(el => el.getAttribute('data-fg-style') !== gridStyle).length, style);
+    .filter(el => el.getAttribute('data-fs-style') !== gridStyle).length, style);
 
   if (wrongStyle) failures.push(`${path || '/'} (${style}): ${wrongStyle} live example(s) without the ${style} style`);
   // The isolation of theme styles must not break the theme itself, e.g. the home page content width.

@@ -58,7 +58,7 @@ pnpm test
 ```
 
 Browser tests use Playwright. If its system dependencies cannot be installed on your machine, run them
-in Docker: `tools/in-playwright-docker.sh pnpm --dir packages/freegrid test:e2e`.
+in Docker: `tools/in-playwright-docker.sh pnpm --dir packages/sheet test:e2e`.
 
 Tests are compared against the recorded upstream results in [docs/baseline](docs/baseline): every test
 that passed in Handsontable 6.2.2 must pass in FreeGrid.

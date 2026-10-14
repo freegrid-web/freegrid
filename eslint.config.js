@@ -2,13 +2,13 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-const tsSources = ['packages/freegrid/src/**/*.ts'];
-const tsTypeTests = ['packages/freegrid/src/**/test/**'];
+const tsSources = ['packages/sheet/src/**/*.ts'];
+const tsTypeTests = ['packages/sheet/src/**/test/**'];
 
 export default [
   {
-    ignores: ['**/node_modules/**', '**/dist/**', 'packages/freegrid/lib/**', 'packages/freegrid/test/lib/**',
-      'packages/freegrid/src/3rdparty/walkontable/test/lib/**', 'packages/freegrid/test-results/**', '.superpowers/**',
+    ignores: ['**/node_modules/**', '**/dist/**', 'packages/sheet/lib/**', 'packages/sheet/test/lib/**',
+      'packages/sheet/src/3rdparty/walkontable/test/lib/**', 'packages/sheet/test-results/**', '.superpowers/**',
       'packages/docs/.vitepress/cache/**', 'packages/docs/.vitepress/dist/**'],
   },
   js.configs.recommended,
@@ -27,11 +27,11 @@ export default [
   },
   {
     // Walkontable keeps dead initial values until it is reworked (#71).
-    files: ['packages/freegrid/src/3rdparty/walkontable/**'],
+    files: ['packages/sheet/src/3rdparty/walkontable/**'],
     rules: { 'no-useless-assignment': 'off' },
   },
   {
-    files: ['packages/freegrid/test/**', 'packages/freegrid/src/**/test/**', 'packages/freegrid/src/**/*.unit.js', 'packages/freegrid/src/**/*.e2e.js'],
+    files: ['packages/sheet/test/**', 'packages/sheet/src/**/test/**', 'packages/sheet/src/**/*.unit.js', 'packages/sheet/src/**/*.e2e.js'],
     languageOptions: {
       globals: { ...globals.jasmine, ...globals.jquery, ...globals.vitest, jest: 'readonly', Handsontable: 'readonly', FreeGrid: 'readonly', Walkontable: 'readonly' },
     },
@@ -39,7 +39,7 @@ export default [
     rules: { 'no-undef': 'off' },
   },
   {
-    files: ['packages/freegrid/build/**', 'packages/freegrid/test/runner/**', 'packages/freegrid/test/build/**', 'packages/freegrid/*.config.js', 'tools/**', 'eslint.config.js',
+    files: ['packages/sheet/build/**', 'packages/sheet/test/runner/**', 'packages/sheet/test/build/**', 'packages/sheet/*.config.js', 'tools/**', 'eslint.config.js',
       'packages/docs/test/**', 'packages/docs/.vitepress/config.mjs', 'packages/docs/postcss.config.mjs'],
     languageOptions: { globals: { ...globals.node } },
   },

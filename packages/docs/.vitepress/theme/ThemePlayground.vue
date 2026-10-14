@@ -18,15 +18,15 @@ const THEMES = [
   { value: 'auto', label: 'Auto', icon: 'M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 1.5v13' },
 ];
 const LABELS = {
-  '--fg-color-background': 'Background',
-  '--fg-color-text': 'Text',
-  '--fg-color-border': 'Grid lines',
-  '--fg-color-header-background': 'Header',
-  '--fg-color-header-text': 'Header text',
-  '--fg-color-accent': 'Accent',
-  '--fg-color-invalid': 'Invalid cell',
-  '--fg-color-readonly-text': 'Read-only text',
-  '--fg-color-muted-text': 'Muted text',
+  '--fs-color-background': 'Background',
+  '--fs-color-text': 'Text',
+  '--fs-color-border': 'Grid lines',
+  '--fs-color-header-background': 'Header',
+  '--fs-color-header-text': 'Header text',
+  '--fs-color-accent': 'Accent',
+  '--fs-color-invalid': 'Invalid cell',
+  '--fs-color-readonly-text': 'Read-only text',
+  '--fs-color-muted-text': 'Muted text',
 };
 const FONTS = [
   { label: 'Page font', value: '' },
@@ -39,33 +39,33 @@ const PRESETS = [
   {
     name: 'Ocean', swatch: '#0284c7', theme: 'light',
     values: {
-      '--fg-color-border': '#cfe0ea', '--fg-color-header-background': '#e8f2f8',
-      '--fg-color-header-text': '#0b3a53', '--fg-color-accent': '#0284c7',
+      '--fs-color-border': '#cfe0ea', '--fs-color-header-background': '#e8f2f8',
+      '--fs-color-header-text': '#0b3a53', '--fs-color-accent': '#0284c7',
     },
   },
   {
     name: 'Forest', swatch: '#15803d', theme: 'light',
     values: {
-      '--fg-color-border': '#d4e3d6', '--fg-color-header-background': '#edf5ee',
-      '--fg-color-header-text': '#1f3d27', '--fg-color-accent': '#15803d',
+      '--fs-color-border': '#d4e3d6', '--fs-color-header-background': '#edf5ee',
+      '--fs-color-header-text': '#1f3d27', '--fs-color-accent': '#15803d',
     },
   },
   {
     name: 'Rose', swatch: '#e11d48', theme: 'light',
     values: {
-      '--fg-color-border': '#f1d5dc', '--fg-color-header-background': '#fdf0f3',
-      '--fg-color-header-text': '#5c1a2b', '--fg-color-accent': '#e11d48',
+      '--fs-color-border': '#f1d5dc', '--fs-color-header-background': '#fdf0f3',
+      '--fs-color-header-text': '#5c1a2b', '--fs-color-accent': '#e11d48',
     },
   },
   {
     name: 'Slate', swatch: '#0f172a', theme: 'dark',
     values: {
-      '--fg-color-background': '#0f172a', '--fg-color-text': '#e2e8f0', '--fg-color-border': '#1e293b',
-      '--fg-color-header-background': '#1e293b', '--fg-color-header-text': '#cbd5e1', '--fg-color-accent': '#38bdf8',
+      '--fs-color-background': '#0f172a', '--fs-color-text': '#e2e8f0', '--fs-color-border': '#1e293b',
+      '--fs-color-header-background': '#1e293b', '--fs-color-header-text': '#cbd5e1', '--fs-color-accent': '#38bdf8',
     },
   },
 ];
-const TARGETS = '.theme-playground__frame, .fg-context-menu, .fg-comments-container, .fg-datepicker-holder';
+const TARGETS = '.theme-playground__frame, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder';
 
 const container = ref(null);
 const theme = ref('light');
@@ -93,7 +93,7 @@ const themeDefault = variable => toHex(isDark.value ? (variable.dark || styleDef
 // The swatch and hex shown for a variable: the edited value, else the active theme's default ('' = from the page).
 const valueOf = variable => changed[variable.name] ?? themeDefault(variable);
 // Modern has its own font (14px); Classic uses the page's.
-const fontSize = computed(() => parseInt(changed['--fg-font-size'], 10) || (gridStyle.value === 'modern' ? 14 : 13));
+const fontSize = computed(() => parseInt(changed['--fs-font-size'], 10) || (gridStyle.value === 'modern' ? 14 : 13));
 const unsetLabel = computed(() => (gridStyle.value === 'modern' ? 'Modern' : 'page'));
 const css = computed(() => {
   const lines = Object.entries(changed).map(([name, value]) => `  ${name}: ${value};`);
@@ -131,7 +131,7 @@ const copy = async() => {
 };
 const onSystemChange = (event) => { systemDark.value = event.matches; };
 
-// A new grid for the new style, so the row height (--fg-row-height) and the column widths are measured again.
+// A new grid for the new style, so the row height (--fs-row-height) and the column widths are measured again.
 watch(gridStyle, async() => {
   await nextTick();
   if (createGrid && container.value) {
@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
         <div class="tp-section">Typography</div>
         <label class="tp-field">
           <span class="tp-name">Font</span>
-          <select :value="changed['--fg-font-family'] || ''" @change="set('--fg-font-family', $event.target.value)">
+          <select :value="changed['--fs-font-family'] || ''" @change="set('--fs-font-family', $event.target.value)">
             <option v-for="font in FONTS" :key="font.label" :value="font.value">
               {{ font.value ? font.label : `${unsetLabel === 'page' ? 'Page' : 'Modern'} font` }}
             </option>
@@ -223,13 +223,13 @@ onBeforeUnmount(() => {
         <label class="tp-field">
           <span class="tp-name">Size</span>
           <input type="range" min="11" max="16" :value="fontSize"
-            @input="set('--fg-font-size', `${$event.target.value}px`)">
-          <span class="tp-size">{{ changed['--fg-font-size'] ? `${fontSize}px` : unsetLabel }}</span>
+            @input="set('--fs-font-size', `${$event.target.value}px`)">
+          <span class="tp-size">{{ changed['--fs-font-size'] ? `${fontSize}px` : unsetLabel }}</span>
         </label>
       </div>
 
-      <div class="theme-playground__frame" :data-fg-theme="theme === 'light' ? null : theme"
-        :data-fg-style="gridStyle">
+      <div class="theme-playground__frame" :data-fs-theme="theme === 'light' ? null : theme"
+        :data-fs-style="gridStyle">
         <div ref="container" class="theme-playground__grid" />
       </div>
     </div>
@@ -449,7 +449,7 @@ onBeforeUnmount(() => {
   /* The page around the grid keeps the docs' background: the variables style the grid only, as on a real page. */
   padding: 16px;
   background: var(--vp-c-bg);
-  color: var(--fg-color-text, #222);
+  color: var(--fs-color-text, #222);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: normal;

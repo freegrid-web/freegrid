@@ -1,9 +1,9 @@
 node_modules/
-packages/freegrid/dist/
-packages/freegrid/test/dist/
-packages/freegrid/src/3rdparty/walkontable/dist/
-packages/freegrid/src/3rdparty/walkontable/test/dist/
-packages/freegrid/test-results/
+packages/sheet/dist/
+packages/sheet/test/dist/
+packages/sheet/src/3rdparty/walkontable/dist/
+packages/sheet/src/3rdparty/walkontable/test/dist/
+packages/sheet/test-results/
 *.log
 .DS_Store
 packages/docs/.vitepress/dist/

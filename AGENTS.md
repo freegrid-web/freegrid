@@ -6,7 +6,7 @@ rules apply to every change.
 
 ## Repository
 
-- `packages/freegrid`: FreeSheet (`@freegrid/sheet` on npm; `@freegrid/core` was its name up to 0.2.0).
+- `packages/sheet`: FreeSheet (`@freegrid/sheet` on npm; `@freegrid/core` was its name up to 0.2.0).
   - `src/core.ts` is the grid (`Core` class); `src/tableView.ts` connects it to Walkontable.
   - `src/3rdparty/walkontable/`: the rendering engine (virtual rendering, overlays for frozen rows, columns and
     headers, selection borders). TypeScript.
@@ -25,11 +25,11 @@ Run from the repository root unless noted.
 pnpm install
 pnpm lint                 # ESLint for the whole repo (an unused eslint-disable comment is an error)
 pnpm typecheck            # tsc
-pnpm build                # Vite build into packages/freegrid/dist (the browser tests use dist/)
+pnpm build                # Vite build into packages/sheet/dist (the browser tests use dist/)
 pnpm docs:build
 ```
 
-In `packages/freegrid`:
+In `packages/sheet`:
 
 ```sh
 pnpm test:unit            # Vitest + comparison with the upstream baseline
@@ -38,7 +38,7 @@ pnpm test:dist            # checks of the built files (run `pnpm build` first)
 ```
 
 Browser tests need Playwright's browsers. Where they can't be installed (WSL without sudo), run them in Docker
-with `tools/in-playwright-docker.sh` (from `packages/freegrid`):
+with `tools/in-playwright-docker.sh` (from `packages/sheet`):
 
 ```sh
 ../../tools/in-playwright-docker.sh pnpm test:e2e            # Chromium, compared with the baseline

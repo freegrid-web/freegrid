@@ -44,7 +44,7 @@ new FreeSheet(container, {
   ],
   cells(row, col) {
     // called for every cell; return settings for it
-    return row === 2 ? { className: 'fg-center' } : {};
+    return row === 2 ? { className: 'fs-center' } : {};
   },
 });
 ```

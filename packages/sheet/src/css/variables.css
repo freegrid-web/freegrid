@@ -1,0 +1,423 @@
+/*
+ * FreeSheet theme variables. Every color, the font and the shadows of FreeSheet come from here; no other stylesheet
+ * contains a color value.
+ *
+ * - Base variables (--fs-color-*, --fs-font-*, --fs-shadow) and component variables with their own value are defaults
+ *   on :root. Override them anywhere: on :root, on an ancestor of the grid, or on the grid itself.
+ * - The colors and the font that differ between the Classic and the Modern style are not set on :root: what you or a
+ *   theme does not set comes from the style's --fs-style-* defaults (see "Style defaults"), so your values win in
+ *   both styles.
+ * - Component variables that follow a base variable are declared on the grid's parts (the grid and the elements
+ *   FreeSheet puts in <body>), so they always see the current base values. Override those on the grid:
+ *   `.freesheet { --fs-cell-background: ... }`.
+ * - In Classic, --fs-color-text, --fs-font-family and --fs-font-size have no default: the grid inherits the page's
+ *   text color and font, as before.
+ * - Themes: class "fs-theme-dark" / data-fs-theme="dark", "fs-theme-light" / data-fs-theme="light" (e.g. a light grid
+ *   inside a dark page), and "fs-theme-auto" / data-fs-theme="auto" (follows the system's dark mode). The closest
+ *   theme to the grid wins: theme classes declare every value on their own element.
+ */
+
+/* == Base == */
+:where(:root) {
+  --fs-color-background: #fff; /* Cell, editor and menu background. */
+  --fs-color-invalid: #ff4c42; /* Background of cells that failed validation. */
+  --fs-color-readonly-text: #777; /* Text of read-only cells. */
+  --fs-color-muted-text: #999; /* Placeholders and disabled menu items. */
+  --fs-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
+  --fs-row-height: 23px; /* Row height, including the bottom border; FreeSheet reads it when the grid is created. */
+  --fs-cell-padding-x: 4px; /* Left and right cell padding. */
+  --fs-header-font-weight: normal; /* Header text weight. */
+  --fs-radius: 0; /* Corner radius of the cell editor and the context menu. */
+  --fs-menu-shadow: none; /* Context menu shadow. */
+  --fs-fill-handle-radius: 0; /* Corner radius of the fill handle (50% = round). */
+
+  /* == Cells == */
+  --fs-search-result-background: #fcedd9; /* Cells matched by the search plugin. */
+  --fs-search-result-text: #583707; /* Text of search matches. */
+  --fs-custom-border-color: #000; /* Default color of custom borders. */
+
+  /* == Headers == */
+  --fs-header-active-background: #ccc; /* Header being resized or moved. */
+  --fs-header-light-border-color: #e6e6e6; /* Light right border of some headers. */
+
+  /* == Selection == */
+  --fs-fill-border-color: #ff0000; /* Border while dragging the fill handle. */
+  --fs-fill-handle-border-color: #fff; /* Outline of the fill handle square. */
+  --fs-mobile-handle-background: #f5f5ff; /* Selection handles on touch devices. */
+  --fs-mobile-handle-border-color: #4285c8; /* Their border. */
+
+  /* == Editors == */
+  --fs-autocomplete-arrow-color: #eee; /* Dropdown arrow in autocomplete cells. */
+  --fs-autocomplete-arrow-hover-color: #777; /* The arrow on hover. */
+  --fs-autocomplete-arrow-selected-color: #d3d3d3; /* The arrow in selected cells. */
+  --fs-listbox-hover-background: #eee; /* Hovered list item. */
+
+  /* == Column and row resize == */
+  --fs-resizer-color: #34a9db; /* Resize handle and guide. */
+  --fs-resizer-guide-border-color: #777; /* Dashed guide line. */
+
+  /* == Context menu == */
+  --fs-menu-separator-color: #e6e6e6; /* Separator line. */
+  --fs-menu-dimmed-text: #323232; /* Dimmed items. */
+  --fs-menu-arrow-color: #777; /* Submenu arrow. */
+
+  /* == Comments == */
+  --fs-comment-indicator-color: #000; /* Triangle in the corner of commented cells. */
+  --fs-comment-focus-border-color: #5292f7; /* That border while editing. */
+
+  /* == Row and column move == */
+  --fs-move-guideline-color: #757575; /* Line where a moved row/column will drop. */
+  --fs-move-backlight-background: rgba(52, 52, 52, 0.25); /* Shadow of the moved row/column. */
+
+  /* == Collapsible headers == */
+  --fs-collapse-button-background: #fff; /* Collapse/expand button. */
+  --fs-collapse-button-border-color: #f3f3f3; /* Its border. */
+  --fs-collapse-button-line-color: #ccc; /* Its +/- line. */
+  --fs-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); /* Its shadow. */
+  --fs-collapsible-indicator-background: #eee; /* Collapsible indicator. */
+  --fs-collapsible-indicator-border-color: #a6a6a6; /* Its border. */
+  --fs-collapsible-indicator-text: #222; /* Its text. */
+  --fs-collapsible-indicator-ring: rgba(238, 238, 238, 1); /* Ring around it. */
+
+  /* == Date picker == */
+  --fs-datepicker-text: #333; /* Calendar text. */
+  --fs-datepicker-shadow: 0 4px 14px rgba(0, 0, 0, 0.2); /* Calendar shadow. */
+  --fs-datepicker-muted-text: #999; /* Weekday names and other months' days. */
+  --fs-datepicker-day-text: #333; /* Days. */
+  --fs-datepicker-day-background: transparent; /* Days background. */
+  --fs-datepicker-selected-text: #fff; /* Selected day text. */
+  --fs-datepicker-hover-text: #222; /* Hovered day text. */
+}
+
+/* == Style defaults: the colors and the font that Classic and Modern draw differently. Each base variable above
+   (--fs-color-border, …) that nobody sets, neither you nor a theme, takes its --fs-style-* value here; set the base
+   variables, not these. == */
+:where(:root, .fs-style-classic, [data-fs-style="classic"]) {
+  --fs-style-color-border: #ccc; /* Grid lines and outlines. */
+  --fs-style-color-header-background: #f0f0f0; /* Row and column header background. */
+  --fs-style-color-header-text: #222; /* Header text. */
+  --fs-style-color-accent: #4b89ff; /* Selection border, fill handle, selected day. */
+  --fs-style-header-highlight-background: #dcdcdc; /* Headers of the selected cells. */
+  --fs-style-header-active-highlight-background: #8eb0e7; /* Headers of fully selected rows/columns. */
+  --fs-style-header-active-highlight-text: #000; /* Their text. */
+  --fs-style-selection-area-background: #005eff; /* Selected range tint (drawn with low opacity). */
+  --fs-style-editor-border-color: #5292f7; /* Cell editor frame. */
+  --fs-style-menu-hover-background: #f3f3f3; /* Hovered menu item. */
+  --fs-style-datepicker-hover-background: #e8effd; /* Hovered day. */
+}
+
+/* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
+:where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder) {
+  /* == Cells == */
+  --fs-cell-background: var(--fs-color-background); /* Cell background. */
+  --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
+  --fs-cell-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Lines between cells. */
+  --fs-readonly-text: var(--fs-color-readonly-text); /* Read-only cell text. */
+  --fs-placeholder-text: var(--fs-color-muted-text); /* Placeholder text. */
+  --fs-invalid-background: var(--fs-color-invalid); /* Invalid cell background. */
+
+  /* == Headers == */
+  --fs-header-background: var(--fs-color-header-background, var(--fs-style-color-header-background)); /* Header background. */
+  --fs-header-text: var(--fs-color-header-text, var(--fs-style-color-header-text)); /* Header text. */
+
+  /* == Selection == */
+  --fs-selection-border-color: var(--fs-color-accent, var(--fs-style-color-accent)); /* Border of the current cell and the selected range. */
+
+  /* == Editors == */
+  --fs-editor-background: var(--fs-color-background); /* Cell editor background. */
+  --fs-editor-text: var(--fs-color-text, var(--fs-style-color-text, #000)); /* Cell editor text. */
+  --fs-listbox-background: var(--fs-color-background); /* Autocomplete/dropdown list background. */
+  --fs-listbox-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* List border. */
+
+  /* == Context menu == */
+  --fs-menu-background: var(--fs-color-background); /* Menu background. */
+  --fs-menu-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Menu border. */
+  --fs-menu-disabled-text: var(--fs-color-muted-text); /* Disabled items. */
+
+  /* == Comments == */
+  --fs-comment-background: var(--fs-color-background); /* Comment editor background. */
+  --fs-comment-text: var(--fs-color-text, var(--fs-style-color-text, FieldText)); /* Comment editor text (a text field does not inherit it). */
+  --fs-comment-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Comment editor left border. */
+  --fs-comment-shadow: var(--fs-shadow); /* Comment editor shadow. */
+
+  /* == Date picker == */
+  --fs-datepicker-background: var(--fs-color-background); /* Calendar background. */
+  --fs-datepicker-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Calendar border. */
+  --fs-datepicker-selected-background: var(--fs-color-accent, var(--fs-style-color-accent)); /* Selected day. */
+  --fs-datepicker-today-text: var(--fs-color-accent, var(--fs-style-color-accent)); /* Today. */
+  --fs-datepicker-focus-color: var(--fs-color-accent, var(--fs-style-color-accent)); /* Keyboard focus ring. */
+  --fs-datepicker-radius: var(--fs-radius); /* Corner radius of the calendar and its days. */
+}
+
+/* == Light theme: class "fs-theme-light" or data-fs-theme="light" (a light grid inside a dark page) == */
+:where(.fs-theme-light, [data-fs-theme="light"]) {
+  --fs-color-background: #fff;
+  --fs-color-border: initial;
+  --fs-color-header-background: initial;
+  --fs-color-header-text: initial;
+  --fs-color-accent: initial;
+  --fs-color-invalid: #ff4c42;
+  --fs-color-readonly-text: #777;
+  --fs-color-muted-text: #999;
+  --fs-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px;
+  --fs-search-result-background: #fcedd9;
+  --fs-search-result-text: #583707;
+  --fs-custom-border-color: #000;
+  --fs-header-active-background: #ccc;
+  --fs-header-highlight-background: initial;
+  --fs-header-active-highlight-background: initial;
+  --fs-header-active-highlight-text: initial;
+  --fs-header-light-border-color: #e6e6e6;
+  --fs-selection-area-background: initial;
+  --fs-fill-border-color: #ff0000;
+  --fs-fill-handle-border-color: #fff;
+  --fs-mobile-handle-background: #f5f5ff;
+  --fs-mobile-handle-border-color: #4285c8;
+  --fs-editor-border-color: initial;
+  --fs-autocomplete-arrow-color: #eee;
+  --fs-autocomplete-arrow-hover-color: #777;
+  --fs-autocomplete-arrow-selected-color: #d3d3d3;
+  --fs-listbox-hover-background: #eee;
+  --fs-resizer-color: #34a9db;
+  --fs-resizer-guide-border-color: #777;
+  --fs-menu-hover-background: initial;
+  --fs-menu-separator-color: #e6e6e6;
+  --fs-menu-dimmed-text: #323232;
+  --fs-menu-arrow-color: #777;
+  --fs-comment-indicator-color: #000;
+  --fs-comment-focus-border-color: #5292f7;
+  --fs-move-guideline-color: #757575;
+  --fs-move-backlight-background: rgba(52, 52, 52, 0.25);
+  --fs-collapse-button-background: #fff;
+  --fs-collapse-button-border-color: #f3f3f3;
+  --fs-collapse-button-line-color: #ccc;
+  --fs-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  --fs-collapsible-indicator-background: #eee;
+  --fs-collapsible-indicator-border-color: #a6a6a6;
+  --fs-collapsible-indicator-text: #222;
+  --fs-collapsible-indicator-ring: rgba(238, 238, 238, 1);
+  --fs-datepicker-text: #333;
+  --fs-datepicker-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  --fs-datepicker-muted-text: #999;
+  --fs-datepicker-day-text: #333;
+  --fs-datepicker-day-background: transparent;
+  --fs-datepicker-selected-text: #fff;
+  --fs-datepicker-hover-text: #222;
+  --fs-datepicker-hover-background: initial;
+  --fs-color-text: initial;
+  --fs-style-color-text: #000; /* black text inside a dark page */
+}
+
+/* == Dark theme: class "fs-theme-dark" or data-fs-theme="dark" on the grid or any ancestor == */
+:where(.fs-theme-dark, [data-fs-theme="dark"]) {
+  --fs-color-background: #1e1e1e;
+  --fs-color-text: #e6e6e6;
+  --fs-color-border: #3a3a3a;
+  --fs-color-header-background: #2a2a2a;
+  --fs-color-header-text: #d0d0d0;
+  --fs-color-accent: #4c9aff;
+  --fs-color-invalid: #5c2b2b;
+  --fs-color-readonly-text: #8a8a8a;
+  --fs-color-muted-text: #9a9a9a;
+  --fs-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --fs-search-result-background: #4d3b1f;
+  --fs-search-result-text: #f5d9a8;
+  --fs-custom-border-color: #e6e6e6;
+  --fs-header-active-background: #3a3a3a;
+  --fs-header-highlight-background: #363636;
+  --fs-header-active-highlight-background: #2f4f80;
+  --fs-header-active-highlight-text: #fff;
+  --fs-header-light-border-color: #333;
+  --fs-selection-area-background: #4c9aff;
+  --fs-fill-border-color: #ff6b6b;
+  --fs-fill-handle-border-color: #1e1e1e;
+  --fs-mobile-handle-background: #2a2a2a;
+  --fs-mobile-handle-border-color: #4c9aff;
+  --fs-editor-border-color: #4c9aff;
+  --fs-autocomplete-arrow-color: #555;
+  --fs-autocomplete-arrow-hover-color: #aaa;
+  --fs-autocomplete-arrow-selected-color: #777;
+  --fs-listbox-hover-background: #333;
+  --fs-resizer-color: #4c9aff;
+  --fs-resizer-guide-border-color: #888;
+  --fs-menu-hover-background: #333;
+  --fs-menu-separator-color: #3a3a3a;
+  --fs-menu-dimmed-text: #bbb;
+  --fs-menu-arrow-color: #aaa;
+  --fs-comment-indicator-color: #e6e6e6;
+  --fs-comment-focus-border-color: #4c9aff;
+  --fs-move-guideline-color: #aaa;
+  --fs-move-backlight-background: rgba(255, 255, 255, 0.15);
+  --fs-collapse-button-background: #2a2a2a;
+  --fs-collapse-button-border-color: #3a3a3a;
+  --fs-collapse-button-line-color: #888;
+  --fs-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  --fs-collapsible-indicator-background: #333;
+  --fs-collapsible-indicator-border-color: #555;
+  --fs-collapsible-indicator-text: #ddd;
+  --fs-collapsible-indicator-ring: rgba(51, 51, 51, 1);
+  --fs-datepicker-text: #e6e6e6;
+  --fs-datepicker-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  --fs-datepicker-muted-text: #8a8a8a;
+  --fs-datepicker-day-text: #ddd;
+  --fs-datepicker-day-background: transparent;
+  --fs-datepicker-selected-text: #fff;
+  --fs-datepicker-hover-text: #fff;
+  --fs-datepicker-hover-background: #2f3b52;
+}
+
+/* == Automatic theme: light, or the dark values when the system uses dark mode == */
+:where(.fs-theme-auto, [data-fs-theme="auto"]) {
+  --fs-color-background: #fff;
+  --fs-color-border: initial;
+  --fs-color-header-background: initial;
+  --fs-color-header-text: initial;
+  --fs-color-accent: initial;
+  --fs-color-invalid: #ff4c42;
+  --fs-color-readonly-text: #777;
+  --fs-color-muted-text: #999;
+  --fs-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px;
+  --fs-search-result-background: #fcedd9;
+  --fs-search-result-text: #583707;
+  --fs-custom-border-color: #000;
+  --fs-header-active-background: #ccc;
+  --fs-header-highlight-background: initial;
+  --fs-header-active-highlight-background: initial;
+  --fs-header-active-highlight-text: initial;
+  --fs-header-light-border-color: #e6e6e6;
+  --fs-selection-area-background: initial;
+  --fs-fill-border-color: #ff0000;
+  --fs-fill-handle-border-color: #fff;
+  --fs-mobile-handle-background: #f5f5ff;
+  --fs-mobile-handle-border-color: #4285c8;
+  --fs-editor-border-color: initial;
+  --fs-autocomplete-arrow-color: #eee;
+  --fs-autocomplete-arrow-hover-color: #777;
+  --fs-autocomplete-arrow-selected-color: #d3d3d3;
+  --fs-listbox-hover-background: #eee;
+  --fs-resizer-color: #34a9db;
+  --fs-resizer-guide-border-color: #777;
+  --fs-menu-hover-background: initial;
+  --fs-menu-separator-color: #e6e6e6;
+  --fs-menu-dimmed-text: #323232;
+  --fs-menu-arrow-color: #777;
+  --fs-comment-indicator-color: #000;
+  --fs-comment-focus-border-color: #5292f7;
+  --fs-move-guideline-color: #757575;
+  --fs-move-backlight-background: rgba(52, 52, 52, 0.25);
+  --fs-collapse-button-background: #fff;
+  --fs-collapse-button-border-color: #f3f3f3;
+  --fs-collapse-button-line-color: #ccc;
+  --fs-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  --fs-collapsible-indicator-background: #eee;
+  --fs-collapsible-indicator-border-color: #a6a6a6;
+  --fs-collapsible-indicator-text: #222;
+  --fs-collapsible-indicator-ring: rgba(238, 238, 238, 1);
+  --fs-datepicker-text: #333;
+  --fs-datepicker-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  --fs-datepicker-muted-text: #999;
+  --fs-datepicker-day-text: #333;
+  --fs-datepicker-day-background: transparent;
+  --fs-datepicker-selected-text: #fff;
+  --fs-datepicker-hover-text: #222;
+  --fs-datepicker-hover-background: initial;
+  --fs-color-text: initial;
+}
+
+@media (prefers-color-scheme: dark) {
+  :where(.fs-theme-auto, [data-fs-theme="auto"]) {
+    --fs-color-background: #1e1e1e;
+    --fs-color-text: #e6e6e6;
+    --fs-color-border: #3a3a3a;
+    --fs-color-header-background: #2a2a2a;
+    --fs-color-header-text: #d0d0d0;
+    --fs-color-accent: #4c9aff;
+    --fs-color-invalid: #5c2b2b;
+    --fs-color-readonly-text: #8a8a8a;
+    --fs-color-muted-text: #9a9a9a;
+    --fs-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    --fs-search-result-background: #4d3b1f;
+    --fs-search-result-text: #f5d9a8;
+    --fs-custom-border-color: #e6e6e6;
+    --fs-header-active-background: #3a3a3a;
+    --fs-header-highlight-background: #363636;
+    --fs-header-active-highlight-background: #2f4f80;
+    --fs-header-active-highlight-text: #fff;
+    --fs-header-light-border-color: #333;
+    --fs-selection-area-background: #4c9aff;
+    --fs-fill-border-color: #ff6b6b;
+    --fs-fill-handle-border-color: #1e1e1e;
+    --fs-mobile-handle-background: #2a2a2a;
+    --fs-mobile-handle-border-color: #4c9aff;
+    --fs-editor-border-color: #4c9aff;
+    --fs-autocomplete-arrow-color: #555;
+    --fs-autocomplete-arrow-hover-color: #aaa;
+    --fs-autocomplete-arrow-selected-color: #777;
+    --fs-listbox-hover-background: #333;
+    --fs-resizer-color: #4c9aff;
+    --fs-resizer-guide-border-color: #888;
+    --fs-menu-hover-background: #333;
+    --fs-menu-separator-color: #3a3a3a;
+    --fs-menu-dimmed-text: #bbb;
+    --fs-menu-arrow-color: #aaa;
+    --fs-comment-indicator-color: #e6e6e6;
+    --fs-comment-focus-border-color: #4c9aff;
+    --fs-move-guideline-color: #aaa;
+    --fs-move-backlight-background: rgba(255, 255, 255, 0.15);
+    --fs-collapse-button-background: #2a2a2a;
+    --fs-collapse-button-border-color: #3a3a3a;
+    --fs-collapse-button-line-color: #888;
+    --fs-collapse-button-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    --fs-collapsible-indicator-background: #333;
+    --fs-collapsible-indicator-border-color: #555;
+    --fs-collapsible-indicator-text: #ddd;
+    --fs-collapsible-indicator-ring: rgba(51, 51, 51, 1);
+    --fs-datepicker-text: #e6e6e6;
+    --fs-datepicker-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    --fs-datepicker-muted-text: #8a8a8a;
+    --fs-datepicker-day-text: #ddd;
+    --fs-datepicker-day-background: transparent;
+    --fs-datepicker-selected-text: #fff;
+    --fs-datepicker-hover-text: #fff;
+    --fs-datepicker-hover-background: #2f3b52;
+  }
+}
+
+/* == Classic style: class "fs-style-classic" or data-fs-style="classic". The default look; set it explicitly for a
+   Classic grid inside a page (or an ancestor) that uses the Modern style. Its colors are the style defaults above. == */
+:where(.fs-style-classic, [data-fs-style="classic"]) {
+  --fs-row-height: 23px;
+  --fs-cell-padding-x: 4px;
+  --fs-header-font-weight: normal;
+  --fs-radius: 0;
+  --fs-menu-shadow: none;
+  --fs-fill-handle-radius: 0;
+  --fs-style-color-text: initial;
+  --fs-style-font-family: initial;
+  --fs-style-font-size: initial;
+}
+
+/* == Modern style: class "fs-style-modern" or data-fs-style="modern" on the grid or any ancestor. Roomier sizes, round
+   corners, and its own light palette and font as style defaults: your colors and the dark theme still win. == */
+:where(.fs-style-modern, [data-fs-style="modern"]) {
+  --fs-row-height: 32px;
+  --fs-cell-padding-x: 8px;
+  --fs-header-font-weight: 500;
+  --fs-radius: 6px;
+  --fs-menu-shadow: var(--fs-shadow);
+  --fs-fill-handle-radius: 50%;
+  --fs-style-color-text: rgba(0, 0, 0, 0.7);
+  --fs-style-font-family: Roboto, "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --fs-style-font-size: 14px;
+  --fs-style-color-border: #e4e4e4;
+  --fs-style-color-header-background: #f7f7f7;
+  --fs-style-color-header-text: rgba(0, 0, 0, 0.7);
+  --fs-style-color-accent: #0287ca;
+  --fs-style-header-highlight-background: #e6e6e6;
+  --fs-style-header-active-highlight-background: #cce7f4;
+  --fs-style-header-active-highlight-text: rgba(0, 0, 0, 0.85);
+  --fs-style-selection-area-background: #0287ca;
+  --fs-style-editor-border-color: #0287ca;
+  --fs-style-menu-hover-background: #ededed;
+  --fs-style-datepicker-hover-background: #e1f1fa;
+}

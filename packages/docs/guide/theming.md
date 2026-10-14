@@ -4,7 +4,7 @@ import { data } from './theming.data.mjs';
 
 # Theming
 
-Every color of FreeSheet, its font and its shadows come from CSS variables (`--fg-*`). Override a few of them to match
+Every color of FreeSheet, its font and its shadows come from CSS variables (`--fs-*`). Override a few of them to match
 your site, or switch to the built-in dark theme.
 
 ## Change the colors
@@ -13,26 +13,26 @@ Set base variables anywhere: on `:root` for the whole page, or on an element aro
 
 ```css
 :root {
-  --fg-color-accent: #0a7d55;
-  --fg-color-header-background: #eef6f2;
-  --fg-font-family: Inter, sans-serif;
-  --fg-font-size: 13px;
+  --fs-color-accent: #0a7d55;
+  --fs-color-header-background: #eef6f2;
+  --fs-font-family: Inter, sans-serif;
+  --fs-font-size: 13px;
 }
 ```
 
-Base variables restyle everything that uses them: `--fg-color-accent`, for example, colors the selection border.
+Base variables restyle everything that uses them: `--fs-color-accent`, for example, colors the selection border.
 For finer control, every part has its own component variable (see the tables below). Setting component variables on
 the grid itself always works:
 
 ```css
-.freegrid {
-  --fg-header-highlight-background: #d7ebe2;
-  --fg-menu-hover-background: #eef6f2;
+.freesheet {
+  --fs-header-highlight-background: #d7ebe2;
+  --fs-menu-hover-background: #eef6f2;
 }
 ```
 
-The grid takes the text color and the font from the page unless you set `--fg-color-text`, `--fg-font-family` and
-`--fg-font-size`.
+The grid takes the text color and the font from the page unless you set `--fs-color-text`, `--fs-font-family` and
+`--fs-font-size`.
 
 ::: tip Menus and popups
 The context menu, the comment editor and the date picker are added to `<body>`, outside the grid. They get the grid's
@@ -42,19 +42,19 @@ theme automatically, but variables set on an element around the grid do not reac
 
 ## Dark theme
 
-Add the class `fg-theme-dark` (or the attribute `data-fg-theme="dark"`) to the grid's container or any element around
+Add the class `fs-theme-dark` (or the attribute `data-fs-theme="dark"`) to the grid's container or any element around
 it, such as `<html>` or `<body>`:
 
 ```html
-<div class="fg-theme-dark">
+<div class="fs-theme-dark">
   <div id="grid"></div>
 </div>
 ```
 
-`fg-theme-auto` (or `data-fg-theme="auto"`) follows the system setting: dark when the operating system or the
+`fs-theme-auto` (or `data-fs-theme="auto"`) follows the system setting: dark when the operating system or the
 browser uses dark mode, light otherwise. Without a theme class the grid is light.
 
-`fg-theme-light` (or `data-fg-theme="light"`) keeps a grid light inside a dark page: the closest theme to the grid
+`fs-theme-light` (or `data-fs-theme="light"`) keeps a grid light inside a dark page: the closest theme to the grid
 wins.
 
 ## Styles
@@ -65,25 +65,25 @@ Two looks, independent of the color theme:
   text color.
 - **Modern**: roomier 32px rows and 8px cell padding, a rounded editor and context menu with a soft shadow, a round
   fill handle, and its own light palette (light grid lines, soft text, light headers, a blue accent) and font
-  (14px Roboto or the system's sans-serif). Add `fg-style-modern` (or `data-fg-style="modern"`) to the grid or any
+  (14px Roboto or the system's sans-serif). Add `fs-style-modern` (or `data-fs-style="modern"`) to the grid or any
   element around it, together with any theme:
 
 ```html
-<div class="fg-style-modern fg-theme-dark">
+<div class="fs-style-modern fs-theme-dark">
   <div id="grid"></div>
 </div>
 ```
 
 The examples on this site use Modern; switch them with **Grid** in the top bar.
 
-Modern's colors and font are defaults, not overrides: a base variable you set (`--fg-color-border`, `--fg-font-family`,
+Modern's colors and font are defaults, not overrides: a base variable you set (`--fs-color-border`, `--fs-font-family`,
 …) wins in Modern too, and the dark theme gives Modern its dark colors. The "Modern" column in [Variables](#variables)
-lists what Modern changes. To show a Classic grid inside a Modern page, add `fg-style-classic` (or
-`data-fg-style="classic"`) around it: the closest style wins.
+lists what Modern changes. To show a Classic grid inside a Modern page, add `fs-style-classic` (or
+`data-fs-style="classic"`) around it: the closest style wins.
 
-Sizes are variables too (`--fg-row-height`, `--fg-cell-padding-x`, `--fg-radius`, `--fg-header-font-weight`,
-`--fg-fill-handle-radius`), so you can make your own density, e.g. `.freegrid { --fg-row-height: 28px; }`. FreeSheet
-reads `--fg-row-height` when the grid is created; after changing it later, call `updateSettings({})`. Modern's wider
+Sizes are variables too (`--fs-row-height`, `--fs-cell-padding-x`, `--fs-radius`, `--fs-header-font-weight`,
+`--fs-fill-handle-radius`), so you can make your own density, e.g. `.freesheet { --fs-row-height: 28px; }`. FreeSheet
+reads `--fs-row-height` when the grid is created; after changing it later, call `updateSettings({})`. Modern's wider
 padding needs a little more column width: with fixed `colWidths`, add about 8px per column so that text does not wrap.
 
 ## Playground

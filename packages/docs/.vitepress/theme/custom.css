@@ -17,9 +17,9 @@
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   /* The grid inherits the page font and text color, so give it its own surface, text color and font from FreeSheet's
-     theme variables instead of the docs theme's. In dark mode LiveExample adds the class fg-theme-dark. */
-  background: var(--fg-color-background);
-  color: var(--fg-color-text, var(--fg-style-color-text, #222));
+     theme variables instead of the docs theme's. In dark mode LiveExample adds the class fs-theme-dark. */
+  background: var(--fs-color-background);
+  color: var(--fs-color-text, var(--fs-style-color-text, #222));
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: normal;
@@ -44,22 +44,22 @@
   gap: 8px 16px;
   align-items: center;
   margin-bottom: 10px;
-  color: var(--fg-color-text, #333);
+  color: var(--fs-color-text, #333);
   font-size: 14px;
 }
 
 .example-toolbar input,
 .example-toolbar select {
   padding: 2px 8px;
-  border: 1px solid var(--fg-color-border);
+  border: 1px solid var(--fs-color-border);
   border-radius: 6px;
-  background: var(--fg-color-background);
-  color: var(--fg-color-text, #000);
+  background: var(--fs-color-background);
+  color: var(--fs-color-text, #000);
 }
 
 /* Matches highlighted by the search plugin (light theme). */
-.live-example:not(.fg-theme-dark) .freegrid {
-  --fg-search-result-background: #fff3b0;
+.live-example:not(.fs-theme-dark) .freesheet {
+  --fs-search-result-background: #fff3b0;
 }
 
 /* "On this page" first; the page meta (Markdown, edit link, last updated) below it. */

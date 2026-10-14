@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { anchor, parseBlocks, readPlugin, readSettings } from './jsdoc.mjs';
 import { TOPICS, UNAVAILABLE, topicOf } from './topics.mjs';
 
-export const SOURCE = new URL('../../freegrid/src/', import.meta.url).pathname;
+export const SOURCE = new URL('../../sheet/src/', import.meta.url).pathname;
 
 const read = file => readFileSync(join(SOURCE, file), 'utf8');
 

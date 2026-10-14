@@ -13,7 +13,7 @@ them will be closed.
 
 - Never delete or weaken a test to make it pass.
 - A test that fails for an environmental reason is changed to `xit` with
-  `// FG-SKIP: <specific reason> — <issue URL>`.
+  `// FS-SKIP: <specific reason> — <issue URL>`.
 - `pnpm test` must pass before a PR is merged. It compares results with the upstream baseline in
   `docs/baseline/`.
 - CI runs the fast checks (lint, types, unit, build, dist, docs) on every push to a PR. The browser tests

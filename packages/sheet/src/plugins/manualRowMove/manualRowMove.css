@@ -1,0 +1,42 @@
+.freesheet .fs-hider {
+  position: relative;
+}
+.freesheet.fs-manual-row-move.after-selection--rows tbody th.fs-highlight {
+  cursor: move;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+.freesheet.fs-manual-row-move.on-moving--rows,
+.freesheet.fs-manual-row-move.on-moving--rows tbody th.fs-highlight {
+  cursor: move;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+.freesheet.fs-manual-row-move.on-moving--rows .manualRowResizer {
+  display: none;
+}
+.freesheet .fs-manual-row-move--guideline,
+.freesheet .fs-manual-row-move--backlight {
+  position: absolute;
+  width: 100%;
+  display: none;
+}
+.freesheet .fs-manual-row-move--guideline {
+  background: var(--fs-move-guideline-color);
+  height: 2px;
+  left: 0;
+  margin-top: -1px;
+  z-index: 105;
+}
+.freesheet .fs-manual-row-move--backlight {
+  background: var(--fs-move-backlight-background);
+  display: none;
+  z-index: 105;
+  pointer-events: none;
+}
+.freesheet.on-moving--rows.show-ui .fs-manual-row-move--guideline,
+.freesheet.on-moving--rows .fs-manual-row-move--backlight {
+  display: block;
+}
