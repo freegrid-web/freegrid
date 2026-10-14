@@ -40,11 +40,9 @@ type Change = [number, string | number, unknown, unknown];
 class Action {
   actionType?: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  undo(instance: PluginHost, undoneCallback: Done): void {}
+  undo(_instance: PluginHost, _undoneCallback: Done): void {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  redo(instance: PluginHost, redoneCallback: Done): void {}
+  redo(_instance: PluginHost, _redoneCallback: Done): void {}
 }
 
 /** Changed cell values. */

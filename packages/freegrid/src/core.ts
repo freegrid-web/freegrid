@@ -517,10 +517,8 @@ class Core {
           return normalizedIndexes;
         };
 
-        /* eslint-disable no-case-declarations */
         switch (action) {
-          case 'insert_row':
-
+          case 'insert_row': {
             const numberOfSourceRows = this.countSourceRows();
 
             if (this.getSettings().maxRows === numberOfSourceRows) {
@@ -542,8 +540,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'insert_col':
+          case 'insert_col': {
             delta = this.#datamap.createCol(index, amount, source);
 
             for (let row = 0, len = this.countSourceRows(); row < len; row++) {
@@ -568,9 +567,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'remove_row':
-
+          case 'remove_row': {
             const removeRow = (indexes: IndexGroup[]) => {
               let offset = 0;
 
@@ -615,9 +614,9 @@ class Core {
             this.#grid.adjustRowsAndCols();
             this._refreshBorders(); // it will call render and prepare methods
             break;
+          }
 
-          case 'remove_col':
-
+          case 'remove_col': {
             const removeCol = (indexes: IndexGroup[]) => {
               let offset = 0;
 
@@ -669,8 +668,11 @@ class Core {
             this._refreshBorders(); // it will call render and prepare methods
 
             break;
-          default:
+          }
+
+          default: {
             throw new Error(`There is no such action "${action}"`);
+          }
         }
 
         if (!keepEmptyRows) {
@@ -817,10 +819,9 @@ class Core {
         let cmax;
         let rmax;
 
-        /* eslint-disable no-case-declarations */
         // insert data with specified pasteMode method
         switch (method) {
-          case 'shift_down' :
+          case 'shift_down': {
             repeatCol = end ? end.col - start.col + 1 : 0;
             repeatRow = end ? end.row - start.row + 1 : 0;
             input = translateRowsToColumns(input);
@@ -837,8 +838,9 @@ class Core {
               }
             }
             break;
+          }
 
-          case 'shift_right':
+          case 'shift_right': {
             repeatCol = end ? end.col - start.col + 1 : 0;
             repeatRow = end ? end.row - start.row + 1 : 0;
             for (r = 0, rlen = input.length, rmax = Math.max(rlen, repeatRow); r < rmax; r++) {
@@ -854,9 +856,10 @@ class Core {
               }
             }
             break;
+          }
 
           case 'overwrite':
-          default:
+          default: {
             // overwrite and other not specified options
             current.row = start.row;
             current.col = start.col;
@@ -974,6 +977,7 @@ class Core {
             }
             this.setDataAtCell(setData, null, null, source || 'populateFromArray');
             break;
+          }
         }
       },
     };

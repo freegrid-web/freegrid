@@ -153,8 +153,7 @@ class EditorText extends EditorBase {
   }
 
   /** Whether an arrow key reaches the grid in full edit mode (instead of moving the caret). */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  allowKeyEventPropagation(keyCode: number): boolean {
+  allowKeyEventPropagation(_keyCode: number): boolean {
     return false;
   }
 

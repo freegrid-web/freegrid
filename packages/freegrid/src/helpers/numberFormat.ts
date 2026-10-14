@@ -185,7 +185,8 @@ const setCharacteristic = (output: string, optional: boolean | undefined, precis
 };
 
 const replaceDelimiters = (output: string, value: number, pattern: Pattern, culture: Culture, decimal?: string): string => {
-  let [characteristic, mantissa] = output.split('.'); // eslint-disable-line prefer-const
+  const [integerPart, mantissa] = output.split('.');
+  let characteristic = integerPart;
 
   if (pattern.thousandSeparated) {
     const sign = value < 0 ? '-' : '';

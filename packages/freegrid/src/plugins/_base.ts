@@ -153,8 +153,7 @@ class BasePlugin {
    *
    * @private
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onUpdateSettings(newSettings?: unknown): void {
+  onUpdateSettings(_newSettings?: unknown): void {
     if (!this.isEnabled) {
       return;
     }

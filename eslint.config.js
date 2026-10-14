@@ -56,8 +56,9 @@ export default [
     files: tsSources,
     ignores: tsTypeTests,
     rules: {
-      // Same option as for JS: unused catch bindings are allowed.
-      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
+      // Same option as for JS: unused catch bindings are allowed. A parameter only overriding methods use (the base
+      // class ignores it) starts with `_`.
+      '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none', argsIgnorePattern: '^_' }],
     },
   },
 ];

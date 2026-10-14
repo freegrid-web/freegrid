@@ -68,18 +68,15 @@ class EditorBase {
     throw Error('Editor getValue() method unimplemented');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setValue(newValue?: unknown): void {
+  setValue(_newValue?: unknown): void {
     throw Error('Editor setValue() method unimplemented');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  open(event?: Event | null): void {
+  open(_event?: Event | null): void {
     throw Error('Editor open() method unimplemented');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  close(force?: boolean): void {
+  close(_force?: boolean): void {
     throw Error('Editor close() method unimplemented');
   }
 
