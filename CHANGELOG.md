@@ -41,6 +41,8 @@
   - A column header that had to be rebuilt ran `afterGetColHeader` twice.
 - Core, part 3 (TypeScript rewrite): the entry module (`FreeGrid(...)` and its `helper`, `dom`, `editors`,
   `renderers`, `validators`, `cellTypes`, `plugins` and `languages` objects). A build test pins every public name.
+- Core, part 4 (TypeScript rewrite): the hooks (`FreeGrid.hooks`, typed listeners and buckets). The docs read the
+  core modules as `.ts` or `.js`.
 - Docs, API reference:
   - Plugin methods show their TypeScript parameter and return types.
   - `isEnabled` is listed for every plugin, and four plugin methods lost descriptions that belonged to other code

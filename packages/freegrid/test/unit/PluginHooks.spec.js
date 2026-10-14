@@ -286,4 +286,72 @@ describe('PluginHooks', () => {
 
     expect(hooks.has('beforeInit', context)).toBe(true);
   });
+
+  it('should add the same callback only once', () => {
+    const hooks = new Hooks();
+    const context = {};
+    const fn = () => {};
+
+    hooks.add('afterInit', fn, context);
+    hooks.add('afterInit', fn, context);
+
+    expect(hooks.getBucket(context).afterInit).toEqual([fn]);
+  });
+
+  it('should replace the earlier `initialHook` callback with a new one', () => {
+    const hooks = new Hooks();
+    const context = {};
+    const first = () => {};
+    const other = () => {};
+    const second = () => {};
+
+    first.initialHook = true;
+    second.initialHook = true;
+
+    hooks.add('afterInit', first, context);
+    hooks.add('afterInit', other, context);
+    hooks.add('afterInit', second, context);
+
+    expect(hooks.getBucket(context).afterInit).toEqual([second, other]);
+  });
+
+  it('should pass a returned value on as the first argument and return the last one (undefined keeps it)', () => {
+    const hooks = new Hooks();
+    const context = {};
+    const seen = [];
+
+    hooks.add('modifyRow', (value) => { seen.push(value); return value + 1; }, context);
+    hooks.add('modifyRow', (value) => { seen.push(value); }, context);
+    hooks.add('modifyRow', (value, extra) => { seen.push([value, extra]); return value * 10; }, context);
+
+    expect(hooks.run(context, 'modifyRow', 1, 'x')).toBe(20);
+    expect(seen).toEqual([1, 2, [2, 'x']]);
+  });
+
+  it('should run the global callbacks before the local ones, with the context as `this`', () => {
+    const hooks = new Hooks();
+    const context = { name: 'grid' };
+    const calls = [];
+
+    hooks.add('afterRender', function() { calls.push(['local', this.name]); }, context);
+    hooks.add('afterRender', function() { calls.push(['global', this.name]); });
+
+    hooks.run(context, 'afterRender');
+
+    expect(calls).toEqual([['global', 'grid'], ['local', 'grid']]);
+  });
+
+  it('should register an unknown hook name when a callback is added to it', () => {
+    const hooks = new Hooks();
+    const fn = () => {};
+
+    expect(hooks.isRegistered('myCustomHook')).toBe(false);
+
+    hooks.add('myCustomHook', fn);
+
+    expect(hooks.isRegistered('myCustomHook')).toBe(true);
+    expect(hooks.getBucket().myCustomHook).toEqual([fn]);
+
+    hooks.deregister('myCustomHook');
+  });
 });
