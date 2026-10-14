@@ -161,6 +161,22 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
 
     if (!contentWidth || contentWidth > 1152) failures.push(`/: home content is ${contentWidth}px wide (theme max is 1152px)`);
   }
+  // Scrolled past an example, the top bar stays on top: the grid's sticky header (fixed, z-index 101) goes under it.
+  if (rendered) {
+    const coveredNav = await page.evaluate(async() => {
+      const example = document.querySelector('.live-example, .theme-playground');
+      const left = example.getBoundingClientRect().left + 60;
+
+      window.scrollBy(0, example.getBoundingClientRect().top + 40);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const hit = document.elementFromPoint(left, 30);
+
+      window.scrollTo(0, 0);
+      return hit?.closest('.live-example, .theme-playground') ? hit.className || hit.tagName : null;
+    });
+
+    if (coveredNav) failures.push(`${path || '/'}: a live example covers the top bar (${coveredNav})`);
+  }
   if (rendered < grids) failures.push(`${path || '/'}: expected ${grids} live grid(s), found ${rendered}`);
   layoutProblems.forEach(p => failures.push(`${path || '/'}: ${p}`));
   errors.forEach(e => failures.push(`${path || '/'}: ${e}`));
