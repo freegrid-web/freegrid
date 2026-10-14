@@ -43,6 +43,7 @@
   `renderers`, `validators`, `cellTypes`, `plugins` and `languages` objects). A build test pins every public name.
 - Core, part 4 (TypeScript rewrite): the hooks (`FreeGrid.hooks`, typed listeners and buckets). The docs read the
   core modules as `.ts` or `.js`.
+- Core, part 5 (TypeScript rewrite): the default settings (`FreeGrid.DefaultSettings`).
 - Docs, API reference:
   - The settings `isEmptyRow` and `isEmptyCol` are listed (they are methods in the defaults and were skipped), and
     `observeDOMVisibility` shows its own description instead of `isEmptyRow`'s, with the two functions' source as examples.
