@@ -9,6 +9,8 @@
 
 ### Changed
 
+- Nested object cell writes reuse their parsed property path for the safety check and traversal, reducing
+  temporary allocations when pasting large ranges.
 - Column sorting reads a column's settings (`type`, `dateFormat`, `columnSorting`, …) from the column meta, not from
   the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
   (#65).
