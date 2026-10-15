@@ -121,6 +121,18 @@ describe('data property path behavior', () => {
     expect(map.dataSource[0]).toEqual({ group: { '': 2 } });
   });
 
+  it('keeps repeated intermediate getter reads when writing a nested path', () => {
+    const first = { value: 'first' };
+    const second = { value: 'second' };
+    let reads = 0;
+    const map = dataMap([{ get group() { return ++reads === 1 ? first : second; } }]);
+
+    map.set(0, 'group.value', 'new');
+    expect(reads).toBe(2);
+    expect(first.value).toBe('first');
+    expect(second.value).toBe('new');
+  });
+
   it('rejects unsafe segments even after reading the same path', () => {
     const map = dataMap([{}]);
 
