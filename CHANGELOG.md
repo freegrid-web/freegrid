@@ -13,6 +13,9 @@
   the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
   (#65).
 
+- Column headers skip source-column enumeration when `columns` is not a function, speeding up wide grids and
+  retrieving all headers without retaining additional cached state.
+
 ### Internal
 
 - Column sorting no longer keeps its own cache of the columns' settings, and no longer clears it when columns are

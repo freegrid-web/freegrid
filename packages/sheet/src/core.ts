@@ -2972,7 +2972,9 @@ class Core {
       const baseCol = columnIndex;
       const physicalColumn = this.runHooks('modifyCol', baseCol);
 
-      const prop = translateVisualIndexToColumns(physicalColumn);
+      const prop = isFunction(this.getSettings().columns)
+        ? translateVisualIndexToColumns(physicalColumn)
+        : undefined;
 
       if (this.#priv.settings.colHeaders === false) {
         result = null;
