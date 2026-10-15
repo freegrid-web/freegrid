@@ -33,8 +33,6 @@ const UNSAFE_KEYS = ['__proto__', 'constructor', 'prototype'];
 // Keep short deletion lists on the linear path to avoid Set setup.
 const ROW_FILTER_SET_THRESHOLD = 32;
 
-const isUnsafeProp = (prop: Prop): boolean => typeof prop === 'string' && prop.split('.').some(key => UNSAFE_KEYS.includes(key));
-
 const copyableLookup = cellMethodLookupFactory('copyable', false);
 
 /**
@@ -624,7 +622,10 @@ class DataMap {
       }
     }
 
-    if (isUnsafeProp(prop)) {
+    // Reuse this write's path for both the safety check and nested traversal.
+    const path = typeof prop === 'string' ? prop.split('.') : null;
+
+    if (path && path.some(key => UNSAFE_KEYS.includes(key))) {
       return;
     }
 
@@ -632,12 +633,11 @@ class DataMap {
     if (dataRow && dataRow.hasOwnProperty && hasOwnProperty(dataRow, prop as PropertyKey)) {
       dataRow[prop as PropertyKey] = newValue;
 
-    } else if (typeof prop === 'string' && prop.indexOf('.') > -1) {
-      const sliced = prop.split('.');
-      const last = sliced.pop() as string;
+    } else if (path && path.length > 1) {
+      const last = path.pop() as string;
       let out = dataRow;
 
-      for (const key of sliced) {
+      for (const key of path) {
         if (typeof out[key] === 'undefined') {
           out[key] = {};
         }
