@@ -163,4 +163,19 @@ describe('data property path behavior', () => {
     mapping = 'b.value';
     expect(source.getAtCell(0, 0)).toBe(2);
   });
+
+  it('keeps function-valued column getters and setters', () => {
+    const map = dataMap([{ value: 1 }]);
+    const calls = [];
+    const property = function(row, value) {
+      calls.push(arguments.length);
+      if (arguments.length === 1) return row.value;
+      row.value = value;
+    };
+
+    expect(map.get(0, property)).toBe(1);
+    map.set(0, property, 2);
+    expect(map.get(0, property)).toBe(2);
+    expect(calls).toEqual([1, 2, 1]);
+  });
 });
