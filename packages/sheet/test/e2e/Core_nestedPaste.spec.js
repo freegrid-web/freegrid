@@ -95,4 +95,40 @@ describe('Core_nestedPaste', () => {
     grid.populateFromArray(0, 0, [['second']]);
     expect(data).toEqual([{ second: { value: 'second' } }]);
   });
+
+  for (const shape of ['array', 'nested']) {
+    it(`keeps preparation hook counts with ${shape} columns`, () => {
+      const data = shape === 'array' ? [['a', 'b'], ['c', 'd']] :
+        [{ group: { value: 'a', other: 'b' } }, { group: { value: 'c', other: 'd' } }];
+      const definitions = shape === 'array' ? [{ data: 0 }, { data: 1 }] :
+        [{ data: 'group.value' }, { data: 'group.other' }];
+      let recording = false;
+      let columns = 0;
+      const counts = {};
+      let snapshot;
+
+      grid = createGrid({ data, colHeaders: false, allowInsertColumn: false,
+        columns: shape === 'array' ? (index) => {
+          if (recording) columns++;
+          return definitions[index];
+        } : definitions,
+      });
+      const original = grid.runHooks;
+
+      grid.runHooks = function(name, ...args) {
+        if (recording) counts[name] = (counts[name] || 0) + 1;
+        return original.call(this, name, ...args);
+      };
+      grid.addHook('beforeChange', () => {
+        snapshot = { modifyRow: counts.modifyRow, modifyCol: counts.modifyCol, modifyRowData: counts.modifyRowData,
+          beforeGetCellMeta: counts.beforeGetCellMeta, afterGetCellMeta: counts.afterGetCellMeta,
+          afterSetDataAtCell: counts.afterSetDataAtCell, columns };
+        recording = false;
+      });
+      recording = true;
+      grid.populateFromArray(0, 0, [['A', 'B'], ['C', 'D']]);
+      expect(snapshot).toEqual({ modifyRow: 18, modifyCol: 32, modifyRowData: 8,
+        beforeGetCellMeta: 10, afterGetCellMeta: 10, afterSetDataAtCell: 1, columns: shape === 'array' ? 8 : 0 });
+    });
+  }
 });
