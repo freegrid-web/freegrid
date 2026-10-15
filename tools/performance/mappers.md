@@ -60,3 +60,6 @@ without a mutation, avoiding rebuilds between individual moves and amortizing se
 These are workload-dependent cutoffs, not cross-browser performance guarantees. Every in-place map
 mutation in the mapper implementations invalidates the reverse index; replacement arrays use a new
 cache key. The weak keys let the index go when its map is released.
+Live arrays passed to persistence hooks or supplied by a persistence loader keep using `indexOf`,
+since a hook can retain and mutate those arrays at any later time. Local and global listeners follow
+the same rule. No array is copied or wrapped, and the hook calls remain in their original order.

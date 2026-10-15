@@ -4,6 +4,7 @@ import { rangeEach } from './../helpers/number';
 
 type ReverseLookup = { queries: number; indexes: Map<number, number> | null };
 const reverseLookups = new WeakMap<number[], ReverseLookup>();
+const exposedMaps = new WeakSet<number[]>();
 const BULK_THRESHOLD = 256;
 const RENUMBER_THRESHOLD = 32;
 const REVERSE_LOOKUP_THRESHOLD = 256;
@@ -12,6 +13,14 @@ const REVERSE_QUERY_THRESHOLD = 1024;
 /** Call before changing an existing map in place. Replacing the array needs no invalidation. */
 export function invalidateArrayMap(map: number[]): void {
   reverseLookups.delete(map);
+}
+
+/** Hooks can retain a live array and mutate it later. Such arrays must keep using indexOf. */
+export function exposeArrayMap(map: number[]): void {
+  if (Array.isArray(map)) {
+    exposedMaps.add(map);
+    invalidateArrayMap(map);
+  }
 }
 
 /** Shift the tail once, keeping the array's identity and holes. Only used for ordinary insertion indexes/counts. */
@@ -65,7 +74,7 @@ const arrayMapper = {
   getIndexByValue(this: ArrayMapper, translatedIndex: number): number | null {
     const map = this._arrayMap;
 
-    if (map.length >= REVERSE_LOOKUP_THRESHOLD) {
+    if (map.length >= REVERSE_LOOKUP_THRESHOLD && Array.isArray(map) && !exposedMaps.has(map)) {
       // indexOf never matches NaN, whereas Map does.
       if (Number.isNaN(translatedIndex)) return null;
       let lookup = reverseLookups.get(map);
