@@ -1,0 +1,63 @@
+describe('Mapper operations after repeated index translations', () => {
+  let container;
+  let grid;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    if (grid) grid.destroy();
+    container.remove();
+  });
+
+  const checkTranslations = (mapper, sorted = false) => {
+    for (let repeat = 0; repeat < 220; repeat++) {
+      for (const physicalRow of [0, 1, 250, 500, 999]) {
+        const index = mapper._arrayMap.indexOf(physicalRow);
+
+        expect(grid.toVisualRow(physicalRow)).toBe(index === -1 ? (sorted ? null : physicalRow) : index);
+      }
+    }
+  };
+
+  it('keeps row translations current across bulk removal, insertion, moves and loadData', () => {
+    grid = new FreeSheet(container, {
+      data: Array.from({ length: 1000 }, (_, index) => [index]),
+      width: 400, height: 200, manualRowMove: true, autoRowSize: false, autoColumnSize: false,
+    });
+    const plugin = grid.getPlugin('manualRowMove');
+
+    plugin.moveRow(999, 0);
+    checkTranslations(plugin.rowsMapper);
+    grid.alter('remove_row', 200, 100);
+    checkTranslations(plugin.rowsMapper);
+    grid.alter('insert_row', 50, 80);
+    checkTranslations(plugin.rowsMapper);
+    plugin.moveRows([0, 250, 500], 700);
+    checkTranslations(plugin.rowsMapper);
+    expect(grid.getDataAtCell(697, 0)).toBe(999);
+    grid.loadData(Array.from({ length: 1000 }, (_, index) => [index]));
+    checkTranslations(plugin.rowsMapper);
+  });
+
+  it('keeps sorted reverse translations current across sorts and row changes', () => {
+    grid = new FreeSheet(container, {
+      data: Array.from({ length: 1000 }, (_, index) => [999 - index]),
+      width: 400, height: 200, columnSorting: true, autoRowSize: false, autoColumnSize: false,
+    });
+    const plugin = grid.getPlugin('columnSorting');
+
+    plugin.sort({ column: 0, sortOrder: 'asc' });
+    checkTranslations(plugin.rowsMapper, true);
+    expect(grid.getDataAtCell(0, 0)).toBe(0);
+    plugin.sort({ column: 0, sortOrder: 'desc' });
+    checkTranslations(plugin.rowsMapper, true);
+    expect(grid.getDataAtCell(0, 0)).toBe(999);
+    grid.alter('remove_row', 200, 100);
+    checkTranslations(plugin.rowsMapper, true);
+    grid.alter('insert_row', 50, 80);
+    checkTranslations(plugin.rowsMapper, true);
+  });
+});
