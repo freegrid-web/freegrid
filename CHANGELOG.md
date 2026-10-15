@@ -17,6 +17,8 @@
 - Column sorting reads a column's settings (`type`, `dateFormat`, `columnSorting`, …) from the column meta, not from
   the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
   (#65).
+- Bulk row and column index mapping avoids repeated array shifts and scans of removed indexes. Repeated reverse
+  translations reuse an index for large, unchanged maps.
 
 - Column headers skip source-column enumeration when `columns` is not a function, speeding up wide grids and
   retrieving all headers without retaining additional cached state.
