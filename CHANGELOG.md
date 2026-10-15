@@ -9,6 +9,9 @@
 
 ### Changed
 
+- Removing many rows is faster for large deletion lists. Small deletions keep the linear lookup, with filter
+  hooks and surviving row order preserved.
+
 - Column sorting reads a column's settings (`type`, `dateFormat`, `columnSorting`, …) from the column meta, not from
   the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
   (#65).
