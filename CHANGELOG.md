@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.7.0 (2026-10-17)
+
+FreeSheet becomes a data tool: hidden rows and columns, filters with a column menu (and conditions of your own),
+nested rows as a tree grid, column groups written in `columns`, conditional formatting as in Excel, and a side panel
+for comments and formatting rules.
+
 ### Added
 
 - Hidden rows and columns (`hiddenRows`, `hiddenColumns`): hide them from the context menu (Hide rows, Show rows,
