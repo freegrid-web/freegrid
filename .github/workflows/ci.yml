@@ -27,8 +27,12 @@ concurrency:
   group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Pull request pushes run nothing: authors run the full suite locally before opening a pull request, and the merge
+# queue runs every check before anything reaches main. A skipped required check counts as passed, so a pull request
+# can go into the queue right away.
 jobs:
   checks:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -46,6 +50,7 @@ jobs:
 
   docs:
     needs: checks
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
