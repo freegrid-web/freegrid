@@ -157,3 +157,6 @@ hot.closePanel();
 
 hot.exportFile('xlsx', { headers: true }).then((file: Blob) => hot.importFile(file));
 hot.downloadFile('csv', 'data.csv');
+
+hot.setLoading('Reading…');
+const loading: boolean = hot.isLoading();

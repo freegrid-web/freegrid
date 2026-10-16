@@ -376,6 +376,25 @@ export const importFile = async(hot: Core, source: Blob | ArrayBuffer | Uint8Arr
   if (root.runHooks('beforeImportFile', format, source) === false) {
     return;
   }
+  // The loading state while the file is read (unless one is shown already).
+  const showsLoading = !root.isLoading();
+
+  if (showsLoading) {
+    root.setLoading(true);
+  }
+  try {
+    await readInto(root, source, format, options);
+  } finally {
+    if (showsLoading) {
+      root.setLoading(false);
+    }
+  }
+  root.runHooks('afterImportFile', format);
+};
+
+/** Reads a file into the document (xlsx) or the active sheet (csv). */
+const readInto = async(root: Core, source: Blob | ArrayBuffer | Uint8Array | string, format: FileFormat,
+  options: FileOptions): Promise<void> => {
   if (format === 'csv') {
     const text = typeof source === 'string' ? source : new TextDecoder().decode(await toBytes(source));
     const rows: unknown[][] = parseCsv(text, options.delimiter).map(row => row.map(value =>
@@ -394,5 +413,4 @@ export const importFile = async(hot: Core, source: Blob | ArrayBuffer | Uint8Arr
 
     root.loadDocument(bookToDocument(book, options));
   }
-  root.runHooks('afterImportFile', format);
 };

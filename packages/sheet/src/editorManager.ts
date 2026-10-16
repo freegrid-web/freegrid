@@ -248,7 +248,8 @@ class EditorManager {
     const instance = this.#instance;
     const selection = this.#selection;
 
-    if (!instance.isListening()) {
+    // A loading grid ignores the keyboard.
+    if (!instance.isListening() || instance.isLoading()) {
       return;
     }
     instance.runHooks('beforeKeyDown', event);

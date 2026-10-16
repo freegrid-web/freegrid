@@ -10,6 +10,9 @@
   results), number and date formats, cell styles and alignment, column widths and row heights, merged, hidden and
   frozen cells, conditional formatting and comments. Options `headers` (the column headers as a first row) and
   `delimiter` (CSV). Events `beforeImportFile`, `afterImportFile`, `afterExportFile`. New guide page and example.
+- Loading state: `setLoading(true | text | false)` and `isLoading()`: a layer with a spinner over the grid that takes
+  the clicks while the grid ignores the keyboard (`aria-busy` for screen readers). `importFile` shows it while it
+  reads a file.
 - Cell styles: the `style` cell setting (`fontWeight`, `fontStyle`, `textDecoration`, `color`, `background`,
   `border`) draws on the cell, under conditional formatting; `getDocument()` keeps it.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).

@@ -53,6 +53,7 @@ import type { AnyFunction, AnyObject, GridSettings } from './types';
 import { Workbook, getWorkbook } from './workbook/workbook';
 import { findSidePanel, getSidePanel } from './sidePanel/sidePanel';
 import { exportFile, downloadFile, importFile } from './files';
+import { setLoading, isLoading } from './loading/loading';
 import type { FileFormat, FileOptions } from './files';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
@@ -2798,6 +2799,30 @@ class Core {
    */
   closePanel() {
     findSidePanel(this)?.close();
+  }
+
+  /**
+   * Shows the loading state: a layer over the grid with a spinner and a text (`true`: "Loading…", or your text), which
+   * takes the clicks while the grid ignores the keyboard; `false` hides it. `importFile` shows it while it reads a
+   * file.
+   *
+   * @memberof Core#
+   * @function setLoading
+   * @param {Boolean|String} state `true`, a text, or `false`.
+   */
+  setLoading(state: boolean | string) {
+    setLoading(this, state);
+  }
+
+  /**
+   * Whether the grid shows its loading state.
+   *
+   * @memberof Core#
+   * @function isLoading
+   * @returns {Boolean}
+   */
+  isLoading() {
+    return isLoading(this);
   }
 
   /**

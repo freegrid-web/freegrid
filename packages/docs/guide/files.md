@@ -60,6 +60,19 @@ A cell's `style` setting draws on the cell (conditional formatting draws over it
 cell: [{ row: 0, col: 0, style: { fontWeight: 'bold', color: '#1f4e78', background: '#ddebf7' } }],
 ```
 
+## Loading state
+
+`importFile` shows a loading state while it reads a file. Show it yourself while your data comes:
+
+```js
+hot.setLoading(true);                 // or a text: hot.setLoading('Fetching orders…')
+hot.loadData(await fetchOrders());
+hot.setLoading(false);
+```
+
+A layer with a spinner covers the grid and takes the clicks; the grid ignores the keyboard and is marked busy for
+screen readers. `isLoading()` tells whether it shows. The layer follows the theme (`--fs-loading-background`).
+
 ## Events
 
 `beforeImportFile(format, source)` (return `false` to cancel), `afterImportFile(format)` and

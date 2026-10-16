@@ -42,13 +42,13 @@ describe('Core methods', () => {
       'getSelectedRange', 'getSelectedRangeLast', 'getSettings', 'getSheet', 'getSheetId', 'getSheetName', 'getSheets',
       'getSourceData', 'getSourceDataArray', 'getSourceDataAtCell', 'getSourceDataAtCol', 'getSourceDataAtRow',
       'getTranslatedPhrase', 'getValue', 'hasColHeaders', 'hasHook', 'hasRowHeaders', 'importFile', 'init',
-      'isColumnModificationAllowed', 'isEmptyCol', 'isEmptyRow', 'isListening', 'isRedoAvailable', 'isUndoAvailable',
-      'listen', 'loadData', 'loadDocument', 'moveSheet', 'openPanel', 'populateFromArray', 'propToCol', 'redo',
-      'removeCellMeta', 'removeHook', 'removeSheet', 'renameSheet', 'render', 'rowOffset', 'runHooks',
-      'scrollViewportTo', 'selectAll', 'selectCell', 'selectCellByProp', 'selectCells', 'selectColumns', 'selectRows',
-      'setCellMeta', 'setCellMetaObject', 'setDataAtCell', 'setDataAtRowProp', 'spliceCellsMeta', 'spliceCol',
-      'spliceRow', 'toPhysicalColumn', 'toPhysicalRow', 'toVisualColumn', 'toVisualRow', 'undo', 'unlisten',
-      'updateSettings', 'validateCell', 'validateCells', 'validateColumns', 'validateRows'
+      'isColumnModificationAllowed', 'isEmptyCol', 'isEmptyRow', 'isListening', 'isLoading', 'isRedoAvailable',
+      'isUndoAvailable', 'listen', 'loadData', 'loadDocument', 'moveSheet', 'openPanel', 'populateFromArray',
+      'propToCol', 'redo', 'removeCellMeta', 'removeHook', 'removeSheet', 'renameSheet', 'render', 'rowOffset',
+      'runHooks', 'scrollViewportTo', 'selectAll', 'selectCell', 'selectCellByProp', 'selectCells', 'selectColumns',
+      'selectRows', 'setCellMeta', 'setCellMetaObject', 'setDataAtCell', 'setDataAtRowProp', 'setLoading',
+      'spliceCellsMeta', 'spliceCol', 'spliceRow', 'toPhysicalColumn', 'toPhysicalRow', 'toVisualColumn', 'toVisualRow',
+      'undo', 'unlisten', 'updateSettings', 'validateCell', 'validateCells', 'validateColumns', 'validateRows'
     ]);
   });
 

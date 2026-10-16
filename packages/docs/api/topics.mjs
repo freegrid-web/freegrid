@@ -120,7 +120,7 @@ export const TOPICS = [
   {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
-    methods: ['exportFile', 'downloadFile', 'importFile'],
+    methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],
     events: ['beforeImportFile', 'afterImportFile', 'afterExportFile'],
     settings: [],
   },

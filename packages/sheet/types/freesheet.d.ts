@@ -35,6 +35,8 @@ declare namespace _FreeSheet {
     openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
+    setLoading(state: boolean | string): void;
+    isLoading(): boolean;
     exportFile(format?: 'xlsx' | 'csv', options?: { headers?: boolean; delimiter?: string }): Promise<Blob>;
     downloadFile(format?: 'xlsx' | 'csv', filename?: string, options?: { headers?: boolean; delimiter?: string }): Promise<void>;
     importFile(source: Blob | ArrayBuffer | Uint8Array | string,
