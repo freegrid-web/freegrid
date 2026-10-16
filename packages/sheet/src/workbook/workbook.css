@@ -1,0 +1,104 @@
+/* The sheet tabs below the sheets (more than one sheet, or sheetTabs: true), in the headers' colors. */
+.fs-sheet-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 4px 4px;
+  overflow-x: auto;
+  border: 1px solid var(--fs-cell-border-color);
+  border-top: 0;
+  background: var(--fs-header-background);
+  color: var(--fs-header-text);
+  font: inherit;
+}
+
+.fs-sheet-tabs__add,
+.fs-sheet-tab {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.fs-sheet-tabs__add {
+  padding: 0 10px;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.fs-sheet-tabs__add:hover,
+.fs-sheet-tab:hover {
+  background: var(--fs-cell-background);
+}
+
+.fs-sheet-tab--active {
+  border-color: var(--fs-cell-border-color);
+  background: var(--fs-cell-background);
+  color: var(--fs-cell-text);
+  box-shadow: inset 0 -2px 0 var(--fs-selection-border-color);
+  font-weight: 600;
+}
+
+.fs-sheet-tab:focus-visible,
+.fs-sheet-tabs__add:focus-visible {
+  outline: 2px solid var(--fs-selection-border-color);
+  outline-offset: -2px;
+}
+
+.fs-sheet-tab__input {
+  width: 10em;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--fs-selection-border-color);
+  border-radius: 2px;
+  background: var(--fs-cell-background);
+  color: var(--fs-cell-text);
+  font: inherit;
+}
+
+/* The tab's right-click menu. */
+.fs-sheet-menu {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 4px 0;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 4px;
+  background: var(--fs-cell-background);
+  color: var(--fs-cell-text);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 18%);
+  font: inherit;
+}
+
+.fs-sheet-menu__item {
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fs-sheet-menu__item:not(:disabled):hover {
+  background: var(--fs-header-background);
+}
+
+.fs-sheet-menu__item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

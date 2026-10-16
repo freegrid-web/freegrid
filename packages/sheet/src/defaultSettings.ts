@@ -2485,6 +2485,66 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * The id of this grid's sheet in its document (see `addSheet`). The grid created with `new FreeSheet` is
+   * `sheet1` by default.
+   *
+   * @type {String}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * sheetId: 'sales',
+   * ```
+   */
+  sheetId: void 0,
+
+  /**
+   * The name of this grid's sheet: shown on its tab and used in formulas of other sheets (`=Sales!B2`). The grid
+   * created with `new FreeSheet` is `Sheet1` by default. Change it with `renameSheet`.
+   *
+   * @type {String}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * sheetName: 'Sales',
+   * ```
+   */
+  sheetName: void 0,
+
+  /**
+   * More sheets for the document, created with the grid: each item is `{ id, name, ...settings }`, as for
+   * `addSheet`. The grid itself is the first sheet.
+   *
+   * @type {Array}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * sheetName: 'Sales',
+   * sheets: [
+   *   { id: 'costs', name: 'Costs', data: costs },
+   *   { id: 'summary', name: 'Summary', data: [['=SUM(Sales!B:B)-SUM(Costs!B:B)']] },
+   * ],
+   * ```
+   */
+  sheets: void 0,
+
+  /**
+   * The sheet tabs below the sheets: shown when the document has more than one sheet. `true` shows them for a single
+   * sheet too (with the + button to add sheets), `false` hides them.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * sheetTabs: true,
+   * ```
+   */
+  sheetTabs: void 0,
+
+  /**
    * @description
    * The {@link GanttChart} plugin enables a possibility to create a Gantt chart using a FreeSheet instance. In this
    * case, the whole table becomes read-only.

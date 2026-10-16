@@ -19,6 +19,9 @@ const PAGES = [
   { path: 'examples/search-and-languages.html', grids: 1 },
   { path: 'examples/formulas.html', grids: 1 },
   { path: 'guide/formulas.html', grids: 0 },
+  { path: 'examples/sheets.html', grids: 1 },
+  { path: 'examples/budget.html', grids: 1 },
+  { path: 'guide/sheets.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },
@@ -87,12 +90,20 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     !(await page.locator('.live-example .ht_master td').allTextContents()).includes('12')) {
     failures.push(`${path}: the formula =B2*C2 does not show 12`);
   }
+  // The sheets examples show their tabs.
+  if (path.startsWith('examples/sheets') || path.startsWith('examples/budget')) {
+    const tabs = await page.locator('.live-example .fs-sheet-tab').count();
+
+    if (tabs < 3) failures.push(`${path}: ${tabs} sheet tabs, expected 3`);
+  }
   // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeSheet's height
   // (--fs-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
   const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {
-    const table = el.querySelector('.ht_master table.htCore');
-    const cell = el.querySelector('.ht_master td');
-    const holder = el.querySelector('.ht_master .wtHolder');
+    // The visible sheet's grid (a document with several sheets hides the others).
+    const master = Array.from(el.querySelectorAll('.ht_master')).find(node => node.offsetParent !== null);
+    const table = master && master.querySelector('table.htCore');
+    const cell = master && master.querySelector('td');
+    const holder = master && master.querySelector('.wtHolder');
 
     if (!table || !cell || !holder) return [];
     const problems = [];
