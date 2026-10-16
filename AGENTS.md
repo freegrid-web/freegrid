@@ -72,34 +72,14 @@ the docs build and the docs smoke test (`pnpm --dir packages/docs test:smoke`, n
 - The docs model must not change by accident: when touching `core.ts`, `pluginHooks.ts`, `defaultSettings.ts` or a
   plugin's main file, compare `buildReference()` from `packages/docs/api/reference.mjs` before and after.
 
-## Current assignment: measured performance fixes (data operations)
+## Current assignment
 
-Small, measured speed-ups in data operations, **without changing how FreeSheet behaves**. The rendering work (row
-geometry cache, lazy cell meta, reusing DOM rows, batching layout reads) is a separate stage-4 design in
-`docs/specs/` and is **out of scope** here: do not touch `viewportRows`, `viewportColumns`, `overlays`, the overlay
-`sumCellSizes` code or `tableRenderer`.
-
-Rules for every change:
-
-- **Measure first.** Each change comes with before/after numbers from the same build setup, for a small case (where
-  the old code may be faster) and a large one. Put the numbers in the PR. No change without a measured gain.
-- **Pick the data structure by use, not by style.** `Set`/`Map` for repeated membership checks or lookups in large
-  lists, an inverse map for reverse index lookups, `WeakMap` for data tied to an object or DOM node, `Map` instead of
-  a plain object for dictionaries keyed by user input. Arrays stay where order matters, for iteration and for small
-  lists. No `forEach` → `for` or `[]` → `Set` rewrites for style alone.
-- **Same behavior.** Keep order, duplicates, `NaN` and sparse-array behavior, hook order and hook call counts. Each
-  change gets specs that pin the behavior (they pass before and after), and a spec that fails before the change
-  if behavior is meant to change (it should not be).
-- One topic per PR, in this order:
-  1. `tools/performance`: a dependency-free benchmark runner (browser scenarios on the production build plus
-     microbenchmarks), so every later PR can show before/after numbers. Document how to run it.
-  2. Removing many rows: `dataMap.filterData` checks membership with `indexOf` for every row (O(N×K)); use a
-     `Set` built once, after `beforeDataFilter`, with the small-list path kept if it is faster.
-  3. `mixins/arrayMapper.ts`: bulk `removeItems`/`unshiftItems`/`insertItems` without per-item `splice` and nested
-     `filter`; a reverse lookup for `getIndexByValue` (`indexOf` today), rebuilt only when the map changes.
-  4. Index translation: count how often `modifyRow`/`modifyCol`, `columns` (as a function) and `colToProp`/`propToCol`
-     run for one render, `getColHeader` and a paste; cache results only where it is safe to invalidate.
-  5. Paste and `populateFromArray`: avoid scanning the same column or row once per cell.
-  6. Sorting dates and times: parse each value once per sort, not inside the compare function.
-- Each PR: all the checks above pass (lint, typecheck, unit, types, build, dist, the three browser E2E suites,
-  Walkontable, docs build and smoke). Add a `CHANGELOG.md` entry under "Changed" for a user-visible speed-up.
+- **Done:** measured data-operation fixes (row removal, mapper bulk operations, column headers, nested writes) and
+  `tools/performance`. A reverse-lookup cache for the mappers was not adopted: it needs mappers that keep their
+  arrays private first.
+- **Open, small:** sorting dates and times parses each value inside the compare function; parse once per sort
+  (measure with `tools/performance`, same rules as before: numbers before/after, unchanged behavior, specs).
+- **Stage 4, rendering:** the shared geometry index from
+  [the large-grid design](docs/specs/2026-10-15-large-grid-performance-design.md) is the next rendering work. It
+  touches `viewportRows`, `viewportColumns`, `overlays`, `sumCellSizes` and `tableRenderer`; agree on the owner
+  before starting, so two agents never change these files at the same time.
