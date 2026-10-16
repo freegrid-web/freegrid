@@ -1,0 +1,361 @@
+import './hidden.css';
+import BasePlugin from './../_base';
+import EventManager from './../../eventManager';
+import { getTranslator } from './../../utils/recordTranslator';
+import * as C from './../../i18n/constants';
+import type { IndexVisibility } from './../../utils/indexVisibility';
+import type { MenuItem } from './../contextMenu/menuItem';
+
+/** The `hiddenRows` / `hiddenColumns` setting as an object. */
+export type HiddenIndexesSettings = {
+  /** Physical rows (columns) hidden at start. */
+  rows?: number[];
+  columns?: number[];
+  /** Marks where hidden rows (columns) are, with a double line in the headers (default `true`). */
+  indicators?: boolean;
+};
+
+/** A header cell next to hidden rows (columns). */
+export const HIDDEN_BEFORE_CLASS_NAME = 'fs-hidden-before';
+export const HIDDEN_AFTER_CLASS_NAME = 'fs-hidden-after';
+
+/** How close to a header's edge a double click shows the hidden rows (columns) there, in pixels. */
+const EDGE = 5;
+
+/**
+ * Hiding rows or columns (the shared part of `hiddenRows` and `hiddenColumns`). A hidden row leaves the visual order:
+ * `countRows()` skips it, and so do selection, the keyboard and copying. What is hidden is kept per physical index, so
+ * it stays hidden when rows are sorted or moved.
+ */
+abstract class HiddenIndexes extends BasePlugin {
+  abstract readonly axis: 'row' | 'column';
+
+  /** `Rows` or `Columns`, for the hook names. */
+  get noun(): 'Rows' | 'Columns' {
+    return this.axis === 'row' ? 'Rows' : 'Columns';
+  }
+
+  get settingName(): 'hiddenRows' | 'hiddenColumns' {
+    return this.axis === 'row' ? 'hiddenRows' : 'hiddenColumns';
+  }
+
+  get visibility(): IndexVisibility {
+    const translator = getTranslator(this.hot);
+
+    return (this.axis === 'row' ? translator.rows : translator.columns)!;
+  }
+
+  get settings(): HiddenIndexesSettings {
+    const settings = this.hot.getSettings()[this.settingName];
+
+    return settings && typeof settings === 'object' ? settings : {};
+  }
+
+  isEnabled(): boolean {
+    return !!this.hot.getSettings()[this.settingName];
+  }
+
+  enablePlugin(): void {
+    if (this.enabled) {
+      return;
+    }
+    this.applySettings();
+
+    if (this.axis === 'row') {
+      this.addHook('afterGetRowHeader', (row: number, TH: HTMLTableCellElement) => this.markHeader(row, TH));
+    } else {
+      this.addHook('afterGetColHeader', (column: number, TH: HTMLTableCellElement) => this.markHeader(column, TH));
+    }
+    this.addHook('afterContextMenuDefaultOptions', (options: { items: MenuItem[] }) => this.addMenuItems(options));
+    this.addHook('afterLoadData', () => this.dropMissing());
+    this.eventManager = this.eventManager || new EventManager(this);
+    this.eventManager.addEventListener(this.hot.rootElement, 'dblclick', event => this.onDoubleClick(event));
+
+    super.enablePlugin();
+  }
+
+  disablePlugin(): void {
+    this.visibility.setHidden(this.settingName, null);
+    this.eventManager?.clear();
+    super.disablePlugin();
+  }
+
+  updatePlugin(): void {
+    this.disablePlugin();
+    this.enablePlugin();
+    super.updatePlugin();
+    this.refresh();
+  }
+
+  /** Hides the rows (columns) the setting lists. */
+  applySettings(): void {
+    const indexes = this.axis === 'row' ? this.settings.rows : this.settings.columns;
+
+    this.visibility.setHidden(this.settingName, Array.isArray(indexes) ? indexes.filter(Number.isInteger) : null);
+  }
+
+  /** The number of physical rows (columns). */
+  total(): number {
+    return this.axis === 'row' ? this.hot.countSourceRows() : this.hot.countSourceCols();
+  }
+
+  /** Ordered index (before hiding) → physical. */
+  orderedToPhysical(ordered: number): number {
+    const hook = this.axis === 'row' ? 'modifyRow' : 'modifyCol';
+
+    return this.hot.hasHook(hook) ? this.hot.runHooks(hook, ordered) : ordered;
+  }
+
+  /** Physical → ordered index (before hiding). */
+  physicalToOrdered(physical: number): number {
+    return this.hot.runHooks(this.axis === 'row' ? 'unmodifyRow' : 'unmodifyCol', physical);
+  }
+
+  /** The visible rows (columns). */
+  count(): number {
+    return this.axis === 'row' ? this.hot.countRows() : this.hot.countCols();
+  }
+
+  /**
+   * Hides rows (columns).
+   *
+   * @param visualIndexes Visual indexes.
+   */
+  hide(visualIndexes: number[]): void {
+    const count = this.count();
+    const physical = visualIndexes
+      .filter(index => Number.isInteger(index) && index >= 0 && index < count)
+      .map(index => this.orderedToPhysical(this.visibility.toOrdered(index)))
+      .filter(index => index !== null && !this.visibility.isHiddenBy(this.settingName, index));
+    const changed = [...new Set(physical)];
+
+    this.change([...this.getHidden(), ...changed], changed, 'Hide');
+  }
+
+  /**
+   * Shows hidden rows (columns).
+   *
+   * @param physicalIndexes Physical indexes (a hidden row has no visual index).
+   */
+  show(physicalIndexes: number[]): void {
+    const shown = [...new Set(physicalIndexes)].filter(index => this.visibility.isHiddenBy(this.settingName, index));
+
+    this.change(this.getHidden().filter(index => shown.indexOf(index) === -1), shown, 'Unhide');
+  }
+
+  /** The hidden rows (columns) as physical indexes, in ascending order. */
+  getHidden(): number[] {
+    return this.visibility.getHidden(this.settingName);
+  }
+
+  /**
+   * Whether this plugin hides a row (column).
+   *
+   * @param physicalIndex Physical index.
+   */
+  isHidden(physicalIndex: number): boolean {
+    return this.visibility.isHiddenBy(this.settingName, physicalIndex);
+  }
+
+  /**
+   * Sets the hidden rows (columns), running the hooks and redrawing.
+   *
+   * @param hidden Every hidden physical index after the change.
+   * @param changed The physical indexes hidden or shown.
+   * @param action `Hide` or `Unhide`.
+   */
+  change(hidden: number[], changed: number[], action: 'Hide' | 'Unhide'): void {
+    if (!changed.length || this.hot.runHooks(`before${action}${this.noun}`, changed) === false) {
+      return;
+    }
+    const previous = this.getHidden();
+
+    this.visibility.setHidden(this.settingName, hidden);
+    this.hot.runHooks(`after${action}${this.noun}`, changed, previous);
+    this.refresh();
+  }
+
+  /** Sets the hidden rows (columns) to a saved set (undo and redo), through the hooks. */
+  restore(hidden: number[]): void {
+    const current = this.getHidden();
+    const shown = current.filter(index => hidden.indexOf(index) === -1);
+    const added = hidden.filter(index => current.indexOf(index) === -1);
+
+    this.change(current.filter(index => shown.indexOf(index) === -1), shown, 'Unhide');
+    this.change(hidden, added, 'Hide');
+    if (!shown.length && !added.length) {
+      this.refresh();
+    }
+  }
+
+  /** Redraws, keeping the selection on visible cells. */
+  refresh(): void {
+    const selected = this.hot.getSelectedLast();
+    const count = this.count();
+
+    if (selected && count > 0) {
+      const [row, column] = selected;
+
+      if (this.axis === 'row') {
+        this.hot.selectCell(Math.min(row, count - 1), column, void 0, void 0, false);
+      } else {
+        this.hot.selectCell(row, Math.min(column, count - 1), void 0, void 0, false);
+      }
+    } else if (selected) {
+      this.hot.deselectCell();
+    }
+    this.hot.view?.wt.wtOverlays.adjustElementsSize(true);
+    this.hot.render();
+  }
+
+  /** After new data is loaded, indexes past its end are no longer hidden. */
+  dropMissing(): void {
+    const total = this.total();
+    const hidden = this.getHidden();
+
+    if (hidden.some(index => index >= total)) {
+      this.visibility.setHidden(this.settingName, hidden.filter(index => index < total));
+    }
+  }
+
+  /** Whether the row (column) next to a visible one, before or after it, is hidden by this plugin. */
+  isGap(visual: number, side: -1 | 1): boolean {
+    const neighbour = this.visibility.toOrdered(visual) + side;
+
+    return neighbour >= 0 && neighbour < this.total() && this.isHidden(this.orderedToPhysical(neighbour));
+  }
+
+  markHeader(visual: number, TH: HTMLTableCellElement): void {
+    const indicators = this.settings.indicators !== false;
+
+    TH.classList.toggle(HIDDEN_BEFORE_CLASS_NAME, indicators && visual >= 0 && this.isGap(visual, -1));
+    TH.classList.toggle(HIDDEN_AFTER_CLASS_NAME, indicators && visual >= 0 && this.isGap(visual, 1));
+  }
+
+  /**
+   * The hidden rows (columns) inside a visual range: between its first and last row, and before the first visible row
+   * or after the last one when the range reaches them.
+   */
+  hiddenWithin(from: number, to: number): number[] {
+    const count = this.count();
+    const low = from <= 0 ? 0 : this.visibility.toOrdered(from);
+    const high = to >= count - 1 ? Infinity : this.visibility.toOrdered(to);
+
+    return this.getHidden().filter((physical) => {
+      const ordered = this.physicalToOrdered(physical);
+
+      return ordered >= low && ordered <= high;
+    });
+  }
+
+  /** The selected visual range along this axis, or `null`. */
+  selectedRange(): [number, number] | null {
+    const selected = this.hot.getSelectedLast();
+
+    if (!selected) {
+      return null;
+    }
+    const [row, column, row2, column2] = selected;
+    const [from, to] = this.axis === 'row' ? [row, row2] : [column, column2];
+
+    return [Math.max(0, Math.min(from, to)), Math.max(from, to)];
+  }
+
+  /** A double click on a header's edge next to hidden rows (columns) shows them. */
+  onDoubleClick(event: MouseEvent): void {
+    const TH = (event.target as HTMLElement).closest('th');
+
+    if (!TH || !(TH.classList.contains(HIDDEN_BEFORE_CLASS_NAME) || TH.classList.contains(HIDDEN_AFTER_CLASS_NAME))) {
+      return;
+    }
+    const coords = this.hot.view.wt.wtTable.getCoords(TH);
+    const visual = this.axis === 'row' ? coords?.row : coords?.col;
+    const isHeader = this.axis === 'row' ? coords?.col === -1 : coords?.row === -1;
+
+    if (!coords || !isHeader || visual === void 0 || visual < 0) {
+      return;
+    }
+    const rect = TH.getBoundingClientRect();
+    const [position, start, end] = this.axis === 'row' ? [event.clientY, rect.top, rect.bottom] :
+      [event.clientX, rect.left, rect.right];
+    const ordered = this.visibility.toOrdered(visual);
+    let shown: number[] = [];
+
+    if (position - start <= EDGE && this.isGap(visual, -1)) {
+      shown = this.adjacentHidden(ordered, -1);
+    } else if (end - position <= EDGE && this.isGap(visual, 1)) {
+      shown = this.adjacentHidden(ordered, 1);
+    }
+    if (shown.length) {
+      event.stopImmediatePropagation();
+      this.show(shown);
+    }
+  }
+
+  /** The hidden rows (columns) right before or after an ordered index, up to the next visible one. */
+  adjacentHidden(ordered: number, side: -1 | 1): number[] {
+    const hidden: number[] = [];
+    const total = this.total();
+
+    for (let index = ordered + side; index >= 0 && index < total; index += side) {
+      const physical = this.orderedToPhysical(index);
+
+      if (!this.isHidden(physical)) {
+        break;
+      }
+      hidden.push(physical);
+    }
+
+    return hidden;
+  }
+
+  addMenuItems(options: { items: MenuItem[] }): void {
+    const isRow = this.axis === 'row';
+    const range = () => this.selectedRange();
+
+    options.items.push(
+      { name: '---------' } as MenuItem,
+      {
+        key: isRow ? 'hide_rows' : 'hide_columns',
+        name: () => {
+          const selected = range();
+
+          return this.hot.getTranslatedPhrase(isRow ? C.CONTEXTMENU_ITEMS_HIDE_ROW : C.CONTEXTMENU_ITEMS_HIDE_COLUMN,
+            selected && selected[1] > selected[0] ? 1 : 0);
+        },
+        callback: () => {
+          const selected = range();
+
+          if (selected) {
+            this.hide(Array.from({ length: selected[1] - selected[0] + 1 }, (_, i) => selected[0] + i));
+          }
+        },
+        disabled: () => {
+          const selected = range();
+
+          // At least one row (column) stays visible.
+          return !selected || selected[1] - selected[0] + 1 >= this.count();
+        },
+      } as MenuItem,
+      {
+        key: isRow ? 'show_rows' : 'show_columns',
+        name: () => this.hot.getTranslatedPhrase(isRow ? C.CONTEXTMENU_ITEMS_SHOW_ROW :
+          C.CONTEXTMENU_ITEMS_SHOW_COLUMN, 1),
+        callback: () => {
+          const selected = range();
+
+          if (selected) {
+            this.show(this.hiddenWithin(selected[0], selected[1]));
+          }
+        },
+        disabled: () => {
+          const selected = range();
+
+          return !selected || this.hiddenWithin(selected[0], selected[1]).length === 0;
+        },
+      } as MenuItem,
+    );
+  }
+}
+
+export default HiddenIndexes;

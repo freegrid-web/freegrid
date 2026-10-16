@@ -404,7 +404,7 @@ class ManualColumnResize extends BasePlugin {
   setManualSize(column: number, width: number): number {
     const newWidth = Math.max(width, 20);
     // The physical column: the order may differ from the data source's (e.g. after manualColumnMove).
-    const physicalColumn = this.hot.runHooks('modifyCol', column);
+    const physicalColumn = this.hot.toPhysicalColumn(column);
 
     this.manualColumnWidths[physicalColumn] = newWidth;
 
@@ -417,7 +417,7 @@ class ManualColumnResize extends BasePlugin {
    * @param column Visual column index.
    */
   clearManualSize(column: number): void {
-    const physicalColumn = this.hot.runHooks('modifyCol', column);
+    const physicalColumn = this.hot.toPhysicalColumn(column);
 
     this.manualColumnWidths[physicalColumn] = undefined;
   }
@@ -433,7 +433,7 @@ class ManualColumnResize extends BasePlugin {
     if (!this.enabled || !this.hot.getSettings().manualColumnResize) {
       return width;
     }
-    const columnWidth = this.manualColumnWidths[this.hot.runHooks('modifyCol', column)];
+    const columnWidth = this.manualColumnWidths[this.hot.toPhysicalColumn(column)];
 
     return columnWidth || width;
   }

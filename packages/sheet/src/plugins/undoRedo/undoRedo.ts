@@ -442,6 +442,33 @@ class RowMoveAction extends Action {
   }
 }
 
+type HiddenIndexesPlugin = { getHidden(): number[]; restore(hidden: number[]): void };
+
+/** Hidden rows or columns (the plugin's whole set before and after). */
+class HiddenIndexesAction extends Action {
+  pluginName: 'hiddenRows' | 'hiddenColumns';
+  previous: number[];
+  hidden: number[];
+
+  constructor(pluginName: 'hiddenRows' | 'hiddenColumns', previous: number[], hidden: number[]) {
+    super();
+    this.pluginName = pluginName;
+    this.previous = previous.slice();
+    this.hidden = hidden.slice();
+    this.actionType = pluginName;
+  }
+
+  undo(instance: PluginHost, undoneCallback: Done): void {
+    instance.addHookOnce('afterRender', undoneCallback);
+    (instance.getPlugin(this.pluginName) as unknown as HiddenIndexesPlugin).restore(this.previous);
+  }
+
+  redo(instance: PluginHost, redoneCallback: Done): void {
+    instance.addHookOnce('afterRender', redoneCallback);
+    (instance.getPlugin(this.pluginName) as unknown as HiddenIndexesPlugin).restore(this.hidden);
+  }
+}
+
 /** Whether a change comes from undoing or redoing (or is automatic): it is not recorded. */
 const isUndoRedoSource = (source: string): boolean => (
   source === 'UndoRedo.undo' || source === 'UndoRedo.redo' || source === 'auto');
@@ -505,6 +532,15 @@ class UndoRedo {
       }
     });
 
+    (['hiddenRows', 'hiddenColumns'] as const).forEach((pluginName) => {
+      const noun = pluginName === 'hiddenRows' ? 'Rows' : 'Columns';
+      const record = (_changed: number[], previous: number[]) => this.done(new HiddenIndexesAction(pluginName,
+        previous, (instance.getPlugin(pluginName) as unknown as HiddenIndexesPlugin).getHidden()));
+
+      instance.addHook(`afterHide${noun}`, record);
+      instance.addHook(`afterUnhide${noun}`, record);
+    });
+
     instance.addHook('afterCreateRow', (index: number, amount: number, source: string) => {
       if (!isUndoRedoSource(source)) {
         this.done(new CreateRowAction(index, amount));
@@ -538,7 +574,7 @@ class UndoRedo {
       const originalData: unknown[][] = instance.getSourceDataArray();
       const columnIndex = (instance.countCols() + index) % instance.countCols();
       const physicalColumns = Array.from({ length: amount },
-        (_, i): number => instance.runHooks('modifyCol', columnIndex + i));
+        (_, i): number => instance.toPhysicalColumn(columnIndex + i));
       const removedData = originalData.map(row => physicalColumns.map(column => row[column]));
       const { colHeaders } = instance.getSettings();
       const headers = Array.isArray(colHeaders) ? physicalColumns.map(column => colHeaders[column] || null) : [];

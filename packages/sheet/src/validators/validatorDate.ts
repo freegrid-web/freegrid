@@ -26,8 +26,8 @@ export default function validatorDate(this: ValidatorContext, value: unknown, ca
   const isDate = !Number.isNaN(new Date(valueToValidate as string).getTime());
 
   if (isDate && this.correctFormat === true) {
-    const row = this.instance.runHooks('unmodifyRow', this.row) as number;
-    const column = this.instance.runHooks('unmodifyCol', this.col) as number;
+    const row = this.instance.toVisualRow(this.row) as number;
+    const column = this.instance.toVisualColumn(this.col) as number;
 
     this.instance.setDataAtCell(row, column, correctFormat(valueToValidate as string, this.dateFormat), 'validatorDate');
     callback(true);

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Added
+
+- Hidden rows and columns (`hiddenRows`, `hiddenColumns`): hide them from the context menu (Hide rows, Show rows,
+  Hide columns, Show columns) or with `getPlugin('hiddenRows').hideRows(rows)`, `showRows`, `showAllRows`,
+  `isHidden`, `getHiddenRows` (and the same for columns). A hidden row leaves the visual order: `countRows()`,
+  selection, the arrow keys and copying skip it. Headers keep the numbers and letters of the visible rows and
+  columns (1, 2, 5; A, B, E) and mark hidden ones with a double line; a double click on it shows them. Hidden rows
+  stay hidden when rows are sorted or moved, move with their data when rows are inserted or removed, can be undone,
+  and are saved by `getDocument()`. New events `before/afterHideRows`, `before/afterUnhideRows`,
+  `before/afterHideColumns`, `before/afterUnhideColumns`. New guide page and example.
+
+### Fixed
+
+- `getCellsMeta()` no longer returns empty entries for rows whose cells were never read.
+
 ## 0.6.0 (2026-10-16)
 
 Sheets: one document with several sheets and a tab bar, as in Excel. Formulas work across sheets (`=Costs!B2`).

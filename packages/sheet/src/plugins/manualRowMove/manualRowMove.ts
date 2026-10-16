@@ -11,6 +11,7 @@ import GuidelineUI from './ui/guideline';
 import type { CellCoords } from './../../3rdparty/walkontable/src';
 
 import './manualRowMove.css';
+import { getTranslator } from './../../utils/recordTranslator';
 
 Hooks.getSingleton().register('beforeRowMove');
 Hooks.getSingleton().register('afterRowMove');
@@ -210,17 +211,21 @@ class ManualRowMove extends BasePlugin {
     priv.disallowMoving = beforeMoveHook === false;
 
     if (!priv.disallowMoving) {
+      // Hidden rows are not in the visual indexes: the map works on the indexes that count them.
+      const visibility = getTranslator(this.hot).rows!;
+      const mapTarget = visibility.toOrdered(target);
+
       // first we need to rewrite an visual indexes to physical for save reference after move
       rows.forEach((row, index, array) => {
-        array[index] = this.rowsMapper.getValueByIndex(row)!;
+        array[index] = this.rowsMapper.getValueByIndex(visibility.toOrdered(row))!;
       });
 
       // next, when we have got an physical indexes, we can move rows
       rows.forEach((row, index) => {
         const actualPosition = this.rowsMapper.getIndexByValue(row)!;
 
-        if (actualPosition !== target) {
-          this.rowsMapper.moveRow(actualPosition, target + index);
+        if (actualPosition !== mapTarget) {
+          this.rowsMapper.moveRow(actualPosition, mapTarget + index);
         }
       });
 
@@ -686,7 +691,7 @@ class ManualRowMove extends BasePlugin {
     if (index !== false) {
       // Collect physical row index.
       rangeEach(index, index + amount - 1, (removedIndex) => {
-        this.removedRows.push(this.hot.runHooks('modifyRow', removedIndex, this.pluginName));
+        this.removedRows.push(getTranslator(this.hot).toPhysicalRow(removedIndex, this.pluginName || void 0));
       });
     }
   }

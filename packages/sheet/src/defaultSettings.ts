@@ -2597,53 +2597,48 @@ DefaultSettings.prototype = {
   headerTooltips: void 0,
 
   /**
-   * The {@link HiddenColumns} plugin allows hiding of certain columns. You can pass additional configuration with an
-   * object notation. Options that are then available are:
-   *  * `columns` - an array of rows that should be hidden on plugin initialization
-   *  * `indicators` - enables small ui markers to indicate where are hidden columns
+   * Hidden columns. `true` turns hiding on (the context menu gets Hide columns and Show columns); an object can list
+   * the columns hidden at start:
+   *  * `columns`: physical column indexes hidden at start;
+   *  * `indicators`: a double line in the column headers where columns are hidden (default `true`).
    *
-   * @pro
+   * A hidden column leaves the visual order: `countCols()`, selection, the keyboard and copying skip it. A double click
+   * on the double line shows the columns there. The API is `getPlugin('hiddenColumns')`: `hideColumns`, `showColumns`,
+   * `showAllColumns`, `isHidden`, `getHiddenColumns`.
+   *
    * @type {Boolean|Object}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable column hiding
    * hiddenColumns: true,
    *
    * // or
-   * hiddenColumns: {
-   *   // set columns that are hidden by default
-   *   columns: [5, 10, 15],
-   *   // show where are hidden columns
-   *   indicators: true
-   * }
+   * hiddenColumns: { columns: [1, 2], indicators: true },
    * ```
    */
   hiddenColumns: void 0,
 
   /**
-   * The {@link HiddenRows} plugin allows hiding of certain rows. You can pass additional configuration with an
-   * object notation. Options that are then available are:
-   *  * `rows` - an array of rows that should be hidden on plugin initialization
-   *  * `indicators` - enables small ui markers to indicate where are hidden columns
+   * Hidden rows. `true` turns hiding on (the context menu gets Hide rows and Show rows); an object can list the rows
+   * hidden at start:
+   *  * `rows`: physical row indexes hidden at start;
+   *  * `indicators`: a double line in the row headers where rows are hidden (default `true`).
    *
-   * @pro
+   * A hidden row leaves the visual order: `countRows()`, selection, the keyboard and copying skip it, and the row
+   * headers keep their numbers (1, 2, 5), as in Excel. Hidden rows stay hidden when rows are sorted or moved. A double
+   * click on the double line shows the rows there. The API is `getPlugin('hiddenRows')`: `hideRows`, `showRows`,
+   * `showAllRows`, `isHidden`, `getHiddenRows`.
+   *
    * @type {Boolean|Object}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable row hiding
    * hiddenRows: true,
    *
    * // or
-   * hiddenRows: {
-   *   // set rows that are hidden by default
-   *   rows: [5, 10, 15],
-   *   // show where are hidden rows
-   *   indicators: true
-   * }
+   * hiddenRows: { rows: [2, 3], indicators: true },
    * ```
    */
   hiddenRows: void 0,

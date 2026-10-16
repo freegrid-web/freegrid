@@ -308,6 +308,24 @@ describe('Core sheets', () => {
       expect(JSON.parse(JSON.stringify(saved))).toEqual(saved); // JSON-safe
     });
 
+    it('saves and loads hidden rows and columns', () => {
+      const hot = handsontable({ data: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']], hiddenRows: { rows: [1] } });
+
+      hot.addSheet('other', { data: [['x', 'y']], hiddenColumns: { columns: [0] } });
+
+      const saved = hot.getDocument();
+
+      expect(saved.sheets[0].hiddenRows).toEqual([1]);
+      expect(saved.sheets[0].hiddenColumns).toBeUndefined();
+      expect(saved.sheets[1].hiddenColumns).toEqual([0]);
+
+      hot.getPlugin('hiddenRows').showAllRows();
+      hot.loadDocument(saved);
+
+      expect(hot.getDataAtCol(0)).toEqual(['a', 'g']);
+      expect(hot.getSheet('other').getDataAtRow(0)).toEqual(['y']);
+    });
+
     it('loads a saved document into another grid', function() {
       const first = handsontable({ data: [['x']], manualColumnResize: true, mergeCells: true });
 

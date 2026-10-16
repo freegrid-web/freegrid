@@ -1578,22 +1578,92 @@ const REGISTERED_HOOKS: string[] = [
   'afterDropdownMenuHide',
 
   /**
-   * Fired by {@link HiddenRows} plugin to check whether the provided row index is hidden. This hook is fired when
-   * {@link Options#hiddenRows} option is enabled.
+   * Fired before rows are hidden (`hideRows`, the context menu, a double click on a header's edge). Return
+   * `false` to cancel.
    *
-   * @pro
+   * @event Hooks#beforeHideRows
+   * @param {Number[]} rows The physical row indexes to be hidden.
+   */
+  'beforeHideRows',
+
+  /**
+   * Fired after rows were hidden.
+   *
+   * @event Hooks#afterHideRows
+   * @param {Number[]} rows The physical row indexes hidden.
+   * @param {Number[]} previous The physical row indexes hidden before.
+   */
+  'afterHideRows',
+
+  /**
+   * Fired before rows are shown (`showRows`, the context menu, a double click on a header's edge). Return
+   * `false` to cancel.
+   *
+   * @event Hooks#beforeUnhideRows
+   * @param {Number[]} rows The physical row indexes to be shown.
+   */
+  'beforeUnhideRows',
+
+  /**
+   * Fired after rows were shown.
+   *
+   * @event Hooks#afterUnhideRows
+   * @param {Number[]} rows The physical row indexes shown.
+   * @param {Number[]} previous The physical row indexes hidden before.
+   */
+  'afterUnhideRows',
+
+  /**
+   * Fired before columns are hidden (`hideColumns`, the context menu, a double click on a header's edge). Return
+   * `false` to cancel.
+   *
+   * @event Hooks#beforeHideColumns
+   * @param {Number[]} columns The physical column indexes to be hidden.
+   */
+  'beforeHideColumns',
+
+  /**
+   * Fired after columns were hidden.
+   *
+   * @event Hooks#afterHideColumns
+   * @param {Number[]} columns The physical column indexes hidden.
+   * @param {Number[]} previous The physical column indexes hidden before.
+   */
+  'afterHideColumns',
+
+  /**
+   * Fired before columns are shown (`showColumns`, the context menu, a double click on a header's edge). Return
+   * `false` to cancel.
+   *
+   * @event Hooks#beforeUnhideColumns
+   * @param {Number[]} columns The physical column indexes to be shown.
+   */
+  'beforeUnhideColumns',
+
+  /**
+   * Fired after columns were shown.
+   *
+   * @event Hooks#afterUnhideColumns
+   * @param {Number[]} columns The physical column indexes shown.
+   * @param {Number[]} previous The physical column indexes hidden before.
+   */
+  'afterUnhideColumns',
+
+  /**
+   * Not fired by FreeSheet; kept so configurations that listen to it still load. Use
+   * `getPlugin('hiddenRows').isHidden(row)`.
+   *
    * @event Hooks#hiddenRow
-   * @param {Number} row The visual row index in question.
+   * @param {Number} row A row index.
    */
   'hiddenRow',
 
   /**
-   * Fired by {@link HiddenColumns} plugin to check whether the provided column index is hidden. This hook is fired when
-   * {@link Options#hiddenColumns} option is enabled.
+   * Not fired by FreeSheet; kept so configurations that listen to it still load. Use
+   * `getPlugin('hiddenColumns').isHidden(column)`.
    *
-   * @pro
    * @event Hooks#hiddenColumn
-   * @param {Number} column The visual column index in question.
+   * @param {Number} column A column index.
    */
   'hiddenColumn',
 

@@ -10,6 +10,8 @@ import CustomBorders from './customBorders/customBorders';
 import DragToScroll from './dragToScroll/dragToScroll';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
+import HiddenColumns from './hiddenColumns/hiddenColumns';
+import HiddenRows from './hiddenRows/hiddenRows';
 import ManualColumnFreeze from './manualColumnFreeze/manualColumnFreeze';
 import ManualColumnMove from './manualColumnMove/manualColumnMove';
 import ManualColumnResize from './manualColumnResize/manualColumnResize';
@@ -35,6 +37,8 @@ export {
   DragToScroll,
   FormulaBar,
   Formulas,
+  HiddenColumns,
+  HiddenRows,
   ManualColumnFreeze,
   ManualColumnMove,
   ManualColumnResize,

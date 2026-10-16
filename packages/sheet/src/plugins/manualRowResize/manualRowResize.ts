@@ -396,7 +396,7 @@ class ManualRowResize extends BasePlugin {
    * @fires Hooks#modifyRow
    */
   setManualSize(row: number, height: number): number {
-    const physicalRow = this.hot.runHooks('modifyRow', row);
+    const physicalRow = this.hot.toPhysicalRow(row);
 
     this.manualRowHeights[physicalRow] = height;
 
@@ -418,7 +418,7 @@ class ManualRowResize extends BasePlugin {
     }
     const autoRowSizePlugin = this.hot.getPlugin('autoRowSize');
     const autoRowHeightResult = autoRowSizePlugin ? autoRowSizePlugin.heights[row] : null;
-    const manualRowHeight = this.manualRowHeights[this.hot.runHooks('modifyRow', row)];
+    const manualRowHeight = this.manualRowHeights[this.hot.toPhysicalRow(row)];
 
     // A height set by resizing wins unless the row's content needs more.
     if (manualRowHeight !== undefined && (manualRowHeight === autoRowHeightResult || manualRowHeight > (height || 0))) {

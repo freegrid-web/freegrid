@@ -53,7 +53,7 @@ filtered rows). Pasting over a range writes to visible rows only.
 The row header of a visible row shows its position before hiding (`1, 2, 5, 6`), as Excel shows gaps in the row
 numbers. A header next to hidden rows gets `fs-hidden-before` / `fs-hidden-after`, drawn as a double line
 (`--fs-hidden-indicator-color`). Column headers do the same with letters (`A, B, E`). Custom `rowHeaders` (an array
-or a function) receive the visual index as before; the new `getRowHeaderNumber(row)` gives the number shown.
+or a function) receive the visual index as before; `getRowHeader(row)` gives the number shown.
 
 ### Order of the translation
 
@@ -106,8 +106,8 @@ class IndexVisibility {
   whole suite green.
 - `DataMap.getLength()` and `countCols()` subtract the hidden count. The old "`modifyRow` returns `null`" trimming
   stays for compatibility.
-- `mergeCells`: a merge drawn over hidden rows spans only its visible rows; a merge whose first cell is hidden is
-  drawn from its first visible cell. Merging a selection never includes hidden rows.
+- `mergeCells` keeps merged cells at visual positions (as it does with sorting), so they move with their rows when
+  rows above them are hidden or shown; rows (columns) inside a merged cell cannot be hidden.
 - Formulas are unaffected: they work on physical rows and columns. Hidden rows are still calculated.
 - `getDocument()` saves `hiddenRows`, `hiddenColumns`, the filter conditions and the collapsed nodes and groups of
   each sheet; `loadDocument()` restores them.
@@ -120,7 +120,7 @@ hiddenRows: { rows: [3, 4], indicators: true }       // physical rows hidden at 
 hiddenColumns: { columns: [2], indicators: true }
 ```
 
-- Context menu: "Hide rows" / "Hide columns" for the selection; "Show rows" / "Show columns" when the selection
+- Context menu (any selection, not only headers): "Hide rows" / "Hide columns" for the selection; "Show rows" / "Show columns" when the selection
   spans a gap (it shows the hidden rows inside it). With row and column headers, a double click on the gap shows
   them too.
 - API (`getPlugin('hiddenRows')`): `hideRows(visualRows)`, `showRows(physicalRows)`, `showAllRows()`,
@@ -129,7 +129,8 @@ hiddenColumns: { columns: [2], indicators: true }
 - Hooks: `beforeHideRows(rows)` (return `false` to cancel), `afterHideRows(rows)`, `beforeUnhideRows`,
   `afterUnhideRows`; the same for columns.
 - Hiding and showing are undoable.
-- The old `hiddenRow`/`hiddenColumn` hooks are fired for compatibility (they answer for a physical index).
+- The old `hiddenRow`/`hiddenColumn` hooks stay registered, so configurations that listen to them still load; they
+  are not fired (`isHidden` answers the question).
 
 ## 3. Filters and the column menu (PR 2)
 
