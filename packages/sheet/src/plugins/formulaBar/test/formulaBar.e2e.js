@@ -58,6 +58,9 @@ describe('FormulaBar', () => {
     expect(getDataAtCell(0, 1)).toBe('new');
     expect(getSelectedLast()).toEqual([0, 1, 0, 1]);
     expect(hot.isListening()).toBe(true);
+    // The same Enter must not reach the grid and open the cell's editor.
+    expect(getActiveEditor().isOpened()).toBe(false);
+    expect(document.activeElement).not.toBe(input());
 
     hot.undo();
     expect(getDataAtCell(0, 1)).toBe(2);
@@ -72,6 +75,7 @@ describe('FormulaBar', () => {
 
     expect(getDataAtCell(0, 1)).toBe(2);
     expect(input().value).toBe('2');
+    expect(getActiveEditor().isOpened()).toBe(false);
   });
 
   it('selects the cell typed in the address box', () => {

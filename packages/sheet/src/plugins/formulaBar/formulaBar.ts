@@ -86,8 +86,10 @@ class FormulaBar extends BasePlugin {
 
     // A click in the bar is not a click outside the grid: the selection stays.
     bar.addEventListener('mousedown', event => event.stopPropagation());
-    // While the bar has the focus, the grid does not take the keyboard.
+    // While the bar has the focus, the grid does not take the keyboard, and the bar's keys never reach the grid (an
+    // Enter that writes the cell would otherwise also open the cell's editor once the grid listens again).
     bar.addEventListener('focusin', () => this.hot.unlisten());
+    bar.addEventListener('keydown', event => event.stopPropagation());
     this.input!.addEventListener('keydown', event => this.onInputKeyDown(event));
     this.nameBox!.addEventListener('keydown', event => this.onNameKeyDown(event));
 
@@ -158,6 +160,7 @@ class FormulaBar extends BasePlugin {
 
   /** Writes the bar's text to the cell and gives the keyboard back to the grid. */
   confirm(): void {
+    (document.activeElement as HTMLElement | null)?.blur();
     if (this.#cell && this.input) {
       const [row, column] = this.#cell;
 
@@ -172,6 +175,7 @@ class FormulaBar extends BasePlugin {
 
   /** Restores the cell's value in the bar and gives the keyboard back to the grid. */
   cancel(): void {
+    (document.activeElement as HTMLElement | null)?.blur();
     this.refresh();
     this.hot.listen();
   }
@@ -190,6 +194,8 @@ class FormulaBar extends BasePlugin {
     if (event.key === 'Enter') {
       event.preventDefault();
       const cell = parseAddress(this.nameBox!.value);
+
+      this.nameBox!.blur();
 
       if (cell && cell[0] < this.hot.countRows() && cell[1] < this.hot.countCols()) {
         this.hot.selectCell(cell[0], cell[1]);
