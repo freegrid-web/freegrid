@@ -109,7 +109,8 @@ class CollapsibleColumns extends BasePlugin {
     button.className = `${BUTTON_CLASS_NAME}${collapsed ? ` ${BUTTON_CLASS_NAME}--collapsed` : ''}`;
     button.setAttribute('role', 'button');
     button.setAttribute('aria-expanded', String(!collapsed));
-    button.setAttribute('aria-label', this.hot.getTranslatedPhrase(phrase, 0) as string);
+    button.title = `${this.hot.getTranslatedPhrase(phrase, 0) as string}: ${group.label}`;
+    button.setAttribute('aria-label', button.title);
     button.dataset.level = String(group.level);
     button.dataset.start = String(group.start);
 

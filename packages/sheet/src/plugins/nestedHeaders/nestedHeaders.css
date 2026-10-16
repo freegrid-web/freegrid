@@ -1,6 +1,7 @@
 /* Group headers: the label of a group is drawn in its first visible column, over the group's columns. */
 .freesheet thead th.fs-group {
-  border-right-color: transparent;
+  /* No line between the group's columns (the header's own color, so nothing shows through). */
+  border-right-color: var(--fs-header-background);
 }
 
 .freesheet thead th.fs-group-end {
@@ -17,6 +18,8 @@
   position: absolute;
   top: 0;
   left: 0;
+  /* Over the lines between the group's columns. */
+  background: var(--fs-header-background);
   box-sizing: border-box;
   height: 100%;
   overflow: hidden;
@@ -28,35 +31,40 @@
   padding-left: 20px;
 }
 
-/* The −/+ button of a collapsible group. */
+/*
+ * The button of a collapsible group, in the style of the arrows beside hidden columns: ‹ collapses the group, › expands
+ * it; on hover it turns into a button.
+ */
 .freesheet thead th .fs-group-toggle {
   position: absolute;
   top: 50%;
   left: 4px;
-  width: 11px;
-  height: 11px;
-  margin-top: -6px;
-  border: 1px solid var(--fs-collapse-button-border-color);
-  border-radius: 2px;
-  background: var(--fs-collapse-button-background);
-  box-shadow: var(--fs-collapse-button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 12px;
+  height: 16px;
+  margin-top: -8px;
+  border-radius: 3px;
+  color: var(--fs-hidden-toggle-text);
   cursor: pointer;
 }
 
-.freesheet thead th .fs-group-toggle::before,
-.freesheet thead th .fs-group-toggle--collapsed::after {
+.freesheet thead th .fs-group-toggle::before {
   content: '';
-  position: absolute;
-  top: 5px;
-  left: 2px;
-  width: 7px;
-  height: 1px;
-  background: var(--fs-collapse-button-line-color);
+  width: 4px;
+  height: 4px;
+  border: solid currentcolor;
+  border-width: 0 0 1.5px 1.5px;
+  transform: translateX(1px) rotate(45deg);
 }
 
-.freesheet thead th .fs-group-toggle--collapsed::after {
-  top: 2px;
-  left: 5px;
-  width: 1px;
-  height: 7px;
+.freesheet thead th .fs-group-toggle--collapsed::before {
+  transform: translateX(-1px) rotate(-135deg);
+}
+
+.freesheet thead th .fs-group-toggle:hover {
+  color: var(--fs-hidden-toggle-hover-text);
+  background: var(--fs-hidden-toggle-hover-background);
 }

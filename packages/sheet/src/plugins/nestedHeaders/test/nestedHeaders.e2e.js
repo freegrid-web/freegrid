@@ -76,6 +76,7 @@ describe('NestedHeaders and CollapsibleColumns', () => {
     const hot = handsontable({ data: data(), nestedHeaders, collapsibleColumns: true });
 
     expect(headerRows()[0].querySelectorAll('.fs-group-toggle').length).toBe(2);
+    expect(headerRows()[0].querySelector('.fs-group-toggle').title).toBe('Collapse: 2026');
 
     hot.getPlugin('collapsibleColumns').collapse(0, 1);
 
