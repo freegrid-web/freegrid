@@ -33,7 +33,7 @@ removing rows moves the hidden ones with their data. Formulas still calculate hi
 - **Context menu**: Hide rows hides the selected rows. Show rows shows the hidden rows inside the selection (select
   the rows on both sides of the gap, or the first or last row for rows hidden at the edge).
 - **A click** on one of the small arrows beside the double line shows the rows hidden there (on hover the arrow
-  becomes a button with a tooltip).
+  becomes a button, and its tooltip lists what is hidden: "Show rows: 2–3").
 - **API**: hiding takes visual indexes; a hidden row has no visual index, so showing takes physical ones.
 
 ```js

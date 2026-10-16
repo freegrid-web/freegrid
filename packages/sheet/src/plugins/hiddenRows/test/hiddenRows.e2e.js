@@ -161,7 +161,7 @@ describe('HiddenRows', () => {
 
     expect(rowHeaderTH(0).querySelector('.fs-hidden-toggle--after')).not.toBeNull();
     expect(rowHeaderTH(2).querySelector('.fs-hidden-toggle')).toBeNull();
-    expect(toggle.title).toBe('Show rows');
+    expect(toggle.title).toBe('Show rows: 2–3');
 
     $(toggle).simulate('mousedown');
 
@@ -183,7 +183,11 @@ describe('HiddenRows', () => {
   it('shows the hidden columns after a click on the arrow in a column header', () => {
     const hot = handsontable({ data: data(), colHeaders: true, hiddenColumns: { columns: [1] } });
 
-    $(hot.view.wt.wtTable.getColumnHeader(0).querySelector('.fs-hidden-toggle--after')).simulate('mousedown');
+    const toggle = hot.view.wt.wtTable.getColumnHeader(0).querySelector('.fs-hidden-toggle--after');
+
+    expect(toggle.title).toBe('Show column: B');
+
+    $(toggle).simulate('mousedown');
 
     expect(countCols()).toBe(2);
   });

@@ -1,6 +1,7 @@
 import './hidden.css';
 import BasePlugin from './../_base';
 import { getTranslator } from './../../utils/recordTranslator';
+import { spreadsheetColumnLabel } from './../../helpers/data';
 import * as C from './../../i18n/constants';
 import type { IndexVisibility } from './../../utils/indexVisibility';
 import type { MenuItem } from './../contextMenu/menuItem';
@@ -192,6 +193,13 @@ abstract class HiddenIndexes extends BasePlugin {
     const selected = this.hot.getSelectedLast();
     const count = this.count();
 
+    // First the new rows (columns), then the sizes that depend on them (the grid's height decides whether a
+    // scrollbar takes width from stretched columns), then the selection.
+    this.hot.forceFullRender = true;
+    this.hot.render();
+    this.hot.view?.wt.wtOverlays.adjustElementsSize(true);
+    this.hot.render();
+
     if (selected && count > 0) {
       const [row, column] = selected;
 
@@ -203,8 +211,6 @@ abstract class HiddenIndexes extends BasePlugin {
     } else if (selected) {
       this.hot.deselectCell();
     }
-    this.hot.view?.wt.wtOverlays.adjustElementsSize(true);
-    this.hot.render();
   }
 
   /** After new data is loaded, indexes past its end are no longer hidden. */
@@ -237,12 +243,12 @@ abstract class HiddenIndexes extends BasePlugin {
     if (!before && !after) {
       return;
     }
-    const title = this.hot.getTranslatedPhrase(this.axis === 'row' ? C.CONTEXTMENU_ITEMS_SHOW_ROW :
-      C.CONTEXTMENU_ITEMS_SHOW_COLUMN, 1) as string;
+    const ordered = this.visibility.toOrdered(visual);
 
-    ([[before, 'before'], [after, 'after']] as const).forEach(([shown, side]) => {
+    ([[before, 'before', -1], [after, 'after', 1]] as const).forEach(([shown, side, direction]) => {
       if (shown) {
         const toggle = document.createElement('span');
+        const title = this.toggleTitle(ordered, direction);
 
         toggle.className = `${TOGGLE_CLASS_NAME} ${TOGGLE_CLASS_NAME}--${side}`;
         toggle.title = title;
@@ -303,6 +309,37 @@ abstract class HiddenIndexes extends BasePlugin {
       this.show(shown);
     }
   };
+
+  /** The tooltip of an arrow: what it shows, for example "Show rows: 2–3" or "Show columns: B, D–F". */
+  toggleTitle(ordered: number, side: -1 | 1): string {
+    const limit = 1000;
+    const total = this.total();
+    const indexes: number[] = [];
+
+    for (let index = ordered + side; index >= 0 && index < total && indexes.length <= limit; index += side) {
+      if (!this.isHidden(this.orderedToPhysical(index))) {
+        break;
+      }
+      indexes.push(index);
+    }
+    indexes.sort((a, b) => a - b);
+
+    const label = (index: number) => (this.axis === 'row' ? String(index + 1) : spreadsheetColumnLabel(index));
+    // Consecutive indexes as ranges.
+    const ranges: string[] = [];
+    let start = 0;
+
+    for (let i = 1; i <= indexes.length; i += 1) {
+      if (i === indexes.length || indexes[i] !== indexes[i - 1] + 1) {
+        ranges.push(i - 1 === start ? label(indexes[start]) : `${label(indexes[start])}–${label(indexes[i - 1])}`);
+        start = i;
+      }
+    }
+    const phrase = this.hot.getTranslatedPhrase(this.axis === 'row' ? C.CONTEXTMENU_ITEMS_SHOW_ROW :
+      C.CONTEXTMENU_ITEMS_SHOW_COLUMN, indexes.length > 1 ? 1 : 0) as string;
+
+    return `${phrase}: ${ranges.join(', ')}${indexes.length > limit ? '…' : ''}`;
+  }
 
   /** The hidden rows (columns) right before or after an ordered index, up to the next visible one. */
   adjacentHidden(ordered: number, side: -1 | 1): number[] {
