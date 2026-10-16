@@ -80,7 +80,7 @@
   border-radius: 4px;
   background: var(--fs-cell-background);
   color: var(--fs-cell-text);
-  box-shadow: 0 4px 14px rgb(0 0 0 / 18%);
+  box-shadow: var(--fs-shadow);
   font: inherit;
 }
 
