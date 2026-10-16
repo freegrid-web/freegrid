@@ -16,6 +16,7 @@
 }
 
 .fs-sheet-tabs__menu,
+.fs-sheet-tabs__scroll,
 .fs-sheet-tabs__add {
   flex: 0 0 32px;
   margin: 0;
@@ -35,6 +36,20 @@
 
 .fs-sheet-tabs__add {
   border-left: 1px solid var(--fs-cell-border-color);
+}
+
+.fs-sheet-tabs__scroll {
+  flex-basis: 24px;
+  font-size: 1.3em;
+}
+
+.fs-sheet-tabs__scroll--end {
+  border-right: 1px solid var(--fs-cell-border-color);
+}
+
+.fs-sheet-tabs__scroll:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .fs-sheet-tabs__list {
@@ -78,6 +93,7 @@
 }
 
 .fs-sheet-tabs__menu:hover,
+.fs-sheet-tabs__scroll:not(:disabled):hover,
 .fs-sheet-tabs__add:hover,
 .fs-sheet-tab:hover {
   background: var(--fs-cell-background);

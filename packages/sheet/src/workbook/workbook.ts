@@ -408,11 +408,16 @@ export class Workbook {
       });
       list.appendChild(tab);
     });
-    // The wheel scrolls the tabs sideways; the fades show where tabs are hidden.
+    // The wheel scrolls the tabs sideways (a wheel that reports lines or pages, as in Firefox, in pixels too); the
+    // fades show where tabs are hidden.
     list.addEventListener('wheel', (event) => {
-      if (list.scrollWidth > list.clientWidth && Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      const delta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+      const unit = event.deltaMode === 1 ? 40 : (event.deltaMode === 2 ? list.clientWidth : 1);
+
+      if (list.scrollWidth > list.clientWidth && delta !== 0) {
         event.preventDefault();
-        list.scrollLeft += event.deltaY;
+        list.scrollLeft += delta * unit;
+        this.updateFades(list);
       }
     }, { passive: false });
     list.addEventListener('scroll', () => this.updateFades(list));
@@ -426,6 +431,16 @@ export class Workbook {
         action: () => this.activate(sheet.id),
       })), rect.left, rect.top, true);
     }));
+    // ‹ › scroll the tabs by most of the visible width.
+    const step = (direction: number) => () => {
+      list.scrollLeft += direction * Math.max(60, list.clientWidth * 0.75);
+      this.updateFades(list);
+    };
+
+    this.#tabs.appendChild(button('fs-sheet-tabs__scroll fs-sheet-tabs__scroll--start', 'Scroll tabs left', '‹',
+      step(-1)));
+    this.#tabs.appendChild(button('fs-sheet-tabs__scroll fs-sheet-tabs__scroll--end', 'Scroll tabs right', '›',
+      step(1)));
     this.#tabs.appendChild(list);
     this.#tabs.appendChild(button('fs-sheet-tabs__add', 'Add sheet', '+', () => this.activate(this.add(void 0).getSheetId())));
 
@@ -441,6 +456,15 @@ export class Workbook {
 
     list.classList.toggle('fs-sheet-tabs__list--fade-start', list.scrollLeft > 1);
     list.classList.toggle('fs-sheet-tabs__list--fade-end', end > 1);
+
+    const bar = list.parentElement;
+    const start = bar?.querySelector<HTMLButtonElement>('.fs-sheet-tabs__scroll--start');
+    const finish = bar?.querySelector<HTMLButtonElement>('.fs-sheet-tabs__scroll--end');
+
+    if (start && finish) {
+      start.disabled = list.scrollLeft <= 1;
+      finish.disabled = end <= 1;
+    }
   }
 
   /** The tab bar is as wide as the active sheet's drawn grid (its table and vertical scrollbar); the tabs scroll. */

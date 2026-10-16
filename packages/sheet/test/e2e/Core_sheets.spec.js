@@ -117,6 +117,21 @@ describe('Core sheets', () => {
     expect(list.classList.contains('fs-sheet-tabs__list--fade-end')).toBe(true);
     expect(list.classList.contains('fs-sheet-tabs__list--fade-start')).toBe(false);
 
+    // The wheel scrolls back (a line-based wheel, as in Firefox, too), and so do ‹ ›.
+    const before = list.scrollLeft;
+
+    list.dispatchEvent(new WheelEvent('wheel', { deltaY: 3, deltaMode: 1, bubbles: true, cancelable: true }));
+    expect(list.scrollLeft).toBe(before + 120);
+    list.dispatchEvent(new WheelEvent('wheel', { deltaY: -3, deltaMode: 1, bubbles: true, cancelable: true }));
+    expect(list.scrollLeft).toBe(before);
+
+    const [left, right] = document.querySelectorAll('.fs-sheet-tabs__scroll');
+
+    expect(left.disabled).toBe(true);
+    right.click();
+    expect(list.scrollLeft).toBeGreaterThan(before);
+    expect(left.disabled).toBe(false);
+
     hot.activateSheet('sheet31');
 
     expect(list.isConnected ? list.scrollLeft : document.querySelector('.fs-sheet-tabs__list').scrollLeft)
