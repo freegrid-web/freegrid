@@ -215,6 +215,25 @@ class Viewport {
   /**
    * @returns {Number}
    */
+  /**
+   * The height of every row when all rows have the same height, or `null`. It is the same height only when the
+   * `rowHeightsUniform` setting says so and no rendered row turned out higher (oversized).
+   */
+  getUniformRowHeight(): number | null {
+    const engine = this.#engine;
+
+    const rowHeightsUniform = engine.wtSettings.settings.rowHeightsUniform as () => boolean;
+
+    if (engine.getSetting('totalRows') === 0 || !rowHeightsUniform() ||
+      Object.keys(this.oversizedRows).length > 0) {
+      return null;
+    }
+    const height = engine.wtTable.getRowHeight(0);
+    const uniform = (height === void 0 ? engine.wtSettings.settings.defaultRowHeight : height) as number;
+
+    return Number.isFinite(uniform) && uniform > 0 ? uniform : null;
+  }
+
   getViewportHeight() {
     let containerHeight = this.getWorkspaceHeight();
 
@@ -356,7 +375,8 @@ class Viewport {
       },
       (visible ? null : this.#engine.wtSettings.settings.viewportRowCalculatorOverride) as ConstructorParameters<typeof ViewportRowsCalculator>[4],
       visible,
-      scrollbarHeight
+      scrollbarHeight,
+      this.getUniformRowHeight()
     );
   }
 
