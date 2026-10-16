@@ -17,6 +17,7 @@ import { rangeEach } from './helpers/number';
 import MultiMap from './multiMap';
 import type { SourceRow } from './dataSource';
 import type Core from './core';
+import { getTranslator } from './utils/recordTranslator';
 import type { GridPrivate, GridSettingsConstructor } from './core';
 
 type Grid = Core;
@@ -173,7 +174,7 @@ class DataMap {
    * @returns {Number} Physical column index.
    */
   colToProp(col: number): Prop {
-    const physicalColumn = this.instance.runHooks('modifyCol', col);
+    const physicalColumn = getTranslator(this.instance).toPhysicalColumn(col);
 
     if (!isNaN(physicalColumn) && this.colToPropCache && typeof this.colToPropCache[physicalColumn] !== 'undefined') {
       return this.colToPropCache[physicalColumn];
@@ -191,7 +192,9 @@ class DataMap {
     const cached = this.propToColCache.get(prop);
     const col = typeof cached === 'undefined' ? prop : cached;
 
-    return this.instance.runHooks('unmodifyCol', col);
+    // A property that is no column stays as it is.
+    return typeof col === 'number' ? getTranslator(this.instance).toVisualColumn(col) :
+      this.instance.runHooks('unmodifyCol', col);
   }
 
   /**
@@ -519,7 +522,7 @@ class DataMap {
    * @param {Number} prop
    */
   get(row: number, prop: Prop): unknown {
-    const physicalRow = this.instance.runHooks('modifyRow', row);
+    const physicalRow = getTranslator(this.instance).toPhysicalRow(row);
 
     let dataRow = this.dataSource[physicalRow];
     // modifyRowData is to be deprecated for modifyData (see #69).
@@ -603,7 +606,7 @@ class DataMap {
    * @param {String} [source] Source of hook runner.
    */
   set(row: number, prop: Prop, value: unknown, source?: string): void {
-    const physicalRow = this.instance.runHooks('modifyRow', row, source || 'datamapGet');
+    const physicalRow = getTranslator(this.instance).toPhysicalRow(row, source || 'datamapGet');
     let newValue = value;
     let dataRow = this.dataSource[physicalRow];
     // modifyRowData is to be deprecated for modifyData (see #69).
@@ -671,7 +674,7 @@ class DataMap {
     let rowsToRemove = amount;
 
     while (physicRow < totalRows && rowsToRemove) {
-      logicRows.push(this.instance.runHooks('modifyRow', physicRow));
+      logicRows.push(getTranslator(this.instance).toPhysicalRow(physicRow));
 
       rowsToRemove -= 1;
       physicRow += 1;
@@ -693,7 +696,7 @@ class DataMap {
     let colsToRemove = amount;
 
     while (physicalCol < totalCols && colsToRemove) {
-      visualCols.push(this.instance.runHooks('modifyCol', physicalCol));
+      visualCols.push(getTranslator(this.instance).toPhysicalColumn(physicalCol));
 
       colsToRemove -= 1;
       physicalCol += 1;
@@ -736,6 +739,11 @@ class DataMap {
     }
 
     let length = this.instance.countSourceRows();
+    const rows = getTranslator(this.instance).rows;
+
+    if (rows && rows.isActive()) {
+      return Math.min(rows.count(), maxRows);
+    }
 
     if (this.instance.hasHook('modifyRow')) {
       let reValidate = this.skipCache;
@@ -814,7 +822,7 @@ class DataMap {
 
     for (let r = Math.min(start.row, end.row); r <= rlen; r++) {
       const row: unknown[] = [];
-      const physicalRow = this.instance.runHooks('modifyRow', r);
+      const physicalRow = getTranslator(this.instance).toPhysicalRow(r);
 
       for (let c = Math.min(start.col, end.col); c <= clen; c++) {
 

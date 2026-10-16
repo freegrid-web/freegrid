@@ -1047,27 +1047,19 @@ declare namespace FreeSheet {
     }
 
     interface HiddenColumns extends Base {
-      hiddenColumns: boolean | any[];
-      lastSelectedColumn: number;
-      settings: object | void;
-
-      isHidden(column: number, isLogicIndex?: boolean): boolean;
-      hideColumn(column: number): void;
-      hideColumns(columns: any[]): void;
-      showColumn(column: number): void;
-      showColumns(columns: any[]): void;
+      hideColumns(columns: number[]): void;
+      showColumns(columns: number[]): void;
+      showAllColumns(): void;
+      isHidden(column: number): boolean;
+      getHiddenColumns(): number[];
     }
 
     interface HiddenRows extends Base {
-      hiddenRows: boolean | any[];
-      lastSelectedRow: number;
-      settings: object | void;
-
-      isHidden(row: number, isLogicIndex?: boolean): boolean;
-      hideRow(row: number): void;
-      hideRows(rows: any[]): void;
-      showRow(row: number): void;
-      showRows(rows: any[]): void;
+      hideRows(rows: number[]): void;
+      showRows(rows: number[]): void;
+      showAllRows(): void;
+      isHidden(row: number): boolean;
+      getHiddenRows(): number[];
     }
 
     interface ManualColumnFreeze extends Base {
@@ -1490,8 +1482,8 @@ declare namespace FreeSheet {
     ganttChart?: object; // pro
     headerTooltips?: boolean | object; // pro
     height?: number | (() => void);
-    hiddenColumns?: boolean | object; // pro
-    hiddenRows?: boolean | object; // pro
+    hiddenColumns?: boolean | { columns?: number[]; indicators?: boolean };
+    hiddenRows?: boolean | { rows?: number[]; indicators?: boolean };
     invalidCellClassName?: string;
     isEmptyCol?: (col: number) => boolean;
     isEmptyRow?: (row: number) => boolean;
@@ -1610,6 +1602,14 @@ declare namespace FreeSheet {
     afterRender?: (isForced: boolean) => void;
     afterRenderer?: (TD: Element, row: number, col: number, prop: string | number, value: string, cellProperties: GridSettings) => void;
     afterRowMove?: (startRow: number, endRow: number) => void;
+    beforeHideRows?: (rows: number[]) => void | boolean;
+    afterHideRows?: (rows: number[], previous: number[]) => void;
+    beforeUnhideRows?: (rows: number[]) => void | boolean;
+    afterUnhideRows?: (rows: number[], previous: number[]) => void;
+    beforeHideColumns?: (columns: number[]) => void | boolean;
+    afterHideColumns?: (columns: number[], previous: number[]) => void;
+    beforeUnhideColumns?: (columns: number[]) => void | boolean;
+    afterUnhideColumns?: (columns: number[], previous: number[]) => void;
     afterRowResize?: (currentRow: number, newSize: number, isDoubleClick: boolean) => void;
     afterScrollHorizontally?: () => void;
     afterScrollVertically?: () => void;

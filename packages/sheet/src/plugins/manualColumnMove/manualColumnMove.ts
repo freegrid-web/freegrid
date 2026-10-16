@@ -11,6 +11,7 @@ import GuidelineUI from './ui/guideline';
 import type { CellCoords } from './../../3rdparty/walkontable/src';
 
 import './manualColumnMove.css';
+import { getTranslator } from './../../utils/recordTranslator';
 
 Hooks.getSingleton().register('beforeColumnMove');
 Hooks.getSingleton().register('afterColumnMove');
@@ -215,17 +216,21 @@ class ManualColumnMove extends BasePlugin {
     priv.disallowMoving = !beforeColumnHook;
 
     if (beforeColumnHook !== false) {
+      // Hidden columns are not in the visual indexes: the map works on the indexes that count them.
+      const visibility = getTranslator(this.hot).columns!;
+      const mapTarget = visibility.toOrdered(target);
+
       // first we need to rewrite an visual indexes to physical for save reference after move
       columns.forEach((column, index, array) => {
-        array[index] = this.columnsMapper.getValueByIndex(column)!;
+        array[index] = this.columnsMapper.getValueByIndex(visibility.toOrdered(column))!;
       });
 
       // next, when we have got an physical indexes, we can move columns
       columns.forEach((column, index) => {
         const actualPosition = this.columnsMapper.getIndexByValue(column)!;
 
-        if (actualPosition !== target) {
-          this.columnsMapper.moveColumn(actualPosition, target + index);
+        if (actualPosition !== mapTarget) {
+          this.columnsMapper.moveColumn(actualPosition, mapTarget + index);
         }
       });
 
@@ -675,7 +680,7 @@ class ManualColumnMove extends BasePlugin {
     if (index !== false) {
       // Collect physical row index.
       rangeEach(index, index + amount - 1, (removedIndex) => {
-        this.removedColumns.push(this.hot.runHooks('modifyCol', removedIndex, this.pluginName));
+        this.removedColumns.push(getTranslator(this.hot).toPhysicalColumn(removedIndex, this.pluginName || void 0));
       });
     }
   }

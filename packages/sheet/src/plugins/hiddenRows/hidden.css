@@ -1,0 +1,50 @@
+/* Where rows or columns are hidden: a double line on the header's edge. */
+.freesheet th.fs-hidden-before,
+.freesheet th.fs-hidden-after {
+  position: relative;
+}
+
+.freesheet th.fs-hidden-before::before,
+.freesheet th.fs-hidden-after::after {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 0 solid var(--fs-hidden-indicator-color);
+}
+
+/* Row headers: a line at the top or bottom. */
+.freesheet tbody th.fs-hidden-before::before,
+.freesheet tbody th.fs-hidden-after::after {
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.freesheet tbody th.fs-hidden-before::before {
+  top: 0;
+}
+
+.freesheet tbody th.fs-hidden-after::after {
+  bottom: 0;
+}
+
+/* Column headers: a line at the left or right. */
+.freesheet thead th.fs-hidden-before::before,
+.freesheet thead th.fs-hidden-after::after {
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-left-width: 1px;
+  border-right-width: 1px;
+}
+
+.freesheet thead th.fs-hidden-before::before {
+  left: 0;
+}
+
+.freesheet thead th.fs-hidden-after::after {
+  right: 0;
+}

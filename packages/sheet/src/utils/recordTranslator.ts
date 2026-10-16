@@ -1,8 +1,9 @@
 import Core from './../core';
 import { isObject } from './../helpers/object';
+import type { IndexVisibility } from './indexVisibility';
 
 /** What the translator needs from a grid: its index hooks. */
-type HooksRunner = { runHooks(name: string, index: number): number };
+type HooksRunner = { runHooks(name: string, index: number, source?: string): number };
 type Coords = { row: number; column: number };
 
 /**
@@ -10,17 +11,29 @@ type Coords = { row: number; column: number };
  */
 export class RecordTranslator {
   hot: HooksRunner;
+  /** The hidden rows and columns (set by the grid); visual indexes skip them. */
+  rows: IndexVisibility | null = null;
+  columns: IndexVisibility | null = null;
 
   constructor(hot: HooksRunner) {
     this.hot = hot;
   }
 
-  toVisualRow(row: number): number {
-    return this.hot.runHooks('unmodifyRow', row);
+  #run(name: string, index: number, source?: string): number {
+    return source === void 0 ? this.hot.runHooks(name, index) : this.hot.runHooks(name, index, source);
   }
 
-  toVisualColumn(column: number): number {
-    return this.hot.runHooks('unmodifyCol', column);
+  /** Physical → visual; `null` for a hidden row. `source` is passed to the hooks (a plugin skips its own map). */
+  toVisualRow(row: number, source?: string): number {
+    const ordered = this.#run('unmodifyRow', row, source);
+
+    return this.rows && ordered !== null ? this.rows.toVisual(ordered) as number : ordered;
+  }
+
+  toVisualColumn(column: number, source?: string): number {
+    const ordered = this.#run('unmodifyCol', column, source);
+
+    return this.columns && ordered !== null ? this.columns.toVisual(ordered) as number : ordered;
   }
 
   /**
@@ -36,12 +49,13 @@ export class RecordTranslator {
     return [this.toVisualRow(row as number), this.toVisualColumn(column as number)];
   }
 
-  toPhysicalRow(row: number): number {
-    return this.hot.runHooks('modifyRow', row);
+  /** Visual → physical. `source` is passed to the hooks (a plugin skips its own map). */
+  toPhysicalRow(row: number, source?: string): number {
+    return this.#run('modifyRow', this.rows ? this.rows.toOrdered(row) : row, source);
   }
 
-  toPhysicalColumn(column: number): number {
-    return this.hot.runHooks('modifyCol', column);
+  toPhysicalColumn(column: number, source?: string): number {
+    return this.#run('modifyCol', this.columns ? this.columns.toOrdered(column) : column, source);
   }
 
   /**
@@ -77,7 +91,9 @@ export const getIdentity = (identity: object): HooksRunner => {
 
 /** The translator of a grid, or of the grid registered for `identity` (one translator per grid). */
 export const getTranslator = (identity: object): RecordTranslator => {
-  const instance = identity instanceof Core ? identity as unknown as HooksRunner : getIdentity(identity);
+  // A grid, or an object that runs hooks as a grid does; otherwise the grid registered for the object.
+  const runsHooks = identity instanceof Core || typeof (identity as Partial<HooksRunner>).runHooks === 'function';
+  const instance = runsHooks ? identity as unknown as HooksRunner : getIdentity(identity);
   let translator = translatorSingletons.get(instance);
 
   if (!translator) {

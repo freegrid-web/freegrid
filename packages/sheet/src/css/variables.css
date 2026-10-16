@@ -120,6 +120,7 @@
   /* == Headers == */
   --fs-header-background: var(--fs-color-header-background, var(--fs-style-color-header-background)); /* Header background. */
   --fs-header-text: var(--fs-color-header-text, var(--fs-style-color-header-text)); /* Header text. */
+  --fs-hidden-indicator-color: var(--fs-color-header-text, var(--fs-style-color-header-text, #777)); /* Double line where rows or columns are hidden. */
 
   /* == Selection == */
   --fs-selection-border-color: var(--fs-color-accent, var(--fs-style-color-accent)); /* Border of the current cell and the selected range. */

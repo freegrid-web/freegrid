@@ -21,6 +21,7 @@ import {
 import type { ColumnSortState, SortOrder, SortSettings } from './utils';
 import { getClassedToRemove, getClassesToAdd } from './domHelpers';
 import RowsMapper from './rowsMapper';
+import { getTranslator } from './../../utils/recordTranslator';
 import { rootComparator } from './rootComparator';
 import { registerRootComparator, sort } from './sortService';
 
@@ -498,6 +499,11 @@ class ColumnSorting extends BasePlugin {
 
     const indexesWithData: [number, ...unknown[]][] = [];
     const sortedColumnsList = this.columnStatesManager.getSortedColumns();
+    const translator = getTranslator(this.hot);
+    const visibility = translator.rows;
+
+    // Hidden rows are sorted too: while sorting, row indexes count every row.
+    translator.rows = null;
     const numberOfRows = this.hot.countRows();
 
     // Function `getDataAtCell` won't call the indices translation inside `onModifyRow` callback - we check the `blockPluginTranslation`
@@ -525,6 +531,7 @@ class ColumnSorting extends BasePlugin {
 
     // The blockade of the indices translation is released.
     this.blockPluginTranslation = false;
+    translator.rows = visibility;
 
     // Save all indexes to arrayMapper, a completely new sequence is set by the plugin
     this.rowsMapper._arrayMap = indexesWithData.map(indexWithData => indexWithData[0]);

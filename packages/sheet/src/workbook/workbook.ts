@@ -29,6 +29,9 @@ export type SheetDocument = {
   colWidths?: (number | null)[];
   rowHeights?: (number | null)[];
   mergeCells?: { row: number; col: number; rowspan: number; colspan: number }[];
+  /** Hidden rows and columns (physical indexes). */
+  hiddenRows?: number[];
+  hiddenColumns?: number[];
   cell?: AnyObject[];
 };
 
@@ -79,6 +82,13 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   if (merged.length) {
     saved.mergeCells = merged.map(({ row, col, rowspan, colspan }) => ({ row, col, rowspan, colspan }));
   }
+  (['hiddenRows', 'hiddenColumns'] as const).forEach((name) => {
+    const hidden = plugin(name)?.enabled ? (plugin(name)!.getHidden as () => number[])() : [];
+
+    if (hidden.length) {
+      saved[name] = hidden;
+    }
+  });
   if (cell.length) {
     saved.cell = JSON.parse(JSON.stringify(cell));
   }
@@ -98,6 +108,12 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   }
   if (sheet.mergeCells) {
     settings.mergeCells = sheet.mergeCells;
+  }
+  if (sheet.hiddenRows) {
+    settings.hiddenRows = { rows: sheet.hiddenRows };
+  }
+  if (sheet.hiddenColumns) {
+    settings.hiddenColumns = { columns: sheet.hiddenColumns };
   }
   settings.cell = sheet.cell || [];
 
@@ -784,6 +800,14 @@ export class Workbook {
     if (!settings.mergeCells && plugin('mergeCells')?.enabled) {
       settings.mergeCells = [];
     }
+    // The first sheet keeps its hiding options; what is hidden follows the saved sheet.
+    ([['hiddenRows', 'rows'], ['hiddenColumns', 'columns']] as const).forEach(([name, key]) => {
+      const current = this.root.getSettings()[name];
+
+      if (current || settings[name]) {
+        settings[name] = { ...(typeof current === 'object' ? current : {}), [key]: first[name] || [] };
+      }
+    });
     this.root.updateSettings(settings);
     others.forEach(sheet => this.add(sheet.id, { name: sheet.name, ...sheetSettings(sheet) }));
 

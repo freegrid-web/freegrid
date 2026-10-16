@@ -41,8 +41,8 @@ export default function validatorTime(this: ValidatorContext, value: unknown, ca
     : parseDate(valueToValidate, timeFormat);
 
   if (date !== null && this.correctFormat === true) {
-    const row = this.instance.runHooks('unmodifyRow', this.row) as number;
-    const column = this.instance.runHooks('unmodifyCol', this.col) as number;
+    const row = this.instance.toVisualRow(this.row) as number;
+    const column = this.instance.toVisualColumn(this.col) as number;
 
     this.instance.setDataAtCell(row, column, formatDate(date, timeFormat), 'validatorTime');
     callback(true);

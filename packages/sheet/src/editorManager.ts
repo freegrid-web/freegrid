@@ -112,7 +112,7 @@ class EditorManager {
     const { row, col } = instance.selection.selectedRange.current()!.highlight;
     const prop = instance.colToProp(col);
     const td = instance.getCell(row, col);
-    const originalValue = instance.getSourceDataAtCell(instance.runHooks('modifyRow', row), col);
+    const originalValue = instance.getSourceDataAtCell(instance.toPhysicalRow(row), col);
     const cellProperties = instance.getCellMeta(row, col);
     const editorClass = instance.getCellEditor(cellProperties);
 

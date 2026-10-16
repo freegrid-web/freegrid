@@ -15,6 +15,7 @@ import { clone } from '../../helpers/object';
 import { warn } from '../../helpers/console';
 import { rangeEach } from '../../helpers/number';
 import { applySpanProperties } from './utils';
+import { getTranslator } from './../../utils/recordTranslator';
 import './mergeCells.css';
 
 Hooks.getSingleton().register('beforeMergeCells');
@@ -118,6 +119,12 @@ class MergeCells extends BasePlugin {
     this.addHook('afterCreateRow', (...args: Parameters<MergeCells['onAfterCreateRow']>) => this.onAfterCreateRow(...args));
     this.addHook('afterRemoveRow', (...args: Parameters<MergeCells['onAfterRemoveRow']>) => this.onAfterRemoveRow(...args));
     this.addHook('afterChange', (...args: Parameters<MergeCells['onAfterChange']>) => this.onAfterChange(...args));
+    this.addHook('beforeHideRows', (rows: number[]) => this.onBeforeHide('row', rows));
+    this.addHook('afterHideRows', () => this.onAfterHide('row'));
+    this.addHook('afterUnhideRows', (rows: number[]) => this.onAfterUnhide('row', rows));
+    this.addHook('beforeHideColumns', (columns: number[]) => this.onBeforeHide('column', columns));
+    this.addHook('afterHideColumns', () => this.onAfterHide('column'));
+    this.addHook('afterUnhideColumns', (columns: number[]) => this.onAfterUnhide('column', columns));
     this.addHook('beforeDrawBorders', (...args: Parameters<MergeCells['onBeforeDrawAreaBorders']>) => this.onBeforeDrawAreaBorders(...args));
     this.addHook('afterDrawSelection', (...args: Parameters<MergeCells['onAfterDrawSelection']>) => this.onAfterDrawSelection(...args));
     this.addHook('beforeRemoveCellClassNames', (...args: Parameters<MergeCells['onBeforeRemoveCellClassNames']>) => this.onBeforeRemoveCellClassNames(...args));
@@ -838,7 +845,8 @@ class MergeCells extends BasePlugin {
    * @param count Number of created columns.
    */
   onAfterCreateCol(column: number, count: number): void {
-    this.mergedCellsCollection.shiftCollections('right', column, count);
+    // Merged cells are kept at visual positions; the new columns are visible.
+    this.mergedCellsCollection.shiftCollections('right', getTranslator(this.hot).columns!.toVisual(column)!, count);
   }
 
   /**
@@ -865,7 +873,47 @@ class MergeCells extends BasePlugin {
       return;
     }
 
-    this.mergedCellsCollection.shiftCollections('down', row, count);
+    // Merged cells are kept at visual positions; the new rows are visible.
+    this.mergedCellsCollection.shiftCollections('down', getTranslator(this.hot).rows!.toVisual(row)!, count);
+  }
+
+  /** Visual indexes of rows (columns) about to be hidden, from the last one. */
+  #hiding: number[] = [];
+
+  /**
+   * Merged cells are kept at visual positions, so they move with the rows (columns) that are hidden or shown. A row
+   * (column) inside a merged cell is not hidden.
+   *
+   * @private
+   */
+  onBeforeHide(axis: 'row' | 'column', physicalIndexes: number[]): boolean | void {
+    const visual = physicalIndexes
+      .map(index => (axis === 'row' ? this.hot.toVisualRow(index) : this.hot.toVisualColumn(index)))
+      .filter(index => index !== null && index >= 0)
+      .sort((a, b) => b - a);
+    const inMerge = visual.some(index => this.mergedCellsCollection.mergedCells.some(({ row, col, rowspan, colspan }) =>
+      (axis === 'row' ? index >= row && index < row + rowspan && rowspan > 1 :
+        index >= col && index < col + colspan && colspan > 1)));
+
+    if (inMerge) {
+      return false;
+    }
+    this.#hiding = visual;
+  }
+
+  /** @private */
+  onAfterHide(axis: 'row' | 'column'): void {
+    this.#hiding.forEach(index => this.mergedCellsCollection.shiftCollections(axis === 'row' ? 'up' : 'left', index, 1));
+    this.#hiding = [];
+  }
+
+  /** @private */
+  onAfterUnhide(axis: 'row' | 'column', physicalIndexes: number[]): void {
+    physicalIndexes
+      .map(index => (axis === 'row' ? this.hot.toVisualRow(index) : this.hot.toVisualColumn(index)))
+      .filter(index => index !== null && index >= 0)
+      .sort((a, b) => a - b)
+      .forEach(index => this.mergedCellsCollection.shiftCollections(axis === 'row' ? 'down' : 'right', index, 1));
   }
 
   /**

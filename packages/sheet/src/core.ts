@@ -33,6 +33,7 @@ import DataSource from './dataSource';
 import { translateRowsToColumns, cellMethodLookupFactory, spreadsheetColumnLabel } from './helpers/data';
 import { getTranslator } from './utils/recordTranslator';
 import type { RecordTranslator } from './utils/recordTranslator';
+import { IndexVisibility } from './utils/indexVisibility';
 import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
@@ -302,6 +303,7 @@ class Core {
     this.guid = `ht_${randomString()}`; // this is the namespace for global events
 
     this.#recordTranslator = getTranslator(this);
+    this.#initVisibility();
 
     this.#dataSource = new DataSource(this);
 
@@ -538,9 +540,11 @@ class Core {
               return;
             }
             index = (isDefined(index)) ? index : numberOfSourceRows;
+            // Between visible rows, after any hidden rows above.
+            const dataIndex = this.#recordTranslator.rows!.toOrdered(index);
 
-            delta = this.#datamap.createRow(index, amount, source);
-            spliceWith(this.#priv.cellSettings, index, amount, 'array');
+            delta = this.#datamap.createRow(dataIndex, amount, source);
+            spliceWith(this.#priv.cellSettings, dataIndex, amount, 'array');
 
             if (delta) {
               const currentRange = this.selection.selectedRange.current();
@@ -556,18 +560,20 @@ class Core {
           }
 
           case 'insert_col': {
-            delta = this.#datamap.createCol(index, amount, source);
+            const dataIndex = isDefined(index) ? this.#recordTranslator.columns!.toOrdered(index) : index;
+
+            delta = this.#datamap.createCol(dataIndex, amount, source);
 
             for (let row = 0, len = this.countSourceRows(); row < len; row++) {
               if (this.#priv.cellSettings[row]) {
-                spliceWith(this.#priv.cellSettings[row], index, amount);
+                spliceWith(this.#priv.cellSettings[row], dataIndex, amount);
               }
             }
 
             if (delta) {
               if (Array.isArray(this.getSettings().colHeaders)) {
                 // inserts empty (undefined) elements into the colHeader array
-                this.getSettings().colHeaders.splice(index, 0, ...new Array(delta));
+                this.getSettings().colHeaders.splice(dataIndex, 0, ...new Array(delta));
               }
 
               const currentRange = this.selection.selectedRange.current();
@@ -717,7 +723,7 @@ class Core {
 
           if (rows < this.#priv.settings.minRows) {
             for (let r = 0, minRows = this.#priv.settings.minRows; r < minRows - rows; r++) {
-              this.#datamap.createRow(this.countRows(), 1, 'auto');
+              this.#datamap.createRow(this.countSourceRows(), 1, 'auto');
             }
           }
         }
@@ -727,7 +733,7 @@ class Core {
           // should I add empty rows to meet minSpareRows?
           if (emptyRows < this.#priv.settings.minSpareRows) {
             for (; emptyRows < this.#priv.settings.minSpareRows && this.countSourceRows() < this.#priv.settings.maxRows; emptyRows++) {
-              this.#datamap.createRow(this.countRows(), 1, 'auto');
+              this.#datamap.createRow(this.countSourceRows(), 1, 'auto');
             }
           }
         }
@@ -742,14 +748,14 @@ class Core {
           // should I add empty cols to meet minCols?
           if (this.#priv.settings.minCols && !this.#priv.settings.columns && this.countCols() < this.#priv.settings.minCols) {
             for (; this.countCols() < this.#priv.settings.minCols; emptyCols++) {
-              this.#datamap.createCol(this.countCols(), 1, 'auto');
+              this.#datamap.createCol(this.#countAllCols(), 1, 'auto');
             }
           }
           // should I add empty cols to meet minSpareCols?
           if (this.#priv.settings.minSpareCols && !this.#priv.settings.columns && this.dataType === 'array' &&
               emptyCols < this.#priv.settings.minSpareCols) {
             for (; emptyCols < this.#priv.settings.minSpareCols && this.countCols() < this.#priv.settings.maxCols; emptyCols++) {
-              this.#datamap.createCol(this.countCols(), 1, 'auto');
+              this.#datamap.createCol(this.#countAllCols(), 1, 'auto');
             }
           }
         }
@@ -1869,7 +1875,8 @@ class Core {
       this.#datamap.createMap();
     }
 
-    clen = this.countCols();
+    // Hidden columns too.
+    clen = this.#countAllCols();
 
     const columnSetting = settings.columns || this.#GridSettings.prototype.columns;
 
@@ -2286,7 +2293,7 @@ class Core {
    * @returns {Array} Array of cell values.
    */
   getDataAtCol(column: number) {
-    return ([] as unknown[]).concat(...this.#datamap.getRange(new CellCoords(0, column), new CellCoords(this.#priv.settings.data.length - 1, column), this.#datamap.DESTINATION_RENDERER));
+    return ([] as unknown[]).concat(...this.#datamap.getRange(new CellCoords(0, column), new CellCoords(this.#lastRow(), column), this.#datamap.DESTINATION_RENDERER));
   }
 
 
@@ -2303,7 +2310,7 @@ class Core {
   getDataAtProp(prop: Prop) {
     const range = this.#datamap.getRange(
       new CellCoords(0, this.#datamap.propToCol(prop)),
-      new CellCoords(this.#priv.settings.data.length - 1, this.#datamap.propToCol(prop)),
+      new CellCoords(this.#lastRow(), this.#datamap.propToCol(prop)),
       this.#datamap.DESTINATION_RENDERER);
 
     return ([] as unknown[]).concat(...range);
@@ -2579,7 +2586,8 @@ class Core {
    * @returns {Array} Returns an array of ColumnSettings object instances.
    */
   getCellsMeta() {
-    return arrayFlatten(this.#priv.cellSettings);
+    // Rows whose cells were never read (for example hidden ones) have no meta.
+    return arrayFlatten(this.#priv.cellSettings).filter(Boolean);
   }
 
   /**
@@ -3142,7 +3150,8 @@ class Core {
       rowHeader = rowHeader(physicalRow);
 
     } else if (rowHeader && typeof rowHeader !== 'string' && typeof rowHeader !== 'number') {
-      rowHeader = physicalRow + 1;
+      // Hidden rows leave gaps in the numbers (1, 2, 5), as in Excel.
+      rowHeader = this.#recordTranslator.rows!.toOrdered(physicalRow) + 1;
     }
 
     return rowHeader;
@@ -3222,7 +3231,7 @@ class Core {
         return arr[visualColumnIndex];
       };
       const baseCol = columnIndex;
-      const physicalColumn = this.runHooks('modifyCol', baseCol);
+      const physicalColumn = this.#recordTranslator.toPhysicalColumn(baseCol);
 
       const prop = isFunction(this.getSettings().columns)
         ? translateVisualIndexToColumns(physicalColumn)
@@ -3245,7 +3254,8 @@ class Core {
         result = this.#priv.settings.colHeaders(physicalColumn);
 
       } else if (this.#priv.settings.colHeaders && typeof this.#priv.settings.colHeaders !== 'string' && typeof this.#priv.settings.colHeaders !== 'number') {
-        result = spreadsheetColumnLabel(baseCol); // see #1458
+        // Hidden columns leave gaps in the letters (A, B, E), as in Excel.
+        result = spreadsheetColumnLabel(this.#recordTranslator.columns!.toOrdered(baseCol)); // see #1458
       }
     }
 
@@ -3407,6 +3417,40 @@ class Core {
     return this.#datamap.getLength();
   }
 
+  /** The last visual row of the data (the data's last row while no row is hidden). */
+  #lastRow(): number {
+    return this.#recordTranslator.rows!.isActive() ? this.countRows() - 1 : this.#priv.settings.data.length - 1;
+  }
+
+  /**
+   * The hidden rows and columns: plugins (hidden rows, filters, …) hide physical indexes, and visual indexes skip them.
+   * Sorting and moving apply first; a change of order rebuilds the maps.
+   */
+  #initVisibility(): void {
+    // Without sorting or moving, the ordered index is the physical one: no hooks to run for each row.
+    const rows = new IndexVisibility(() => this.countSourceRows(), () => (this.hasHook('modifyRow') ?
+      (ordered: number) => this.runHooks('modifyRow', ordered) : null));
+    const columns = new IndexVisibility(() => this.#countAllCols(), () => (this.hasHook('modifyCol') ?
+      (ordered: number) => this.runHooks('modifyCol', ordered) : null));
+
+    this.#recordTranslator.rows = rows;
+    this.#recordTranslator.columns = columns;
+
+    this.addHook('afterColumnSort', () => rows.invalidate());
+    this.addHook('afterRowMove', () => rows.invalidate());
+    this.addHook('afterColumnMove', () => columns.invalidate());
+    this.addHook('afterLoadData', () => {
+      rows.invalidate();
+      columns.invalidate();
+    });
+    this.addHook('afterCreateRow', (index: number, amount: number) => rows.onInsert(index, amount));
+    this.addHook('afterRemoveRow', (_index: number, _amount: number, physicalRows: number[] = []) =>
+      rows.onRemove(physicalRows));
+    this.addHook('afterCreateCol', (index: number, amount: number) => columns.onInsert(index, amount));
+    this.addHook('afterRemoveCol', (_index: number, _amount: number, physicalColumns: number[] = []) =>
+      columns.onRemove(physicalColumns));
+  }
+
 
   /**
    * Returns the total number of visible columns in the table.
@@ -3416,6 +3460,13 @@ class Core {
    * @returns {Number} Total number of columns.
    */
   countCols() {
+    const columns = this.#recordTranslator.columns;
+
+    return columns && columns.isActive() ? columns.count() : this.#countAllCols();
+  }
+
+  /** The number of columns, hidden ones included. */
+  #countAllCols(): number {
     const maxCols = this.getSettings().maxCols;
     let dataHasLength = false;
     let dataLen = 0;
