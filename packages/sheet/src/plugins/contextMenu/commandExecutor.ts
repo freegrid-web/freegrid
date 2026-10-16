@@ -6,6 +6,19 @@ import type { PluginHost } from './../_base';
 const findSubCommand = (subCommandName: string, subCommands: MenuItem[]): MenuItem | undefined => subCommands
   .find(cmd => cmd.key?.split(':')[1] === subCommandName);
 
+/** An item of a submenu, at any depth, by its whole key (`parent:child:grandchild`). */
+const findByKey = (key: string, items: MenuItem[]): MenuItem | undefined => {
+  for (const item of items) {
+    const found = item.key === key ? item : item.submenu ? findByKey(key, item.submenu.items) : void 0;
+
+    if (found) {
+      return found;
+    }
+  }
+
+  return void 0;
+};
+
 /**
  * Command executor for ContextMenu.
  *
@@ -60,8 +73,10 @@ class CommandExecutor {
     if (!command) {
       throw new Error(`Menu command '${commandNamePrimary}' not exists.`);
     }
-    if (subCommandName && command.submenu) {
-      command = findSubCommand(subCommandName, command.submenu.items);
+    // A submenu's item: by its whole key (submenus can have submenus), or by the part after the parent's key.
+    if (commandSplit.length > 1 && command.submenu) {
+      command = findByKey(commandName, command.submenu.items) ||
+        (subCommandName ? findSubCommand(subCommandName, command.submenu.items) : void 0);
     }
     const { disabled } = command!;
 

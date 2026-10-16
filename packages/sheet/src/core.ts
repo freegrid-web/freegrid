@@ -51,6 +51,7 @@ import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
 import type { AnyFunction, AnyObject, GridSettings } from './types';
 import { Workbook, getWorkbook } from './workbook/workbook';
+import { findSidePanel, getSidePanel } from './sidePanel/sidePanel';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
 type Change = [number, Prop, unknown, unknown];
@@ -286,7 +287,7 @@ class Core {
     // With a formula bar or sheets, the given element is the frame: the bars and every sheet go inside it, and the
     // grid takes the height that is left (when the element has a height; otherwise all are as tall as their content).
     // A sheet that addSheet creates is already inside a frame.
-    if ((userSettings.formulaBar || userSettings.sheetTabs ||
+    if ((userSettings.formulaBar || userSettings.sheetTabs || userSettings.sidePanel ||
       (Array.isArray(userSettings.sheets) && userSettings.sheets.length)) &&
       !rootElement.classList.contains('fs-document__sheet')) {
       const gridElement = document.createElement('div');
@@ -1083,6 +1084,13 @@ class Core {
 
       (Array.isArray(sheets) ? sheets : []).forEach((sheet: AnyObject) => workbook.add(sheet.id, sheet));
       workbook.renderTabs();
+    }
+    // `sidePanel: 'comments'` opens a panel from the start.
+    const { sidePanel } = this.#priv.settings;
+
+    // (Not for a sheet that addSheet creates: it is inside the document's frame.)
+    if (typeof sidePanel === 'string' && (this.#frame || !this.rootElement.classList.contains('fs-document__sheet'))) {
+      this.openPanel(sidePanel);
     }
   }
 
@@ -2719,6 +2727,42 @@ class Core {
   }
 
   /**
+   * Opens a side panel at the right of the document (in the frame, the sheets make room for it): `'comments'` lists
+   * every comment, `'conditionalFormatting'` the conditional formatting rules. Another open panel is replaced.
+   *
+   * @memberof Core#
+   * @function openPanel
+   * @param {String} name The panel.
+   * @param {Object} [options] The panel's options.
+   * @fires Hooks#afterPanelOpen
+   */
+  openPanel(name: string, options?: AnyObject) {
+    getSidePanel(this).open(name, options);
+  }
+
+  /**
+   * Closes the side panel.
+   *
+   * @memberof Core#
+   * @function closePanel
+   * @fires Hooks#afterPanelClose
+   */
+  closePanel() {
+    findSidePanel(this)?.close();
+  }
+
+  /**
+   * The name of the open side panel, or `null`.
+   *
+   * @memberof Core#
+   * @function getOpenPanel
+   * @returns {String|null}
+   */
+  getOpenPanel() {
+    return findSidePanel(this)?.name ?? null;
+  }
+
+  /**
    * Shows a sheet: its tab becomes active and its grid takes the keyboard.
    *
    * @memberof Core#
@@ -3916,6 +3960,10 @@ class Core {
   destroy() {
     const workbook = getWorkbook(this);
 
+    // The document's panel goes with the grid that holds it.
+    if (!workbook || workbook.root === this) {
+      findSidePanel(this)?.destroy();
+    }
     // The grid created with new FreeSheet holds the document: the other sheets go with it.
     if (workbook && workbook.root === this) {
       workbook.destroy();

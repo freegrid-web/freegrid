@@ -1,0 +1,203 @@
+/* The side panel: at the right of the document's frame; the sheets, the formula bar and the tabs make room for it. */
+.fs-panel-host {
+  position: relative;
+  padding-right: var(--fs-side-panel-width);
+}
+
+/* Over the grid: a narrow container, or a grid without a frame. */
+.fs-panel-host--over {
+  padding-right: 0;
+}
+
+.fs-side-panel {
+  position: absolute;
+  z-index: 110;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: var(--fs-side-panel-width);
+  max-width: 100%;
+  border-left: 1px solid var(--fs-cell-border-color);
+  background: var(--fs-side-panel-background);
+  color: var(--fs-cell-text);
+  font-family: var(--fs-font-family, var(--fs-style-font-family, inherit));
+  font-size: var(--fs-font-size, var(--fs-style-font-size, 13px));
+  text-align: left;
+}
+
+.fs-panel-host--over > .fs-side-panel {
+  box-shadow: var(--fs-shadow);
+}
+
+.fs-side-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px 6px 14px;
+}
+
+.fs-side-panel__title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+.fs-side-panel__back,
+.fs-side-panel__close,
+.fs-side-panel__icon-button {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.fs-side-panel__back[hidden] {
+  display: none;
+}
+
+.fs-side-panel__back:hover,
+.fs-side-panel__close:hover,
+.fs-side-panel__icon-button:hover {
+  background: var(--fs-header-background);
+}
+
+/* × */
+.fs-side-panel__close::before,
+.fs-side-panel__close::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 6px;
+  width: 14px;
+  height: 1.5px;
+  background: currentcolor;
+  transform: rotate(45deg);
+}
+
+.fs-side-panel__close::after {
+  transform: rotate(-45deg);
+}
+
+/* ← */
+.fs-side-panel__back::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  width: 7px;
+  height: 7px;
+  border: solid currentcolor;
+  border-width: 0 0 1.5px 1.5px;
+  transform: rotate(45deg);
+}
+
+.fs-side-panel__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 6px 14px 14px;
+  overflow: auto;
+}
+
+/* Parts the panels share. */
+.fs-side-panel__card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 6px;
+  background: var(--fs-cell-background);
+}
+
+.fs-side-panel__card--active {
+  border-color: var(--fs-selection-border-color);
+  box-shadow: 0 0 0 1px var(--fs-selection-border-color);
+}
+
+.fs-side-panel__card--link {
+  cursor: pointer;
+}
+
+.fs-side-panel__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fs-side-panel__label {
+  font-weight: 600;
+}
+
+.fs-side-panel__muted {
+  color: var(--fs-menu-disabled-text);
+  font-size: 0.9em;
+}
+
+.fs-side-panel__spacer {
+  flex: 1 1 auto;
+}
+
+.fs-side-panel input[type='text'],
+.fs-side-panel input[type='number'],
+.fs-side-panel select,
+.fs-side-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 4px;
+  background: var(--fs-editor-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-side-panel textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+.fs-side-panel__button {
+  padding: 5px 14px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 4px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fs-side-panel__button:hover {
+  background: var(--fs-header-background);
+}
+
+.fs-side-panel__button--primary {
+  border-color: var(--fs-selection-border-color);
+  background: var(--fs-selection-border-color);
+  color: var(--fs-cell-background);
+}
+
+.fs-side-panel__button--primary:hover {
+  background: var(--fs-selection-border-color);
+  opacity: 0.9;
+}
+
+.fs-side-panel__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+}

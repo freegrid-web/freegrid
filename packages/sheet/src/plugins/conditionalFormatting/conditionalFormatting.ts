@@ -1,4 +1,8 @@
 import './conditionalFormatting.css';
+import './panel';
+import { COLOR_SCALES, DATA_BAR_COLORS, ICON_SETS as MENU_ICON_SETS, selectionRanges } from './panel';
+import * as C from './../../i18n/constants';
+import type { MenuItem } from './../contextMenu/menuItem';
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { getTranslator } from './../../utils/recordTranslator';
@@ -134,6 +138,7 @@ class ConditionalFormatting extends BasePlugin {
     this.addHook('beforeRender', () => this.installFormulas());
     this.addHook('afterChange', () => this.invalidate(false));
     this.addHook('afterLoadData', () => this.invalidate(true));
+    this.addHook('afterContextMenuDefaultOptions', (options: { items: MenuItem[] }) => this.addMenuItems(options));
     this.addHook('afterCreateRow', (index: number, amount: number) =>
       this.moveRanges(rect => insertRows(rect, index, amount)));
     this.addHook('afterRemoveRow', (_index: number, _amount: number, physicalRows: number[] = []) =>
@@ -335,6 +340,68 @@ class ConditionalFormatting extends BasePlugin {
     this.invalidate(true);
     this.hot.runHooks('afterConditionalFormattingChange', this.getRules());
     this.hot.render();
+  }
+
+  // -- Context menu ------------------------------------------------------------------------------------------------
+
+  /** Conditional formatting ▸ in the context menu, as Excel's menu. */
+  addMenuItems(options: { items: MenuItem[] }): void {
+    const phrase = (key: string) => this.hot.getTranslatedPhrase(key, 0) as string;
+    const editor = (preset: ConditionalRule) => () => this.hot.openPanel('conditionalFormattingRule', { preset });
+    const addToSelection = (rule: ConditionalRule) => () => {
+      const range = selectionRanges(this.hot);
+
+      if (range.length) {
+        this.addRule({ ...rule, range: range.length === 1 ? range[0] : range });
+      }
+    };
+    // Keys are paths: `conditional_formatting`, `conditional_formatting:highlight`, `conditional_formatting:highlight:gt`.
+    const ROOT = 'conditional_formatting';
+    const item = (key: string, name: string, callback: () => void): MenuItem => ({
+      key, name: () => name, callback, disabled: () => !this.hot.getSelectedLast(),
+    }) as MenuItem;
+    const group = (key: string, name: string, items: MenuItem[]): MenuItem => ({
+      key, name: () => name, submenu: { items }, disabled: () => !this.hot.getSelectedLast(),
+    }) as MenuItem;
+    const path = (...parts: string[]) => [ROOT, ...parts].join(':');
+
+    options.items.push({ name: '---------' } as MenuItem, group(ROOT, phrase(C.CF_MENU), [
+      group(path('highlight'), phrase(C.CF_HIGHLIGHT), [
+        item(path('highlight', 'gt'), phrase(C.CF_GREATER), editor({ when: 'gt', value: '' })),
+        item(path('highlight', 'lt'), phrase(C.CF_LESS), editor({ when: 'lt', value: '' })),
+        item(path('highlight', 'between'), phrase(C.CF_BETWEEN), editor({ when: 'between', value: ['', ''] })),
+        item(path('highlight', 'eq'), phrase(C.CF_EQUAL), editor({ when: 'eq', value: '' })),
+        item(path('highlight', 'contains'), phrase(C.CF_TEXT_CONTAINS), editor({ when: 'contains', value: '' })),
+        item(path('highlight', 'date'), phrase(C.CF_DATE), editor({ when: 'date_today' })),
+        item(path('highlight', 'duplicate'), phrase(C.CF_DUPLICATE), editor({ when: 'duplicate' })),
+      ]),
+      group(path('top_bottom'), phrase(C.CF_TOP_BOTTOM), [
+        item(path('top_bottom', 'top'), phrase(C.CF_TOP_ITEMS), editor({ when: 'top', value: 10 })),
+        item(path('top_bottom', 'top_percent'), phrase(C.CF_TOP_PERCENT),
+          editor({ when: 'top', value: 10, percent: true })),
+        item(path('top_bottom', 'bottom'), phrase(C.CF_BOTTOM_ITEMS), editor({ when: 'bottom', value: 10 })),
+        item(path('top_bottom', 'bottom_percent'), phrase(C.CF_BOTTOM_PERCENT),
+          editor({ when: 'bottom', value: 10, percent: true })),
+        item(path('top_bottom', 'above_average'), phrase(C.CF_ABOVE_AVERAGE), editor({ when: 'aboveAverage' })),
+        item(path('top_bottom', 'below_average'), phrase(C.CF_BELOW_AVERAGE), editor({ when: 'belowAverage' })),
+      ]),
+      group(path('data_bars'), phrase(C.CF_DATA_BARS), DATA_BAR_COLORS.map((color, i) =>
+        item(path('data_bars', `data_bar_${i}`), color, addToSelection({ dataBar: color })))),
+      group(path('color_scales'), phrase(C.CF_COLOR_SCALES), COLOR_SCALES.map((colors, i) =>
+        item(path('color_scales', `color_scale_${i}`), colors.join(' – '),
+          addToSelection({ colorScale: [...colors] })))),
+      group(path('icon_sets'), phrase(C.CF_ICON_SETS), MENU_ICON_SETS.map(set =>
+        item(path('icon_sets', `icon_set_${set.name}`), phrase(set.phrase),
+          addToSelection({ iconSet: set.name })))),
+      { name: '---------' } as MenuItem,
+      item(path('new'), phrase(C.CF_NEW_RULE), editor({ when: 'gt', value: '' })),
+      group(path('clear'), phrase(C.CF_CLEAR), [
+        item(path('clear', 'clear_selection'), phrase(C.CF_CLEAR_SELECTION),
+          () => this.clearRules(selectionRanges(this.hot))),
+        item(path('clear', 'clear_sheet'), phrase(C.CF_CLEAR_SHEET), () => this.clearRules()),
+      ]),
+      item(path('manage'), phrase(C.CF_MANAGE), () => this.hot.openPanel('conditionalFormatting')),
+    ]));
   }
 
   // -- Evaluation ---------------------------------------------------------------------------------------------------

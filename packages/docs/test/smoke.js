@@ -32,6 +32,7 @@ const PAGES = [
   { path: 'guide/column-groups.html', grids: 0 },
   { path: 'examples/conditional-formatting.html', grids: 1 },
   { path: 'guide/conditional-formatting.html', grids: 0 },
+  { path: 'guide/side-panel.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },

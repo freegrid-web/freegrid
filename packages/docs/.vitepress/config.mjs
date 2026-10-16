@@ -44,6 +44,7 @@ export default defineConfigWithTheme({
             { text: 'Nested rows', link: '/guide/nested-rows' },
             { text: 'Column groups', link: '/guide/column-groups' },
             { text: 'Conditional formatting', link: '/guide/conditional-formatting' },
+            { text: 'Side panel', link: '/guide/side-panel' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },

@@ -118,6 +118,13 @@ export const TOPICS = [
     settings: ['conditionalFormatting'],
   },
   {
+    name: 'Side panel',
+    description: 'The panel at the right of the document: comments, conditional formatting rules.',
+    methods: ['openPanel', 'closePanel', 'getOpenPanel'],
+    events: ['afterPanelOpen', 'afterPanelClose'],
+    settings: ['sidePanel'],
+  },
+  {
     name: 'Rendering and scrolling',
     description: 'Size, rendering, scrolling and DOM access.',
     methods: ['render', 'getCell', 'getCoords', 'scrollViewportTo'],

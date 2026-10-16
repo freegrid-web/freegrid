@@ -1751,6 +1751,22 @@ const REGISTERED_HOOKS: string[] = [
   'afterConditionalFormattingChange',
 
   /**
+   * Fired after a side panel opened (`openPanel`, or a menu).
+   *
+   * @event Hooks#afterPanelOpen
+   * @param {String} name The panel.
+   */
+  'afterPanelOpen',
+
+  /**
+   * Fired after the side panel closed.
+   *
+   * @event Hooks#afterPanelClose
+   * @param {String} name The panel that was open.
+   */
+  'afterPanelClose',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

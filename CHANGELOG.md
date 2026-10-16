@@ -53,6 +53,13 @@
   `clearRules`; event `afterConditionalFormattingChange`; `getDocument()` saves the rules. New date conditions
   `date_last_7_days`, `date_this_week`, `date_last_week`, `date_next_week`, `date_this_month`, `date_last_month`,
   `date_next_month`. New guide page and example.
+- Side panel: `openPanel(name)`, `closePanel()`, `getOpenPanel()`, events `afterPanelOpen` and `afterPanelClose`,
+  setting `sidePanel` (`true`, or a panel to open at start). In the document's frame the sheets make room for it;
+  otherwise it opens over the grid. **Comments**: every comment of every sheet with its cell, author and date; a click
+  selects the cell (switching the sheet); edit, delete and New in place; Show all comments in the context menu.
+  **Conditional formatting**: Conditional formatting ▸ in the context menu (Highlight Cell Rules, Top/Bottom Rules,
+  Data Bars, Color Scales, Icon Sets, New Rule, Clear Rules, Manage Rules), a rule editor with a live preview, and a
+  rule manager. New guide page.
 - `beforeLoadData` event: a callback can return the data to load instead.
 
 ### Fixed

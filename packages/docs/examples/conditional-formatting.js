@@ -19,6 +19,8 @@ export default function createGrid(container) {
     ],
     rowHeaders: true,
     stretchH: 'all',
+    contextMenu: true, // right-click: Conditional formatting ▸
+    sidePanel: true, // the rule editor and Manage Rules open at the right
     conditionalFormatting: [
       { range: 'B1:E5', colorScale: ['#f8696b', '#ffeb84', '#63be7b'] }, // red to green
       { range: 'A1:A5', when: 'eq', value: 'Central', style: { fontWeight: 'bold' } },
