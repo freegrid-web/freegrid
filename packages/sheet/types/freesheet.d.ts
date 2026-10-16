@@ -37,6 +37,8 @@ declare namespace _FreeSheet {
     getOpenPanel(): string | null;
     setLoading(state: boolean | string): void;
     isLoading(): boolean;
+    setCellStyle(style: { [P in 'background' | 'color' | 'fontWeight' | 'fontStyle' | 'textDecoration' | 'border']?: string | null } | null,
+      ranges?: FreeSheet.wot.CellRange[]): void;
     exportFile(format?: 'xlsx' | 'csv', options?: { headers?: boolean; delimiter?: string }): Promise<Blob>;
     downloadFile(format?: 'xlsx' | 'csv', filename?: string, options?: { headers?: boolean; delimiter?: string }): Promise<void>;
     importFile(source: Blob | ArrayBuffer | Uint8Array | string,
@@ -1579,6 +1581,7 @@ declare namespace FreeSheet {
     beforeImportFile?: (format: 'xlsx' | 'csv', source: Blob | ArrayBuffer | Uint8Array | string) => void | boolean;
     afterImportFile?: (format: 'xlsx' | 'csv') => void;
     afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
+    afterSetCellStyle?: (changes: Array<[number, number, object | undefined, object | undefined]>) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;

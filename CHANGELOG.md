@@ -15,6 +15,10 @@
   reads a file.
 - Cell styles: the `style` cell setting (`fontWeight`, `fontStyle`, `textDecoration`, `color`, `background`,
   `border`) draws on the cell, under conditional formatting; `getDocument()` keeps it.
+- Formatting: Ctrl+B, Ctrl+I and Ctrl+U toggle bold, italic and underline; the context menu has a **Format** entry
+  (bold, italic, underline, strikethrough, text and fill colors, clear formatting; add the key `'formatting'` to
+  `contextMenu`); `setCellStyle(style, ranges?)` sets the `style` of cells; undo takes formatting back. Event
+  `afterSetCellStyle`.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

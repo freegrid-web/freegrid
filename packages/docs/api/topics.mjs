@@ -118,6 +118,13 @@ export const TOPICS = [
     settings: ['conditionalFormatting'],
   },
   {
+    name: 'Formatting',
+    description: 'Cell styles: bold, italic, underline, colors; the Format menu and Ctrl+B, Ctrl+I, Ctrl+U.',
+    methods: ['setCellStyle'],
+    events: ['afterSetCellStyle'],
+    settings: [],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],

@@ -57,6 +57,8 @@ Hooks.getSingleton().register('afterContextMenuExecute');
  * * `'redo'`
  * * `'make_read_only'`
  * * `'alignment'`
+ * * `'formatting'` (bold, italic, underline, strikethrough, text and fill colors, clear formatting; not in the default
+ *   menu)
  * * `'---------'` (menu item separator)
  * * `'borders'` (with {@link Options#customBorders} turned on)
  * * `'commentsAddEdit'` (with {@link Options#comments} turned on)
@@ -281,6 +283,9 @@ class ContextMenu extends BasePlugin {
    *  * `'alignment:bottom'` - Alignment to the bottom
    *  * `'alignment:middle'` - Alignment to the middle
    *  * `'alignment:center'` - Alignment to the center (justify)
+   *  * `'formatting:bold'`, `'formatting:italic'`, `'formatting:underline'`, `'formatting:strikethrough'` - Toggle
+   *  * `'formatting:text_color:text_color_<n>'`, `'formatting:fill_color:fill_color_<n>'` - A color (`_none` removes it)
+   *  * `'formatting:clear'` - Clear formatting
    *
    * Or you can execute command registered in settings where `key` is your command name.
    *

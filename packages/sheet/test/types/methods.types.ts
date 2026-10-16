@@ -160,3 +160,5 @@ hot.downloadFile('csv', 'data.csv');
 
 hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
+hot.setCellStyle({ fontWeight: 'bold', color: null });
+hot.setCellStyle(null, hot.getSelectedRange());

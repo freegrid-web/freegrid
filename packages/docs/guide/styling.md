@@ -33,6 +33,33 @@ columns: [{ className: 'fs-center' }, { className: 'my-highlight' }]
 
 The `cells` setting and custom renderers can set classes per cell, based on the value.
 
+## Cell styles
+
+A cell's `style` setting is drawn on the cell (under [conditional formatting](./conditional-formatting)), and Excel
+files keep it:
+
+```js
+cell: [{ row: 0, col: 0, style: { fontWeight: 'bold', color: '#c00000', background: '#fff3b0' } }]
+```
+
+The properties are `fontWeight`, `fontStyle`, `textDecoration`, `color`, `background` and `border`.
+
+Users format cells as in a spreadsheet:
+
+- **Ctrl+B**, **Ctrl+I** and **Ctrl+U** toggle bold, italic and underline for the selected cells (on for all of them,
+  or off when all of them have it).
+- The context menu's **Format** entry has bold, italic, underline, strikethrough, text and fill colors, and
+  **Clear formatting**. Add its key `'formatting'` to your menu: `contextMenu: [..., 'alignment', 'formatting']`.
+
+In code, `setCellStyle(style, ranges?)` merges `style` into the selected cells (or the given ranges); a `null`
+property removes that property, and a `null` style removes the whole style. Undo takes any of these back, and the
+`afterSetCellStyle` event gets the changes.
+
+```js
+grid.setCellStyle({ fontWeight: 'bold', background: null });
+grid.setCellStyle(null); // Clear formatting
+```
+
 ## Legacy class names
 
 FreeSheet started from Handsontable 6, whose classes were named `handsontable`, `htCore`, `htCenter` and so on.
