@@ -92,6 +92,7 @@ class FormulaBar extends BasePlugin {
     bar.addEventListener('keydown', event => event.stopPropagation());
     this.input!.addEventListener('keydown', event => this.onInputKeyDown(event));
     this.nameBox!.addEventListener('keydown', event => this.onNameKeyDown(event));
+    this.nameBox!.addEventListener('input', () => this.setNameInvalid(null));
 
     root.parentNode?.insertBefore(bar, root);
     this.matchGridWidth();
@@ -128,6 +129,7 @@ class FormulaBar extends BasePlugin {
     const themeClasses = Array.from(this.hot.rootElement.classList).filter(name => /^fs-(theme|style)-/.test(name));
 
     this.element.className = ['fs-formula-bar', ...themeClasses].join(' ');
+    this.setNameInvalid(null);
 
     const selected = this.hot.getSelectedLast();
 
@@ -194,18 +196,37 @@ class FormulaBar extends BasePlugin {
     if (event.key === 'Enter') {
       event.preventDefault();
       const cell = parseAddress(this.nameBox!.value);
+      const rows = this.hot.countRows();
+      const columns = this.hot.countCols();
 
-      this.nameBox!.blur();
+      if (!cell || cell[0] >= rows || cell[1] >= columns) {
+        // Not a cell of this sheet: say so, and let the address be corrected.
+        const sheet = rows && columns ? ` (${address(0, 0)}:${address(rows - 1, columns - 1)})` : '';
 
-      if (cell && cell[0] < this.hot.countRows() && cell[1] < this.hot.countCols()) {
-        this.hot.selectCell(cell[0], cell[1]);
+        this.setNameInvalid(cell ? `No cell ${this.nameBox!.value.trim().toUpperCase()} in this sheet${sheet}` :
+          `Not a cell address: ${this.nameBox!.value.trim()}`);
+        this.nameBox!.select();
+
+        return;
       }
+      this.nameBox!.blur();
+      this.hot.selectCell(cell[0], cell[1]);
       this.hot.listen();
       this.refresh();
     } else if (event.key === 'Escape') {
       event.preventDefault();
       this.cancel();
     }
+  }
+
+  /** Marks the address box as invalid with a message (`null` clears it). */
+  setNameInvalid(message: string | null): void {
+    if (!this.nameBox) {
+      return;
+    }
+    this.nameBox.classList.toggle('fs-formula-bar__name--invalid', message !== null);
+    this.nameBox.title = message || '';
+    this.nameBox.setAttribute('aria-invalid', message === null ? 'false' : 'true');
   }
 
   /** While the cell is edited in the grid, the bar shows what is typed. */

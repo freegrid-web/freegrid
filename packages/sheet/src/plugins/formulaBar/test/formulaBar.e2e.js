@@ -88,6 +88,42 @@ describe('FormulaBar', () => {
     expect(nameBox().value).toBe('F6');
   });
 
+  it('marks an address outside the sheet as invalid and keeps it for correction', () => {
+    handsontable({ data: Handsontable.helper.createSpreadsheetData(6, 4), formulaBar: true });
+
+    selectCell(2, 3);
+    nameBox().focus();
+    nameBox().value = 'F5';
+    press(nameBox(), 'Enter');
+
+    expect(getSelectedLast()).toEqual([2, 3, 2, 3]);
+    expect(nameBox().value).toBe('F5');
+    expect(nameBox().classList.contains('fs-formula-bar__name--invalid')).toBe(true);
+    expect(nameBox().title).toBe('No cell F5 in this sheet (A1:D6)');
+    expect(document.activeElement).toBe(nameBox());
+
+    nameBox().value = 'B2';
+    nameBox().dispatchEvent(new Event('input'));
+    expect(nameBox().classList.contains('fs-formula-bar__name--invalid')).toBe(false);
+    press(nameBox(), 'Enter');
+
+    expect(getSelectedLast()).toEqual([1, 1, 1, 1]);
+  });
+
+  it('marks text that is not an address as invalid', () => {
+    handsontable({ data: [[1]], formulaBar: true });
+
+    selectCell(0, 0);
+    nameBox().value = 'hello';
+    press(nameBox(), 'Enter');
+
+    expect(nameBox().title).toBe('Not a cell address: hello');
+
+    press(nameBox(), 'Escape');
+    expect(nameBox().value).toBe('A1');
+    expect(nameBox().classList.contains('fs-formula-bar__name--invalid')).toBe(false);
+  });
+
   it('keeps the selection when the bar is clicked', () => {
     handsontable({ data: [[1, 2]], formulaBar: true, outsideClickDeselects: true });
 

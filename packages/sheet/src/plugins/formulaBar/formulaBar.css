@@ -52,3 +52,10 @@
   outline: 1px solid var(--fs-selection-border-color);
   outline-offset: 0;
 }
+
+/* An address that is not a cell of the sheet (its title says why). */
+.fs-formula-bar__name--invalid,
+.fs-formula-bar__name--invalid:focus {
+  border-color: var(--fs-color-invalid);
+  outline-color: var(--fs-color-invalid);
+}
