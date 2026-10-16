@@ -31,7 +31,7 @@ export const TOPICS = [
       'modifyData', 'modifyRowData', 'afterChangesObserved'],
     settings: ['data', 'dataSchema', 'startRows', 'startCols', 'minRows', 'minCols', 'maxRows', 'maxCols',
       'minSpareRows', 'minSpareCols', 'observeChanges', 'trimWhitespace', 'isEmptyRow', 'isEmptyCol',
-      'formulas'],
+      'formulas', 'formulaBar'],
     match: /^(set|get)(Source)?Data|^getDataAt|^getDataType/,
   },
   {

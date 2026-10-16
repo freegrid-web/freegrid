@@ -50,4 +50,11 @@ the engine (default `'en'`, `'UTC'`, `'en'`).
 - Column letters in formulas are the data columns (`A` is the first column of the data). One grid is one sheet;
   references to other grids are not supported yet.
 
+## The formula bar
+
+`formulaBar: true` shows a bar above the grid, as in Excel: the selected cell's address and its formula (or value).
+Type in the bar and press <kbd>Enter</kbd> to write the cell, or <kbd>Escape</kbd> to cancel. Type an address such
+as `F6` in the address box and press <kbd>Enter</kbd> to select that cell. It works without formulas too. Turn it on
+or off at any time with `updateSettings({ formulaBar: false })`.
+
 See it working in the [Formulas example](../examples/formulas).

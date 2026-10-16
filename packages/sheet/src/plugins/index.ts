@@ -8,6 +8,7 @@ import ContextMenu from './contextMenu/contextMenu';
 import CopyPaste from './copyPaste/copyPaste';
 import CustomBorders from './customBorders/customBorders';
 import DragToScroll from './dragToScroll/dragToScroll';
+import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
 import ManualColumnFreeze from './manualColumnFreeze/manualColumnFreeze';
 import ManualColumnMove from './manualColumnMove/manualColumnMove';
@@ -32,6 +33,7 @@ export {
   CopyPaste,
   CustomBorders,
   DragToScroll,
+  FormulaBar,
   Formulas,
   ManualColumnFreeze,
   ManualColumnMove,

@@ -5,7 +5,7 @@ const dist = f => new URL(`../../dist/${f}`, import.meta.url);
 const read = f => readFileSync(dist(f), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ColumnSorting', 'Comments', 'ContextMenu',
-  'CopyPaste', 'CustomBorders', 'DragToScroll', 'Formulas', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
+  'CopyPaste', 'CustomBorders', 'DragToScroll', 'FormulaBar', 'Formulas', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
   'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'ObserveChanges',
   'PersistentState', 'Search', 'TouchScroll', 'UndoRedo'];
 

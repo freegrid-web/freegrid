@@ -9,6 +9,9 @@
   so `@freegrid/sheet` keeps no dependencies. The editor and `getSourceDataAtCell` show the formula; `getDataAtCell`,
   the renderers, copying and sorting use the result. Inserting and removing rows and columns moves the references
   and updates the formulas in the data; errors get the class `fs-formula-error`. New guide page and example.
+- Formula bar (`formulaBar: true`): a bar above the grid, as in Excel, with the selected cell's address and its
+  formula or value. Edit the cell there (<kbd>Enter</kbd> writes, <kbd>Escape</kbd> cancels), or type an address
+  such as `F6` to select that cell. It follows the grid's theme and can be turned on or off with `updateSettings`.
 - `getColumnMeta(column)`: the column meta, the grid settings together with the column's settings from `columns`.
   Every cell meta of the column inherits from it. Unlike `getCellMeta`, it creates no cell meta and runs no hooks.
 

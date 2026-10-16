@@ -2469,6 +2469,22 @@ DefaultSettings.prototype = {
   formulas: void 0,
 
   /**
+   * Shows a formula bar above the grid, as in Excel: the selected cell's address and its value (a formula shows as
+   * its formula). Typing in the bar and pressing <kbd>Enter</kbd> writes the cell, <kbd>Escape</kbd> cancels; typing
+   * an address such as `F6` in the address box and pressing <kbd>Enter</kbd> selects that cell. Turn it on or off
+   * at any time with `updateSettings`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * formulaBar: true,
+   * ```
+   */
+  formulaBar: void 0,
+
+  /**
    * @description
    * The {@link GanttChart} plugin enables a possibility to create a Gantt chart using a FreeSheet instance. In this
    * case, the whole table becomes read-only.
