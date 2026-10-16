@@ -36,7 +36,24 @@ type SortingPlugin = {
 };
 type HidingPlugin = { enabled: boolean; hideColumns(columns: number[]): void };
 
-const escapeHtml = (text: string): string => text.replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
+/** An element with attributes (`text` sets its text) and children: the menu is built without HTML strings. */
+const el = <K extends keyof HTMLElementTagNameMap>(tag: K, attributes: Record<string, string | boolean> = {},
+  children: (Node | null)[] = []): HTMLElementTagNameMap[K] => {
+  const element = document.createElement(tag);
+
+  Object.entries(attributes).forEach(([name, value]) => {
+    if (name === 'text') {
+      element.textContent = String(value);
+    } else if (typeof value === 'boolean') {
+      (element as unknown as Record<string, boolean>)[name] = value;
+    } else {
+      element.setAttribute(name, value);
+    }
+  });
+  children.forEach(child => child && element.appendChild(child));
+
+  return element;
+};
 
 /**
  * The column menu: a ▾ button in each column header opens a menu with sorting, filtering (by condition and by
@@ -279,7 +296,7 @@ class DropdownMenu extends BasePlugin {
 
   renderItem(menu: HTMLElement, item: string | DropdownMenuItem, column: number): void {
     if (item === SEPARATOR) {
-      menu.insertAdjacentHTML('beforeend', `<div class="${MENU_CLASS_NAME}__separator" role="separator"></div>`);
+      menu.appendChild(el('div', { class: `${MENU_CLASS_NAME}__separator`, role: 'separator' }));
 
       return;
     }
@@ -375,27 +392,35 @@ class DropdownMenu extends BasePlugin {
     }
     const names = conditionsForType(type);
     const existing = filters.getConditions(column).filter(({ name }) => name !== 'by_value');
-    const options = (selected?: string) => [`<option value="">${escapeHtml(this.phrase(C.FILTERS_CONDITIONS_NONE))}</option>`,
+    const select = (index: number, selected?: string) => el('select', { class: 'fs-filter-condition',
+      'data-index': String(index) }, [
+      el('option', { value: '', text: this.phrase(C.FILTERS_CONDITIONS_NONE) }),
       ...Array.from(new Set([...names, ...(selected ? [selected] : [])])).map(name =>
-        `<option value="${name}"${name === selected ? ' selected' : ''}>${escapeHtml(this.conditionTitle(name))}</option>`)]
-      .join('');
-    const inputs = (index: number, condition?: FilterCondition) => [0, 1].map(arg =>
-      `<input class="fs-filter-input" type="text" data-index="${index}" data-arg="${arg}" placeholder="${escapeHtml(
-        this.phrase(arg === 0 ? C.FILTERS_BUTTONS_PLACEHOLDER_VALUE : C.FILTERS_BUTTONS_PLACEHOLDER_SECOND_VALUE))}"
-        value="${escapeHtml(condition && condition.args[arg] !== void 0 ? String(condition.args[arg]) : '')}">`).join('');
+        el('option', { value: name, text: this.conditionTitle(name), selected: name === selected })),
+    ]);
+    const inputs = (index: number, condition?: FilterCondition) => [0, 1].map(arg => el('input', {
+      class: 'fs-filter-input',
+      type: 'text',
+      'data-index': String(index),
+      'data-arg': String(arg),
+      placeholder: this.phrase(arg === 0 ? C.FILTERS_BUTTONS_PLACEHOLDER_VALUE : C.FILTERS_BUTTONS_PLACEHOLDER_SECOND_VALUE),
+      value: condition && condition.args[arg] !== void 0 ? String(condition.args[arg]) : '',
+    }));
     const operation = filters.getOperation(column);
-    const section = document.createElement('div');
+    const radio = (value: ColumnConditions['operation'], phrase: string) => el('label', {}, [
+      el('input', { type: 'radio', name: 'fs-filter-operation', value, checked: operation === value }),
+      document.createTextNode(` ${this.phrase(phrase)}`),
+    ]);
+    const section = el('div', { class: `${MENU_CLASS_NAME}__section fs-filter-by-condition` }, [
+      el('div', { class: `${MENU_CLASS_NAME}__title`, text: this.phrase(C.FILTERS_DIVS_FILTER_BY_CONDITION) }),
+      select(0, existing[0]?.name),
+      ...inputs(0, existing[0]),
+      el('div', { class: 'fs-filter-operation' }, [radio('conjunction', C.FILTERS_LABELS_CONJUNCTION),
+        radio('disjunction', C.FILTERS_LABELS_DISJUNCTION)]),
+      select(1, existing[1]?.name),
+      ...inputs(1, existing[1]),
+    ]);
 
-    section.className = `${MENU_CLASS_NAME}__section fs-filter-by-condition`;
-    section.innerHTML = `<div class="${MENU_CLASS_NAME}__title">${escapeHtml(this.phrase(C.FILTERS_DIVS_FILTER_BY_CONDITION))}</div>
-      <select class="fs-filter-condition" data-index="0">${options(existing[0]?.name)}</select>${inputs(0, existing[0])}
-      <div class="fs-filter-operation">
-        <label><input type="radio" name="fs-filter-operation" value="conjunction"${operation === 'conjunction' ? ' checked' : ''}>
-          ${escapeHtml(this.phrase(C.FILTERS_LABELS_CONJUNCTION))}</label>
-        <label><input type="radio" name="fs-filter-operation" value="disjunction"${operation === 'disjunction' ? ' checked' : ''}>
-          ${escapeHtml(this.phrase(C.FILTERS_LABELS_DISJUNCTION))}</label>
-      </div>
-      <select class="fs-filter-condition" data-index="1">${options(existing[1]?.name)}</select>${inputs(1, existing[1])}`;
     section.addEventListener('change', () => this.updateConditionInputs());
     menu.appendChild(section);
     this.updateConditionInputs();
@@ -437,16 +462,15 @@ class DropdownMenu extends BasePlugin {
     this.#checked = new Set(list && Array.isArray(list.args[0]) ? (list.args[0] as unknown[]).map(String) : this.#values);
     this.#search = '';
 
-    const section = document.createElement('div');
-
-    section.className = `${MENU_CLASS_NAME}__section fs-filter-by-value`;
-    section.innerHTML = `<div class="${MENU_CLASS_NAME}__title">${escapeHtml(this.phrase(C.FILTERS_DIVS_FILTER_BY_VALUE))}</div>
-      <input class="fs-filter-search" type="search" placeholder="${escapeHtml(this.phrase(C.FILTERS_BUTTONS_PLACEHOLDER_SEARCH))}">
-      <div class="fs-filter-links">
-        <button type="button" class="fs-filter-select-all">${escapeHtml(this.phrase(C.FILTERS_BUTTONS_SELECT_ALL))}</button>
-        <button type="button" class="fs-filter-clear">${escapeHtml(this.phrase(C.FILTERS_BUTTONS_CLEAR))}</button>
-      </div>
-      <div class="fs-filter-values" role="group"></div>`;
+    const section = el('div', { class: `${MENU_CLASS_NAME}__section fs-filter-by-value` }, [
+      el('div', { class: `${MENU_CLASS_NAME}__title`, text: this.phrase(C.FILTERS_DIVS_FILTER_BY_VALUE) }),
+      el('input', { class: 'fs-filter-search', type: 'search', placeholder: this.phrase(C.FILTERS_BUTTONS_PLACEHOLDER_SEARCH) }),
+      el('div', { class: 'fs-filter-links' }, [
+        el('button', { type: 'button', class: 'fs-filter-select-all', text: this.phrase(C.FILTERS_BUTTONS_SELECT_ALL) }),
+        el('button', { type: 'button', class: 'fs-filter-clear', text: this.phrase(C.FILTERS_BUTTONS_CLEAR) }),
+      ]),
+      el('div', { class: 'fs-filter-values', role: 'group' }),
+    ]);
 
     section.querySelector('.fs-filter-search')!.addEventListener('input', (event) => {
       this.#search = (event.target as HTMLInputElement).value.toLowerCase();
@@ -486,17 +510,19 @@ class DropdownMenu extends BasePlugin {
     }
     const blank = this.phrase(C.FILTERS_VALUES_BLANK_CELLS);
 
-    list.innerHTML = this.searchedValues().slice(0, MAX_DRAWN_VALUES).map(value => `<label class="fs-filter-value">
-      <input type="checkbox" value="${escapeHtml(value)}"${this.#checked.has(value) ? ' checked' : ''}>
-      <span>${escapeHtml(value === '' ? `(${blank})` : value)}</span></label>`).join('');
+    list.replaceChildren(...this.searchedValues().slice(0, MAX_DRAWN_VALUES).map(value => el('label',
+      { class: 'fs-filter-value' }, [
+        el('input', { type: 'checkbox', value, checked: this.#checked.has(value) }),
+        el('span', { text: value === '' ? `(${blank})` : value }),
+      ])));
   }
 
   renderActions(menu: HTMLElement): void {
-    const actions = document.createElement('div');
+    const actions = el('div', { class: `${MENU_CLASS_NAME}__actions` }, [
+      el('button', { type: 'button', class: 'fs-filter-ok', text: this.phrase(C.FILTERS_BUTTONS_OK) }),
+      el('button', { type: 'button', class: 'fs-filter-cancel', text: this.phrase(C.FILTERS_BUTTONS_CANCEL) }),
+    ]);
 
-    actions.className = `${MENU_CLASS_NAME}__actions`;
-    actions.innerHTML = `<button type="button" class="fs-filter-ok">${escapeHtml(this.phrase(C.FILTERS_BUTTONS_OK))}</button>
-      <button type="button" class="fs-filter-cancel">${escapeHtml(this.phrase(C.FILTERS_BUTTONS_CANCEL))}</button>`;
     actions.querySelector('.fs-filter-ok')!.addEventListener('click', () => this.apply());
     actions.querySelector('.fs-filter-cancel')!.addEventListener('click', () => this.close());
     menu.appendChild(actions);

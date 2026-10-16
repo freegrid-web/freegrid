@@ -169,4 +169,22 @@ describe('DropdownMenu', () => {
 
     expect(header(0).querySelector('.fs-dropdown-button')).toBeNull();
   });
+
+  it('shows values and condition names as text, never as HTML', () => {
+    window.fsMenuInjected = false;
+    Handsontable.filters.registerCondition('spec_"><img src=x onerror="window.fsMenuInjected=true">', {
+      title: '<b>Bold</b>',
+      test: () => true,
+    });
+    handsontable(settings({ data: [['<img src=x onerror="window.fsMenuInjected=true">', 1]] }));
+    openMenu(0);
+
+    const labels = Array.from(menu().querySelectorAll('.fs-filter-value span')).map(span => span.textContent);
+    const titles = Array.from(menu().querySelectorAll('option')).map(option => option.textContent);
+
+    expect(labels).toContain('<img src=x onerror="window.fsMenuInjected=true">');
+    expect(titles).toContain('<b>Bold</b>');
+    expect(menu().querySelector('img, b')).toBeNull();
+    expect(window.fsMenuInjected).toBe(false);
+  });
 });
