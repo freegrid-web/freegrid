@@ -2,6 +2,32 @@ import { arrayMax } from './../helpers/array';
 import { defineGetter } from './../helpers/object';
 import { rangeEach } from './../helpers/number';
 
+// Below these sizes the native splice/filter path is as fast or faster (measured with tools/performance).
+const BULK_THRESHOLD = 256;
+const RENUMBER_THRESHOLD = 32;
+
+/** Shift the tail once, keeping the array's identity and holes. Only used for ordinary insertion indexes/counts. */
+function insertRange(map: number[], index: number, amount: number, firstValue: number): void {
+  const length = map.length;
+
+  map.length = length + amount;
+  for (let source = length - 1; source >= index; source--) {
+    if (source in map) {
+      map[source + amount] = map[source];
+    } else {
+      delete map[source + amount];
+    }
+  }
+  for (let offset = 0; offset < amount; offset++) {
+    map[index + offset] = firstValue + offset;
+  }
+}
+
+function canInsertRange(map: number[], index: number, amount: number): boolean {
+  return amount >= BULK_THRESHOLD && Number.isSafeInteger(amount) &&
+    Number.isInteger(index) && index >= 0 && index <= map.length;
+}
+
 /** What `arrayMapper` adds to a class (with `mixin(Class, arrayMapper)`). */
 export type ArrayMapper = {
   _arrayMap: number[];
@@ -42,6 +68,12 @@ const arrayMapper = {
     const newIndex = (arrayMax(this._arrayMap) as number) + 1;
     const addedItems: number[][] = [];
 
+    if (canInsertRange(this._arrayMap, physicalIndex, amount)) {
+      insertRange(this._arrayMap, physicalIndex, amount, newIndex);
+      for (let count = 0; count < amount; count++) addedItems.push([]);
+
+      return addedItems;
+    }
     rangeEach(amount - 1, (count) => {
       addedItems.push(this._arrayMap.splice(physicalIndex + count, 0, newIndex + count));
     });
@@ -59,6 +91,42 @@ const arrayMapper = {
     // Largest index first, so that the other indexes stay valid.
     physicalIndex.sort((a, b) => b - a);
 
+    if (physicalIndex.length >= BULK_THRESHOLD && physicalIndex !== this._arrayMap) {
+      let previous = this._arrayMap.length;
+      let ordinaryIndexes = true;
+
+      for (let index = 0; index < physicalIndex.length; index++) {
+        const value = physicalIndex[index];
+
+        if (!Number.isInteger(value) || value < 0 || value >= previous) {
+          ordinaryIndexes = false;
+          break;
+        }
+        previous = value;
+      }
+      if (ordinaryIndexes) {
+        const removedItems = physicalIndex.map(index => mapCopy[index]);
+        const map = this._arrayMap;
+        let removal = physicalIndex.length - 1;
+        let destination = 0;
+
+        for (let source = 0; source < map.length; source++) {
+          if (removal >= 0 && source === physicalIndex[removal]) {
+            removal--;
+          } else {
+            if (source in map) {
+              map[destination] = map[source];
+            } else {
+              delete map[destination];
+            }
+            destination++;
+          }
+        }
+        map.length = destination;
+
+        return removedItems;
+      }
+    }
     return physicalIndex.map((indexToRemove) => {
       this._arrayMap.splice(indexToRemove, 1);
 
@@ -70,6 +138,27 @@ const arrayMapper = {
   unshiftItems(this: ArrayMapper, physicalIndex: number | number[], amount = 1): void {
     const removedItems = this.removeItems(physicalIndex, amount);
 
+    if (removedItems.length >= RENUMBER_THRESHOLD && removedItems.every(value => typeof value === 'number') &&
+      this._arrayMap.every(value => typeof value === 'number')) {
+      const ordered = removedItems.filter(value => !Number.isNaN(value)).sort((a, b) => a - b);
+
+      this._arrayMap = this._arrayMap.map((logicalRow) => {
+        // Count strictly smaller removed values, including duplicates, without allocating a filter per row.
+        let low = 0;
+        let high = ordered.length;
+
+        while (low < high) {
+          const middle = Math.floor((low + high) / 2);
+
+          if (ordered[middle] < logicalRow) low = middle + 1;
+          else high = middle;
+        }
+
+        return logicalRow - low;
+      });
+
+      return;
+    }
     this._arrayMap = this._arrayMap
       .map(logicalRow => logicalRow - removedItems.filter(removed => logicalRow > removed).length);
   },
@@ -78,6 +167,11 @@ const arrayMapper = {
   shiftItems(this: ArrayMapper, physicalIndex: number, amount = 1): void {
     this._arrayMap = this._arrayMap.map(row => (row >= physicalIndex ? row + amount : row));
 
+    if (canInsertRange(this._arrayMap, physicalIndex, amount)) {
+      insertRange(this._arrayMap, physicalIndex, amount, physicalIndex);
+
+      return;
+    }
     rangeEach(amount - 1, (count) => {
       this._arrayMap.splice(physicalIndex + count, 0, physicalIndex + count);
     });
