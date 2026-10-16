@@ -1653,6 +1653,8 @@ class Core {
    * @fires Hooks#afterChange
    */
   loadData(data: any) { // eslint-disable-line @typescript-eslint/no-explicit-any -- an array, or a collection with push and splice
+    // A plugin can give the rows the grid works with (nested rows: the tree's rows, parents before their children).
+    data = this.runHooks('beforeLoadData', data, this.#priv.firstRun);
     if (Array.isArray(this.#priv.settings.dataSchema)) {
       this.dataType = 'array';
     } else if (isFunction(this.#priv.settings.dataSchema)) {

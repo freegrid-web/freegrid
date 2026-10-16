@@ -189,20 +189,24 @@ nestedRows: {
 ```
 
 - Data: an array of objects; a row's children are in `childrenKey`. Array rows cannot have children.
-  `getSourceData()` returns the tree the grid was given (the same objects).
+  `getSourceData()` returns the grid's rows (every row, parents before children: physical indexes and
+  `countSourceRows()` count them); `getPlugin('nestedRows').getSourceData()` returns the tree, which `getDocument()`
+  saves. The plugin gives the grid its rows through the new `beforeLoadData` hook.
 - Inside the grid each node is one physical row, in depth-first order. Formulas, rendering, editing and the
   visibility map see ordinary rows. Inserting a child is inserting a row (the formula engine moves references as
   for any insert).
 - Collapsing a node hides its descendants (visibility source `nestedRows`); the node remembers its state.
-- Context menu: Insert child row, Indent (becomes the last child of the row above), Outdent (becomes the sibling
-  after its parent), Expand / Collapse, Expand all / Collapse all.
+- Context menu: Insert child row, Indent (becomes the last child of the row above on its level), Outdent (becomes
+  the sibling after its parent; the rows after it under that parent become its children, so no row moves), Expand /
+  Collapse, Expand all / Collapse all.
 - Keyboard: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>→</kbd> expands, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>
   collapses the selected row's node.
 - **Sorting** sorts each set of siblings, keeping children under their parent. Column sorting gets the tree from
   the plugin through an internal interface (`getRowTree()`), not a hook.
-- **Filtering** shows the rows that match and their ancestors; while a filter is on, ancestors of matching rows are
-  shown expanded. Ancestors shown only for context get `fs-nested-context` (dimmed).
-- **Row moving** (drag) moves a node with its subtree among its siblings; Indent and Outdent change the parent.
+- **Filtering** shows the rows that match and their ancestors; while a filter is on, collapsing hides nothing (the
+  filter decides what is shown). Ancestors shown only for context get `fs-nested-context` (dimmed).
+- **Row moving** (drag, `manualRowMove`) is not supported together with nested rows in `0.7.0`; Indent and Outdent
+  change the parent.
 - **Numbering** `'outline'`: the row header shows the node's path among its siblings in the current order
   (`1.2.3`); filtered-out siblings leave gaps (`1.1, 1.3`). The header width grows to the longest number.
 - Classes `fs-nested-level-0`, `-1`, … on the row's cells; `fs-nested-parent` on rows with children.

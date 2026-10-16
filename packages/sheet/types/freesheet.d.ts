@@ -1338,11 +1338,23 @@ declare namespace FreeSheet {
     }
 
     interface NestedRows extends Base {
-      bindRowsWithHeadersPlugin: BindRowsWithHeaders | void;
-      dataManager: DataManager | void;
-      headersUI: object | void;
-      sourceData: object | void;
-      trimRowsPlugin: TrimRows | void;
+      expand(row: number): void;
+      collapse(row: number): void;
+      toggle(row: number): void;
+      expandAll(): void;
+      collapseAll(): void;
+      isCollapsed(row: number): boolean;
+      isParent(row: number): boolean;
+      getParent(row: number): number | null;
+      getChildren(row: number): number[];
+      getLevel(row: number): number;
+      getRowNumber(row: number): string;
+      addChild(row: number, data?: object): void;
+      indent(row: number): void;
+      outdent(row: number): void;
+      getSourceData(): object[];
+      getCollapsedRows(): number[];
+      setCollapsedRows(rows: number[]): void;
     }
 
     interface DataObserver {
@@ -1479,6 +1491,8 @@ declare namespace FreeSheet {
     height?: number | (() => void);
     hiddenColumns?: boolean | { columns?: number[]; indicators?: boolean };
     hiddenRows?: boolean | { rows?: number[]; indicators?: boolean };
+    nestedRows?: boolean | { childrenKey?: string; numbering?: 'flat' | 'outline'; collapsed?: boolean | number;
+      toggle?: 'rowHeader' | 'column'; indent?: number };
     invalidCellClassName?: string;
     isEmptyCol?: (col: number) => boolean;
     isEmptyRow?: (row: number) => boolean;
@@ -1543,7 +1557,11 @@ declare namespace FreeSheet {
   }
 
   interface Hooks {
-    afterAddChild?: (parent: object, element: object | void, index: number | void) => void;
+    afterAddChild?: (parent: object, element: object) => void;
+    afterRowCollapse?: (row: number) => void;
+    afterRowExpand?: (row: number) => void;
+    beforeRowCollapse?: (row: number) => void | boolean;
+    beforeRowExpand?: (row: number) => void | boolean;
     afterBeginEditing?: (row: number, column: number) => void;
     afterCellMetaReset?: () => void;
     afterChange?: (changes: [number, string | number, any, any][], source: string) => void;
@@ -1624,7 +1642,7 @@ declare namespace FreeSheet {
     afterValidate?: (isValid: boolean, value: any, row: number, prop: string | number, source: string) => void | boolean;
     afterViewportColumnCalculatorOverride?: (calc: object) => void;
     afterViewportRowCalculatorOverride?: (calc: object) => void;
-    beforeAddChild?: (parent: object, element: object | void, index: number | void) => void;
+    beforeAddChild?: (parent: object, element: object | void) => void | boolean;
     beforeAutofill?: (start: object, end: object, data: any[]) => void;
     beforeAutofillInsidePopulate?: (index: object, direction: string, input: any[], deltas: any[]) => void;
     beforeCellAlignment?: (stateBefore: any, range: any, type: string, alignmentClass: string) => void;
@@ -1639,7 +1657,7 @@ declare namespace FreeSheet {
     beforeCreateCol?: (index: number, amount: number, source?: string) => void;
     beforeCreateRow?: (index: number, amount: number, source?: string) => void;
     beforeCut?: (data: any[], coords: any[]) => any;
-    beforeDetachChild?: (parent: object, element: object) => void;
+    beforeDetachChild?: (parent: object, element: object) => void | boolean;
     beforeDrawBorders?: (corners: any[], borderClassName: string) => void;
     beforeDropdownMenuSetItems?: (items: any[], column: number) => void;
     beforeDropdownMenuShow?: (column: number) => void | boolean;

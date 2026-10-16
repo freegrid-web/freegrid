@@ -6,7 +6,7 @@ const read = f => readFileSync(dist(f), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ColumnSorting', 'Comments', 'ContextMenu',
   'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
-  'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'ObserveChanges',
+  'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedRows', 'ObserveChanges',
   'PersistentState', 'Search', 'TouchScroll', 'UndoRedo'];
 
 function windowWith(...scripts) {

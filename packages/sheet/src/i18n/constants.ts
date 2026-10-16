@@ -100,3 +100,11 @@ export const COLUMN_MENU_SORT_ASC = `${COLUMN_MENU_NAMESPACE}sortAscending`;
 export const COLUMN_MENU_SORT_DESC = `${COLUMN_MENU_NAMESPACE}sortDescending`;
 export const COLUMN_MENU_CLEAR_SORT = `${COLUMN_MENU_NAMESPACE}clearSort`;
 export const FILTERS_CLEAR_COLUMN = `${FILTERS_NAMESPACE}buttons.clearColumn`;
+
+export const NESTED_ROWS_NAMESPACE = 'NestedRows:';
+export const NESTED_ROWS_EXPAND = `${NESTED_ROWS_NAMESPACE}expand`;
+export const NESTED_ROWS_COLLAPSE = `${NESTED_ROWS_NAMESPACE}collapse`;
+export const NESTED_ROWS_EXPAND_ALL = `${NESTED_ROWS_NAMESPACE}expandAll`;
+export const NESTED_ROWS_COLLAPSE_ALL = `${NESTED_ROWS_NAMESPACE}collapseAll`;
+export const NESTED_ROWS_INDENT = `${NESTED_ROWS_NAMESPACE}indent`;
+export const NESTED_ROWS_OUTDENT = `${NESTED_ROWS_NAMESPACE}outdent`;

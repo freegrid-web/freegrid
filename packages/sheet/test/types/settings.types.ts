@@ -128,7 +128,7 @@ const hotSettings: Handsontable.GridSettings = {
   wordWrap: true,
 
   // Hooks via settings object
-  afterAddChild: (parent, element, index) => {},
+  afterAddChild: (parent, element) => {},
   afterBeginEditing: (row, column) => {},
   afterCellMetaReset: () => {},
   afterChange: (changes, source) => {},
@@ -201,7 +201,7 @@ const hotSettings: Handsontable.GridSettings = {
   afterValidate: () => {},
   afterViewportColumnCalculatorOverride: (calc) => {},
   afterViewportRowCalculatorOverride: (calc) => {},
-  beforeAddChild: (parent, element, index) => {},
+  beforeAddChild: (parent, element) => {},
   beforeAutofill: (start, end, data) => {},
   beforeAutofillInsidePopulate: (index, direction, input, deltas) => {},
   beforeCellAlignment: (stateBefore, range, type, alignmentClass) => {},

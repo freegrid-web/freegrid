@@ -31,6 +31,9 @@ export const FILTERED_GRID_CLASS_NAME = 'fs-has-filters';
 
 const SOURCE = 'filters';
 
+/** What filtering needs from nested rows. */
+type NestedRowsFiltering = { enabled: boolean; filterTree(matching: boolean[], active: boolean): boolean[] };
+
 /**
  * Filters: rows whose values do not meet the conditions of every filtered column are hidden. A column's conditions
  * are joined by AND or OR; a value list (`by_value`) keeps the rows whose value is in the list, on top of them.
@@ -231,7 +234,14 @@ class Filters extends BasePlugin {
     if (this.hot.runHooks('beforeFilter', conditions) === false) {
       return;
     }
-    this.visibility.setHidden(SOURCE, this.rowsToHide());
+    let shown = this.matchingRows();
+    const nestedRows = this.hot.getPlugin('nestedRows' as 'filters') as unknown as NestedRowsFiltering | undefined;
+
+    // In a tree, the parents of the matching rows are shown too.
+    if (nestedRows?.enabled) {
+      shown = nestedRows.filterTree(shown, this.#columns.size > 0);
+    }
+    this.visibility.setHidden(SOURCE, shown.flatMap((matches, row) => (matches ? [] : [row])));
     this.hot.rootElement.classList.toggle(FILTERED_GRID_CLASS_NAME, this.#columns.size > 0);
     this.hot.runHooks('afterFilter', conditions);
     this.refresh();
