@@ -111,6 +111,13 @@ export const TOPICS = [
     settings: ['nestedHeaders', 'collapsibleColumns'],
   },
   {
+    name: 'Conditional formatting',
+    description: 'Cells that format themselves from their values: highlights, color scales, data bars, icons.',
+    methods: [],
+    events: ['afterConditionalFormattingChange'],
+    settings: ['conditionalFormatting'],
+  },
+  {
     name: 'Rendering and scrolling',
     description: 'Size, rendering, scrolling and DOM access.',
     methods: ['render', 'getCell', 'getCoords', 'scrollViewportTo'],

@@ -33,6 +33,8 @@ export type FormulasSettings = {
 
 /** The cell types of the engine (`getCellType`). */
 const CELL_TYPE = { NUMBER: 1, TEXT: 2, BOOLEAN: 4, ERROR: 16 };
+/** The engine's last column (as in Excel). */
+const MAX_COLUMNS = 16384;
 /** The class of a formula cell whose result is an error (`#DIV/0!`, `#REF!`, …). */
 export const ERROR_CLASS_NAME = 'fs-formula-error';
 
@@ -324,8 +326,83 @@ class Formulas extends BasePlugin {
     }
   }
 
+  /** Formulas of conditional formatting, by owner: their block of engine cells far to the right of the sheet. */
+  #conditionBlocks = new Map<string, { column: number; width: number; rows: number; top: number; left: number }>();
+
+  /**
+   * Puts formulas into the engine (not into the grid's data), in a block of cells far to the right of the sheet, so a
+   * recalculation evaluates them all; `getConditionResult` reads their results. A key's earlier formulas are cleared.
+   * Used by conditional formatting.
+   *
+   * @param key The owner of the formulas.
+   * @param cells A formula for each physical cell, written for that cell.
+   */
+  setConditionFormulas(key: string, cells: { row: number; column: number; formula: string }[]): void {
+    const model = this.model;
+
+    if (!model) {
+      return;
+    }
+    this.removeConditionFormulas(key, false);
+    if (!cells.length) {
+      return;
+    }
+    const top = Math.min(...cells.map(cell => cell.row));
+    const bottom = Math.max(...cells.map(cell => cell.row));
+    const left = Math.min(...cells.map(cell => cell.column));
+    const width = Math.max(...cells.map(cell => cell.column)) - left + 1;
+    const used = Array.from(this.#conditionBlocks.values()).reduce((sum, block) => sum + block.width, 0);
+    // The engine's last column is 16384; blocks are put next to each other from there to the left.
+    const column = MAX_COLUMNS - used - width + 1;
+
+    if (column <= this.hot.countSourceCols() + 1) {
+      return;
+    }
+    this.#conditionBlocks.set(key, { column, width, rows: bottom - top + 1, top, left });
+    model.pauseEvaluation();
+    cells.forEach(cell => model.setUserInput(this.sheet(), cell.row + 1, column + cell.column - left, cell.formula));
+    model.resumeEvaluation();
+    model.evaluate();
+  }
+
+  /**
+   * Whether the condition formula of a cell is true (TRUE or a number other than 0).
+   *
+   * @param key The owner of the formulas.
+   * @param row Physical row.
+   * @param column Physical column.
+   */
+  getConditionResult(key: string, row: number, column: number): boolean {
+    const block = this.#conditionBlocks.get(key);
+    const model = this.model;
+
+    if (!block || !model || row < block.top || row >= block.top + block.rows || column < block.left ||
+      column >= block.left + block.width) {
+      return false;
+    }
+    const value = this.getResult(row + 1, block.column + column - block.left);
+
+    return value === true || (typeof value === 'number' && value !== 0);
+  }
+
+  /** Clears a key's condition formulas. */
+  removeConditionFormulas(key: string, evaluate = true): void {
+    const block = this.#conditionBlocks.get(key);
+    const model = this.model;
+
+    this.#conditionBlocks.delete(key);
+    if (!block || !model) {
+      return;
+    }
+    model.rangeClearAll(this.sheet(), block.top + 1, block.column, block.top + block.rows, block.column + block.width - 1);
+    if (evaluate) {
+      model.evaluate();
+    }
+  }
+
   /** Frees the model this grid created (a document's shared model is freed with the grid that holds it). */
   freeModel(): void {
+    this.#conditionBlocks.clear();
     if (this.ownModel && typeof this.ownModel.free === 'function') {
       this.ownModel.free();
     }

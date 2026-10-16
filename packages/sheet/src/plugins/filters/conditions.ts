@@ -114,6 +114,25 @@ const between = (value: unknown, args: unknown[], context: ConditionContext): bo
 const onDay = (offset: number) => (value: unknown, _args: unknown[], context: ConditionContext): boolean =>
   toDay(value, context) === today(offset);
 
+/** Whether a date is in the week `offset` weeks from this one (Monday to Sunday). */
+const inWeek = (offset: number) => (value: unknown, _args: unknown[], context: ConditionContext): boolean => {
+  const day = toDay(value, context);
+  const now = new Date();
+  const monday = today(-((now.getDay() + 6) % 7) + offset * 7);
+
+  return day !== null && day >= monday && day < monday + 7 * DAY;
+};
+
+/** Whether a date is in the month `offset` months from this one. */
+const inMonth = (offset: number) => (value: unknown, _args: unknown[], context: ConditionContext): boolean => {
+  const day = toDay(value, context);
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() + offset, 1).getTime();
+  const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 1).getTime();
+
+  return day !== null && day >= start && day < end;
+};
+
 /** The conditions, by name. */
 export const CONDITIONS: Record<string, ConditionDefinition> = {
   empty: { arity: 0, phrase: C.FILTERS_CONDITIONS_EMPTY, test: isEmpty },
@@ -135,6 +154,18 @@ export const CONDITIONS: Record<string, ConditionDefinition> = {
   date_today: { arity: 0, phrase: C.FILTERS_CONDITIONS_TODAY, test: onDay(0) },
   date_tomorrow: { arity: 0, phrase: C.FILTERS_CONDITIONS_TOMORROW, test: onDay(1) },
   date_yesterday: { arity: 0, phrase: C.FILTERS_CONDITIONS_YESTERDAY, test: onDay(-1) },
+  // Periods (weeks start on Monday). Offered by conditional formatting's A Date Occurring.
+  date_last_7_days: { arity: 0, title: 'In the last 7 days', test: (value, _args, context) => {
+    const day = toDay(value, context);
+
+    return day !== null && day <= today(0) && day > today(-7);
+  } },
+  date_this_week: { arity: 0, title: 'This week', test: inWeek(0) },
+  date_last_week: { arity: 0, title: 'Last week', test: inWeek(-1) },
+  date_next_week: { arity: 0, title: 'Next week', test: inWeek(1) },
+  date_this_month: { arity: 0, title: 'This month', test: inMonth(0) },
+  date_last_month: { arity: 0, title: 'Last month', test: inMonth(-1) },
+  date_next_month: { arity: 0, title: 'Next month', test: inMonth(1) },
   // args[0]: the texts of the values to keep (`''` for blank cells).
   by_value: { arity: 0, phrase: C.FILTERS_CONDITIONS_BY_VALUE, test: (value, args) =>
     Array.isArray(args[0]) && args[0].indexOf(toText(value)) !== -1 },

@@ -4,6 +4,7 @@ import AutoFill from './autofill/autofill';
 import AutoRowSize from './autoRowSize/autoRowSize';
 import CollapsibleColumns from './collapsibleColumns/collapsibleColumns';
 import ColumnSorting from './columnSorting/columnSorting';
+import ConditionalFormatting from './conditionalFormatting/conditionalFormatting';
 import Comments from './comments/comments';
 import ContextMenu from './contextMenu/contextMenu';
 import CopyPaste from './copyPaste/copyPaste';
@@ -36,6 +37,7 @@ export {
   AutoRowSize,
   CollapsibleColumns,
   ColumnSorting,
+  ConditionalFormatting,
   Comments,
   ContextMenu,
   CopyPaste,

@@ -121,6 +121,9 @@
   --fs-header-background: var(--fs-color-header-background, var(--fs-style-color-header-background)); /* Header background. */
   --fs-header-text: var(--fs-color-header-text, var(--fs-style-color-header-text)); /* Header text. */
   --fs-hidden-indicator-color: var(--fs-cell-border-color); /* The double line where rows or columns are hidden. */
+  --fs-cf-icon-good: #2e9e50; /* Conditional formatting icons: the high third. */
+  --fs-cf-icon-neutral: #e0a800; /* The middle third. */
+  --fs-cf-icon-bad: #d9363e; /* The low third. */
   --fs-filtered-row-header-text: var(--fs-color-accent, var(--fs-style-color-accent)); /* Row numbers while a filter hides rows. */
   --fs-hidden-indicator-gap: var(--fs-cell-background); /* The space between its two lines. */
   --fs-hidden-toggle-text: var(--fs-color-header-text, var(--fs-style-color-header-text, #777)); /* The arrows that show hidden rows or columns. */
