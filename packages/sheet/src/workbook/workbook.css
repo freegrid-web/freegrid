@@ -1,4 +1,34 @@
 /*
+ * The frame: with a formula bar or sheets, the element given to FreeSheet holds the bars and the sheets, and the
+ * visible sheet takes the height that is left.
+ */
+.fs-document {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.fs-document > .fs-formula-bar,
+.fs-document > .fs-sheet-tabs {
+  flex: 0 0 auto;
+  width: auto !important;
+  max-width: none;
+}
+
+.fs-document > .fs-document__sheet {
+  flex: 0 0 auto;
+}
+
+/* The frame has a height: the sheet fills what the bars leave and scrolls inside. */
+.fs-document > .fs-document__sheet--fill {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
  * The sheet tabs below the sheets (more than one sheet, or sheetTabs: true), in the headers' colors, as wide as the
  * grid: [ ☰ all sheets ][ tabs, scrolled sideways, faded at a hidden edge ][ + ]
  */

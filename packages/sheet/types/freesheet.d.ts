@@ -37,6 +37,8 @@ declare namespace _FreeSheet {
     moveSheet(id: string, index: number): void;
     getSheetId(): string;
     getSheetName(): string;
+    getDocument(): { version: 1; activeSheet: string; sheets: Array<{ id: string; name: string; data: any[]; colWidths?: Array<number | null>; rowHeights?: Array<number | null>; mergeCells?: Array<{ row: number; col: number; rowspan: number; colspan: number }>; cell?: object[] }> };
+    loadDocument(document: object): void;
     getCellMetaAtRow(row: number): FreeSheet.GridSettings[];
     getCellRenderer(row: number, col: number): FreeSheet.renderers.Base;
     getCellValidator(row: number, col: number): (value: any, callback: (valid: boolean) => void) => void | RegExp | undefined;

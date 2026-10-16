@@ -21,6 +21,89 @@ export type CreateSheet = (rootElement: HTMLElement, settings: AnyObject) => Cor
 const INHERITED_SETTINGS = ['formulas', 'formulaBar', 'rowHeaders', 'colHeaders', 'contextMenu', 'width', 'height',
   'stretchH', 'language', 'manualColumnResize', 'manualRowResize', 'columnSorting', 'outsideClickDeselects'];
 
+/** One sheet in a saved document (`getDocument`). */
+export type SheetDocument = {
+  id: string;
+  name: string;
+  data: unknown[];
+  colWidths?: (number | null)[];
+  rowHeights?: (number | null)[];
+  mergeCells?: { row: number; col: number; rowspan: number; colspan: number }[];
+  cell?: AnyObject[];
+};
+
+/** A saved document: every sheet, in tab order, and the sheet that was shown. */
+export type SavedDocument = { version: 1; activeSheet: string; sheets: SheetDocument[] };
+
+/** Cell settings a saved document keeps (what users change in the grid: comments, formats, read-only cells). */
+const SAVED_CELL_SETTINGS = ['comment', 'className', 'readOnly', 'type', 'numericFormat', 'dateFormat', 'timeFormat',
+  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap'];
+
+const sparse = <T>(values: (T | undefined)[]): (T | null)[] | undefined => {
+  if (!values.some(value => value !== void 0 && value !== null)) {
+    return void 0;
+  }
+
+  return Array.from(values, value => (value === void 0 ? null : value));
+};
+
+/** A sheet's grid as a saved sheet. */
+const saveSheet = (sheet: Sheet): SheetDocument => {
+  const { instance } = sheet;
+  const plugin = (name: string) => instance.getPlugin(name as 'search') as unknown as AnyObject | undefined;
+  const columnResize = plugin('manualColumnResize');
+  const rowResize = plugin('manualRowResize');
+  const mergeCells = plugin('mergeCells');
+  const saved: SheetDocument = {
+    id: sheet.id,
+    name: sheet.name,
+    data: JSON.parse(JSON.stringify(instance.getSourceData())),
+  };
+  const colWidths = columnResize?.enabled ? sparse(columnResize.manualColumnWidths as (number | undefined)[]) : void 0;
+  const rowHeights = rowResize?.enabled ? sparse(rowResize.manualRowHeights as (number | undefined)[]) : void 0;
+  const merged = mergeCells?.enabled ? (mergeCells.mergedCellsCollection as AnyObject).mergedCells as AnyObject[] : [];
+  const cell = (instance.getCellsMeta() as AnyObject[]).flatMap((meta) => {
+    const own = SAVED_CELL_SETTINGS.filter(key => Object.prototype.hasOwnProperty.call(meta, key) &&
+      meta[key] !== void 0);
+
+    return own.length ? [Object.fromEntries([['row', meta.row], ['col', meta.col], ...own.map(key => [key, meta[key]])])] :
+      [];
+  });
+
+  if (colWidths) {
+    saved.colWidths = colWidths;
+  }
+  if (rowHeights) {
+    saved.rowHeights = rowHeights;
+  }
+  if (merged.length) {
+    saved.mergeCells = merged.map(({ row, col, rowspan, colspan }) => ({ row, col, rowspan, colspan }));
+  }
+  if (cell.length) {
+    saved.cell = JSON.parse(JSON.stringify(cell));
+  }
+
+  return saved;
+};
+
+/** The grid settings of a saved sheet. */
+const sheetSettings = (sheet: SheetDocument): AnyObject => {
+  const settings: AnyObject = { data: sheet.data };
+
+  if (sheet.colWidths) {
+    settings.colWidths = sheet.colWidths.map(width => (width === null ? void 0 : width));
+  }
+  if (sheet.rowHeights) {
+    settings.rowHeights = sheet.rowHeights.map(height => (height === null ? void 0 : height));
+  }
+  if (sheet.mergeCells) {
+    settings.mergeCells = sheet.mergeCells;
+  }
+  settings.cell = sheet.cell || [];
+
+  return settings;
+};
+
 /** Characters a sheet name cannot have (as in Excel). */
 const INVALID_NAME = /[[\]:*?/\\]/;
 
@@ -190,7 +273,7 @@ export class Workbook {
     const last = this.sheets[this.sheets.length - 1].instance.rootElement;
 
     element.className = Array.from(rootElement.classList)
-      .filter(name => !/^(freesheet|handsontable|fs-|ht)/.test(name)).join(' ');
+      .filter(name => !/^(freesheet|handsontable|fs-|ht)/.test(name) || /^fs-document__sheet/.test(name)).join(' ');
     // The first sheet's inline style (an explicit size); otherwise a sheet is as tall as its content, like any grid.
     element.style.cssText = rootElement.style.cssText;
     last.parentNode!.insertBefore(element, last.nextSibling);
@@ -660,6 +743,54 @@ export class Workbook {
     this.#menu?.remove();
     this.#menu = null;
     document.removeEventListener('mousedown', this.#onDocumentMouseDown, true);
+  }
+
+  /** The whole document as JSON-safe data: every sheet's data (with formulas), sizes, merged cells and cell formats. */
+  save(): SavedDocument {
+    return { version: 1, activeSheet: this.activeId, sheets: this.sheets.map(saveSheet) };
+  }
+
+  /**
+   * Replaces the document with a saved one: the first sheet takes the first saved sheet, the other sheets are removed
+   * and the saved ones added, in their order; then the saved active sheet is shown.
+   */
+  load(saved: SavedDocument): void {
+    if (!saved || !Array.isArray(saved.sheets) || saved.sheets.length === 0) {
+      throw new Error('loadDocument needs a document from getDocument (an object with a non-empty `sheets` list).');
+    }
+    const [first, ...others] = saved.sheets;
+    const rootSheet = this.sheetOf(this.root)!;
+
+    this.activate(rootSheet.id);
+    this.sheets.filter(sheet => sheet !== rootSheet).forEach(sheet => this.remove(sheet.id));
+
+    // The first sheet keeps its grid: its id, name and content follow the saved first sheet.
+    rootSheet.id = first.id;
+    this.activeId = first.id;
+
+    if (first.name !== rootSheet.name) {
+      this.rename(first.id, first.name);
+    }
+    // The sizes and merged cells users changed belong to the old content: they go before the saved ones apply.
+    const plugin = (name: string) => this.root.getPlugin(name as 'search') as unknown as AnyObject | undefined;
+    const settings = sheetSettings(first);
+
+    if (plugin('manualColumnResize')?.enabled) {
+      plugin('manualColumnResize')!.manualColumnWidths = [];
+    }
+    if (plugin('manualRowResize')?.enabled) {
+      plugin('manualRowResize')!.manualRowHeights = [];
+    }
+    if (!settings.mergeCells && plugin('mergeCells')?.enabled) {
+      settings.mergeCells = [];
+    }
+    this.root.updateSettings(settings);
+    others.forEach(sheet => this.add(sheet.id, { name: sheet.name, ...sheetSettings(sheet) }));
+
+    if (saved.activeSheet && this.get(saved.activeSheet)) {
+      this.activate(saved.activeSheet);
+    }
+    this.renderTabs();
   }
 
   /** Destroys every other sheet and the tab bar (the first sheet destroys itself). */

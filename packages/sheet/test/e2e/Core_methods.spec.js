@@ -37,17 +37,17 @@ describe('Core methods', () => {
       'getActiveSheet', 'getCell', 'getCellEditor', 'getCellMeta', 'getCellMetaAtRow', 'getCellRenderer',
       'getCellValidator', 'getCellsMeta', 'getColHeader', 'getColWidth', 'getColumnMeta', 'getCoords',
       'getCopyableData', 'getCopyableText', 'getData', 'getDataAtCell', 'getDataAtCol', 'getDataAtProp', 'getDataAtRow',
-      'getDataAtRowProp', 'getDataType', 'getInstance', 'getPlugin', 'getRowHeader', 'getRowHeight', 'getSchema',
-      'getSelected', 'getSelectedLast', 'getSelectedRange', 'getSelectedRangeLast', 'getSettings', 'getSheet',
-      'getSheetId', 'getSheetName', 'getSheets', 'getSourceData', 'getSourceDataArray', 'getSourceDataAtCell',
-      'getSourceDataAtCol', 'getSourceDataAtRow', 'getTranslatedPhrase', 'getValue', 'hasColHeaders', 'hasHook',
-      'hasRowHeaders', 'init', 'isColumnModificationAllowed', 'isEmptyCol', 'isEmptyRow', 'isListening',
-      'isRedoAvailable', 'isUndoAvailable', 'listen', 'loadData', 'moveSheet', 'populateFromArray', 'propToCol', 'redo',
-      'removeCellMeta', 'removeHook', 'removeSheet', 'renameSheet', 'render', 'rowOffset', 'runHooks',
-      'scrollViewportTo', 'selectAll', 'selectCell', 'selectCellByProp', 'selectCells', 'selectColumns', 'selectRows',
-      'setCellMeta', 'setCellMetaObject', 'setDataAtCell', 'setDataAtRowProp', 'spliceCellsMeta', 'spliceCol',
-      'spliceRow', 'toPhysicalColumn', 'toPhysicalRow', 'toVisualColumn', 'toVisualRow', 'undo', 'unlisten',
-      'updateSettings', 'validateCell', 'validateCells', 'validateColumns', 'validateRows'
+      'getDataAtRowProp', 'getDataType', 'getDocument', 'getInstance', 'getPlugin', 'getRowHeader', 'getRowHeight',
+      'getSchema', 'getSelected', 'getSelectedLast', 'getSelectedRange', 'getSelectedRangeLast', 'getSettings',
+      'getSheet', 'getSheetId', 'getSheetName', 'getSheets', 'getSourceData', 'getSourceDataArray',
+      'getSourceDataAtCell', 'getSourceDataAtCol', 'getSourceDataAtRow', 'getTranslatedPhrase', 'getValue',
+      'hasColHeaders', 'hasHook', 'hasRowHeaders', 'init', 'isColumnModificationAllowed', 'isEmptyCol', 'isEmptyRow',
+      'isListening', 'isRedoAvailable', 'isUndoAvailable', 'listen', 'loadData', 'loadDocument', 'moveSheet',
+      'populateFromArray', 'propToCol', 'redo', 'removeCellMeta', 'removeHook', 'removeSheet', 'renameSheet', 'render',
+      'rowOffset', 'runHooks', 'scrollViewportTo', 'selectAll', 'selectCell', 'selectCellByProp', 'selectCells',
+      'selectColumns', 'selectRows', 'setCellMeta', 'setCellMetaObject', 'setDataAtCell', 'setDataAtRowProp',
+      'spliceCellsMeta', 'spliceCol', 'spliceRow', 'toPhysicalColumn', 'toPhysicalRow', 'toVisualColumn', 'toVisualRow',
+      'undo', 'unlisten', 'updateSettings', 'validateCell', 'validateCells', 'validateColumns', 'validateRows'
     ]);
   });
 

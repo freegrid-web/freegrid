@@ -283,4 +283,87 @@ describe('Core sheets', () => {
     expect(document.querySelector('.fs-sheet-tabs')).toBeNull();
     expect(hot.isDestroyed).toBe(true);
   });
+
+  describe('getDocument and loadDocument', () => {
+    it('saves every sheet with its data, sizes, merged cells and cell formats, and the active sheet', () => {
+      const hot = handsontable({
+        data: [['a', null], ['c', 'd']], sheetName: 'Main', manualColumnResize: true, mergeCells: [{ row: 0, col: 0, rowspan: 1, colspan: 2 }],
+        cell: [{ row: 1, col: 1, className: 'fs-right', comment: { value: 'Check' } }],
+      });
+
+      hot.getPlugin('manualColumnResize').setManualSize(1, 120);
+      hot.addSheet('costs', { name: 'Costs', data: [['Rent', 1200]] });
+      hot.activateSheet('costs');
+
+      const saved = hot.getDocument();
+
+      expect(saved.version).toBe(1);
+      expect(saved.activeSheet).toBe('costs');
+      expect(saved.sheets.map(sheet => [sheet.id, sheet.name])).toEqual([['sheet1', 'Main'], ['costs', 'Costs']]);
+      expect(saved.sheets[0].data).toEqual([['a', null], ['c', 'd']]);
+      expect(saved.sheets[0].colWidths).toEqual([null, 120]);
+      expect(saved.sheets[0].mergeCells).toEqual([{ row: 0, col: 0, rowspan: 1, colspan: 2 }]);
+      expect(saved.sheets[0].cell).toEqual([{ row: 1, col: 1, className: 'fs-right', comment: { value: 'Check' } }]);
+      expect(saved.sheets[1].data).toEqual([['Rent', 1200]]);
+      expect(JSON.parse(JSON.stringify(saved))).toEqual(saved); // JSON-safe
+    });
+
+    it('loads a saved document into another grid', function() {
+      const first = handsontable({ data: [['x']], manualColumnResize: true, mergeCells: true });
+
+      first.addSheet('b', { name: 'B', data: [[2]] });
+      first.getPlugin('manualColumnResize').setManualSize(0, 90);
+      first.activateSheet('b');
+      const saved = first.getDocument();
+
+      destroy();
+      $('.fs-sheet-tabs').remove();
+
+      const hot = handsontable({ data: [['old']], manualColumnResize: true, mergeCells: true });
+
+      hot.addSheet('gone');
+      hot.loadDocument(saved);
+
+      expect(hot.getSheets()).toEqual([{ id: 'sheet1', name: 'Sheet1' }, { id: 'b', name: 'B' }]);
+      expect(hot.getDataAtCell(0, 0)).toBe('x');
+      expect(hot.getColWidth(0)).toBe(90);
+      expect(hot.getSheet('b').getDataAtCell(0, 0)).toBe(2);
+      expect(hot.getActiveSheet().getSheetId()).toBe('b');
+      expect(hot.getSheet('gone')).toBeNull();
+      expect(this.$container.find('.fs-sheet-tab').length || document.querySelectorAll('.fs-sheet-tab').length).toBe(2);
+    });
+  });
+
+  describe('the frame', () => {
+    it('keeps the bars and every sheet inside the given element, and the grid fills the height that is left', function() {
+      this.$container.css({ height: '300px', width: '500px' });
+      const hot = handsontable({
+        data: Handsontable.helper.createSpreadsheetData(100, 5), formulaBar: true, sheetTabs: true, colHeaders: true,
+      });
+      const frame = this.$container[0];
+
+      hot.addSheet('two', { data: [[1]] });
+
+      expect(frame.classList.contains('fs-document')).toBe(true);
+      expect(hot.rootElement.parentElement).toBe(frame);
+      expect(frame.querySelector('.fs-formula-bar')).not.toBeNull();
+      expect(frame.querySelector('.fs-sheet-tabs')).not.toBeNull();
+      expect(hot.getSheet('two').rootElement.parentElement).toBe(frame);
+
+      const frameRect = frame.getBoundingClientRect();
+      const tabsRect = frame.querySelector('.fs-sheet-tabs').getBoundingClientRect();
+
+      expect(frameRect.height).toBe(300);
+      expect(tabsRect.bottom).toBeLessThanOrEqual(frameRect.bottom + 0.5);
+      expect(hot.countRenderedRows()).toBeLessThan(100); // the grid scrolls inside the frame
+    });
+
+    it('is not used for a plain grid', function() {
+      const hot = handsontable({ data: [[1]] });
+
+      expect(hot.rootElement).toBe(this.$container[0]);
+      expect(this.$container[0].classList.contains('fs-document')).toBe(false);
+    });
+  });
 });
+

@@ -69,7 +69,7 @@ export const TOPICS = [
     name: 'Sheets',
     description: 'Several sheets in one document, with tabs, as in an Excel file.',
     methods: ['addSheet', 'getSheet', 'getSheets', 'getActiveSheet', 'activateSheet', 'renameSheet', 'removeSheet',
-      'moveSheet', 'getSheetId', 'getSheetName'],
+      'moveSheet', 'getSheetId', 'getSheetName', 'getDocument', 'loadDocument'],
     events: ['beforeSheetAdd', 'afterSheetAdd', 'beforeSheetActivate', 'afterSheetActivate', 'beforeSheetRename',
       'afterSheetRename', 'beforeSheetRemove', 'afterSheetRemove', 'afterSheetMove'],
     settings: ['sheetId', 'sheetName', 'sheets', 'sheetTabs', 'sheetTabsPosition'],

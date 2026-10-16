@@ -62,6 +62,28 @@ events, which can cancel), and destroying it destroys every sheet.
 
 A sheet name has 1 to 31 characters, without `[ ] : * ? / \`, and is unique in the document (as in Excel).
 
+## Saving and loading
+
+`getDocument()` returns the whole document as JSON-safe data: every sheet in tab order with its id, name and data
+(formulas stay formulas), the column widths and row heights users changed, merged cells, cell formats (comments,
+`className`, `readOnly`, `type`, number and date formats) and the active sheet. `loadDocument(document)` puts it
+back: the sheets, their order and content, and the active sheet.
+
+```js
+localStorage.setItem('book', JSON.stringify(hot.getDocument())); // or send it to your server
+
+hot.loadDocument(JSON.parse(localStorage.getItem('book')));
+```
+
+## Fitting in your element
+
+With `formulaBar`, `sheets` or `sheetTabs` set when the grid is created, the element you give FreeSheet holds
+everything: the formula bar, every sheet and the tab bar. When the element has a height, the bars take what they
+need and the sheet fills the rest and scrolls inside; without a height, everything is as tall as its content. Make
+the element as big as you want the whole component to be. (`rootElement` is then the sheet's own element inside it.)
+Turned on later (`updateSettings`, or `addSheet` on a grid created without these settings), the bars and the sheets
+go next to the element instead.
+
 ## Formulas across sheets
 
 With [formulas](./formulas), all sheets share one formula engine, so a formula can refer to another sheet by its

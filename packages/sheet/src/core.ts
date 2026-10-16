@@ -243,6 +243,8 @@ class Core {
   #recordTranslator!: RecordTranslator;
   #eventManager!: EventManager;
   #preventScrollingToCell = false;
+  /** The element given to the constructor when it is the frame of the bars and sheets (see the constructor). */
+  #frame: HTMLElement | null = null;
 
   constructor(rootElement: HTMLElement, userSettings: AnyObject,
     rootInstanceSymbol: symbol | boolean = false) {
@@ -273,6 +275,21 @@ class Core {
     keyStateStartObserving();
 
     this.isDestroyed = false;
+
+    // With a formula bar or sheets, the given element is the frame: the bars and every sheet go inside it, and the
+    // grid takes the height that is left (when the element has a height; otherwise all are as tall as their content).
+    // A sheet that addSheet creates is already inside a frame.
+    if ((userSettings.formulaBar || userSettings.sheetTabs ||
+      (Array.isArray(userSettings.sheets) && userSettings.sheets.length)) &&
+      !rootElement.classList.contains('fs-document__sheet')) {
+      const gridElement = document.createElement('div');
+
+      gridElement.className = `fs-document__sheet${rootElement.clientHeight > 0 ? ' fs-document__sheet--fill' : ''}`;
+      rootElement.classList.add('fs-document');
+      rootElement.appendChild(gridElement);
+      this.#frame = rootElement;
+      rootElement = gridElement;
+    }
     this.rootElement = rootElement;
     this.isHotTableEnv = isChildOfWebComponentTable(this.rootElement);
     EventManager.isHotTableEnv = this.isHotTableEnv;
@@ -2738,6 +2755,41 @@ class Core {
   }
 
   /**
+   * Returns the whole document as JSON-safe data, to save it and load it later with `loadDocument`: every sheet (in
+   * tab order) with its id, name, data (formulas as formulas), the column widths and row heights users changed, the
+   * merged cells and the cell formats (comments, `className`, `readOnly`, `type`, number and date formats, …), and the
+   * active sheet.
+   *
+   * @memberof Core#
+   * @function getDocument
+   * @returns {Object} `{ version: 1, activeSheet, sheets: [{ id, name, data, colWidths?, rowHeights?, mergeCells?,
+   * cell? }] }`
+   * @example
+   * ```js
+   * localStorage.setItem('book', JSON.stringify(hot.getDocument()));
+   * ```
+   */
+  getDocument() {
+    return this.#workbook().save();
+  }
+
+  /**
+   * Replaces the document with one saved by `getDocument`: the sheets, their content and order, and the active
+   * sheet. The grid that holds the document takes the first saved sheet; the other sheets are created again.
+   *
+   * @memberof Core#
+   * @function loadDocument
+   * @param {Object} document A document from `getDocument`.
+   * @example
+   * ```js
+   * hot.loadDocument(JSON.parse(localStorage.getItem('book')));
+   * ```
+   */
+  loadDocument(document: AnyObject) {
+    this.#workbook().load(document as never);
+  }
+
+  /**
    * Returns this grid's sheet id (`sheet1` for a grid created with `new FreeSheet`, unless `sheetId` is set).
    *
    * @memberof Core#
@@ -3806,6 +3858,13 @@ class Core {
     keyStateStopObserving();
 
     empty(this.rootElement);
+
+    // The frame becomes the element it was: the grid's element inside it goes.
+    if (this.#frame) {
+      this.rootElement.remove();
+      this.#frame.classList.remove('fs-document');
+      this.#frame = null;
+    }
     this.#eventManager.destroy();
 
     if (this.#editorManager) {

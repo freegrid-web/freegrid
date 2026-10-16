@@ -11,7 +11,11 @@
   name the first one, `sheetTabs` controls the tab bar. The tab bar below the sheets switches sheets, adds one (+),
   renames one (double click), deletes or moves one (right click, or drag). New events `before/afterSheetAdd`,
   `…Activate`, `…Rename`, `…Remove` and `afterSheetMove`. With formulas, sheets share one engine: `=Costs!B2`
-  works, renaming a sheet updates the formulas, removing it shows `#REF!`. New guide page and two examples.
+  works, renaming a sheet updates the formulas, removing it shows `#REF!`. `sheetTabsPosition: 'top'` puts the
+  tabs above the sheets. `getDocument()` returns every sheet (data with formulas, changed sizes, merged cells, cell
+  formats) as JSON-safe data, and `loadDocument()` loads it back. With `formulaBar`, `sheets` or `sheetTabs` set at
+  creation, the given element holds the formula bar, the sheets and the tabs, and the sheet fills the height left.
+  New guide page and two examples.
 
 ## 0.5.0 (2026-10-16)
 
