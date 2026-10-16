@@ -8,14 +8,18 @@
   Hide columns, Show columns) or with `getPlugin('hiddenRows').hideRows(rows)`, `showRows`, `showAllRows`,
   `isHidden`, `getHiddenRows` (and the same for columns). A hidden row leaves the visual order: `countRows()`,
   selection, the arrow keys and copying skip it. Headers keep the numbers and letters of the visible rows and
-  columns (1, 2, 5; A, B, E) and mark hidden ones with a double line; a double click on it shows them. Hidden rows
-  stay hidden when rows are sorted or moved, move with their data when rows are inserted or removed, can be undone,
-  and are saved by `getDocument()`. New events `before/afterHideRows`, `before/afterUnhideRows`,
-  `before/afterHideColumns`, `before/afterUnhideColumns`. New guide page and example.
+  columns (1, 2, 5; A, B, E) and mark hidden ones with a double line and small arrows; a click on an arrow (a button
+  with a tooltip that lists them, "Show rows: 2–3") shows them. Hidden rows stay hidden when rows are sorted or
+  moved, move with their data when rows are inserted or removed, can be undone, and are saved by `getDocument()`.
+  New events `before/afterHideRows`, `before/afterUnhideRows`, `before/afterHideColumns`,
+  `before/afterUnhideColumns`. New guide page and example.
 
 ### Fixed
 
 - `getCellsMeta()` no longer returns empty entries for rows whose cells were never read.
+- With `stretchH`, the columns no longer lose a scrollbar's width (and the column headers no longer drift away from
+  the cells) when the selected cell is in the last row of a grid without a height: the fill handle sticks out a few
+  pixels but shows no scrollbar.
 
 ## 0.6.0 (2026-10-16)
 

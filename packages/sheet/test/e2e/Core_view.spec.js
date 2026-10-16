@@ -649,6 +649,23 @@ describe('Core_view', () => {
   });
 
   describe('stretchH', () => {
+    it('keeps the full width when the selected cell in the last row sticks out (fill handle), with no scrollbar', () => {
+      spec().$container[0].style.width = '400px';
+
+      const hot = handsontable({ data: Handsontable.helper.createSpreadsheetData(3, 4), rowHeaders: true,
+        colHeaders: true, stretchH: 'all' });
+      const width = () => Array.from({ length: 4 }, (_, column) => getCell(0, column).offsetWidth)
+        .reduce((sum, columnWidth) => sum + columnWidth, 0);
+      const fullWidth = width();
+
+      selectCell(2, 1);
+      hot.render();
+
+      expect(width()).toBe(fullWidth);
+      expect(hot.view.wt.wtTable.getColumnHeader(3).getBoundingClientRect().left)
+        .toBe(getCell(0, 3).getBoundingClientRect().left);
+    });
+
     it('should stretch all visible columns with the ratio appropriate to the container\'s width', () => {
       spec().$container[0].style.width = '300px';
 

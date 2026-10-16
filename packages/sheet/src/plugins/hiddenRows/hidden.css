@@ -1,4 +1,8 @@
-/* Where rows or columns are hidden: a double line on the header's edge. */
+/*
+ * Where rows or columns are hidden: a double line centred on the border between the two headers (the border itself
+ * becomes the space between the lines), and an arrow on both sides that shows them (a click). The arrows point away
+ * from the gap and turn into buttons on hover.
+ */
 .freesheet th.fs-hidden-before,
 .freesheet th.fs-hidden-after {
   position: relative;
@@ -10,41 +14,124 @@
   position: absolute;
   box-sizing: border-box;
   pointer-events: none;
+  /* A line on the outer side, the gap's color towards the border. */
+  background: var(--fs-hidden-indicator-gap);
   border: 0 solid var(--fs-hidden-indicator-color);
 }
 
-/* Row headers: a line at the top or bottom. */
-.freesheet tbody th.fs-hidden-before::before,
-.freesheet tbody th.fs-hidden-after::after {
-  left: 0;
-  right: 0;
-  height: 4px;
-  border-top-width: 1px;
-  border-bottom-width: 1px;
+/* Columns: the border between them takes the gap's color, a line on each side of it. */
+.freesheet thead th.fs-hidden-after {
+  border-right-color: var(--fs-hidden-indicator-gap);
 }
 
-.freesheet tbody th.fs-hidden-before::before {
-  top: 0;
-}
-
-.freesheet tbody th.fs-hidden-after::after {
-  bottom: 0;
-}
-
-/* Column headers: a line at the left or right. */
 .freesheet thead th.fs-hidden-before::before,
 .freesheet thead th.fs-hidden-after::after {
   top: 0;
   bottom: 0;
-  width: 4px;
-  border-left-width: 1px;
-  border-right-width: 1px;
+  width: 2px;
 }
 
 .freesheet thead th.fs-hidden-before::before {
   left: 0;
+  border-right-width: 1px;
 }
 
 .freesheet thead th.fs-hidden-after::after {
   right: 0;
+  border-left-width: 1px;
+}
+
+/* Rows: the same, across. */
+.freesheet tbody th.fs-hidden-after {
+  border-bottom-color: var(--fs-hidden-indicator-gap);
+}
+
+.freesheet tbody th.fs-hidden-before::before,
+.freesheet tbody th.fs-hidden-after::after {
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.freesheet tbody th.fs-hidden-before::before {
+  top: 0;
+  border-bottom-width: 1px;
+}
+
+.freesheet tbody th.fs-hidden-after::after {
+  bottom: 0;
+  border-top-width: 1px;
+}
+
+/* The arrow. */
+.freesheet th .fs-hidden-toggle {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: var(--fs-hidden-toggle-text);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.freesheet th .fs-hidden-toggle::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border: solid currentcolor;
+  border-width: 0 0 1.5px 1.5px;
+}
+
+.freesheet th .fs-hidden-toggle:hover {
+  color: var(--fs-hidden-toggle-hover-text);
+  background: var(--fs-hidden-toggle-hover-background);
+}
+
+/* Column headers: ‹ at the right edge of the column before the gap, › at the left edge of the one after it. */
+.freesheet thead th .fs-hidden-toggle {
+  top: 50%;
+  width: 12px;
+  height: 16px;
+  margin-top: -8px;
+}
+
+.freesheet thead th .fs-hidden-toggle--before {
+  left: 4px;
+}
+
+.freesheet thead th .fs-hidden-toggle--before::before {
+  transform: translateX(-1px) rotate(-135deg);
+}
+
+.freesheet thead th .fs-hidden-toggle--after {
+  right: 4px;
+}
+
+.freesheet thead th .fs-hidden-toggle--after::before {
+  transform: translateX(1px) rotate(45deg);
+}
+
+/* Row headers: ˄ at the bottom of the row before the gap, ˅ at the top of the row after it. */
+.freesheet tbody th .fs-hidden-toggle {
+  right: 2px;
+  width: 16px;
+  height: 10px;
+}
+
+.freesheet tbody th .fs-hidden-toggle--before {
+  top: 3px;
+}
+
+.freesheet tbody th .fs-hidden-toggle--before::before {
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.freesheet tbody th .fs-hidden-toggle--after {
+  bottom: 3px;
+}
+
+.freesheet tbody th .fs-hidden-toggle--after::before {
+  transform: translateY(1px) rotate(135deg);
 }

@@ -154,15 +154,42 @@ describe('HiddenRows', () => {
     expect(countRows()).toBe(6);
   });
 
-  it('shows the hidden rows after a double click on the edge of a marked header', () => {
+  it('shows arrows with a tooltip next to hidden rows; a click on one shows them, without selecting the row', () => {
     handsontable({ data: data(), rowHeaders: true, hiddenRows: { rows: [1, 2] } });
 
-    const TH = rowHeaderTH(1);
-    const rect = TH.getBoundingClientRect();
+    const toggle = rowHeaderTH(1).querySelector('.fs-hidden-toggle--before');
 
-    $(TH).simulate('dblclick', { clientX: rect.left + 5, clientY: rect.top + 1 });
+    expect(rowHeaderTH(0).querySelector('.fs-hidden-toggle--after')).not.toBeNull();
+    expect(rowHeaderTH(2).querySelector('.fs-hidden-toggle')).toBeNull();
+    expect(toggle.title).toBe('Show rows: 2–3');
+
+    $(toggle).simulate('mousedown');
 
     expect(countRows()).toBe(6);
+    expect(getSelected()).toBeUndefined();
+    expect(spec().$container[0].querySelector('.fs-hidden-toggle')).toBeNull();
+  });
+
+  it('selects the row after a click on its header away from the arrow', () => {
+    handsontable({ data: data(), rowHeaders: true, hiddenRows: { rows: [1, 2] } });
+
+    $(rowHeaderTH(1)).simulate('mousedown');
+    $(rowHeaderTH(1)).simulate('mouseup');
+
+    expect(countRows()).toBe(4);
+    expect(getSelectedLast()[0]).toBe(1);
+  });
+
+  it('shows the hidden columns after a click on the arrow in a column header', () => {
+    const hot = handsontable({ data: data(), colHeaders: true, hiddenColumns: { columns: [1] } });
+
+    const toggle = hot.view.wt.wtTable.getColumnHeader(0).querySelector('.fs-hidden-toggle--after');
+
+    expect(toggle.title).toBe('Show column: B');
+
+    $(toggle).simulate('mousedown');
+
+    expect(countCols()).toBe(2);
   });
 
   it('undoes and redoes hiding', () => {

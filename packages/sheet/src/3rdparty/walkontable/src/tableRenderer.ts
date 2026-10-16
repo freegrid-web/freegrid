@@ -6,7 +6,6 @@ import type Walkontable from './core';
 import {
   addClass,
   empty,
-  getScrollbarWidth,
   hasClass,
   innerHeight,
   outerWidth
@@ -423,8 +422,10 @@ class TableRenderer {
     const defaultColumnWidth = this.#wot.getSetting('defaultColumnWidth');
     let rowHeaderWidthSetting = this.#wot.getSetting('rowHeaderWidth');
 
+    // The width of a vertical scrollbar the holder shows. Content that only sticks out a few pixels (the fill handle
+    // of a cell in the last row) shows none, and stretched columns keep the full width.
     if (mainHolder.offsetHeight < mainHolder.scrollHeight) {
-      scrollbarCompensation = getScrollbarWidth();
+      scrollbarCompensation = Math.max(0, mainHolder.offsetWidth - mainHolder.clientWidth);
     }
     this.#wot.wtViewport.columnsRenderCalculator.refreshStretching(this.#wot.wtViewport.getViewportWidth() - scrollbarCompensation);
 
