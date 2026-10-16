@@ -16,6 +16,7 @@ export default async function createGrid(container) {
     rowHeaders: true,
     colHeaders: true,
     contextMenu: true,
+    stretchH: 'all', // the grid fills the width, so do the formula bar and the tabs
     formulas: { engine: Model },
     formulaBar: true,
     sheets: [

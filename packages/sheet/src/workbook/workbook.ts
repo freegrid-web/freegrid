@@ -337,7 +337,10 @@ export class Workbook {
     return setting === false ? false : (setting === true || this.sheets.length > 1);
   }
 
-  /** The tab bar below the sheets: a tab per sheet, a + button, a menu on right click, drag to reorder. */
+  /**
+   * The tab bar below the sheets: ☰ (every sheet in a menu), the tabs (scrolled sideways, with the wheel too, faded at
+   * a hidden edge; a right click opens a menu; drag to reorder) and + (a new sheet).
+   */
   renderTabs(): void {
     if (!this.showsTabs()) {
       this.#tabs?.remove();
@@ -347,8 +350,6 @@ export class Workbook {
     }
     if (!this.#tabs) {
       this.#tabs = document.createElement('div');
-      this.#tabs.className = 'fs-sheet-tabs';
-      this.#tabs.setAttribute('role', 'tablist');
       this.#tabs.addEventListener('mousedown', event => event.stopPropagation());
     }
     const lastElement = this.sheets[this.sheets.length - 1].instance.rootElement;
@@ -357,19 +358,27 @@ export class Workbook {
       lastElement.parentNode!.insertBefore(this.#tabs, lastElement.nextSibling);
     }
     const themeClasses = Array.from(this.root.rootElement.classList).filter(name => /^fs-(theme|style)-/.test(name));
+    const scrollLeft = this.#tabs.querySelector('.fs-sheet-tabs__list')?.scrollLeft || 0;
 
     this.#tabs.className = ['fs-sheet-tabs', ...themeClasses].join(' ');
     this.#tabs.textContent = '';
 
-    const add = document.createElement('button');
+    const button = (className: string, label: string, text: string, onClick: (event: MouseEvent) => void) => {
+      const element = document.createElement('button');
 
-    add.type = 'button';
-    add.className = 'fs-sheet-tabs__add';
-    add.title = 'Add sheet';
-    add.setAttribute('aria-label', 'Add sheet');
-    add.textContent = '+';
-    add.addEventListener('click', () => this.activate(this.add(void 0).getSheetId()));
-    this.#tabs.appendChild(add);
+      element.type = 'button';
+      element.className = className;
+      element.title = label;
+      element.setAttribute('aria-label', label);
+      element.textContent = text;
+      element.addEventListener('click', onClick);
+
+      return element;
+    };
+    const list = document.createElement('div');
+
+    list.className = 'fs-sheet-tabs__list';
+    list.setAttribute('role', 'tablist');
 
     this.sheets.forEach((sheet, index) => {
       const tab = document.createElement('button');
@@ -385,7 +394,7 @@ export class Workbook {
       tab.addEventListener('dblclick', () => this.startRename(tab, sheet));
       tab.addEventListener('contextmenu', (event) => {
         event.preventDefault();
-        this.openMenu(sheet, event.clientX, event.clientY);
+        this.openSheetMenu(sheet, event.clientX, event.clientY);
       });
       tab.addEventListener('dragstart', event => event.dataTransfer?.setData('text/plain', sheet.id));
       tab.addEventListener('dragover', event => event.preventDefault());
@@ -397,12 +406,44 @@ export class Workbook {
           this.move(draggedId, index);
         }
       });
-      this.#tabs!.appendChild(tab);
+      list.appendChild(tab);
     });
+    // The wheel scrolls the tabs sideways; the fades show where tabs are hidden.
+    list.addEventListener('wheel', (event) => {
+      if (list.scrollWidth > list.clientWidth && Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        event.preventDefault();
+        list.scrollLeft += event.deltaY;
+      }
+    }, { passive: false });
+    list.addEventListener('scroll', () => this.updateFades(list));
+
+    this.#tabs.appendChild(button('fs-sheet-tabs__menu', 'All sheets', '☰', (event) => {
+      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+      this.openMenu(this.sheets.map(sheet => ({
+        label: sheet.name,
+        active: sheet.id === this.activeId,
+        action: () => this.activate(sheet.id),
+      })), rect.left, rect.top, true);
+    }));
+    this.#tabs.appendChild(list);
+    this.#tabs.appendChild(button('fs-sheet-tabs__add', 'Add sheet', '+', () => this.activate(this.add(void 0).getSheetId())));
+
+    list.scrollLeft = scrollLeft;
     this.matchGridWidth();
+    list.querySelector<HTMLElement>('.fs-sheet-tab--active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    this.updateFades(list);
   }
 
-  /** The tab bar is at least as wide as the active sheet's drawn grid (its table and vertical scrollbar). */
+  /** Fades the edges of the tab list where tabs are scrolled out of sight. */
+  updateFades(list: HTMLElement): void {
+    const end = list.scrollWidth - list.clientWidth - list.scrollLeft;
+
+    list.classList.toggle('fs-sheet-tabs__list--fade-start', list.scrollLeft > 1);
+    list.classList.toggle('fs-sheet-tabs__list--fade-end', end > 1);
+  }
+
+  /** The tab bar is as wide as the active sheet's drawn grid (its table and vertical scrollbar); the tabs scroll. */
   matchGridWidth(): void {
     const sheet = this.get(this.activeId);
     const wtTable = sheet?.instance.view?.wt?.wtTable;
@@ -414,8 +455,12 @@ export class Workbook {
     const width = Math.min(sheet.instance.rootElement.offsetWidth,
       (wtTable.TABLE as HTMLElement).offsetWidth + holder.offsetWidth - holder.clientWidth);
 
-    // At least as wide as the grid; wider when the tabs need it (up to the container, then it scrolls).
-    this.#tabs.style.minWidth = width > 0 ? `${width}px` : '';
+    this.#tabs.style.width = width > 0 ? `${width}px` : '';
+    const list = this.#tabs.querySelector<HTMLElement>('.fs-sheet-tabs__list');
+
+    if (list) {
+      this.updateFades(list);
+    }
   }
 
   /**
@@ -480,35 +525,41 @@ export class Workbook {
     input.addEventListener('click', event => event.stopPropagation());
   }
 
-  openMenu(sheet: Sheet, x: number, y: number): void {
-    this.closeMenu();
+  /** The right-click menu of a tab. */
+  openSheetMenu(sheet: Sheet, x: number, y: number): void {
     const index = this.sheets.indexOf(sheet);
-    const items: [string, boolean, () => void][] = [
-      ['Rename', true, () => {
+
+    this.openMenu([
+      { label: 'Rename', action: () => {
         const tab = this.#tabs?.querySelector<HTMLElement>(`[data-sheet-id="${CSS.escape(sheet.id)}"]`);
 
         if (tab) {
           this.startRename(tab, sheet);
         }
-      }],
-      ['Delete', sheet.instance !== this.root, () => this.remove(sheet.id)],
-      ['Move left', index > 0, () => this.move(sheet.id, index - 1)],
-      ['Move right', index < this.sheets.length - 1, () => this.move(sheet.id, index + 1)],
-    ];
+      } },
+      { label: 'Delete', disabled: sheet.instance === this.root, action: () => this.remove(sheet.id) },
+      { label: 'Move left', disabled: index === 0, action: () => this.move(sheet.id, index - 1) },
+      { label: 'Move right', disabled: index === this.sheets.length - 1, action: () => this.move(sheet.id, index + 1) },
+    ], x, y);
+  }
+
+  /** A small menu at a point (above it when `above`). */
+  openMenu(items: { label: string; action: () => void; disabled?: boolean; active?: boolean }[], x: number, y: number,
+    above = false): void {
+    this.closeMenu();
     const menu = document.createElement('div');
 
-    menu.className = 'fs-sheet-menu';
+    menu.className = ['fs-sheet-menu',
+      ...Array.from(this.root.rootElement.classList).filter(name => /^fs-(theme|style)-/.test(name))].join(' ');
     menu.setAttribute('role', 'menu');
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    items.forEach(([label, enabled, action]) => {
+    items.forEach(({ label, action, disabled, active }) => {
       const item = document.createElement('button');
 
       item.type = 'button';
-      item.className = 'fs-sheet-menu__item';
+      item.className = `fs-sheet-menu__item${active ? ' fs-sheet-menu__item--active' : ''}`;
       item.setAttribute('role', 'menuitem');
       item.textContent = label;
-      item.disabled = !enabled;
+      item.disabled = !!disabled;
       item.addEventListener('click', () => {
         this.closeMenu();
         action();
@@ -516,6 +567,8 @@ export class Workbook {
       menu.appendChild(item);
     });
     document.body.appendChild(menu);
+    menu.style.left = `${x}px`;
+    menu.style.top = `${above ? Math.max(0, y - menu.offsetHeight) : y}px`;
     this.#menu = menu;
     document.addEventListener('mousedown', this.#onDocumentMouseDown, true);
   }

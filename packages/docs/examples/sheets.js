@@ -13,6 +13,7 @@ export default function createGrid(container) {
     rowHeaders: true,
     colHeaders: true,
     contextMenu: true,
+    stretchH: 'all', // the grid fills the width, so do the formula bar and the tabs
     // More sheets, created with the grid; + adds one, a double click renames, a right click opens the menu.
     sheets: [
       { id: 'offices', name: 'Offices', data: [['Office', 'Opened'], ['Vilnius', 2019], ['Kaunas', 2023]] },

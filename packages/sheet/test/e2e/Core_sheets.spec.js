@@ -87,6 +87,42 @@ describe('Core sheets', () => {
     expect(hot.getActiveSheet().getSheetName()).toBe('Sheet2');
   });
 
+  it('lists every sheet in the ☰ menu, and activates the one clicked', () => {
+    const hot = handsontable({ data: [[1]] });
+
+    hot.addSheet('b', { name: 'B' });
+    hot.addSheet('c', { name: 'C' });
+    document.querySelector('.fs-sheet-tabs__menu').click();
+
+    const items = Array.from(document.querySelectorAll('.fs-sheet-menu .fs-sheet-menu__item'));
+
+    expect(items.map(item => item.textContent)).toEqual(['Sheet1', 'B', 'C']);
+    expect(items[0].classList.contains('fs-sheet-menu__item--active')).toBe(true);
+
+    items[2].click();
+
+    expect(hot.getActiveSheet().getSheetId()).toBe('c');
+    expect(document.querySelector('.fs-sheet-menu')).toBeNull();
+  });
+
+  it('scrolls many tabs sideways, fading the edge where tabs are hidden', () => {
+    const hot = handsontable({ data: [[1]] });
+
+    for (let i = 0; i < 30; i += 1) {
+      hot.addSheet();
+    }
+    const list = document.querySelector('.fs-sheet-tabs__list');
+
+    expect(list.scrollWidth).toBeGreaterThan(list.clientWidth);
+    expect(list.classList.contains('fs-sheet-tabs__list--fade-end')).toBe(true);
+    expect(list.classList.contains('fs-sheet-tabs__list--fade-start')).toBe(false);
+
+    hot.activateSheet('sheet31');
+
+    expect(list.isConnected ? list.scrollLeft : document.querySelector('.fs-sheet-tabs__list').scrollLeft)
+      .toBeGreaterThan(0);
+  });
+
   it('renames a sheet, and rejects invalid or duplicate names', () => {
     const hot = handsontable({ data: [[1]] });
 
