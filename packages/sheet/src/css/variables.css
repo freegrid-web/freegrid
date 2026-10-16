@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu, .fs-dropdown-menu) {
+  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
@@ -121,6 +121,8 @@
   --fs-header-background: var(--fs-color-header-background, var(--fs-style-color-header-background)); /* Header background. */
   --fs-header-text: var(--fs-color-header-text, var(--fs-style-color-header-text)); /* Header text. */
   --fs-hidden-indicator-color: var(--fs-cell-border-color); /* The double line where rows or columns are hidden. */
+  --fs-side-panel-width: 300px; /* The side panel (comments, conditional formatting). */
+  --fs-side-panel-background: var(--fs-header-background, var(--fs-color-background)); /* Its background. */
   --fs-cf-icon-good: #2e9e50; /* Conditional formatting icons: the high third. */
   --fs-cf-icon-neutral: #e0a800; /* The middle third. */
   --fs-cf-icon-bad: #d9363e; /* The low third. */

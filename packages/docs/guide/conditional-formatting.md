@@ -68,6 +68,12 @@ when its F is negative. A formula rule needs `formulas`; without an engine it do
 Rules are in priority order: where two rules set the same style, the first wins; others still add their styles.
 `stopIfTrue: true` stops the rules after it for the cells it formats.
 
+## In the grid
+
+With `contextMenu: true`, the context menu has **Conditional formatting ▸** with Excel's menu (Highlight Cell
+Rules, Top/Bottom Rules, Data Bars, Color Scales, Icon Sets, New Rule, Clear Rules, Manage Rules); rules are written
+in the [side panel](./side-panel). `conditionalFormatting: true` turns the plugin on without rules.
+
 ## The API
 
 ```js

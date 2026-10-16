@@ -415,6 +415,25 @@ DefaultSettings.prototype = {
   conditionalFormatting: void 0,
 
   /**
+   * The side panel at the right of the document (comments, conditional formatting rules). `true` (or a panel's name,
+   * which also opens it: `'comments'`, `'conditionalFormatting'`) makes the given element the document's frame, so
+   * the sheets make room for the panel when it opens; without it a panel opens over the grid. Panels open from the
+   * context menu, or with `openPanel(name)`.
+   *
+   * @type {Boolean|String}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * sidePanel: true,
+   *
+   * // or: open the comments at start
+   * sidePanel: 'comments',
+   * ```
+   */
+  sidePanel: void 0,
+
+  /**
    * @description
    * Defines the cell properties for given `row`, `col`, `prop` coordinates. Any constructor or column option may be
    * overwritten for a particular cell (row/column combination) using the `cells` property in the FreeSheet constructor.

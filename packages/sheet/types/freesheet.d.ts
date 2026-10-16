@@ -32,6 +32,9 @@ declare namespace _FreeSheet {
     getSheets(): Array<{ id: string; name: string }>;
     getActiveSheet(): Core;
     activateSheet(id: string): void;
+    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | string, options?: object): void;
+    closePanel(): void;
+    getOpenPanel(): string | null;
     renameSheet(id: string, name: string): void;
     removeSheet(id: string): void;
     moveSheet(id: string, index: number): void;
@@ -1445,6 +1448,7 @@ declare namespace FreeSheet {
     colHeaders?: ((index?: number) => void) | boolean | any[];
     collapsibleColumns?: boolean | { row: number; col: number; show?: 'first' | 'last' | number }[];
     conditionalFormatting?: boolean | FreeSheet.plugins.ConditionalFormattingRule[];
+    sidePanel?: boolean | 'comments' | 'conditionalFormatting';
     /** A column's conditional formatting rules (without `range`). */
     format?: FreeSheet.plugins.ConditionalFormattingRule[];
     columnHeaderHeight?: number | any[];
@@ -1564,6 +1568,8 @@ declare namespace FreeSheet {
   interface Hooks {
     afterAddChild?: (parent: object, element: object) => void;
     afterConditionalFormattingChange?: (rules: FreeSheet.plugins.ConditionalFormattingRule[]) => void;
+    afterPanelOpen?: (name: string) => void;
+    afterPanelClose?: (name: string) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;

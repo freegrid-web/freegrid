@@ -21,6 +21,7 @@ import DisplaySwitch from './displaySwitch';
 import * as C from './../../i18n/constants';
 
 import './comments.css';
+import './commentsPanel';
 
 /** A cell's comment (its `comment` cell meta). */
 type CommentMeta = { value?: string; readOnly?: boolean; style?: { width?: number; height?: number } };
@@ -692,6 +693,11 @@ class Comments extends BasePlugin {
         },
         callback: () => this.onContextMenuMakeReadOnly(),
         disabled: () => this.hot.selection.isSelectedByCorner() || !this.checkSelectionCommentsConsistency()
+      },
+      {
+        key: 'commentsPanel',
+        name: () => this.hot.getTranslatedPhrase(C.COMMENTS_PANEL_SHOW, 0),
+        callback: () => this.hot.openPanel('comments'),
       }
     );
   }

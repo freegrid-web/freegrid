@@ -928,7 +928,7 @@ describe('ContextMenu', () => {
       const actions = items.not('.htSeparator');
       const separators = items.filter('.htSeparator');
 
-      expect(actions.length).toEqual(15);
+      expect(actions.length).toEqual(16);
       expect(separators.length).toEqual(7);
 
       expect(actions.text()).toEqual([
@@ -945,6 +945,7 @@ describe('ContextMenu', () => {
         'Add comment',
         'Delete comment',
         'Read-only comment',
+        'Show all comments',
         'Copy',
         'Cut',
       ].join(''));
