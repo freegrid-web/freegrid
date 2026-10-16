@@ -696,25 +696,11 @@ declare namespace FreeSheet {
     }
 
     interface CollapsibleColumns extends Base {
-      buttonEnabledList: object;
-      collapsedSections: object;
-      columnHeaderLevelCount: number;
-      eventManager: EventManager;
-      hiddenColumnsPlugin: object;
-      nestedHeadersPlugin: object;
-      settings: boolean | any[];
-
-      checkDependencies(): void;
+      collapse(level: number, column: number): void;
+      expand(level: number, column: number): void;
+      isCollapsed(level: number, column: number): boolean;
       collapseAll(): void;
-      collapseSection(coords: object): void;
       expandAll(): void;
-      expandSection(coords: object): void;
-      generateIndicator(col: number, TH: HTMLElement): HTMLElement;
-      markSectionAs(state: string, row: number, column: number, recursive: boolean): void;
-      meetsDependencies(): boolean;
-      parseSettings(): void;
-      toggleAllCollapsibleSections(action: string): void;
-      toggleCollapsibleSection(coords: object, action: string): void;
     }
 
     interface ColumnSorting extends Base {
@@ -1295,22 +1281,8 @@ declare namespace FreeSheet {
     }
 
     interface NestedHeaders extends Base {
-      colspanArray: any[];
-      columnHeaderLevelCount: number;
-      ghostTable: GhostTableNestedHeaders;
-      settings: any[];
-
-      checkForFixedColumnsCollision(): void;
-      checkForOverlappingHeaders(): void;
-      getChildHeaders(row: number, column: number): any[];
-      fillColspanArrayWithDummies(colspan: number, level: number): void;
-      fillTheRemainingColspans(): void;
-      getColspan(row: number, column: number): number;
-      getNestedParent(level: number, column: number): any;
-      headerRendererFactory(headerRow: number): () => void;
-      levelToRowCoords(level: number): number;
-      rowCoordsToLevel(row: number): number;
-      setupColspanArray(): void;
+      countLevels(): number;
+      getGroup(level: number, column: number): { label: string; columns: number[] } | null;
     }
 
     interface DataManager {
@@ -1447,7 +1419,7 @@ declare namespace FreeSheet {
     checkedTemplate?: boolean | string;
     className?: string | any[];
     colHeaders?: ((index?: number) => void) | boolean | any[];
-    collapsibleColumns?: boolean | any[]; // pro
+    collapsibleColumns?: boolean | { row: number; col: number; show?: 'first' | 'last' | number }[];
     columnHeaderHeight?: number | any[];
     columns?: ((index?: number) => void) | any[];
     columnSorting?: boolean | columnSorting.Settings;
@@ -1512,7 +1484,7 @@ declare namespace FreeSheet {
     minSpareRows?: number;
     multiColumnSorting?: boolean | multiColumnSorting.Settings;
     selectionMode?: 'single' | 'range' | 'multiple';
-    nestedHeaders?: any[]; // pro
+    nestedHeaders?: (string | { label: string; colspan?: number })[][];
     noWordWrapClassName?: string;
     observeChanges?: boolean;
     observeDOMVisibility?: boolean;
@@ -1559,6 +1531,10 @@ declare namespace FreeSheet {
   interface Hooks {
     afterAddChild?: (parent: object, element: object) => void;
     afterRowCollapse?: (row: number) => void;
+    afterColumnCollapse?: (level: number, column: number) => void;
+    afterColumnExpand?: (level: number, column: number) => void;
+    beforeColumnCollapse?: (level: number, column: number) => void | boolean;
+    beforeColumnExpand?: (level: number, column: number) => void | boolean;
     afterRowExpand?: (row: number) => void;
     beforeRowCollapse?: (row: number) => void | boolean;
     beforeRowExpand?: (row: number) => void | boolean;

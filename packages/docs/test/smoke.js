@@ -28,6 +28,8 @@ const PAGES = [
   { path: 'guide/filters.html', grids: 0 },
   { path: 'examples/nested-rows.html', grids: 1 },
   { path: 'guide/nested-rows.html', grids: 0 },
+  { path: 'examples/column-groups.html', grids: 1 },
+  { path: 'guide/column-groups.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },

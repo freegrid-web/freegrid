@@ -2342,33 +2342,21 @@ DefaultSettings.prototype = {
   bindRowsWithHeaders: void 0,
 
   /**
-   * @description
-   * The {@link CollapsibleColumns} plugin allows collapsing of columns, covered by a header with the `colspan` property
-   * defined.
+   * Collapsible column groups (with `nestedHeaders`): a group's header gets a −/+ button, and a collapsed group hides
+   * its columns but one. `true` makes every group wider than one column collapsible; a list chooses groups by their
+   * header row and first column, and the column that stays (`show`: `'first'`, the default, `'last'`, or an offset in
+   * the group). The API is `getPlugin('collapsibleColumns')`: `collapse(level, column)`, `expand`, `isCollapsed`,
+   * `collapseAll`, `expandAll`.
    *
-   * Clicking the "collapse/expand" button collapses (or expands) all "child" headers except the first one.
-   *
-   * Setting the `collapsibleColumns` property to `true` will display a "collapse/expand" button in every
-   * header with a defined colspan` property.
-   *
-   * To limit this functionality to a smaller group of headers, define the `collapsibleColumns` property
-   * as an array of objects, as in the example below.
-   *
-   * @pro
    * @type {Boolean|Object[]}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable collapsing for all headers
    * collapsibleColumns: true,
    *
-   * // or
-   * // enable collapsing for selected headers
-   * collapsibleColumns: [
-   *   {row: -4, col: 1, collapsible: true},
-   *   {row: -3, col: 5, collapsible: true}
-   * ],
+   * // or: the 2026 group keeps its Total column when collapsed
+   * collapsibleColumns: [{ row: 0, col: 1, show: 'last' }],
    * ```
    */
   collapsibleColumns: void 0,
@@ -2656,19 +2644,19 @@ DefaultSettings.prototype = {
   hiddenRows: void 0,
 
   /**
-   * @description
-   * Allows creating a nested header structure, using the HTML's colspan attribute.
+   * Header rows with headers that span columns. Each row is a list of labels, or `{ label, colspan }` for a header over
+   * several columns. The last row is the column headers; the rows above it are group rows. A click on a group header
+   * selects its columns; columns can be moved inside their group only. `getPlugin('nestedHeaders').getGroup(level,
+   * column)` gives a group's label and columns.
    *
-   * @pro
    * @type {Array[]}
    * @default undefined
    *
    * @example
-   * ```
+   * ```js
    * nestedHeaders: [
-   *   ['A', {label: 'B', colspan: 8}, 'C'],
-   *   ['D', {label: 'E', colspan: 4}, {label: 'F', colspan: 4}, 'G'],
-   *   ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T']
+   *   ['Region', { label: '2026', colspan: 4 }, { label: '2027', colspan: 4 }],
+   *   ['', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'],
    * ],
    * ```
    */

@@ -1,0 +1,62 @@
+/* Group headers: the label of a group is drawn in its first visible column, over the group's columns. */
+.freesheet thead th.fs-group {
+  border-right-color: transparent;
+}
+
+.freesheet thead th.fs-group-end {
+  border-right-color: var(--fs-cell-border-color);
+}
+
+.freesheet thead th.fs-group-start {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.freesheet thead th .fs-group-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.freesheet thead th .fs-group-label--button {
+  padding-left: 20px;
+}
+
+/* The −/+ button of a collapsible group. */
+.freesheet thead th .fs-group-toggle {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 11px;
+  height: 11px;
+  margin-top: -6px;
+  border: 1px solid var(--fs-collapse-button-border-color);
+  border-radius: 2px;
+  background: var(--fs-collapse-button-background);
+  box-shadow: var(--fs-collapse-button-shadow);
+  cursor: pointer;
+}
+
+.freesheet thead th .fs-group-toggle::before,
+.freesheet thead th .fs-group-toggle--collapsed::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 2px;
+  width: 7px;
+  height: 1px;
+  background: var(--fs-collapse-button-line-color);
+}
+
+.freesheet thead th .fs-group-toggle--collapsed::after {
+  top: 2px;
+  left: 5px;
+  width: 1px;
+  height: 7px;
+}

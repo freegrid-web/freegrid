@@ -229,9 +229,10 @@ collapsibleColumns: [{ row: 0, col: 1, show: 'last' }], // or chosen groups; sho
 
 - The last row of `nestedHeaders` is the column headers; the rows above are group rows.
 - Rendering: Walkontable draws one header cell per column, so a group label is drawn in the group's first visible
-  column with the width of the group's visible columns, and the borders inside the group are removed. A group
-  scrolled partly out of view keeps its label in the first visible column. This touches only the header renderer;
-  it is agreed with the stage-4 rendering owner before it starts (see AGENTS.md).
+  column with the width of the group's visible columns (as drawn, stretched), and the borders inside the group are
+  removed. The group rows are header renderers added through `afterGetColumnHeaderRenderers`: Walkontable itself
+  is not changed. A group scrolled partly out of view scrolls its label with it (keeping the label in view is left
+  for the stage-4 rendering work).
 - A collapsible group gets a −/+ button. Collapsing hides every column of the group but the one in `show`
   (default `'first'`; `'last'` keeps a total column, as in a summary). Visibility source `collapsibleColumns`.
 - Moving columns: allowed inside a group; a move across a group's border is refused.
