@@ -249,7 +249,8 @@ class TableRenderer {
       return;
     }
     if (this.#wot.wtViewport.oversizedRows && this.#wot.wtViewport.oversizedRows[sourceRow]) {
-      this.#wot.wtViewport.oversizedRows[sourceRow] = void 0;
+      // Deleted, not set to undefined: Viewport#getUniformRowHeight counts the rows that are still oversized.
+      delete this.#wot.wtViewport.oversizedRows[sourceRow];
     }
   }
 

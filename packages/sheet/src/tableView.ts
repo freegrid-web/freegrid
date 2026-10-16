@@ -10,6 +10,7 @@ import {
   isOutsideInput
 } from './helpers/dom/element';
 import EventManager from './eventManager';
+import Hooks from './pluginHooks';
 import { stopPropagation, isImmediatePropagationStopped, isRightClick, isLeftClick } from './helpers/dom/event';
 import Walkontable from './3rdparty/walkontable/src';
 import type CellCoords from './3rdparty/walkontable/src/cell/coords';
@@ -313,6 +314,13 @@ class TableView {
       },
       columnWidth: instance.getColWidth,
       rowHeight: instance.getRowHeight,
+      // Every row has the same height when `rowHeights` is not per row and no `modifyRowHeight` hook can change it.
+      rowHeightsUniform: () => {
+        const { rowHeights } = instance.getSettings();
+
+        return typeof rowHeights !== 'function' && !Array.isArray(rowHeights) &&
+          !instance.hasHook('modifyRowHeight') && !Hooks.getSingleton().has('modifyRowHeight');
+      },
       cellRenderer: (row: number, col: number, TD: HTMLTableCellElement) => {
         const cellProperties = instance.getCellMeta(row, col);
         const prop = instance.colToProp(col);

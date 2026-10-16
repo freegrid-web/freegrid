@@ -68,6 +68,9 @@ class Settings<Instance extends object = object> {
       rowHeight() {
         // return undefined means use default size for the rendered cell content
       },
+      // Whether `rowHeight` gives every row the same height (no per-row settings or hooks); see
+      // Viewport#getUniformRowHeight.
+      rowHeightsUniform: () => false,
       defaultRowHeight: 23,
       defaultColumnWidth: 50,
       selections: null,

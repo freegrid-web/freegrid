@@ -13,6 +13,7 @@ class ViewportRowsCalculator {
     overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null;
     onlyFullyVisible?: boolean;
     horizontalScrollbarHeight?: number;
+    uniformRowHeight?: number | null;
   };
   declare count: number;
   declare startRow: number | null;
@@ -39,7 +40,7 @@ class ViewportRowsCalculator {
    */
   constructor(viewportHeight: number, scrollOffset: number, totalRows: number,
               rowHeightFn: (row: number) => number | undefined, overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null,
-              onlyFullyVisible?: boolean, horizontalScrollbarHeight?: number) {
+              onlyFullyVisible?: boolean, horizontalScrollbarHeight?: number, uniformRowHeight?: number | null) {
     this.#options = {
       viewportHeight,
       scrollOffset,
@@ -47,7 +48,8 @@ class ViewportRowsCalculator {
       rowHeightFn,
       overrideFn,
       onlyFullyVisible,
-      horizontalScrollbarHeight
+      horizontalScrollbarHeight,
+      uniformRowHeight
     };
 
     /**
@@ -97,11 +99,30 @@ class ViewportRowsCalculator {
     const totalRows = options.totalRows;
     const viewportHeight = options.viewportHeight;
     const horizontalScrollbarHeight = options.horizontalScrollbarHeight || 0;
+    // With one height for every row (the caller checks that), a row's position is `row × height`: the rows above the
+    // viewport are skipped instead of being summed one by one.
+    const uniform = options.uniformRowHeight;
+    const isUniform = typeof uniform === 'number' && uniform > 0 && Number.isFinite(uniform);
+    const positionOf = (row: number) => (isUniform ? row * (uniform as number) : startPositions[row]);
     let rowHeight!: number;
+    let firstRow = 0;
+
+    // Rows before `firstRow` end above the viewport, so in the loop below they would only set `startRow` and `endRow`
+    // to themselves (when not only fully visible rows count). Skip them, keeping one row of margin.
+    if (isUniform && viewportHeight - horizontalScrollbarHeight > 0) {
+      firstRow = Math.min(totalRows, Math.max(0, Math.floor(scrollOffset / (uniform as number)) - 1));
+
+      if (firstRow > 0 && !onlyFullyVisible) {
+        this.startRow = firstRow - 1;
+        this.endRow = firstRow - 1;
+      }
+      sum = firstRow * (uniform as number);
+      rowHeight = uniform as number;
+    }
 
     // Calculate the number (start and end index) of rows needed
-    for (let i = 0; i < totalRows; i++) {
-      rowHeight = rowHeightFn(i) as number;
+    for (let i = firstRow; i < totalRows; i++) {
+      rowHeight = isUniform ? uniform as number : rowHeightFn(i) as number;
 
       if (isNaN(rowHeight)) {
         rowHeight = ViewportRowsCalculator.DEFAULT_HEIGHT;
@@ -117,7 +138,9 @@ class ViewportRowsCalculator {
         }
         this.endRow = i;
       }
-      startPositions.push(sum);
+      if (!isUniform) {
+        startPositions.push(sum);
+      }
       sum += rowHeight;
 
       if (!onlyFullyVisible) {
@@ -136,7 +159,7 @@ class ViewportRowsCalculator {
 
       while (this.startRow > 0) {
         // rowHeight is the height of the last row
-        const viewportSum = startPositions[this.endRow!] + rowHeight - startPositions[this.startRow - 1];
+        const viewportSum = positionOf(this.endRow!) + rowHeight - positionOf(this.startRow - 1);
 
         if (viewportSum <= viewportHeight - horizontalScrollbarHeight || !onlyFullyVisible) {
           this.startRow -= 1;
@@ -150,7 +173,7 @@ class ViewportRowsCalculator {
     if (this.startRow !== null && overrideFn) {
       overrideFn(this);
     }
-    this.startPosition = startPositions[this.startRow!];
+    this.startPosition = this.startRow === null ? null : positionOf(this.startRow);
 
     if (this.startPosition === void 0) {
       this.startPosition = null;
