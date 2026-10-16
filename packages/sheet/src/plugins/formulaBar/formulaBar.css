@@ -1,12 +1,13 @@
 /*
- * The formula bar (the formulaBar setting): a strip on top of the grid, in the headers' colors, as wide as the grid.
- * [ address | fx | value ]
+ * The formula bar (the formulaBar setting): a strip on top of the grid, in the headers' colors, as wide as the grid,
+ * with two inputs that look like cells: [ address ] fx [ value ].
  */
 .fs-formula-bar {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: 6px;
   box-sizing: border-box;
-  height: 30px;
+  padding: 4px;
   border: 1px solid var(--fs-cell-border-color);
   border-bottom: 0;
   background: var(--fs-header-background);
@@ -18,42 +19,36 @@
 .fs-formula-bar__input {
   box-sizing: border-box;
   min-width: 0;
-  height: 100%;
+  height: 26px;
   margin: 0;
-  border: 0;
-  border-radius: 0;
+  padding: 0 8px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 3px;
+  background: var(--fs-cell-background);
   color: inherit;
   font: inherit;
 }
 
 .fs-formula-bar__name {
-  flex: 0 0 88px;
-  padding: 0 8px;
-  border-right: 1px solid var(--fs-cell-border-color);
-  background: transparent;
-  color: var(--fs-header-text);
+  flex: 0 0 80px;
   text-align: center;
 }
 
+.fs-formula-bar__input {
+  flex: 1 1 auto;
+}
+
 .fs-formula-bar__fx {
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  border-right: 1px solid var(--fs-cell-border-color);
+  padding: 0 2px;
   color: var(--fs-header-text);
   font-family: Georgia, 'Times New Roman', serif;
   font-style: italic;
   user-select: none;
 }
 
-.fs-formula-bar__input {
-  flex: 1 1 auto;
-  padding: 0 8px;
-  background: var(--fs-cell-background);
-}
-
 .fs-formula-bar__name:focus,
 .fs-formula-bar__input:focus {
-  outline: 2px solid var(--fs-selection-border-color);
-  outline-offset: -2px;
+  border-color: var(--fs-selection-border-color);
+  outline: 1px solid var(--fs-selection-border-color);
+  outline-offset: 0;
 }
