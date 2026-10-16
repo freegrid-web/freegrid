@@ -2,6 +2,7 @@ import { CellCoords } from './3rdparty/walkontable/src';
 import { KEY_CODES, isMetaKey, isCtrlMetaKey } from './helpers/unicode';
 import { stopPropagation, stopImmediatePropagation, isImmediatePropagationStopped } from './helpers/dom/event';
 import { getEditorInstance } from './editors';
+import { toggleCellStyle } from './formatting/formatting';
 import EventManager from './eventManager';
 import { EditorState } from './editors/editorBase';
 import type EditorBase from './editors/editorBase';
@@ -299,6 +300,18 @@ class EditorManager {
         if (!this.isEditorOpened() && ctrlDown) {
           instance.selectAll();
 
+          event.preventDefault();
+          stopPropagation(event);
+        }
+        break;
+
+      case KEY_CODES.B:
+      case KEY_CODES.I:
+      case KEY_CODES.U:
+        if (!this.isEditorOpened() && ctrlDown && !event.shiftKey) {
+          const toggles = { [KEY_CODES.B]: 'bold', [KEY_CODES.I]: 'italic', [KEY_CODES.U]: 'underline' } as const;
+
+          toggleCellStyle(instance, toggles[event.keyCode]);
           event.preventDefault();
           stopPropagation(event);
         }

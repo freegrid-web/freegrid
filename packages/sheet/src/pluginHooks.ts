@@ -1794,6 +1794,14 @@ const REGISTERED_HOOKS: string[] = [
   'afterExportFile',
 
   /**
+   * Fired after `setCellStyle` (or a formatting command) changed the style of cells.
+   *
+   * @event Hooks#afterSetCellStyle
+   * @param {Array[]} changes `[row, col, styleBefore, styleAfter]` for each changed cell (visual indexes).
+   */
+  'afterSetCellStyle',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

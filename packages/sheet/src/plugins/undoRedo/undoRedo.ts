@@ -307,6 +307,33 @@ class CellAlignmentAction extends Action {
   }
 }
 
+/** A change of cells' `style` meta (`setCellStyle`, the Format menu, Ctrl+B and the like). */
+class CellStyleAction extends Action {
+  changes: [number, number, unknown, unknown][];
+
+  constructor(changes: [number, number, unknown, unknown][]) {
+    super();
+    this.changes = changes;
+    this.actionType = 'style';
+  }
+
+  #apply(instance: PluginHost, done: Done, index: 2 | 3): void {
+    this.changes.forEach((change) => {
+      instance.setCellMeta(change[0], change[1], 'style', change[index]);
+    });
+    instance.addHookOnce('afterRender', done);
+    instance.render();
+  }
+
+  undo(instance: PluginHost, undoneCallback: Done): void {
+    this.#apply(instance, undoneCallback, 2);
+  }
+
+  redo(instance: PluginHost, redoneCallback: Done): void {
+    this.#apply(instance, redoneCallback, 3);
+  }
+}
+
 /** Filtering (for a filters plugin). */
 class FiltersAction extends Action {
   conditionsStack: unknown[];
@@ -588,6 +615,10 @@ class UndoRedo {
       (stateBefore: Record<number, Record<number, string>>, range: CellRange[], type: string, alignment: string) => {
         this.done(new CellAlignmentAction(stateBefore, range, type, alignment));
       });
+
+    instance.addHook('afterSetCellStyle', (changes: [number, number, unknown, unknown][]) => {
+      this.done(new CellStyleAction(changes));
+    });
 
     instance.addHook('beforeFilter', (conditionsStack: unknown[]) => {
       this.done(new FiltersAction(conditionsStack));

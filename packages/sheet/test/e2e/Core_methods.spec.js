@@ -46,7 +46,7 @@ describe('Core methods', () => {
       'isUndoAvailable', 'listen', 'loadData', 'loadDocument', 'moveSheet', 'openPanel', 'populateFromArray',
       'propToCol', 'redo', 'removeCellMeta', 'removeHook', 'removeSheet', 'renameSheet', 'render', 'rowOffset',
       'runHooks', 'scrollViewportTo', 'selectAll', 'selectCell', 'selectCellByProp', 'selectCells', 'selectColumns',
-      'selectRows', 'setCellMeta', 'setCellMetaObject', 'setDataAtCell', 'setDataAtRowProp', 'setLoading',
+      'selectRows', 'setCellMeta', 'setCellMetaObject', 'setCellStyle', 'setDataAtCell', 'setDataAtRowProp', 'setLoading',
       'spliceCellsMeta', 'spliceCol', 'spliceRow', 'toPhysicalColumn', 'toPhysicalRow', 'toVisualColumn', 'toVisualRow',
       'undo', 'unlisten', 'updateSettings', 'validateCell', 'validateCells', 'validateColumns', 'validateRows'
     ]);

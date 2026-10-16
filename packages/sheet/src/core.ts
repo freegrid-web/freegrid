@@ -54,6 +54,7 @@ import { Workbook, getWorkbook } from './workbook/workbook';
 import { findSidePanel, getSidePanel } from './sidePanel/sidePanel';
 import { exportFile, downloadFile, importFile } from './files';
 import { setLoading, isLoading } from './loading/loading';
+import { setCellStyle } from './formatting/formatting';
 import type { FileFormat, FileOptions } from './files';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
@@ -2812,6 +2813,21 @@ class Core {
    */
   setLoading(state: boolean | string) {
     setLoading(this, state);
+  }
+
+  /**
+   * Sets the style of cells (the selected ones by default): `style` (`fontWeight`, `fontStyle`, `textDecoration`,
+   * `color`, `background`, `border`) is merged into each cell's `style` meta, where a `null` property removes that
+   * property; a `null` style removes the whole style. Undo can take it back.
+   *
+   * @memberof Core#
+   * @function setCellStyle
+   * @param {Object|null} style The style properties to set (`null` removes one), or `null` to clear the style.
+   * @param {CellRange[]} [ranges] The cells (visual indexes); the selected cells by default.
+   * @fires Hooks#afterSetCellStyle
+   */
+  setCellStyle(style: Record<string, string | null> | null, ranges?: CellRange[]) {
+    setCellStyle(this, style, ranges ?? this.getSelectedRange());
   }
 
   /**
