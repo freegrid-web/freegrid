@@ -22,8 +22,8 @@ new FreeSheet(container, {
 
 A hidden row leaves the grid's visual order. `countRows()` counts the visible rows (`countSourceRows()` counts all),
 visual indexes skip hidden rows, and so do selection, the arrow keys and copying. The row headers keep each row's
-number, so the gaps show where rows are hidden (1, 2, 5), and a double line marks the spot (`indicators: false`
-turns it off). Columns work the same way, with letters (A, B, E).
+number, so the gaps show where rows are hidden (1, 2, 5), and a double line with small arrows marks the spot
+(`indicators: false` turns them off). Columns work the same way, with letters (A, B, E).
 
 What is hidden is kept per data row, so a hidden row stays hidden when the rows are sorted or moved. Inserting or
 removing rows moves the hidden ones with their data. Formulas still calculate hidden cells.
@@ -32,7 +32,8 @@ removing rows moves the hidden ones with their data. Formulas still calculate hi
 
 - **Context menu**: Hide rows hides the selected rows. Show rows shows the hidden rows inside the selection (select
   the rows on both sides of the gap, or the first or last row for rows hidden at the edge).
-- **Double click** on the double line in a header shows the rows hidden there.
+- **A click** on one of the small arrows beside the double line shows the rows hidden there (on hover the arrow
+  becomes a button with a tooltip).
 - **API**: hiding takes visual indexes; a hidden row has no visual index, so showing takes physical ones.
 
 ```js

@@ -1,6 +1,5 @@
 import './hidden.css';
 import BasePlugin from './../_base';
-import EventManager from './../../eventManager';
 import { getTranslator } from './../../utils/recordTranslator';
 import * as C from './../../i18n/constants';
 import type { IndexVisibility } from './../../utils/indexVisibility';
@@ -19,8 +18,8 @@ export type HiddenIndexesSettings = {
 export const HIDDEN_BEFORE_CLASS_NAME = 'fs-hidden-before';
 export const HIDDEN_AFTER_CLASS_NAME = 'fs-hidden-after';
 
-/** How close to a header's edge a double click shows the hidden rows (columns) there, in pixels. */
-const EDGE = 5;
+/** The button on a header's edge that shows the hidden rows (columns) next to it. */
+export const TOGGLE_CLASS_NAME = 'fs-hidden-toggle';
 
 /**
  * Hiding rows or columns (the shared part of `hiddenRows` and `hiddenColumns`). A hidden row leaves the visual order:
@@ -68,15 +67,15 @@ abstract class HiddenIndexes extends BasePlugin {
     }
     this.addHook('afterContextMenuDefaultOptions', (options: { items: MenuItem[] }) => this.addMenuItems(options));
     this.addHook('afterLoadData', () => this.dropMissing());
-    this.eventManager = this.eventManager || new EventManager(this);
-    this.eventManager.addEventListener(this.hot.rootElement, 'dblclick', event => this.onDoubleClick(event));
+    // Before the grid's own mousedown, which would select the row (column).
+    this.hot.rootElement.addEventListener('mousedown', this.onIndicatorMouseDown, true);
 
     super.enablePlugin();
   }
 
   disablePlugin(): void {
     this.visibility.setHidden(this.settingName, null);
-    this.eventManager?.clear();
+    this.hot.rootElement.removeEventListener('mousedown', this.onIndicatorMouseDown, true);
     super.disablePlugin();
   }
 
@@ -225,11 +224,33 @@ abstract class HiddenIndexes extends BasePlugin {
     return neighbour >= 0 && neighbour < this.total() && this.isHidden(this.orderedToPhysical(neighbour));
   }
 
+  /** Marks a header next to hidden rows (columns): a double line and an arrow that shows them. */
   markHeader(visual: number, TH: HTMLTableCellElement): void {
-    const indicators = this.settings.indicators !== false;
+    const indicators = this.settings.indicators !== false && visual >= 0;
+    const before = indicators && this.isGap(visual, -1);
+    const after = indicators && this.isGap(visual, 1);
 
-    TH.classList.toggle(HIDDEN_BEFORE_CLASS_NAME, indicators && visual >= 0 && this.isGap(visual, -1));
-    TH.classList.toggle(HIDDEN_AFTER_CLASS_NAME, indicators && visual >= 0 && this.isGap(visual, 1));
+    TH.classList.toggle(HIDDEN_BEFORE_CLASS_NAME, before);
+    TH.classList.toggle(HIDDEN_AFTER_CLASS_NAME, after);
+    TH.querySelectorAll(`.${TOGGLE_CLASS_NAME}`).forEach(toggle => toggle.remove());
+
+    if (!before && !after) {
+      return;
+    }
+    const title = this.hot.getTranslatedPhrase(this.axis === 'row' ? C.CONTEXTMENU_ITEMS_SHOW_ROW :
+      C.CONTEXTMENU_ITEMS_SHOW_COLUMN, 1) as string;
+
+    ([[before, 'before'], [after, 'after']] as const).forEach(([shown, side]) => {
+      if (shown) {
+        const toggle = document.createElement('span');
+
+        toggle.className = `${TOGGLE_CLASS_NAME} ${TOGGLE_CLASS_NAME}--${side}`;
+        toggle.title = title;
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('aria-label', title);
+        TH.appendChild(toggle);
+      }
+    });
   }
 
   /**
@@ -261,36 +282,27 @@ abstract class HiddenIndexes extends BasePlugin {
     return [Math.max(0, Math.min(from, to)), Math.max(from, to)];
   }
 
-  /** A double click on a header's edge next to hidden rows (columns) shows them. */
-  onDoubleClick(event: MouseEvent): void {
-    const TH = (event.target as HTMLElement).closest('th');
-
-    if (!TH || !(TH.classList.contains(HIDDEN_BEFORE_CLASS_NAME) || TH.classList.contains(HIDDEN_AFTER_CLASS_NAME))) {
-      return;
-    }
-    const coords = this.hot.view.wt.wtTable.getCoords(TH);
+  /** A click on the arrow next to hidden rows (columns) shows them. */
+  onIndicatorMouseDown = (event: MouseEvent): void => {
+    const toggle = event.button === 0 ? (event.target as HTMLElement).closest(`.${TOGGLE_CLASS_NAME}`) : null;
+    const TH = toggle?.closest('th');
+    const coords = TH ? this.hot.view.wt.wtTable.getCoords(TH) : null;
     const visual = this.axis === 'row' ? coords?.row : coords?.col;
     const isHeader = this.axis === 'row' ? coords?.col === -1 : coords?.row === -1;
 
-    if (!coords || !isHeader || visual === void 0 || visual < 0) {
+    if (!toggle || !isHeader || visual === void 0 || visual < 0) {
       return;
     }
-    const rect = TH.getBoundingClientRect();
-    const [position, start, end] = this.axis === 'row' ? [event.clientY, rect.top, rect.bottom] :
-      [event.clientX, rect.left, rect.right];
-    const ordered = this.visibility.toOrdered(visual);
-    let shown: number[] = [];
+    const side = toggle.classList.contains(`${TOGGLE_CLASS_NAME}--before`) ? -1 : 1;
+    const shown = this.adjacentHidden(this.visibility.toOrdered(visual), side);
 
-    if (position - start <= EDGE && this.isGap(visual, -1)) {
-      shown = this.adjacentHidden(ordered, -1);
-    } else if (end - position <= EDGE && this.isGap(visual, 1)) {
-      shown = this.adjacentHidden(ordered, 1);
-    }
+    // Not a click on the header: the row (column) is not selected.
+    event.preventDefault();
+    event.stopImmediatePropagation();
     if (shown.length) {
-      event.stopImmediatePropagation();
       this.show(shown);
     }
-  }
+  };
 
   /** The hidden rows (columns) right before or after an ordered index, up to the next visible one. */
   adjacentHidden(ordered: number, side: -1 | 1): number[] {

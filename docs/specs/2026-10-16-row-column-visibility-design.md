@@ -121,8 +121,7 @@ hiddenColumns: { columns: [2], indicators: true }
 ```
 
 - Context menu (any selection, not only headers): "Hide rows" / "Hide columns" for the selection; "Show rows" / "Show columns" when the selection
-  spans a gap (it shows the hidden rows inside it). With row and column headers, a double click on the gap shows
-  them too.
+  spans a gap (it shows the hidden rows inside it). A click on the arrows beside the double line in the headers shows them too.
 - API (`getPlugin('hiddenRows')`): `hideRows(visualRows)`, `showRows(physicalRows)`, `showAllRows()`,
   `isHidden(physicalRow)`, `getHiddenRows(): number[]` (physical). A hidden row has no visual index, so showing
   takes physical indexes. Columns: the same names with `Column`.

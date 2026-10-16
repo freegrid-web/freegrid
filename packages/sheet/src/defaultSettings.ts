@@ -2600,11 +2600,11 @@ DefaultSettings.prototype = {
    * Hidden columns. `true` turns hiding on (the context menu gets Hide columns and Show columns); an object can list
    * the columns hidden at start:
    *  * `columns`: physical column indexes hidden at start;
-   *  * `indicators`: a double line in the column headers where columns are hidden (default `true`).
+   *  * `indicators`: a double line and small arrows in the column headers where columns are hidden (default `true`).
    *
-   * A hidden column leaves the visual order: `countCols()`, selection, the keyboard and copying skip it. A double click
-   * on the double line shows the columns there. The API is `getPlugin('hiddenColumns')`: `hideColumns`, `showColumns`,
-   * `showAllColumns`, `isHidden`, `getHiddenColumns`.
+   * A hidden column leaves the visual order: `countCols()`, selection, the keyboard and copying skip it. A click on
+   * one of the arrows shows the columns there. The API is `getPlugin('hiddenColumns')`: `hideColumns`,
+   * `showColumns`, `showAllColumns`, `isHidden`, `getHiddenColumns`.
    *
    * @type {Boolean|Object}
    * @default undefined
@@ -2623,11 +2623,11 @@ DefaultSettings.prototype = {
    * Hidden rows. `true` turns hiding on (the context menu gets Hide rows and Show rows); an object can list the rows
    * hidden at start:
    *  * `rows`: physical row indexes hidden at start;
-   *  * `indicators`: a double line in the row headers where rows are hidden (default `true`).
+   *  * `indicators`: a double line and small arrows in the row headers where rows are hidden (default `true`).
    *
    * A hidden row leaves the visual order: `countRows()`, selection, the keyboard and copying skip it, and the row
-   * headers keep their numbers (1, 2, 5), as in Excel. Hidden rows stay hidden when rows are sorted or moved. A double
-   * click on the double line shows the rows there. The API is `getPlugin('hiddenRows')`: `hideRows`, `showRows`,
+   * headers keep their numbers (1, 2, 5), as in Excel. Hidden rows stay hidden when rows are sorted or moved. A click
+   * on one of the arrows shows the rows there. The API is `getPlugin('hiddenRows')`: `hideRows`, `showRows`,
    * `showAllRows`, `isHidden`, `getHiddenRows`.
    *
    * @type {Boolean|Object}
