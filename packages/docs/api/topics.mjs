@@ -66,6 +66,15 @@ export const TOPICS = [
     match: /CellMeta|CellsMeta|ColumnMeta/,
   },
   {
+    name: 'Sheets',
+    description: 'Several sheets in one document, with tabs, as in an Excel file.',
+    methods: ['addSheet', 'getSheet', 'getSheets', 'getActiveSheet', 'activateSheet', 'renameSheet', 'removeSheet',
+      'moveSheet', 'getSheetId', 'getSheetName', 'getDocument', 'loadDocument'],
+    events: ['beforeSheetAdd', 'afterSheetAdd', 'beforeSheetActivate', 'afterSheetActivate', 'beforeSheetRename',
+      'afterSheetRename', 'beforeSheetRemove', 'afterSheetRemove', 'afterSheetMove'],
+    settings: ['sheetId', 'sheetName', 'sheets', 'sheetTabs', 'sheetTabsPosition'],
+  },
+  {
     name: 'Rows and columns',
     description: 'Counting, inserting, removing and sizing rows and columns; headers; visual and physical indexes.',
     methods: ['alter', 'rowOffset', 'colOffset', 'isColumnModificationAllowed', 'getColWidth', 'getRowHeight'],

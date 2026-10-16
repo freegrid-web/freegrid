@@ -1708,6 +1708,88 @@ const REGISTERED_HOOKS: string[] = [
    * @event Hooks#afterUnlisten
    */
   'afterUnlisten',
+
+  /**
+   * Fired before a sheet is added to the document. Return `false` to cancel (`addSheet` then throws). Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#beforeSheetAdd
+   * @param {String} id The new sheet's id.
+   * @param {String} name The new sheet's name.
+   */
+  'beforeSheetAdd',
+
+  /**
+   * Fired after a sheet is added to the document. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#afterSheetAdd
+   * @param {String} id The new sheet's id.
+   * @param {String} name The new sheet's name.
+   */
+  'afterSheetAdd',
+
+  /**
+   * Fired before another sheet is shown. Return `false` to keep the current one. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#beforeSheetActivate
+   * @param {String} id The sheet to show.
+   * @param {String} previousId The sheet shown now.
+   */
+  'beforeSheetActivate',
+
+  /**
+   * Fired after another sheet is shown. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#afterSheetActivate
+   * @param {String} id The sheet shown now.
+   * @param {String} previousId The sheet shown before.
+   */
+  'afterSheetActivate',
+
+  /**
+   * Fired before a sheet is renamed. Return `false` to cancel. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#beforeSheetRename
+   * @param {String} id The sheet's id.
+   * @param {String} oldName Its name now.
+   * @param {String} newName The new name.
+   */
+  'beforeSheetRename',
+
+  /**
+   * Fired after a sheet is renamed. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#afterSheetRename
+   * @param {String} id The sheet's id.
+   * @param {String} oldName Its old name.
+   * @param {String} newName Its new name.
+   */
+  'afterSheetRename',
+
+  /**
+   * Fired before a sheet is removed. Return `false` to keep it. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#beforeSheetRemove
+   * @param {String} id The sheet's id.
+   */
+  'beforeSheetRemove',
+
+  /**
+   * Fired after a sheet is removed (its grid is destroyed). Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#afterSheetRemove
+   * @param {String} id The removed sheet's id.
+   */
+  'afterSheetRemove',
+
+  /**
+   * Fired after a sheet is moved in the tab order. Sheet events run on the document's first sheet (the grid created with `new FreeSheet`).
+   *
+   * @event Hooks#afterSheetMove
+   * @param {String} id The sheet's id.
+   * @param {Number} index Its new position.
+   * @param {Number} previousIndex Its old position.
+   */
+  'afterSheetMove',
 ];
 
 /** Hooks that still work but will go: the warning shown (once per page) when a listener is added. */

@@ -48,6 +48,7 @@ import { startObserving as keyStateStartObserving, stopObserving as keyStateStop
 import { Selection } from './selection';
 import type { getEditorInstance } from './editors';
 import type { AnyFunction, AnyObject, GridSettings } from './types';
+import { Workbook, getWorkbook } from './workbook/workbook';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
 type Change = [number, Prop, unknown, unknown];
@@ -242,6 +243,8 @@ class Core {
   #recordTranslator!: RecordTranslator;
   #eventManager!: EventManager;
   #preventScrollingToCell = false;
+  /** The element given to the constructor when it is the frame of the bars and sheets (see the constructor). */
+  #frame: HTMLElement | null = null;
 
   constructor(rootElement: HTMLElement, userSettings: AnyObject,
     rootInstanceSymbol: symbol | boolean = false) {
@@ -272,6 +275,21 @@ class Core {
     keyStateStartObserving();
 
     this.isDestroyed = false;
+
+    // With a formula bar or sheets, the given element is the frame: the bars and every sheet go inside it, and the
+    // grid takes the height that is left (when the element has a height; otherwise all are as tall as their content).
+    // A sheet that addSheet creates is already inside a frame.
+    if ((userSettings.formulaBar || userSettings.sheetTabs ||
+      (Array.isArray(userSettings.sheets) && userSettings.sheets.length)) &&
+      !rootElement.classList.contains('fs-document__sheet')) {
+      const gridElement = document.createElement('div');
+
+      gridElement.className = `fs-document__sheet${rootElement.clientHeight > 0 ? ' fs-document__sheet--fill' : ''}`;
+      rootElement.classList.add('fs-document');
+      rootElement.appendChild(gridElement);
+      this.#frame = rootElement;
+      rootElement = gridElement;
+    }
     this.rootElement = rootElement;
     this.isHotTableEnv = isChildOfWebComponentTable(this.rootElement);
     EventManager.isHotTableEnv = this.isHotTableEnv;
@@ -1044,6 +1062,27 @@ class Core {
       this.#priv.firstRun = false;
     }
     this.runHooks('afterInit');
+
+    // More sheets from the start (`sheets`), or the tab bar with one sheet (`sheetTabs: true`).
+    const { sheets, sheetTabs } = this.#priv.settings;
+
+    if (!getWorkbook(this) && (sheetTabs === true || (Array.isArray(sheets) && sheets.length))) {
+      const workbook = this.#workbook();
+
+      (Array.isArray(sheets) ? sheets : []).forEach((sheet: AnyObject) => workbook.add(sheet.id, sheet));
+      workbook.renderTabs();
+    }
+  }
+
+  /** The document this grid belongs to; created on the first call (a grid alone has none and pays nothing). */
+  #workbook(): Workbook {
+    return getWorkbook(this) || new Workbook(this, (rootElement, settings) => {
+      const sheet = new Core(rootElement, settings);
+
+      sheet.init();
+
+      return sheet;
+    });
   }
 
 
@@ -1965,6 +2004,10 @@ class Core {
       }
 
       this.runHooks('afterUpdateSettings', settings);
+
+      if (settings.sheetTabs !== void 0 || settings.sheetTabsPosition !== void 0) {
+        getWorkbook(this)?.renderTabs();
+      }
     }
 
     this.#grid.adjustRowsAndCols();
@@ -2566,6 +2609,215 @@ class Core {
     return this.#priv.columnSettings[columnKey].prototype as AnyObject;
   }
 
+
+  /**
+   * Adds a sheet to the document this grid belongs to, after the last sheet, and returns its grid. Sheets work as
+   * in an Excel file: the tab bar below the sheets switches between them, and formulas can refer to other sheets
+   * (`=Costs!B2`). The new sheet takes `formulas`, `formulaBar`, the headers, the size and a few other settings from
+   * the first sheet unless `settings` sets them. The sheet is not activated.
+   *
+   * @memberof Core#
+   * @function addSheet
+   * @param {String} [id] The sheet's id, for the other sheet methods (default `sheet2`, `sheet3`, …).
+   * @param {Object} [settings] The sheet's settings (`data` and any grid setting), and `name`: the name shown on
+   * its tab and used in formulas (default: the id, or `Sheet2`, `Sheet3`, …). Up to 31 characters, without
+   * `[ ] : * ? / \`, unique in the document.
+   * @returns {Core} The new sheet's grid.
+   * @fires Hooks#beforeSheetAdd
+   * @fires Hooks#afterSheetAdd
+   * @example
+   * ```js
+   * const costs = hot.addSheet('costs', { name: 'Costs', data: [['Rent', 1200]] });
+   *
+   * hot.activateSheet('costs');
+   * ```
+   */
+  addSheet(id?: string, settings: AnyObject = {}) {
+    return this.#workbook().add(id, settings);
+  }
+
+  /**
+   * Returns the grid of a sheet of this grid's document, or `null` when there is no sheet with this id.
+   *
+   * @memberof Core#
+   * @function getSheet
+   * @param {String} id The sheet's id.
+   * @returns {Core|null}
+   * @example
+   * ```js
+   * hot.getSheet('costs').setDataAtCell(0, 1, 1500);
+   * ```
+   */
+  getSheet(id: string) {
+    return this.#workbook().get(id)?.instance || null;
+  }
+
+  /**
+   * Returns the sheets of this grid's document, in the order of their tabs.
+   *
+   * @memberof Core#
+   * @function getSheets
+   * @returns {Array} `[{ id, name }, …]`
+   * @example
+   * ```js
+   * hot.getSheets(); // [{ id: 'sheet1', name: 'Sheet1' }, { id: 'costs', name: 'Costs' }]
+   * ```
+   */
+  getSheets() {
+    return this.#workbook().sheets.map(({ id, name }) => ({ id, name }));
+  }
+
+  /**
+   * Returns the grid of the sheet the user sees (the active sheet).
+   *
+   * @memberof Core#
+   * @function getActiveSheet
+   * @returns {Core}
+   * @example
+   * ```js
+   * hot.getActiveSheet().getSheetName(); // 'Costs'
+   * ```
+   */
+  getActiveSheet() {
+    const workbook = this.#workbook();
+
+    return workbook.require(workbook.activeId).instance;
+  }
+
+  /**
+   * Shows a sheet: its tab becomes active and its grid takes the keyboard.
+   *
+   * @memberof Core#
+   * @function activateSheet
+   * @param {String} id The sheet's id.
+   * @fires Hooks#beforeSheetActivate
+   * @fires Hooks#afterSheetActivate
+   * @example
+   * ```js
+   * hot.activateSheet('costs');
+   * ```
+   */
+  activateSheet(id: string) {
+    this.#workbook().activate(id);
+  }
+
+  /**
+   * Renames a sheet. Formulas that refer to it follow the new name.
+   *
+   * @memberof Core#
+   * @function renameSheet
+   * @param {String} id The sheet's id (it does not change).
+   * @param {String} name The new name: up to 31 characters, without `[ ] : * ? / \`, unique in the document.
+   * @fires Hooks#beforeSheetRename
+   * @fires Hooks#afterSheetRename
+   * @example
+   * ```js
+   * hot.renameSheet('costs', 'Expenses');
+   * ```
+   */
+  renameSheet(id: string, name: string) {
+    this.#workbook().rename(id, name);
+  }
+
+  /**
+   * Removes a sheet and destroys its grid. Formulas that refer to it show `#REF!`. The first sheet (the grid
+   * created with `new FreeSheet`) holds the document and cannot be removed.
+   *
+   * @memberof Core#
+   * @function removeSheet
+   * @param {String} id The sheet's id.
+   * @fires Hooks#beforeSheetRemove
+   * @fires Hooks#afterSheetRemove
+   * @example
+   * ```js
+   * hot.removeSheet('costs');
+   * ```
+   */
+  removeSheet(id: string) {
+    this.#workbook().remove(id);
+  }
+
+  /**
+   * Moves a sheet to another place in the tab order.
+   *
+   * @memberof Core#
+   * @function moveSheet
+   * @param {String} id The sheet's id.
+   * @param {Number} index The new position (0 is the first tab).
+   * @fires Hooks#afterSheetMove
+   * @example
+   * ```js
+   * hot.moveSheet('costs', 0);
+   * ```
+   */
+  moveSheet(id: string, index: number) {
+    this.#workbook().move(id, index);
+  }
+
+  /**
+   * Returns the whole document as JSON-safe data, to save it and load it later with `loadDocument`: every sheet (in
+   * tab order) with its id, name, data (formulas as formulas), the column widths and row heights users changed, the
+   * merged cells and the cell formats (comments, `className`, `readOnly`, `type`, number and date formats, …), and the
+   * active sheet.
+   *
+   * @memberof Core#
+   * @function getDocument
+   * @returns {Object} `{ version: 1, activeSheet, sheets: [{ id, name, data, colWidths?, rowHeights?, mergeCells?,
+   * cell? }] }`
+   * @example
+   * ```js
+   * localStorage.setItem('book', JSON.stringify(hot.getDocument()));
+   * ```
+   */
+  getDocument() {
+    return this.#workbook().save();
+  }
+
+  /**
+   * Replaces the document with one saved by `getDocument`: the sheets, their content and order, and the active
+   * sheet. The grid that holds the document takes the first saved sheet; the other sheets are created again.
+   *
+   * @memberof Core#
+   * @function loadDocument
+   * @param {Object} document A document from `getDocument`.
+   * @example
+   * ```js
+   * hot.loadDocument(JSON.parse(localStorage.getItem('book')));
+   * ```
+   */
+  loadDocument(document: AnyObject) {
+    this.#workbook().load(document as never);
+  }
+
+  /**
+   * Returns this grid's sheet id (`sheet1` for a grid created with `new FreeSheet`, unless `sheetId` is set).
+   *
+   * @memberof Core#
+   * @function getSheetId
+   * @returns {String}
+   * @example
+   * ```js
+   * hot.getActiveSheet().getSheetId(); // 'costs'
+   * ```
+   */
+  getSheetId() {
+    return this.#workbook().sheetOf(this)!.id;
+  }
+
+  /**
+   * Returns this grid's sheet name, as shown on its tab and used in formulas.
+   *
+   * @memberof Core#
+   * @function getSheetName
+   * @returns {String}
+   * @example
+   * ```js
+   * hot.getSheetName(); // 'Sheet1'
+   * ```
+   */
+  getSheetName() {
+    return this.#workbook().sheetOf(this)!.name;
+  }
 
   /**
    * Returns the cell properties object for the given `row` and `column` coordinates.
@@ -3585,6 +3837,12 @@ class Core {
    * @fires Hooks#afterDestroy
    */
   destroy() {
+    const workbook = getWorkbook(this);
+
+    // The grid created with new FreeSheet holds the document: the other sheets go with it.
+    if (workbook && workbook.root === this) {
+      workbook.destroy();
+    }
     this._clearTimeouts();
     this._clearImmediates();
 
@@ -3600,6 +3858,13 @@ class Core {
     keyStateStopObserving();
 
     empty(this.rootElement);
+
+    // The frame becomes the element it was: the grid's element inside it goes.
+    if (this.#frame) {
+      this.rootElement.remove();
+      this.#frame.classList.remove('fs-document');
+      this.#frame = null;
+    }
     this.#eventManager.destroy();
 
     if (this.#editorManager) {

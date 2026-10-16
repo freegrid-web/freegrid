@@ -1,5 +1,22 @@
 # FreeGrid changelog
 
+## Unreleased
+
+### Added
+
+- Sheets: one document can hold several sheets, as an Excel file. The grid created with `new FreeSheet` is the first
+  sheet (`Sheet1`); `addSheet(id, { name, data, … })` adds more and returns their grids, and `getSheet`,
+  `getSheets`, `getActiveSheet`, `activateSheet`, `renameSheet`, `removeSheet`, `moveSheet`, `getSheetId` and
+  `getSheetName` work from any sheet. The `sheets` setting creates sheets with the grid, `sheetName` and `sheetId`
+  name the first one, `sheetTabs` controls the tab bar. The tab bar below the sheets switches sheets, adds one (+),
+  renames one (double click), deletes or moves one (right click, or drag). New events `before/afterSheetAdd`,
+  `…Activate`, `…Rename`, `…Remove` and `afterSheetMove`. With formulas, sheets share one engine: `=Costs!B2`
+  works, renaming a sheet updates the formulas, removing it shows `#REF!`. `sheetTabsPosition: 'top'` puts the
+  tabs above the sheets. `getDocument()` returns every sheet (data with formulas, changed sizes, merged cells, cell
+  formats) as JSON-safe data, and `loadDocument()` loads it back. With `formulaBar`, `sheets` or `sheetTabs` set at
+  creation, the given element holds the formula bar, the sheets and the tabs, and the sheet fills the height left.
+  New guide page and two examples.
+
 ## 0.5.0 (2026-10-16)
 
 Formulas, through the IronCalc engine (`formulas: { engine }`), and a formula bar above the grid. Large grids scroll

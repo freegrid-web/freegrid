@@ -1,6 +1,7 @@
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { addClass } from './../../helpers/dom/element';
+import { getWorkbookOf } from './../../workbook/workbook';
 
 /**
  * The part of a formula engine model the plugin uses. IronCalc's `Model` (`@ironcalc/wasm`) has it: rows and columns
@@ -15,6 +16,7 @@ export type FormulaModel = {
   deleteRows(sheet: number, row: number, count: number): void;
   insertColumns(sheet: number, column: number, count: number): void;
   deleteColumns(sheet: number, column: number, count: number): void;
+  rangeClearAll(sheet: number, row: number, column: number, row2: number, column2: number): void;
   pauseEvaluation(): void;
   resumeEvaluation(): void;
   evaluate(): void;
@@ -31,7 +33,6 @@ export type FormulasSettings = {
 
 /** The cell types of the engine (`getCellType`). */
 const CELL_TYPE = { NUMBER: 1, TEXT: 2, BOOLEAN: 4, ERROR: 16 };
-const SHEET = 0;
 /** The class of a formula cell whose result is an error (`#DIV/0!`, `#REF!`, …). */
 export const ERROR_CLASS_NAME = 'fs-formula-error';
 
@@ -65,8 +66,31 @@ const toInput = (value: unknown): string => {
  * removing rows and columns moves the references, and the grid's formulas are updated to match.
  */
 class Formulas extends BasePlugin {
-  /** The engine's model of the sheet, while the plugin is enabled. */
-  model: FormulaModel | null = null;
+  /** The largest area this sheet has filled in a shared model (cleared before the sheet loads its data again). */
+  #extent = { rows: 0, columns: 0 };
+
+  /** The model this grid created, while it has no document with other sheets (or holds that document). */
+  ownModel: FormulaModel | null = null;
+
+  /** The engine's model: the document's, shared by all its sheets, or this grid's own. */
+  get model(): FormulaModel | null {
+    const workbook = getWorkbookOf(this.hot);
+
+    return workbook && workbook.model ? workbook.model as unknown as FormulaModel : this.ownModel;
+  }
+
+  /** This grid's sheet in the engine's model (0 for a grid alone). */
+  sheet(): number {
+    const workbook = getWorkbookOf(this.hot);
+
+    if (!workbook) {
+      return 0;
+    }
+    const index = workbook.indexOf(this.hot);
+
+    // A sheet whose grid is being created by addSheet is the last one.
+    return index === -1 ? workbook.sheets.length - 1 : index;
+  }
 
   isEnabled(): boolean {
     const settings = this.hot.getSettings().formulas as FormulasSettings | undefined;
@@ -85,15 +109,15 @@ class Formulas extends BasePlugin {
     this.addHook('modifyData', (row: number, column: number, valueHolder: { value: unknown }, ioMode: string) =>
       this.onModifyData(row, column, valueHolder, ioMode));
     this.addHook('afterCreateRow', (index: number, amount: number) => this.onStructureChange(() =>
-      this.model!.insertRows(SHEET, index + 1, amount)));
+      this.model!.insertRows(this.sheet(), index + 1, amount)));
     this.addHook('afterRemoveRow', (_index: number, _amount: number, physicalRows: number[] = []) =>
       this.onStructureChange(() => [...physicalRows].sort((a, b) => b - a)
-        .forEach(row => this.model!.deleteRows(SHEET, row + 1, 1))));
+        .forEach(row => this.model!.deleteRows(this.sheet(), row + 1, 1))));
     this.addHook('afterCreateCol', (index: number, amount: number) => this.onStructureChange(() =>
-      this.model!.insertColumns(SHEET, index + 1, amount)));
+      this.model!.insertColumns(this.sheet(), index + 1, amount)));
     this.addHook('afterRemoveCol', (_index: number, _amount: number, physicalColumns: number[] = []) =>
       this.onStructureChange(() => [...physicalColumns].sort((a, b) => b - a)
-        .forEach(column => this.model!.deleteColumns(SHEET, column + 1, 1))));
+        .forEach(column => this.model!.deleteColumns(this.sheet(), column + 1, 1))));
     this.addHook('afterRenderer', (TD: HTMLTableCellElement, row: number, column: number) =>
       this.onAfterRenderer(TD, row, column));
 
@@ -139,26 +163,43 @@ class Formulas extends BasePlugin {
       return;
     }
     const settings = this.hot.getSettings().formulas as FormulasSettings;
+    const workbook = getWorkbookOf(this.hot);
+    const sheet = this.sheet();
 
-    this.freeModel();
-    this.model = new settings.engine('FreeSheet', settings.locale || 'en', settings.timezone || 'UTC',
-      settings.language || 'en');
-    this.model.pauseEvaluation();
+    if (workbook && workbook.model) {
+      // A sheet of a document: only its own cells are loaded again. (Clearing the engine's whole sheet is not
+      // possible: the engine fails on a range that large.)
+      const rowsToClear = Math.max(this.#extent.rows, this.hot.countSourceRows());
+      const columnsToClear = Math.max(this.#extent.columns, this.hot.countSourceCols());
+
+      if (rowsToClear > 0 && columnsToClear > 0) {
+        this.model!.rangeClearAll(sheet, 1, 1, rowsToClear, columnsToClear);
+      }
+    } else {
+      this.freeModel();
+      this.ownModel = new settings.engine('FreeSheet', settings.locale || 'en', settings.timezone || 'UTC',
+        settings.language || 'en');
+    }
+    const model = this.model!;
+
+    model.pauseEvaluation();
 
     const rows = this.hot.countSourceRows();
     const columns = this.hot.countSourceCols();
+
+    this.#extent = { rows: Math.max(this.#extent.rows, rows), columns: Math.max(this.#extent.columns, columns) };
 
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
         const input = toInput(this.readSource(row, column));
 
         if (input !== '') {
-          this.model.setUserInput(SHEET, row + 1, column + 1, input);
+          model.setUserInput(sheet, row + 1, column + 1, input);
         }
       }
     }
-    this.model.resumeEvaluation();
-    this.model.evaluate();
+    model.resumeEvaluation();
+    model.evaluate();
   }
 
   /** Kept for undo, which reports restored cells; the full recalculation that follows covers them. */
@@ -194,7 +235,7 @@ class Formulas extends BasePlugin {
       const physicalColumn = this.hot.toPhysicalColumn(this.hot.propToCol(prop) as number);
 
       if (physicalRow !== null && physicalRow >= 0 && physicalColumn !== null && physicalColumn >= 0) {
-        this.model!.setUserInput(SHEET, physicalRow + 1, physicalColumn + 1, toInput(value));
+        this.model!.setUserInput(this.sheet(), physicalRow + 1, physicalColumn + 1, toInput(value));
       }
     });
     this.model.evaluate();
@@ -213,8 +254,8 @@ class Formulas extends BasePlugin {
   /** The result of a cell in the engine (1-based row and column). */
   getResult(row: number, column: number): unknown {
     const model = this.model!;
-    const text = model.getFormattedCellValue(SHEET, row, column);
-    const type = model.getCellType(SHEET, row, column);
+    const text = model.getFormattedCellValue(this.sheet(), row, column);
+    const type = model.getCellType(this.sheet(), row, column);
 
     if (type === CELL_TYPE.BOOLEAN) {
       return text === 'TRUE';
@@ -236,14 +277,36 @@ class Formulas extends BasePlugin {
     }
     change();
     this.model.evaluate();
+    this.#extent = {
+      rows: Math.max(this.#extent.rows, this.hot.countSourceRows()),
+      columns: Math.max(this.#extent.columns, this.hot.countSourceCols()),
+    };
 
+    const workbook = getWorkbookOf(this.hot);
+
+    // References in other sheets may have moved too.
+    if (workbook && workbook.model) {
+      workbook.syncFormulas();
+    } else {
+      this.syncFormulas();
+    }
+  }
+
+  /** Writes the engine's formulas (with moved references) into this sheet's data. */
+  syncFormulas(): void {
+    const model = this.model;
+
+    if (!model) {
+      return;
+    }
+    const sheet = this.sheet();
     const rows = this.hot.countSourceRows();
     const columns = this.hot.countSourceCols();
 
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
         if (isFormula(this.readSource(row, column))) {
-          this.writeSource(row, column, this.model.getCellContent(SHEET, row + 1, column + 1));
+          this.writeSource(row, column, model.getCellContent(sheet, row + 1, column + 1));
         }
       }
     }
@@ -256,16 +319,17 @@ class Formulas extends BasePlugin {
     const physicalRow = this.hot.toPhysicalRow(row);
     const physicalColumn = this.hot.toPhysicalColumn(column);
 
-    if (this.model.getCellType(SHEET, physicalRow + 1, physicalColumn + 1) === CELL_TYPE.ERROR) {
+    if (this.model.getCellType(this.sheet(), physicalRow + 1, physicalColumn + 1) === CELL_TYPE.ERROR) {
       addClass(TD, ERROR_CLASS_NAME);
     }
   }
 
+  /** Frees the model this grid created (a document's shared model is freed with the grid that holds it). */
   freeModel(): void {
-    if (this.model && typeof this.model.free === 'function') {
-      this.model.free();
+    if (this.ownModel && typeof this.ownModel.free === 'function') {
+      this.ownModel.free();
     }
-    this.model = null;
+    this.ownModel = null;
   }
 }
 

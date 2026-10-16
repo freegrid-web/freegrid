@@ -139,4 +139,68 @@ describe('Formulas', () => {
 
     expect(getDataAtCell(0, 1)).toBe(2);
   });
+
+  describe('with sheets', () => {
+    afterEach(() => $('.fs-sheet-tabs').remove());
+
+    it('refers to other sheets by name', () => {
+      const hot = grid([['=Costs!B1*2']]);
+      const costs = hot.addSheet('costs', { name: 'Costs', data: [['Rent', 600]] });
+
+      expect(hot.getDataAtCell(0, 0)).toBe(1200);
+
+      costs.setDataAtCell(0, 1, 700);
+      expect(hot.getDataAtCell(0, 0)).toBe(1400);
+    });
+
+    it('sums another sheet in a sheet created by the `sheets` setting', () => {
+      const hot = grid([[10], [20]], {
+        sheetName: 'Sales',
+        sheets: [{ id: 'summary', name: 'Summary', data: [['=SUM(Sales!A1:A2)']] }],
+      });
+
+      expect(hot.getSheet('summary').getDataAtCell(0, 0)).toBe(30);
+    });
+
+    it('follows a renamed sheet in the formulas of the other sheets', () => {
+      const hot = grid([['=Costs!A1+1']]);
+
+      hot.addSheet('costs', { name: 'Costs', data: [[5]] });
+      hot.renameSheet('costs', 'Expenses');
+
+      expect(hot.getSourceDataAtCell(0, 0)).toBe('=Expenses!A1+1');
+      expect(hot.getDataAtCell(0, 0)).toBe(6);
+    });
+
+    it('shows #REF! for references to a removed sheet', () => {
+      const hot = grid([['=Costs!A1']]);
+
+      hot.addSheet('costs', { name: 'Costs', data: [[5]] });
+      hot.removeSheet('costs');
+
+      expect(hot.getDataAtCell(0, 0)).toBe('#REF!');
+    });
+
+    it('moves references in other sheets when rows are inserted', () => {
+      const hot = grid([['=Costs!A2']]);
+      const costs = hot.addSheet('costs', { name: 'Costs', data: [[1], [2]] });
+
+      costs.alter('insert_row', 0, 1);
+
+      expect(hot.getSourceDataAtCell(0, 0)).toBe('=Costs!A3');
+      expect(hot.getDataAtCell(0, 0)).toBe(2);
+    });
+
+    it('keeps each sheet\'s cells when one sheet loads new data', () => {
+      const hot = grid([[1, '=Costs!A1']]);
+      const costs = hot.addSheet('costs', { name: 'Costs', data: [[5]] });
+
+      costs.loadData([[9]]);
+      expect(hot.getDataAtCell(0, 1)).toBe(9);
+
+      hot.loadData([[2, '=Costs!A1*A1']]);
+      expect(hot.getDataAtCell(0, 1)).toBe(18);
+    });
+  });
 });
+

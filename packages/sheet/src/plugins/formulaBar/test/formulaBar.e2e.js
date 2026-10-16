@@ -133,9 +133,18 @@ describe('FormulaBar', () => {
     expect(getSelectedLast()).toEqual([0, 1, 0, 1]);
   });
 
-  it('is as wide as the drawn grid, not as its container', () => {
+  it('fills the width of the element given to the grid (the frame)', () => {
     spec().$container.css('width', '800px');
     handsontable({ data: [[1, 2], [3, 4]], formulaBar: true });
+
+    expect(bar().parentElement).toBe(spec().$container[0]);
+    expect(bar().getBoundingClientRect().width).toBe(800);
+  });
+
+  it('is as wide as the drawn grid when it is turned on later (outside the grid\'s element)', () => {
+    spec().$container.css('width', '800px');
+    handsontable({ data: [[1, 2], [3, 4]] });
+    updateSettings({ formulaBar: true });
 
     const table = spec().$container.find('.fs-master table')[0];
 

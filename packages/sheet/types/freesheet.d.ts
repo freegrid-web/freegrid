@@ -27,6 +27,18 @@ declare namespace _FreeSheet {
     getCellEditor<T extends FreeSheet._editors.Base>(row: number, col: number): T;
     getCellMeta(row: number, col: number): FreeSheet.GridSettings;
     getColumnMeta(column: number): FreeSheet.GridSettings;
+    addSheet(id?: string, settings?: FreeSheet.GridSettings & { name?: string }): Core;
+    getSheet(id: string): Core | null;
+    getSheets(): Array<{ id: string; name: string }>;
+    getActiveSheet(): Core;
+    activateSheet(id: string): void;
+    renameSheet(id: string, name: string): void;
+    removeSheet(id: string): void;
+    moveSheet(id: string, index: number): void;
+    getSheetId(): string;
+    getSheetName(): string;
+    getDocument(): { version: 1; activeSheet: string; sheets: Array<{ id: string; name: string; data: any[]; colWidths?: Array<number | null>; rowHeights?: Array<number | null>; mergeCells?: Array<{ row: number; col: number; rowspan: number; colspan: number }>; cell?: object[] }> };
+    loadDocument(document: object): void;
     getCellMetaAtRow(row: number): FreeSheet.GridSettings[];
     getCellRenderer(row: number, col: number): FreeSheet.renderers.Base;
     getCellValidator(row: number, col: number): (value: any, callback: (valid: boolean) => void) => void | RegExp | undefined;
