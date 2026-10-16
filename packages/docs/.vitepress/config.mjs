@@ -7,6 +7,10 @@ export default defineConfigWithTheme({
   title: 'FreeSheet',
   description: 'A free, MIT-licensed, spreadsheet-like data grid for the web.',
   base: '/sheet/',
+  vite: {
+    // Pre-bundling would move IronCalc's wasm.js away from wasm_bg.wasm, which it loads by a relative URL.
+    optimizeDeps: { exclude: ['@ironcalc/wasm'] },
+  },
   lang: 'en-US',
   lastUpdated: true,
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/sheet/logo.svg' }]],

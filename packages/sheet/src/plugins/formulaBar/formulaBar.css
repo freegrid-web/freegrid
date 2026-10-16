@@ -1,0 +1,61 @@
+/*
+ * The formula bar (the formulaBar setting): a strip on top of the grid, in the headers' colors, as wide as the grid,
+ * with two inputs that look like cells: [ address ] fx [ value ].
+ */
+.fs-formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 4px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-bottom: 0;
+  background: var(--fs-header-background);
+  color: var(--fs-cell-text);
+  font: inherit;
+}
+
+.fs-formula-bar__name,
+.fs-formula-bar__input {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 26px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-radius: 3px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-formula-bar__name {
+  flex: 0 0 80px;
+  text-align: center;
+}
+
+.fs-formula-bar__input {
+  flex: 1 1 auto;
+}
+
+.fs-formula-bar__fx {
+  padding: 0 2px;
+  color: var(--fs-header-text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  user-select: none;
+}
+
+.fs-formula-bar__name:focus,
+.fs-formula-bar__input:focus {
+  border-color: var(--fs-selection-border-color);
+  outline: 1px solid var(--fs-selection-border-color);
+  outline-offset: 0;
+}
+
+/* An address that is not a cell of the sheet (its title says why). */
+.fs-formula-bar__name--invalid,
+.fs-formula-bar__name--invalid:focus {
+  border-color: var(--fs-color-invalid);
+  outline-color: var(--fs-color-invalid);
+}

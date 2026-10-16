@@ -18,5 +18,6 @@ export default async function createGrid(container) {
     colHeaders: true,
     contextMenu: true,
     formulas: { engine: Model },
+    formulaBar: true,
   });
 }
