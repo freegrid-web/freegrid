@@ -48,6 +48,9 @@ with `tools/in-playwright-docker.sh` (from `packages/sheet`):
 ../../tools/in-playwright-docker.sh pnpm test:walkontable     # Walkontable's own specs
 ```
 
+All five at once, each in its own container (about 4 minutes instead of one after another), after `pnpm build`:
+`../../tools/test-browsers.sh` (one line per suite; logs in `/tmp/freesheet-browsers`).
+
 A subset: `node build/build-tests.js e2e` (bundles the specs), then
 `../../tools/in-playwright-docker.sh node test/runner/run.js --suite e2e --grep '<part of a spec name>'`.
 The browser tests run against `dist/`: run `pnpm build` after changing `src/`.
