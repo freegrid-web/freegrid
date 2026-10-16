@@ -1,0 +1,55 @@
+/* Nested rows: the expand/collapse button (▾ expanded, ▸ collapsed) and the indent of each level. */
+.freesheet .fs-nested-header {
+  position: relative;
+  text-align: left;
+}
+
+.freesheet td.fs-nested-cell {
+  position: relative;
+}
+
+.freesheet .fs-nested-toggle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -16px;
+  border-radius: 3px;
+  color: var(--fs-header-text, currentcolor);
+  cursor: pointer;
+}
+
+.freesheet td .fs-nested-toggle {
+  margin-left: -18px;
+  color: var(--fs-cell-text, currentcolor);
+}
+
+.freesheet .fs-nested-toggle::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 3px;
+  border: 4px solid transparent;
+  border-top-color: currentcolor;
+  border-bottom-width: 0;
+}
+
+.freesheet .fs-nested-toggle--collapsed::before {
+  top: 3px;
+  left: 5px;
+  border-width: 4px 0 4px 4px;
+  border-color: transparent transparent transparent currentcolor;
+}
+
+.freesheet .fs-nested-toggle:hover {
+  background: var(--fs-cell-border-color);
+}
+
+.freesheet td.fs-nested-parent {
+  font-weight: 600;
+}
+
+/* Rows shown only as parents of rows a filter keeps. */
+.freesheet td.fs-nested-context {
+  opacity: 0.55;
+}

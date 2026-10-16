@@ -2840,18 +2840,28 @@ DefaultSettings.prototype = {
   dragToScroll: true,
 
   /**
-   * @description
-   * Disable or enable the nested rows functionality - displaying nested structures in a two-dimensional data table.
+   * Nested rows: rows with children, as a tree grid. A row's children are in `__children`; a parent row expands and
+   * collapses them with the button in its row header (or in the first column). `true` turns it on; an object sets:
+   *  * `childrenKey`: the property with the children (default `'__children'`);
+   *  * `numbering`: `'flat'` (1, 2, 3, the default) or `'outline'` (1, 1.1, 1.2, 2) row numbers;
+   *  * `collapsed`: `true` starts with every parent collapsed; a number shows that many levels (1 = the top level);
+   *  * `toggle`: `'rowHeader'` (default) or `'column'` (the button and the indent in the first column);
+   *  * `indent`: pixels per level (default 16).
    *
-   * See [quick setup of the Nested rows](https://docs.handsontable.kbudnik/pro/next/demo-nested-rows.html).
+   * Rows must be objects. The API is `getPlugin('nestedRows')`: `expand`, `collapse`, `toggle`, `expandAll`,
+   * `collapseAll`, `isCollapsed`, `getParent`, `getChildren`, `getLevel`, `getRowNumber`, `addChild`, `indent`,
+   * `outdent`, `getSourceData` (the tree).
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
    * @example
    * ```js
    * nestedRows: true,
-   * ```
    *
-   * @pro
-   * @type {Boolean}
-   * @default false
+   * // or
+   * nestedRows: { childrenKey: 'children', numbering: 'outline', collapsed: 1 },
+   * ```
    */
   nestedRows: void 0,
 };

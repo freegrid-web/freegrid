@@ -20,6 +20,7 @@ import ManualColumnResize from './manualColumnResize/manualColumnResize';
 import ManualRowMove from './manualRowMove/manualRowMove';
 import ManualRowResize from './manualRowResize/manualRowResize';
 import MergeCells from './mergeCells/mergeCells';
+import NestedRows from './nestedRows/nestedRows';
 import MultipleSelectionHandles from './multipleSelectionHandles/multipleSelectionHandles';
 import ObserveChanges from './observeChanges/observeChanges';
 import Search from './search/search';
@@ -50,6 +51,7 @@ export {
   ManualRowResize,
   MergeCells,
   MultipleSelectionHandles,
+  NestedRows,
   ObserveChanges,
   PersistentState,
   Search,

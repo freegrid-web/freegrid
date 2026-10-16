@@ -34,6 +34,8 @@ export type SheetDocument = {
   hiddenColumns?: number[];
   /** Filter conditions (as `getPlugin('filters').exportConditions()` gives them). */
   filters?: AnyObject[];
+  /** Nested rows: the physical rows of the collapsed parents. */
+  collapsedRows?: number[];
   cell?: AnyObject[];
 };
 
@@ -62,7 +64,9 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   const saved: SheetDocument = {
     id: sheet.id,
     name: sheet.name,
-    data: JSON.parse(JSON.stringify(instance.getSourceData())),
+    // Nested rows: the tree, not the grid's rows.
+    data: JSON.parse(JSON.stringify(plugin('nestedRows')?.enabled ?
+      (plugin('nestedRows')!.getSourceData as () => unknown[])() : instance.getSourceData())),
   };
   const colWidths = columnResize?.enabled ? sparse(columnResize.manualColumnWidths as (number | undefined)[]) : void 0;
   const rowHeights = rowResize?.enabled ? sparse(rowResize.manualRowHeights as (number | undefined)[]) : void 0;
@@ -95,6 +99,12 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
 
   if (filters.length) {
     saved.filters = JSON.parse(JSON.stringify(filters));
+  }
+  const collapsedRows = plugin('nestedRows')?.enabled ? (plugin('nestedRows')!.getCollapsedRows as () => number[])() :
+    [];
+
+  if (collapsedRows.length) {
+    saved.collapsedRows = collapsedRows;
   }
   if (cell.length) {
     saved.cell = JSON.parse(JSON.stringify(cell));
@@ -820,6 +830,14 @@ export class Workbook {
     });
     this.root.updateSettings(settings);
     others.forEach(sheet => this.add(sheet.id, { name: sheet.name, ...sheetSettings(sheet) }));
+    // Nested rows: the parents that were collapsed.
+    saved.sheets.forEach((sheet) => {
+      const nestedRows = this.get(sheet.id)?.instance.getPlugin('nestedRows' as 'search') as unknown as AnyObject | undefined;
+
+      if (nestedRows?.enabled && sheet.collapsedRows) {
+        (nestedRows.setCollapsedRows as (rows: number[]) => void)(sheet.collapsedRows);
+      }
+    });
 
     if (saved.activeSheet && this.get(saved.activeSheet)) {
       this.activate(saved.activeSheet);

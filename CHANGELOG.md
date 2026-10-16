@@ -28,6 +28,17 @@
   by values (a checkbox list with search), Clear filter and Hide column. Items can be chosen and custom items added.
   A filtered column shows a funnel; the row numbers of a filtered sheet turn blue. New guide page and example.
 
+- Nested rows (`nestedRows`): rows with children in `__children` (or `childrenKey`), as a tree grid. A ▾/▸ button
+  in the row header (or `toggle: 'column'`, in the first column) expands and collapses a parent; Alt+Shift+→/←,
+  the context menu (Insert child row, Indent, Outdent, Expand/Collapse, Expand all, Collapse all) and the API
+  (`expand`, `collapse`, `toggle`, `expandAll`, `collapseAll`, `addChild`, `indent`, `outdent`, `getParent`,
+  `getChildren`, `getLevel`, `getRowNumber`, `getSourceData`). `numbering: 'outline'` numbers the rows 1, 1.1, 1.2;
+  `collapsed` starts collapsed. Sorting sorts each parent's children; filtering shows the matching rows and their
+  parents. Indent and Outdent never move rows, so formulas keep their references. `getDocument()` saves the tree and
+  the collapsed parents. New events `before/afterRowExpand`, `before/afterRowCollapse`; `beforeAddChild`,
+  `afterAddChild`, `beforeDetachChild` and `afterDetachChild` are fired. New guide page and example.
+- `beforeLoadData` event: a callback can return the data to load instead.
+
 ### Fixed
 
 - `getCellsMeta()` no longer returns empty entries for rows whose cells were never read.

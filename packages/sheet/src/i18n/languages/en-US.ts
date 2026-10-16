@@ -103,6 +103,13 @@ const dictionary: LanguageDictionary = {
   [C.COLUMN_MENU_SORT_ASC]: 'Sort A → Z',
   [C.COLUMN_MENU_SORT_DESC]: 'Sort Z → A',
   [C.COLUMN_MENU_CLEAR_SORT]: 'Clear sorting',
+
+  [C.NESTED_ROWS_EXPAND]: 'Expand',
+  [C.NESTED_ROWS_COLLAPSE]: 'Collapse',
+  [C.NESTED_ROWS_EXPAND_ALL]: 'Expand all',
+  [C.NESTED_ROWS_COLLAPSE_ALL]: 'Collapse all',
+  [C.NESTED_ROWS_INDENT]: 'Indent',
+  [C.NESTED_ROWS_OUTDENT]: 'Outdent',
 };
 
 export default dictionary;

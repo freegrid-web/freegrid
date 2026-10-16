@@ -22,6 +22,12 @@ import type { ColumnSortState, SortOrder, SortSettings } from './utils';
 import { getClassedToRemove, getClassesToAdd } from './domHelpers';
 import RowsMapper from './rowsMapper';
 import { getTranslator } from './../../utils/recordTranslator';
+
+/** What sorting needs from nested rows. */
+type NestedRowsSorting = {
+  enabled: boolean;
+  sortTree(entries: [number, ...unknown[]][], sortList: (list: [number, ...unknown[]][]) => void): number[];
+};
 import { rootComparator } from './rootComparator';
 import { registerRootComparator, sort } from './sortService';
 
@@ -517,12 +523,22 @@ class ColumnSorting extends BasePlugin {
       indexesWithData.push([visualRowIndex, ...getDataForSortedColumns(visualRowIndex)]);
     }
 
-    sort(
-      indexesWithData,
+    const sortList = (list: [number, ...unknown[]][]) => sort(
+      list,
       this.pluginKey,
       sortedColumnsList.map(physicalColumn => this.columnStatesManager.getSortOrderOfColumn(physicalColumn)),
       sortedColumnsList.map(physicalColumn => this.getColumnSettings(this.hot.toVisualColumn(physicalColumn)))
     );
+    const nestedRows = this.hot.getPlugin('nestedRows' as 'columnSorting') as unknown as NestedRowsSorting | undefined;
+
+    if (nestedRows?.enabled) {
+      // Each parent's children are sorted; the children stay under their parent.
+      const order = nestedRows.sortTree(indexesWithData, sortList);
+
+      indexesWithData.splice(0, indexesWithData.length, ...order.map(row => [row] as [number]));
+    } else {
+      sortList(indexesWithData);
+    }
 
     // Append spareRows
     for (let visualRowIndex = indexesWithData.length; visualRowIndex < numberOfRows; visualRowIndex += 1) {

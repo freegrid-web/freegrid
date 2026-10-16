@@ -143,3 +143,6 @@ autoColumnSize.samplesGenerator.setSampleCount(5);
 
 Handsontable.filters.registerCondition('even', { arity: 0, types: ['numeric'], test: value => Number(value) % 2 === 0 });
 const conditionNames: string[] = Handsontable.filters.getConditionNames();
+
+nestedRows.addChild(0, { name: 'child' });
+const rowNumber: string = nestedRows.getRowNumber(1);

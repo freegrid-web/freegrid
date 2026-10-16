@@ -96,6 +96,14 @@ export const TOPICS = [
     settings: ['filters', 'dropdownMenu'],
   },
   {
+    name: 'Nested rows',
+    description: 'Rows with children (a tree grid): expanding, collapsing, outline numbers.',
+    methods: [],
+    events: ['beforeRowExpand', 'afterRowExpand', 'beforeRowCollapse', 'afterRowCollapse', 'beforeAddChild',
+      'afterAddChild', 'beforeDetachChild', 'afterDetachChild', 'beforeLoadData'],
+    settings: ['nestedRows'],
+  },
+  {
     name: 'Rendering and scrolling',
     description: 'Size, rendering, scrolling and DOM access.',
     methods: ['render', 'getCell', 'getCoords', 'scrollViewportTo'],

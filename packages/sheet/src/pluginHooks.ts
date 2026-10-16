@@ -312,6 +312,17 @@ const REGISTERED_HOOKS: string[] = [
   'afterInit',
 
   /**
+   * Fired before data is loaded (by `loadData` or `updateSettings`). A callback can return the data to load instead,
+   * for example the rows of a tree.
+   *
+   * @event Hooks#beforeLoadData
+   * @param {Array} data The data to load.
+   * @param {Boolean} initialLoad Whether the data is loaded while the grid is created.
+   * @returns {Array|undefined} The data to load instead.
+   */
+  'beforeLoadData',
+
+  /**
    * Fired after new data is loaded (by `loadData` or `updateSettings` method) into the data source array.
    *
    * @event Hooks#afterLoadData
@@ -1621,50 +1632,77 @@ const REGISTERED_HOOKS: string[] = [
   'hiddenColumn',
 
   /**
-   * Fired by {@link NestedRows} plugin before adding a children to the NestedRows structure. This hook is fired when
-   * {@link Options#nestedRows} option is enabled.
+   * Fired before a row gets a child: a new child row (`addChild`, Insert child row) or a row moved under it (Indent).
+   * Return `false` to cancel.
    *
-   * @pro
    * @event Hooks#beforeAddChild
-   * @param {Object} parent The parent object.
-   * @param {Object|undefined} element The element added as a child. If `undefined`, a blank child was added.
-   * @param {Number|undefined} index The index within the parent where the new child was added. If `undefined`, the element was added as the last child.
+   * @param {Object} parent The parent row object.
+   * @param {Object|undefined} element The row that becomes its child (`undefined` for a new blank row).
+   * @returns {Boolean|undefined}
    */
   'beforeAddChild',
 
   /**
-   * Fired by {@link NestedRows} plugin after adding a children to the NestedRows structure. This hook is fired when
-   * {@link Options#nestedRows} option is enabled.
+   * Fired after a row got a child.
    *
-   * @pro
    * @event Hooks#afterAddChild
-   * @param {Object} parent The parent object.
-   * @param {Object|undefined} element The element added as a child. If `undefined`, a blank child was added.
-   * @param {Number|undefined} index The index within the parent where the new child was added. If `undefined`, the element was added as the last child.
+   * @param {Object} parent The parent row object.
+   * @param {Object} element The child row object.
    */
   'afterAddChild',
 
   /**
-   * Fired by {@link NestedRows} plugin before detaching a child from its parent. This hook is fired when
-   * {@link Options#nestedRows} option is enabled.
+   * Fired before a row moves up a level (Outdent). Return `false` to cancel.
    *
-   * @pro
    * @event Hooks#beforeDetachChild
-   * @param {Object} parent An object representing the parent from which the element is to be detached.
-   * @param {Object} element The detached element.
+   * @param {Object} parent The row's parent row object.
+   * @param {Object} element The row object.
+   * @returns {Boolean|undefined}
    */
   'beforeDetachChild',
 
   /**
-   * Fired by {@link NestedRows} plugin after detaching a child from its parent. This hook is fired when
-   * {@link Options#nestedRows} option is enabled.
+   * Fired after a row moved up a level (Outdent).
    *
-   * @pro
    * @event Hooks#afterDetachChild
-   * @param {Object} parent An object representing the parent from which the element was detached.
-   * @param {Object} element The detached element.
+   * @param {Object} parent Its former parent row object.
+   * @param {Object} element The row object.
    */
   'afterDetachChild',
+
+  /**
+   * Fired before a parent row's children are shown (nested rows). Return `false` to cancel.
+   *
+   * @event Hooks#beforeRowExpand
+   * @param {Number} row The parent's physical row index.
+   * @returns {Boolean|undefined}
+   */
+  'beforeRowExpand',
+
+  /**
+   * Fired after a parent row's children are shown (nested rows).
+   *
+   * @event Hooks#afterRowExpand
+   * @param {Number} row The parent's physical row index.
+   */
+  'afterRowExpand',
+
+  /**
+   * Fired before a parent row's children are hidden (nested rows). Return `false` to cancel.
+   *
+   * @event Hooks#beforeRowCollapse
+   * @param {Number} row The parent's physical row index.
+   * @returns {Boolean|undefined}
+   */
+  'beforeRowCollapse',
+
+  /**
+   * Fired after a parent row's children are hidden (nested rows).
+   *
+   * @event Hooks#afterRowCollapse
+   * @param {Number} row The parent's physical row index.
+   */
+  'afterRowCollapse',
 
   /**
    * Fired after the editor is opened and rendered.
