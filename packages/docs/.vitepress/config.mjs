@@ -33,6 +33,7 @@ export default defineConfigWithTheme({
           items: [
             { text: 'Configuration', link: '/guide/configuration' },
             { text: 'Cell types', link: '/guide/cell-types' },
+            { text: 'Formulas', link: '/guide/formulas' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },
@@ -47,6 +48,7 @@ export default defineConfigWithTheme({
           items: [
             { text: 'Basics', link: '/examples/basics' },
             { text: 'Cell types', link: '/examples/cell-types' },
+            { text: 'Formulas', link: '/examples/formulas' },
             { text: 'Merged cells and comments', link: '/examples/merged-cells-and-comments' },
             { text: '10,000 rows', link: '/examples/large-data' },
             { text: 'Search and languages', link: '/examples/search-and-languages' },

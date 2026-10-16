@@ -188,6 +188,9 @@ importers:
         specifier: workspace:*
         version: link:../sheet
     devDependencies:
+      '@ironcalc/wasm':
+        specifier: 0.8.4
+        version: 0.8.4
       playwright:
         specifier: 1.64.0
         version: 1.64.0
@@ -203,6 +206,9 @@ importers:
 
   packages/sheet:
     devDependencies:
+      '@ironcalc/wasm':
+        specifier: 0.8.4
+        version: 0.8.4
       jasmine-core:
         specifier: ^5.13.0
         version: 5.13.0
@@ -778,6 +784,9 @@ packages:
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
+
+  '@ironcalc/wasm@0.8.4':
+    resolution: {integrity: sha512-kdOr3nzb170Wrd2S371QEuCRC3q1EoBdu9CCOU06E3L2dr3cswOuSJmlJM4KHumqFaWEpWb2kiBfOz/szgZ/3Q==}
 
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
@@ -2812,6 +2821,8 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify/types@2.0.0': {}
+
+  '@ironcalc/wasm@0.8.4': {}
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
 

@@ -32,7 +32,7 @@ onMounted(async() => {
 
     create = module.default;
     await nextTick();
-    instance = create(container.value);
+    instance = await create(container.value);
   } catch (e) {
     error.value = e.message;
     throw e;
@@ -44,7 +44,7 @@ watch(gridStyle, async() => {
   await nextTick();
   if (create && container.value) {
     instance?.destroy();
-    instance = create(container.value);
+    instance = await create(container.value);
   }
 });
 
