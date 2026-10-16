@@ -249,8 +249,9 @@ class TableRenderer {
       return;
     }
     if (this.#wot.wtViewport.oversizedRows && this.#wot.wtViewport.oversizedRows[sourceRow]) {
-      // Deleted, not set to undefined: Viewport#getUniformRowHeight counts the rows that are still oversized.
+      // Deleted, not set to undefined: Viewport#getRowGeometry lists only the rows that are still oversized.
       delete this.#wot.wtViewport.oversizedRows[sourceRow];
+      this.#wot.wtViewport.oversizedRowsVersion += 1;
     }
   }
 
@@ -291,7 +292,10 @@ class TableRenderer {
       if ((!previousRowHeight && this.instance.wtSettings.settings.defaultRowHeight < rowInnerHeight ||
           previousRowHeight! < rowInnerHeight)) {
         rowInnerHeight += 1;
-        this.instance.wtViewport.oversizedRows[sourceRowIndex] = rowInnerHeight;
+        if (this.instance.wtViewport.oversizedRows[sourceRowIndex] !== rowInnerHeight) {
+          this.instance.wtViewport.oversizedRows[sourceRowIndex] = rowInnerHeight;
+          this.instance.wtViewport.oversizedRowsVersion += 1;
+        }
       }
     }
   }

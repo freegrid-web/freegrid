@@ -116,10 +116,10 @@ class TopOverlay extends Overlay {
    * @returns {Number} Height sum.
    */
   sumCellSizes(from: number, to: number): number {
-    const uniform = this.wot.wtViewport.getUniformRowHeight();
+    const geometry = this.wot.wtViewport.getRowGeometry();
 
-    if (uniform !== null) {
-      return Math.max(0, to - from) * uniform;
+    if (geometry !== null) {
+      return to > from ? geometry.positionOf(to) - geometry.positionOf(from) : 0;
     }
     const defaultRowHeight = this.wot.wtSettings.settings.defaultRowHeight;
     let row = from;

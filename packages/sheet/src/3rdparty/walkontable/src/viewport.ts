@@ -9,6 +9,7 @@ import {
 import { objectEach } from './../../../helpers/object';
 import EventManager from './../../../eventManager';
 import ViewportColumnsCalculator from './calculator/viewportColumns';
+import RowGeometry from './calculator/rowGeometry';
 import ViewportRowsCalculator from './calculator/viewportRows';
 
 /**
@@ -18,6 +19,9 @@ class Viewport {
   #engine: Walkontable;
   declare instance: Walkontable;
   declare oversizedRows: (number | undefined)[];
+  /** Changes whenever `oversizedRows` changes (see getRowGeometry). */
+  oversizedRowsVersion = 0;
+  #rowGeometry: { height: number; totalRows: number; version: number; geometry: RowGeometry } | null = null;
   declare oversizedColumnHeaders: (number | undefined)[];
   declare hasOversizedColumnHeadersMarked: Record<string, boolean | undefined>;
   declare clientHeight: number;
@@ -216,22 +220,32 @@ class Viewport {
    * @returns {Number}
    */
   /**
-   * The height of every row when all rows have the same height, or `null`. It is the same height only when the
-   * `rowHeightsUniform` setting says so and no rendered row turned out higher (oversized).
+   * The row geometry when every row has the same base height (only some rendered rows turned out taller), or `null`.
+   * It is rebuilt only when the base height, the number of rows or the taller rows change.
    */
-  getUniformRowHeight(): number | null {
+  getRowGeometry(): RowGeometry | null {
     const engine = this.#engine;
-
+    const totalRows = engine.getSetting('totalRows') as number;
     const rowHeightsUniform = engine.wtSettings.settings.rowHeightsUniform as () => boolean;
 
-    if (engine.getSetting('totalRows') === 0 || !rowHeightsUniform() ||
-      Object.keys(this.oversizedRows).length > 0) {
+    if (totalRows === 0 || !rowHeightsUniform()) {
       return null;
     }
-    const height = engine.wtTable.getRowHeight(0);
-    const uniform = (height === void 0 ? engine.wtSettings.settings.defaultRowHeight : height) as number;
+    // The base height, without the measured (oversized) height of row 0.
+    const setHeight = (engine.wtSettings.settings.rowHeight as (row: number) => number | undefined)(0);
+    const height = (setHeight === void 0 ? engine.wtSettings.settings.defaultRowHeight : setHeight) as number;
 
-    return Number.isFinite(uniform) && uniform > 0 ? uniform : null;
+    if (!(Number.isFinite(height) && height > 0)) {
+      return null;
+    }
+    const cache = this.#rowGeometry;
+
+    if (!cache || cache.height !== height || cache.totalRows !== totalRows || cache.version !== this.oversizedRowsVersion) {
+      this.#rowGeometry = { height, totalRows, version: this.oversizedRowsVersion,
+        geometry: new RowGeometry(height, totalRows, this.oversizedRows) };
+    }
+
+    return this.#rowGeometry!.geometry;
   }
 
   getViewportHeight() {
@@ -376,7 +390,7 @@ class Viewport {
       (visible ? null : this.#engine.wtSettings.settings.viewportRowCalculatorOverride) as ConstructorParameters<typeof ViewportRowsCalculator>[4],
       visible,
       scrollbarHeight,
-      this.getUniformRowHeight()
+      this.getRowGeometry()
     );
   }
 

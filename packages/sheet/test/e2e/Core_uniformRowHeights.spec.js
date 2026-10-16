@@ -63,4 +63,23 @@ describe('Row geometry with one height for every row', () => {
     expect(firstRenderedRowText()).not.toBe('');
     expect(hot.getCell(800, 0).textContent).toBe('A801');
   });
+
+  it('places rows correctly after scrolling past many taller rows', () => {
+    const data = Handsontable.helper.createSpreadsheetData(2000, 3);
+
+    for (let row = 0; row < 2000; row += 50) {
+      data[row][0] = 'line\nline\nline';
+    }
+    const hot = handsontable({ data, width: 300, height: 300 });
+
+    [500, 1000, 1500].forEach((row) => {
+      hot.scrollViewportTo(row, 0);
+      hot.render();
+    });
+
+    expect(hot.view.wt.wtTable.getFirstVisibleRow()).toBe(1500);
+    expect(hot.getCell(1501, 0).textContent).toBe('A1502');
+    expect(hot.view.wt.wtViewport.getRowGeometry()).not.toBeNull();
+  });
 });
+
