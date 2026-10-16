@@ -1,72 +1,59 @@
-/* The formula bar above the grid (the formulaBar setting). Colors come from the grid's theme variables. */
+/*
+ * The formula bar (the formulaBar setting): a strip on top of the grid, in the headers' colors, as wide as the grid.
+ * [ address | fx | value ]
+ */
 .fs-formula-bar {
   display: flex;
   align-items: stretch;
-  gap: 6px;
   box-sizing: border-box;
-  margin-bottom: 4px;
-  font: inherit;
+  height: 30px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-bottom: 0;
+  background: var(--fs-header-background);
   color: var(--fs-cell-text);
+  font: inherit;
 }
 
 .fs-formula-bar__name,
 .fs-formula-bar__input {
   box-sizing: border-box;
-  height: 26px;
-  padding: 0 6px;
-  border: 1px solid var(--fs-cell-border-color);
-  border-radius: 2px;
-  background: var(--fs-cell-background);
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
   color: inherit;
   font: inherit;
 }
 
 .fs-formula-bar__name {
-  flex: 0 0 90px;
-  min-width: 0;
+  flex: 0 0 88px;
+  padding: 0 8px;
+  border-right: 1px solid var(--fs-cell-border-color);
+  background: transparent;
+  color: var(--fs-header-text);
+  text-align: center;
+}
+
+.fs-formula-bar__fx {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-right: 1px solid var(--fs-cell-border-color);
+  color: var(--fs-header-text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  user-select: none;
 }
 
 .fs-formula-bar__input {
   flex: 1 1 auto;
-  min-width: 0;
+  padding: 0 8px;
+  background: var(--fs-cell-background);
 }
 
 .fs-formula-bar__name:focus,
 .fs-formula-bar__input:focus {
   outline: 2px solid var(--fs-selection-border-color);
-  outline-offset: -1px;
-}
-
-.fs-formula-bar__buttons {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--fs-header-text);
-}
-
-.fs-formula-bar__button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 2px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.fs-formula-bar__button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.fs-formula-bar__button:not(:disabled):hover {
-  background: var(--fs-header-background);
-}
-
-.fs-formula-bar__fx {
-  padding: 0 4px;
-  font-style: italic;
-  font-family: Georgia, 'Times New Roman', serif;
+  outline-offset: -2px;
 }

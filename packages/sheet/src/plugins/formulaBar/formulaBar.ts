@@ -31,8 +31,6 @@ class FormulaBar extends BasePlugin {
   element: HTMLDivElement | null = null;
   nameBox: HTMLInputElement | null = null;
   input: HTMLInputElement | null = null;
-  #cancelButton: HTMLButtonElement | null = null;
-  #confirmButton: HTMLButtonElement | null = null;
   /** The cell the bar shows, as visual coordinates. */
   #cell: [number, number] | null = null;
   #mirroredEditors = new WeakSet<HTMLTextAreaElement>();
@@ -51,6 +49,7 @@ class FormulaBar extends BasePlugin {
     this.addHook('afterChange', () => this.refresh());
     this.addHook('afterLoadData', () => this.refresh());
     this.addHook('afterBeginEditing', () => this.mirrorEditor());
+    this.addHook('afterRender', () => this.matchGridWidth());
 
     super.enablePlugin();
     this.refresh();
@@ -78,28 +77,36 @@ class FormulaBar extends BasePlugin {
 
     bar.className = 'fs-formula-bar';
     bar.innerHTML = '<input class="fs-formula-bar__name" type="text" aria-label="Cell address" spellcheck="false">' +
-      '<span class="fs-formula-bar__buttons">' +
-      '<button class="fs-formula-bar__button" type="button" title="Cancel" aria-label="Cancel">✕</button>' +
-      '<button class="fs-formula-bar__button" type="button" title="Enter" aria-label="Enter">✓</button>' +
-      '<span class="fs-formula-bar__fx" aria-hidden="true">fx</span></span>' +
+      '<span class="fs-formula-bar__fx" aria-hidden="true">fx</span>' +
       '<input class="fs-formula-bar__input" type="text" aria-label="Cell value or formula" spellcheck="false">';
 
     this.element = bar;
     this.nameBox = bar.querySelector('.fs-formula-bar__name');
     this.input = bar.querySelector('.fs-formula-bar__input');
-    [this.#cancelButton, this.#confirmButton] = Array.from(bar.querySelectorAll('button'));
 
     // A click in the bar is not a click outside the grid: the selection stays.
     bar.addEventListener('mousedown', event => event.stopPropagation());
     // While the bar has the focus, the grid does not take the keyboard.
     bar.addEventListener('focusin', () => this.hot.unlisten());
-    this.input!.addEventListener('input', () => this.setButtonsEnabled(true));
     this.input!.addEventListener('keydown', event => this.onInputKeyDown(event));
     this.nameBox!.addEventListener('keydown', event => this.onNameKeyDown(event));
-    this.#cancelButton!.addEventListener('click', () => this.cancel());
-    this.#confirmButton!.addEventListener('click', () => this.confirm());
 
     root.parentNode?.insertBefore(bar, root);
+    this.matchGridWidth();
+  }
+
+  /** The bar is as wide as the drawn grid (its table and vertical scrollbar), not as its container. */
+  matchGridWidth(): void {
+    const wtTable = this.hot.view?.wt?.wtTable;
+
+    if (!this.element || !wtTable) {
+      return;
+    }
+    const holder = wtTable.holder as HTMLElement;
+    const scrollbar = holder.offsetWidth - holder.clientWidth;
+    const width = Math.min(this.hot.rootElement.offsetWidth, (wtTable.TABLE as HTMLElement).offsetWidth + scrollbar);
+
+    this.element.style.width = width > 0 ? `${width}px` : '';
   }
 
   removeElement(): void {
@@ -107,8 +114,6 @@ class FormulaBar extends BasePlugin {
     this.element = null;
     this.nameBox = null;
     this.input = null;
-    this.#cancelButton = null;
-    this.#confirmButton = null;
     this.#cell = null;
   }
 
@@ -128,7 +133,6 @@ class FormulaBar extends BasePlugin {
       this.#cell = null;
       this.nameBox!.value = '';
       this.input!.value = '';
-      this.setButtonsEnabled(false);
 
       return;
     }
@@ -142,7 +146,6 @@ class FormulaBar extends BasePlugin {
     this.nameBox!.value = top === bottom && left === right ? address(top, left) :
       `${address(top, left)}:${address(bottom, right)}`;
     this.input!.value = this.sourceText(this.#cell[0], this.#cell[1]);
-    this.setButtonsEnabled(false);
   }
 
   /** The cell's source value as text (a formula as its formula). */
@@ -212,13 +215,6 @@ class FormulaBar extends BasePlugin {
         this.input.value = textarea.value;
       }
     });
-  }
-
-  setButtonsEnabled(enabled: boolean): void {
-    if (this.#cancelButton && this.#confirmButton) {
-      this.#cancelButton.disabled = !enabled;
-      this.#confirmButton.disabled = !enabled;
-    }
   }
 }
 
