@@ -25,6 +25,14 @@ new FreeSheet(container, {
 });
 ```
 
+With Vite's dev server, exclude the package from dependency pre-bundling; otherwise `init()` cannot find the
+WebAssembly file and fails with "expected magic word 00 61 73 6d":
+
+```js
+// vite.config.js
+export default { optimizeDeps: { exclude: ['@ironcalc/wasm'] } };
+```
+
 FreeSheet is tested with `@ironcalc/wasm` 0.8.4. Optional settings: `locale`, `timezone` and `language`, passed to
 the engine (default `'en'`, `'UTC'`, `'en'`).
 
