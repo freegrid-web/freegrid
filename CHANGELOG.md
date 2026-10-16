@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.6.0 (2026-10-16)
+
+Sheets: one document with several sheets and a tab bar, as in Excel. Formulas work across sheets (`=Costs!B2`).
+`getDocument()` and `loadDocument()` save and load the whole document.
+
 ### Added
 
 - Sheets: one document can hold several sheets, as an Excel file. The grid created with `new FreeSheet` is the first
