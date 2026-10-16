@@ -19,7 +19,8 @@
     an object-based grid: about 27 → 17 ms);
   - writing to nested properties (`a.b.c`) splits the property path once, which helps large pastes.
 - Scrolling and jumping deep into a large grid no longer adds up the height of every row above the viewport when all
-  rows have the same height (no per-row `rowHeights`, no `modifyRowHeight` hook, no row taller than its height).
+  rows have the same base height (no per-row `rowHeights`, no `modifyRowHeight` hook). Rows that turn out taller,
+  for example with wrapped text, are added on top without slowing this down.
   At 1,000,000 rows the 95th-percentile frame gap while scrolling fell from about 150 to 33 ms, and a jump to the
   middle from about 132 to 29 ms. Other grids keep the previous calculation.
 

@@ -1,3 +1,5 @@
+import type RowGeometry from './rowGeometry';
+
 /**
  * Calculates indexes of rows to render OR rows that are visible.
  * To redo the calculation, you need to create a new calculator.
@@ -13,7 +15,7 @@ class ViewportRowsCalculator {
     overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null;
     onlyFullyVisible?: boolean;
     horizontalScrollbarHeight?: number;
-    uniformRowHeight?: number | null;
+    geometry?: RowGeometry | null;
   };
   declare count: number;
   declare startRow: number | null;
@@ -40,7 +42,7 @@ class ViewportRowsCalculator {
    */
   constructor(viewportHeight: number, scrollOffset: number, totalRows: number,
               rowHeightFn: (row: number) => number | undefined, overrideFn?: ((calculator: ViewportRowsCalculator) => void) | null,
-              onlyFullyVisible?: boolean, horizontalScrollbarHeight?: number, uniformRowHeight?: number | null) {
+              onlyFullyVisible?: boolean, horizontalScrollbarHeight?: number, geometry?: RowGeometry | null) {
     this.#options = {
       viewportHeight,
       scrollOffset,
@@ -49,7 +51,7 @@ class ViewportRowsCalculator {
       overrideFn,
       onlyFullyVisible,
       horizontalScrollbarHeight,
-      uniformRowHeight
+      geometry
     };
 
     /**
@@ -99,30 +101,29 @@ class ViewportRowsCalculator {
     const totalRows = options.totalRows;
     const viewportHeight = options.viewportHeight;
     const horizontalScrollbarHeight = options.horizontalScrollbarHeight || 0;
-    // With one height for every row (the caller checks that), a row's position is `row × height`: the rows above the
-    // viewport are skipped instead of being summed one by one.
-    const uniform = options.uniformRowHeight;
-    const isUniform = typeof uniform === 'number' && uniform > 0 && Number.isFinite(uniform);
-    const positionOf = (row: number) => (isUniform ? row * (uniform as number) : startPositions[row]);
+    // With a row geometry (every row has the same base height; the caller checks that), a row's position is computed,
+    // not summed: the rows above the viewport are skipped instead of being asked for their height one by one.
+    const geometry = options.geometry || null;
+    const positionOf = (row: number) => (geometry ? geometry.positionOf(row) : startPositions[row]);
     let rowHeight!: number;
     let firstRow = 0;
 
     // Rows before `firstRow` end above the viewport, so in the loop below they would only set `startRow` and `endRow`
     // to themselves (when not only fully visible rows count). Skip them, keeping one row of margin.
-    if (isUniform && viewportHeight - horizontalScrollbarHeight > 0) {
-      firstRow = Math.min(totalRows, Math.max(0, Math.floor(scrollOffset / (uniform as number)) - 1));
+    if (geometry && viewportHeight - horizontalScrollbarHeight > 0) {
+      firstRow = Math.min(totalRows, Math.max(0, geometry.rowAt(scrollOffset) - 1));
 
       if (firstRow > 0 && !onlyFullyVisible) {
         this.startRow = firstRow - 1;
         this.endRow = firstRow - 1;
       }
-      sum = firstRow * (uniform as number);
-      rowHeight = uniform as number;
+      sum = geometry.positionOf(firstRow);
+      rowHeight = geometry.heightOf(Math.max(0, firstRow - 1));
     }
 
     // Calculate the number (start and end index) of rows needed
     for (let i = firstRow; i < totalRows; i++) {
-      rowHeight = isUniform ? uniform as number : rowHeightFn(i) as number;
+      rowHeight = geometry ? geometry.heightOf(i) : rowHeightFn(i) as number;
 
       if (isNaN(rowHeight)) {
         rowHeight = ViewportRowsCalculator.DEFAULT_HEIGHT;
@@ -138,7 +139,7 @@ class ViewportRowsCalculator {
         }
         this.endRow = i;
       }
-      if (!isUniform) {
+      if (!geometry) {
         startPositions.push(sum);
       }
       sum += rowHeight;
