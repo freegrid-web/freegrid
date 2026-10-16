@@ -191,6 +191,51 @@ describe('Core sheets', () => {
     expect(tabNames()).toEqual(['c', 'Sheet1', 'b']);
   });
 
+  it('keeps the tabs below the sheets after a tab is moved, or above them with sheetTabsPosition: top', () => {
+    const hot = handsontable({ data: [[1]] });
+
+    hot.addSheet('b');
+    hot.addSheet('c');
+    hot.moveSheet('c', 1);
+
+    const tabsBar = document.querySelector('.fs-sheet-tabs');
+    const roots = hot.getSheets().map(({ id }) => hot.getSheet(id).rootElement);
+
+    roots.forEach(root => expect(root.compareDocumentPosition(tabsBar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy());
+
+    hot.updateSettings({ sheetTabsPosition: 'top' });
+    roots.forEach(root => expect(root.compareDocumentPosition(tabsBar) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy());
+  });
+
+  it('moves a dropped tab before or after the tab under the pointer', () => {
+    const hot = handsontable({ data: [[1]] });
+
+    hot.addSheet('b');
+    hot.addSheet('c');
+
+    const drop = (draggedIndex, targetIndex, side) => {
+      const [dragged, target] = [tabs()[draggedIndex], tabs()[targetIndex]];
+      const rect = target.getBoundingClientRect();
+      const clientX = side === 'after' ? rect.right - 2 : rect.left + 2;
+      const dataTransfer = new DataTransfer();
+
+      dragged.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer }));
+      target.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, clientX, dataTransfer }));
+      expect(target.classList.contains(`fs-sheet-tab--drop-${side}`)).toBe(true);
+      target.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, clientX, dataTransfer }));
+    };
+
+    drop(2, 0, 'after'); // c after Sheet1
+    expect(hot.getSheets().map(sheet => sheet.id)).toEqual(['sheet1', 'c', 'b']);
+
+    drop(0, 2, 'after'); // Sheet1 to the end
+    expect(hot.getSheets().map(sheet => sheet.id)).toEqual(['c', 'b', 'sheet1']);
+
+    drop(2, 0, 'before'); // Sheet1 to the front
+    expect(hot.getSheets().map(sheet => sheet.id)).toEqual(['sheet1', 'c', 'b']);
+    expect(document.querySelector('.fs-sheet-tab--drop-before, .fs-sheet-tab--drop-after')).toBeNull();
+  });
+
   it('runs the sheet events on the first sheet, and lets them cancel', () => {
     const events = [];
     const hot = handsontable({

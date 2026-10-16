@@ -72,7 +72,7 @@ export const TOPICS = [
       'moveSheet', 'getSheetId', 'getSheetName'],
     events: ['beforeSheetAdd', 'afterSheetAdd', 'beforeSheetActivate', 'afterSheetActivate', 'beforeSheetRename',
       'afterSheetRename', 'beforeSheetRemove', 'afterSheetRemove', 'afterSheetMove'],
-    settings: ['sheetId', 'sheetName', 'sheets', 'sheetTabs'],
+    settings: ['sheetId', 'sheetName', 'sheets', 'sheetTabs', 'sheetTabsPosition'],
   },
   {
     name: 'Rows and columns',

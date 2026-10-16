@@ -46,6 +46,8 @@ export class Workbook {
   #tabs: HTMLDivElement | null = null;
   #menu: HTMLDivElement | null = null;
   #counter = 1;
+  /** The sheet whose tab is being dragged. */
+  #draggedId: string | null = null;
   #onDocumentMouseDown = (event: MouseEvent) => {
     if (this.#menu && !this.#menu.contains(event.target as Node)) {
       this.closeMenu();
@@ -352,16 +354,13 @@ export class Workbook {
       this.#tabs = document.createElement('div');
       this.#tabs.addEventListener('mousedown', event => event.stopPropagation());
     }
-    const lastElement = this.sheets[this.sheets.length - 1].instance.rootElement;
-
-    if (this.#tabs.previousSibling !== lastElement) {
-      lastElement.parentNode!.insertBefore(this.#tabs, lastElement.nextSibling);
-    }
+    this.placeTabs();
     const themeClasses = Array.from(this.root.rootElement.classList).filter(name => /^fs-(theme|style)-/.test(name));
     const scrollLeft = this.#tabs.querySelector('.fs-sheet-tabs__list')?.scrollLeft || 0;
 
     this.#tabs.className = ['fs-sheet-tabs', ...themeClasses].join(' ');
     this.#tabs.textContent = '';
+    this.placeTabs();
 
     const button = (className: string, label: string, text: string, onClick: (event: MouseEvent) => void) => {
       const element = document.createElement('button');
@@ -396,14 +395,50 @@ export class Workbook {
         event.preventDefault();
         this.openSheetMenu(sheet, event.clientX, event.clientY);
       });
-      tab.addEventListener('dragstart', event => event.dataTransfer?.setData('text/plain', sheet.id));
-      tab.addEventListener('dragover', event => event.preventDefault());
+      // Dragging a tab: a line before or after the tab under the pointer shows where it goes.
+      const after = (event: DragEvent) => {
+        const rect = tab.getBoundingClientRect();
+
+        return event.clientX > rect.left + rect.width / 2;
+      };
+      const clearMarks = () => list.querySelectorAll('.fs-sheet-tab--drop-before, .fs-sheet-tab--drop-after')
+        .forEach(element => element.classList.remove('fs-sheet-tab--drop-before', 'fs-sheet-tab--drop-after'));
+
+      tab.addEventListener('dragstart', (event) => {
+        this.#draggedId = sheet.id;
+        event.dataTransfer?.setData('text/plain', sheet.id);
+      });
+      tab.addEventListener('dragend', () => {
+        this.#draggedId = null;
+        clearMarks();
+      });
+      tab.addEventListener('dragover', (event) => {
+        if (!this.#draggedId) {
+          return;
+        }
+        event.preventDefault();
+        clearMarks();
+        tab.classList.add(after(event) ? 'fs-sheet-tab--drop-after' : 'fs-sheet-tab--drop-before');
+      });
+      tab.addEventListener('dragleave', () => tab.classList.remove('fs-sheet-tab--drop-before',
+        'fs-sheet-tab--drop-after'));
       tab.addEventListener('drop', (event) => {
         event.preventDefault();
-        const draggedId = event.dataTransfer?.getData('text/plain');
+        const draggedId = this.#draggedId || event.dataTransfer?.getData('text/plain');
+        const dragged = draggedId ? this.get(draggedId) : undefined;
 
-        if (draggedId && this.get(draggedId)) {
-          this.move(draggedId, index);
+        clearMarks();
+        this.#draggedId = null;
+
+        if (dragged) {
+          // The place among the other tabs: before or after this one.
+          const from = this.sheets.indexOf(dragged);
+          let to = index + (after(event) ? 1 : 0);
+
+          if (from < to) {
+            to -= 1;
+          }
+          this.move(dragged.id, to);
         }
       });
       list.appendChild(tab);
@@ -448,6 +483,30 @@ export class Workbook {
     this.matchGridWidth();
     list.querySelector<HTMLElement>('.fs-sheet-tab--active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     this.updateFades(list);
+  }
+
+  /**
+   * Puts the tab bar after the sheets (or before them, `sheetTabsPosition: 'top'`). The place comes from the page,
+   * not from the order of the tabs: moving a tab does not move the sheets' elements.
+   */
+  placeTabs(): void {
+    const tabs = this.#tabs!;
+    const elements = this.sheets.flatMap((sheet) => {
+      const bar = this.formulaBarOf(sheet);
+
+      return bar ? [bar, sheet.instance.rootElement] : [sheet.instance.rootElement];
+    });
+    const inPageOrder = elements.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    const top = (this.root.getSettings() as AnyObject).sheetTabsPosition === 'top';
+    const anchor = top ? inPageOrder[0] : inPageOrder[inPageOrder.length - 1];
+
+    tabs.classList.toggle('fs-sheet-tabs--top', top);
+
+    if (top && tabs.nextSibling !== anchor) {
+      anchor.parentNode!.insertBefore(tabs, anchor);
+    } else if (!top && tabs.previousSibling !== anchor) {
+      anchor.parentNode!.insertBefore(tabs, anchor.nextSibling);
+    }
   }
 
   /** Fades the edges of the tab list where tabs are scrolled out of sight. */

@@ -17,7 +17,8 @@ hot.activateSheet('costs');
 
 The tab bar appears below the sheets as soon as there is more than one. Users switch sheets by clicking a tab, add
 one with **+**, rename one with a double click, and delete or move one from the tab's right-click menu or by
-dragging it. `sheetTabs: true` shows the tabs for a single sheet too (so users can add sheets); `false` hides them.
+dragging it (a line shows where it goes). `sheetTabs: true` shows the tabs for a single sheet too (so users can add
+sheets); `false` hides them. `sheetTabsPosition: 'top'` puts them above the sheets.
 
 To create several sheets at once, list them in the `sheets` setting:
 

@@ -99,6 +99,21 @@
   background: var(--fs-cell-background);
 }
 
+/* Where a dragged tab goes. */
+.fs-sheet-tab--drop-before {
+  box-shadow: inset 2px 0 0 var(--fs-selection-border-color);
+}
+
+.fs-sheet-tab--drop-after {
+  box-shadow: inset -2px 0 0 var(--fs-selection-border-color);
+}
+
+/* sheetTabsPosition: 'top' */
+.fs-sheet-tabs--top {
+  border-top: 1px solid var(--fs-cell-border-color);
+  border-bottom: 0;
+}
+
 .fs-sheet-tab--active {
   background: var(--fs-cell-background);
   color: var(--fs-cell-text);

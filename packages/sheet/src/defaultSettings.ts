@@ -2545,6 +2545,19 @@ DefaultSettings.prototype = {
   sheetTabs: void 0,
 
   /**
+   * Where the sheet tabs are: `'bottom'` (below the sheets, as in Excel) or `'top'` (above them).
+   *
+   * @type {String}
+   * @default 'bottom'
+   *
+   * @example
+   * ```js
+   * sheetTabsPosition: 'top',
+   * ```
+   */
+  sheetTabsPosition: 'bottom',
+
+  /**
    * @description
    * The {@link GanttChart} plugin enables a possibility to create a Gantt chart using a FreeSheet instance. In this
    * case, the whole table becomes read-only.

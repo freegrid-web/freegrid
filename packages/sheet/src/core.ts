@@ -1988,7 +1988,7 @@ class Core {
 
       this.runHooks('afterUpdateSettings', settings);
 
-      if (settings.sheetTabs !== void 0) {
+      if (settings.sheetTabs !== void 0 || settings.sheetTabsPosition !== void 0) {
         getWorkbook(this)?.renderTabs();
       }
     }
