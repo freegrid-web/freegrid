@@ -183,7 +183,7 @@ class NestedHeaders extends BasePlugin {
 
     container.className = 'relative fs-group-label';
     // Up to the group's last border (a header with a left border starts one pixel later).
-    container.style.width = `${Math.max(0, width - 1 - TH.clientLeft)}px`;
+    container.style.width = `${Math.max(0, width - 1 - (parseFloat(getComputedStyle(TH).borderLeftWidth) || 0))}px`;
     label.className = 'colHeader';
     label.textContent = group.label;
     TH.title = group.label;

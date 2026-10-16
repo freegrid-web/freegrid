@@ -32,9 +32,14 @@ describe('NestedHeaders and CollapsibleColumns', () => {
 
   it('draws a group label as wide as its columns', () => {
     const hot = handsontable({ data: data(), nestedHeaders, colWidths: 60 });
-    const label = headerRows()[0].querySelectorAll('th')[1].querySelector('.fs-group-label');
+    const ths = headerRows()[0].querySelectorAll('th');
+    const label = ths[1].querySelector('.fs-group-label');
 
-    expect(label.offsetWidth).toBe(5 * 60 - 1);
+    // From the group's first column up to the border of its last one.
+    expect(Math.abs(label.getBoundingClientRect().right - (ths[5].getBoundingClientRect().right - 1)))
+      .toBeLessThanOrEqual(1);
+    expect(Math.round(label.getBoundingClientRect().left)).toBeGreaterThanOrEqual(Math.round(ths[1]
+      .getBoundingClientRect().left));
     expect(hot.getPlugin('nestedHeaders').getGroup(0, 3)).toEqual({ label: '2026', columns: [1, 2, 3, 4, 5] });
   });
 
