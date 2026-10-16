@@ -18,6 +18,9 @@ new FreeSheet(container, {
 });
 ```
 
+A column can also say it itself: `{ data: 'notes', title: 'Notes', hidden: true }` in `columns` starts hidden (no
+`hiddenColumns` setting needed). See [Column groups](./column-groups).
+
 ## What a hidden row is
 
 A hidden row leaves the grid's visual order. `countRows()` counts the visible rows (`countSourceRows()` counts all),

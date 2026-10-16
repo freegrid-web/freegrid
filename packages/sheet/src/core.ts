@@ -34,6 +34,7 @@ import { translateRowsToColumns, cellMethodLookupFactory, spreadsheetColumnLabel
 import { getTranslator } from './utils/recordTranslator';
 import type { RecordTranslator } from './utils/recordTranslator';
 import { IndexVisibility } from './utils/indexVisibility';
+import { flattenColumns, isColumnTree, setColumnTree } from './utils/columnTree';
 import { setImmediate, clearImmediate } from './helpers/immediate';
 import { registerAsRootInstance, hasValidParameter } from './utils/rootInstance';
 import { CellCoords, ViewportColumnsCalculator } from './3rdparty/walkontable/src';
@@ -265,6 +266,11 @@ class Core {
 
     extend(this.#GridSettings.prototype, DefaultSettings.prototype); // create grid settings as a copy of default settings
     extend(this.#GridSettings.prototype, userSettings); // overwrite defaults with user settings
+    // Column groups: plugins see the columns without children (and the tree) from the start.
+    if (isColumnTree(userSettings.columns)) {
+      setColumnTree(this, userSettings.columns);
+      this.#GridSettings.prototype.columns = flattenColumns(userSettings.columns);
+    }
     extend(this.#GridSettings.prototype, expandType(userSettings));
 
     applyLanguageSetting(this.#GridSettings.prototype, userSettings.language);
@@ -1829,7 +1835,8 @@ class Core {
    * @fires Hooks#afterCellMetaReset
    * @fires Hooks#afterUpdateSettings
    */
-  updateSettings(settings: AnyObject, init: boolean = false) {
+  updateSettings(newSettings: AnyObject, init: boolean = false) {
+    let settings = newSettings;
     let columnsAsFunc = false;
     let i;
     let j;
@@ -1840,6 +1847,16 @@ class Core {
     }
     if (isDefined(settings.cols)) {
       throw new Error('"cols" setting is no longer supported. do you mean startCols, minCols or maxCols?');
+    }
+    // Column groups (`columns` inside a column): the grid gets the columns without children; the groups are kept for
+    // the header rows.
+    if (Array.isArray(settings.columns)) {
+      const tree = isColumnTree(settings.columns) ? settings.columns : null;
+
+      setColumnTree(this, tree);
+      if (tree) {
+        settings = { ...settings, columns: flattenColumns(tree) };
+      }
     }
 
     // The class names the grid has now (the loop below overwrites them).

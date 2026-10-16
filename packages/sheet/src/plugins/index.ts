@@ -2,6 +2,7 @@ import PersistentState from './persistentState/persistentState';
 import AutoColumnSize from './autoColumnSize/autoColumnSize';
 import AutoFill from './autofill/autofill';
 import AutoRowSize from './autoRowSize/autoRowSize';
+import CollapsibleColumns from './collapsibleColumns/collapsibleColumns';
 import ColumnSorting from './columnSorting/columnSorting';
 import Comments from './comments/comments';
 import ContextMenu from './contextMenu/contextMenu';
@@ -20,6 +21,7 @@ import ManualColumnResize from './manualColumnResize/manualColumnResize';
 import ManualRowMove from './manualRowMove/manualRowMove';
 import ManualRowResize from './manualRowResize/manualRowResize';
 import MergeCells from './mergeCells/mergeCells';
+import NestedHeaders from './nestedHeaders/nestedHeaders';
 import NestedRows from './nestedRows/nestedRows';
 import MultipleSelectionHandles from './multipleSelectionHandles/multipleSelectionHandles';
 import ObserveChanges from './observeChanges/observeChanges';
@@ -32,6 +34,7 @@ export {
   AutoColumnSize,
   AutoFill,
   AutoRowSize,
+  CollapsibleColumns,
   ColumnSorting,
   Comments,
   ContextMenu,
@@ -51,6 +54,7 @@ export {
   ManualRowResize,
   MergeCells,
   MultipleSelectionHandles,
+  NestedHeaders,
   NestedRows,
   ObserveChanges,
   PersistentState,

@@ -333,6 +333,22 @@ DefaultSettings.prototype = {
    *
    * __Note:__ Using this option sets a fixed number of columns (options `startCols`, `minCols`, `maxCols` will be ignored).
    *
+   * A column with `columns` of its own is a group: a header row above the column headers shows its `title` over its
+   * columns, and groups can be nested. A group with `collapsible: true` gets a − / + button (`collapsed: true` starts
+   * it collapsed); a collapsed group keeps the column marked `showWhenCollapsed: true` (or its first). A column with
+   * `hidden: true` starts hidden. `getSettings().columns` lists the columns without children.
+   *
+   * ```js
+   * columns: [
+   *   { data: 'region', title: 'Region' },
+   *   { title: '2026', collapsible: true, columns: [
+   *     { data: 'q1', title: 'Q1' },
+   *     { data: 'q2', title: 'Q2', hidden: true },
+   *     { data: 'total', title: 'Total', showWhenCollapsed: true },
+   *   ] },
+   * ],
+   * ```
+   *
    *
    * @type {Object[]|Function}
    * @default undefined
@@ -2342,33 +2358,17 @@ DefaultSettings.prototype = {
   bindRowsWithHeaders: void 0,
 
   /**
-   * @description
-   * The {@link CollapsibleColumns} plugin allows collapsing of columns, covered by a header with the `colspan` property
-   * defined.
+   * Collapsible groups for `nestedHeaders`: `true` (every group wider than one column) or a list of
+   * `{ row, col, show }` (`show`: `'first'`, `'last'` or an offset). Kept for older configurations: with groups in
+   * `columns`, use `collapsible: true` on the group and `showWhenCollapsed: true` on a column. The API is
+   * `getPlugin('collapsibleColumns')`: `collapse(level, column)`, `expand`, `isCollapsed`, `collapseAll`, `expandAll`.
    *
-   * Clicking the "collapse/expand" button collapses (or expands) all "child" headers except the first one.
-   *
-   * Setting the `collapsibleColumns` property to `true` will display a "collapse/expand" button in every
-   * header with a defined colspan` property.
-   *
-   * To limit this functionality to a smaller group of headers, define the `collapsibleColumns` property
-   * as an array of objects, as in the example below.
-   *
-   * @pro
    * @type {Boolean|Object[]}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable collapsing for all headers
-   * collapsibleColumns: true,
-   *
-   * // or
-   * // enable collapsing for selected headers
-   * collapsibleColumns: [
-   *   {row: -4, col: 1, collapsible: true},
-   *   {row: -3, col: 5, collapsible: true}
-   * ],
+   * collapsibleColumns: [{ row: 0, col: 1, show: 'last' }],
    * ```
    */
   collapsibleColumns: void 0,
@@ -2656,19 +2656,17 @@ DefaultSettings.prototype = {
   hiddenRows: void 0,
 
   /**
-   * @description
-   * Allows creating a nested header structure, using the HTML's colspan attribute.
+   * Header rows as lists of labels, `{ label, colspan }` for a header over several columns; the last row is the column
+   * headers. Kept for older configurations: groups in `columns` (a column with `columns`) say the same more simply.
    *
-   * @pro
    * @type {Array[]}
    * @default undefined
    *
    * @example
-   * ```
+   * ```js
    * nestedHeaders: [
-   *   ['A', {label: 'B', colspan: 8}, 'C'],
-   *   ['D', {label: 'E', colspan: 4}, {label: 'F', colspan: 4}, 'G'],
-   *   ['H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T']
+   *   ['Region', { label: '2026', colspan: 4 }],
+   *   ['', 'Q1', 'Q2', 'Q3', 'Q4'],
    * ],
    * ```
    */

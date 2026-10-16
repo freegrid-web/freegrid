@@ -104,6 +104,13 @@ export const TOPICS = [
     settings: ['nestedRows'],
   },
   {
+    name: 'Column groups',
+    description: 'Header rows with headers over several columns, and groups that collapse.',
+    methods: [],
+    events: ['beforeColumnCollapse', 'afterColumnCollapse', 'beforeColumnExpand', 'afterColumnExpand'],
+    settings: ['nestedHeaders', 'collapsibleColumns'],
+  },
+  {
     name: 'Rendering and scrolling',
     description: 'Size, rendering, scrolling and DOM access.',
     methods: ['render', 'getCell', 'getCoords', 'scrollViewportTo'],

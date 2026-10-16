@@ -60,6 +60,9 @@ the docs build and the docs smoke test (`pnpm --dir packages/docs test:smoke`, n
 - Rendering direction: keep DOM; Canvas is deferred. Read
   [the decision and performance handoff](docs/specs/2026-10-15-dom-rendering-and-canvas-decision.md) before
   proposing a rendering rewrite, framework cell hosts or further Canvas work.
+- Simple settings: a feature's settings go on the object they describe (a column in `columns`, a row object), not in
+  a separate setting that names columns or rows by index; indexes are for API methods. Older forms from Handsontable
+  (`nestedHeaders`, `collapsibleColumns` lists, …) keep working, documented as older, until `1.0`.
 - One topic per PR, to `main`, small enough to review. PR descriptions follow `.github/PULL_REQUEST_TEMPLATE.md`
   (What / Why / Tests); leave the two checkboxes unticked for the maintainer.
 - `main` is merged through a merge queue by the maintainer. A PR in the queue is locked: do not push to it; put a

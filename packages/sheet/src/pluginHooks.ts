@@ -1705,6 +1705,44 @@ const REGISTERED_HOOKS: string[] = [
   'afterRowCollapse',
 
   /**
+   * Fired before a group of columns is collapsed (collapsible columns). Return `false` to cancel.
+   *
+   * @event Hooks#beforeColumnCollapse
+   * @param {Number} level The group's header row (0 = the top).
+   * @param {Number} column The group's first physical column.
+   * @returns {Boolean|undefined}
+   */
+  'beforeColumnCollapse',
+
+  /**
+   * Fired after a group of columns is collapsed (collapsible columns).
+   *
+   * @event Hooks#afterColumnCollapse
+   * @param {Number} level The group's header row (0 = the top).
+   * @param {Number} column The group's first physical column.
+   */
+  'afterColumnCollapse',
+
+  /**
+   * Fired before a group of columns is expanded (collapsible columns). Return `false` to cancel.
+   *
+   * @event Hooks#beforeColumnExpand
+   * @param {Number} level The group's header row (0 = the top).
+   * @param {Number} column The group's first physical column.
+   * @returns {Boolean|undefined}
+   */
+  'beforeColumnExpand',
+
+  /**
+   * Fired after a group of columns is expanded (collapsible columns).
+   *
+   * @event Hooks#afterColumnExpand
+   * @param {Number} level The group's header row (0 = the top).
+   * @param {Number} column The group's first physical column.
+   */
+  'afterColumnExpand',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

@@ -61,7 +61,13 @@ With `<script>` tags, use `dist/languages/de-DE.js`.
   writes `fs-` alignment classes into `getCellMeta(...).className`.
 - **Editor, renderer and validator names** have the kind first (see below).
 - **Pro features** (filters, dropdown menu, hidden rows and columns, nested headers, export, formulas)
-  were never part of the MIT release. They are on the [roadmap](../project/roadmap), written from scratch.
+  were never part of the MIT release. FreeSheet writes them from scratch; most keep the familiar setting names
+  (`filters`, `dropdownMenu`, `hiddenRows`, `hiddenColumns`, `nestedRows`, `nestedHeaders`, `collapsibleColumns`),
+  see the [roadmap](../project/roadmap).
+- **Column groups:** `nestedHeaders` (rows of labels with `colspan`) and `collapsibleColumns: [{ row, col, show }]`
+  work, but the simpler form is groups in `columns`: a column with `columns`, `collapsible: true`, `collapsed: true`,
+  and `showWhenCollapsed: true` / `hidden: true` on a column (see [Column groups](./column-groups)). The older
+  settings will be removed in `1.0`.
 
 ## Editor, renderer and validator names
 

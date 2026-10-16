@@ -52,7 +52,15 @@ abstract class HiddenIndexes extends BasePlugin {
   }
 
   isEnabled(): boolean {
-    return !!this.hot.getSettings()[this.settingName];
+    return !!this.hot.getSettings()[this.settingName] || this.hiddenByColumns().length > 0;
+  }
+
+  /** Columns: the physical columns marked `hidden: true` in `columns`. */
+  hiddenByColumns(): number[] {
+    const columns = this.axis === 'column' ? this.hot.getSettings().columns : null;
+
+    return Array.isArray(columns) ? columns.flatMap((column: { hidden?: boolean } | null, index: number) =>
+      (column && column.hidden ? [index] : [])) : [];
   }
 
   enablePlugin(): void {
@@ -86,8 +94,10 @@ abstract class HiddenIndexes extends BasePlugin {
   onUpdateSettings(newSettings?: unknown): void {
     const setting = (newSettings as Record<string, unknown> | undefined)?.[this.settingName];
 
-    this.#listGiven = !!setting && typeof setting === 'object' &&
-      Object.prototype.hasOwnProperty.call(setting, this.axis === 'row' ? 'rows' : 'columns');
+    // The hidden columns are given again by `hiddenColumns.columns`, or by `columns` (`hidden: true`).
+    this.#listGiven = (!!setting && typeof setting === 'object' &&
+      Object.prototype.hasOwnProperty.call(setting, this.axis === 'row' ? 'rows' : 'columns')) ||
+      (this.axis === 'column' && !!newSettings && Object.prototype.hasOwnProperty.call(newSettings, 'columns'));
     super.onUpdateSettings(newSettings);
   }
 
@@ -104,7 +114,8 @@ abstract class HiddenIndexes extends BasePlugin {
   applySettings(): void {
     const indexes = this.axis === 'row' ? this.settings.rows : this.settings.columns;
 
-    this.visibility.setHidden(this.settingName, Array.isArray(indexes) ? indexes.filter(Number.isInteger) : null);
+    this.visibility.setHidden(this.settingName, [...(Array.isArray(indexes) ? indexes.filter(Number.isInteger) : []),
+      ...this.hiddenByColumns()]);
   }
 
   /** The number of physical rows (columns). */
