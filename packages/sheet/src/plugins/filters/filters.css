@@ -1,0 +1,4 @@
+/* While a filter hides rows, the row numbers take the accent color, as in Excel. */
+.freesheet.fs-has-filters tbody th {
+  color: var(--fs-filtered-row-header-text);
+}

@@ -88,6 +88,14 @@ export const TOPICS = [
     match: /^count|Header|^to(Visual|Physical)|^(un)?modify(Row|Col)|(Create|Remove)(Row|Col)$/,
   },
   {
+    name: 'Filters and the column menu',
+    description: 'Filtering rows by condition and by values, and the column menu in the headers.',
+    methods: [],
+    events: ['beforeFilter', 'afterFilter', 'beforeDropdownMenuShow', 'afterDropdownMenuShow', 'afterDropdownMenuHide',
+      'beforeDropdownMenuSetItems', 'afterDropdownMenuDefaultOptions'],
+    settings: ['filters', 'dropdownMenu'],
+  },
+  {
     name: 'Rendering and scrolling',
     description: 'Size, rendering, scrolling and DOM access.',
     methods: ['render', 'getCell', 'getCoords', 'scrollViewportTo'],

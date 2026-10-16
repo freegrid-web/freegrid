@@ -14,6 +14,20 @@
   New events `before/afterHideRows`, `before/afterUnhideRows`, `before/afterHideColumns`,
   `before/afterUnhideColumns`. New guide page and example.
 
+- Filters (`filters`): hide the rows whose values do not meet conditions. `getPlugin('filters')` with
+  `addCondition(column, name, args, operation)`, `removeConditions`, `clearConditions`, `filter`, `getConditions`,
+  `getColumnValues`, `exportConditions` and `importConditions`. Conditions for text, numbers and dates (`eq`,
+  `contains`, `gt`, `between`, `date_before`, `empty`, …), two per column joined with AND or OR, and value lists
+  (`by_value`). Filtered rows are hidden rows (selection, the arrow keys and copying skip them, sorting keeps the
+  filter); an edited row stays visible until the next filter unless `reapplyOnChange` is set. Events `beforeFilter`
+  (return `false` to cancel) and `afterFilter`; `getDocument()` saves the conditions.
+- Custom filter conditions: `FreeSheet.filters.registerCondition(name, { title, arity, types, test })` adds a
+  condition (or replaces a built-in one) for every grid; the column menu offers it for the column types it lists.
+  `FreeSheet.filters.getCondition` and `getConditionNames`.
+- Column menu (`dropdownMenu`): a ▾ button in each column header opens a menu with sorting, filtering by condition and
+  by values (a checkbox list with search), Clear filter and Hide column. Items can be chosen and custom items added.
+  A filtered column shows a funnel; the row numbers of a filtered sheet turn blue. New guide page and example.
+
 ### Fixed
 
 - `getCellsMeta()` no longer returns empty entries for rows whose cells were never read.

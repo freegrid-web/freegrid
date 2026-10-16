@@ -5,7 +5,7 @@ const dist = f => new URL(`../../dist/${f}`, import.meta.url);
 const read = f => readFileSync(dist(f), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ColumnSorting', 'Comments', 'ContextMenu',
-  'CopyPaste', 'CustomBorders', 'DragToScroll', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
+  'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize',
   'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'ObserveChanges',
   'PersistentState', 'Search', 'TouchScroll', 'UndoRedo'];
 
@@ -59,8 +59,9 @@ describe('dist outputs', () => {
     const names = object => Object.keys(object).sort();
 
     expect(names(FreeSheet)).toEqual(['Core', 'DefaultSettings', 'EventManager', '__GhostTable', '_getListenersCounter',
-      'buildDate', 'cellTypes', 'dom', 'editors', 'helper', 'hooks', 'languages', 'packageName', 'plugins', 'renderers',
-      'validators', 'version']);
+      'buildDate', 'cellTypes', 'dom', 'editors', 'filters', 'helper', 'hooks', 'languages', 'packageName', 'plugins',
+      'renderers', 'validators', 'version']);
+    expect(names(FreeSheet.filters)).toEqual(['getCondition', 'getConditionNames', 'registerCondition']);
     expect(names(FreeSheet.editors)).toEqual(['EditorAutocomplete', 'EditorBase', 'EditorCheckbox', 'EditorDate',
       'EditorDropdown', 'EditorHandsontable', 'EditorNumeric', 'EditorPassword', 'EditorSelect', 'EditorText',
       'EditorTime', 'getEditor', 'registerEditor']);

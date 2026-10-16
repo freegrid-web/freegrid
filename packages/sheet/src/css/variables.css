@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu) {
+  .fs-sheet-menu, .fs-dropdown-menu) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
@@ -121,6 +121,7 @@
   --fs-header-background: var(--fs-color-header-background, var(--fs-style-color-header-background)); /* Header background. */
   --fs-header-text: var(--fs-color-header-text, var(--fs-style-color-header-text)); /* Header text. */
   --fs-hidden-indicator-color: var(--fs-cell-border-color); /* The double line where rows or columns are hidden. */
+  --fs-filtered-row-header-text: var(--fs-color-accent, var(--fs-style-color-accent)); /* Row numbers while a filter hides rows. */
   --fs-hidden-indicator-gap: var(--fs-cell-background); /* The space between its two lines. */
   --fs-hidden-toggle-text: var(--fs-color-header-text, var(--fs-style-color-header-text, #777)); /* The arrows that show hidden rows or columns. */
   --fs-hidden-toggle-hover-background: var(--fs-color-accent, var(--fs-style-color-accent)); /* The arrow that shows hidden rows or columns, on hover. */

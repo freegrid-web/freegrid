@@ -93,3 +93,10 @@ export const FILTERS_BUTTONS_CANCEL = `${FILTERS_NAMESPACE}buttons.cancel`;
 export const FILTERS_BUTTONS_PLACEHOLDER_SEARCH = `${FILTERS_NAMESPACE}buttons.placeholder.search`;
 export const FILTERS_BUTTONS_PLACEHOLDER_VALUE = `${FILTERS_NAMESPACE}buttons.placeholder.value`;
 export const FILTERS_BUTTONS_PLACEHOLDER_SECOND_VALUE = `${FILTERS_NAMESPACE}buttons.placeholder.secondValue`;
+
+export const COLUMN_MENU_NAMESPACE = 'ColumnMenu:';
+export const COLUMN_MENU_BUTTON = `${COLUMN_MENU_NAMESPACE}button`;
+export const COLUMN_MENU_SORT_ASC = `${COLUMN_MENU_NAMESPACE}sortAscending`;
+export const COLUMN_MENU_SORT_DESC = `${COLUMN_MENU_NAMESPACE}sortDescending`;
+export const COLUMN_MENU_CLEAR_SORT = `${COLUMN_MENU_NAMESPACE}clearSort`;
+export const FILTERS_CLEAR_COLUMN = `${FILTERS_NAMESPACE}buttons.clearColumn`;

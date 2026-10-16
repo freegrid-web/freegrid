@@ -8,6 +8,8 @@ import ContextMenu from './contextMenu/contextMenu';
 import CopyPaste from './copyPaste/copyPaste';
 import CustomBorders from './customBorders/customBorders';
 import DragToScroll from './dragToScroll/dragToScroll';
+import DropdownMenu from './dropdownMenu/dropdownMenu';
+import Filters from './filters/filters';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
 import HiddenColumns from './hiddenColumns/hiddenColumns';
@@ -35,6 +37,8 @@ export {
   CopyPaste,
   CustomBorders,
   DragToScroll,
+  DropdownMenu,
+  Filters,
   FormulaBar,
   Formulas,
   HiddenColumns,

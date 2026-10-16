@@ -96,7 +96,13 @@ const dictionary: LanguageDictionary = {
 
   [C.FILTERS_BUTTONS_PLACEHOLDER_SEARCH]: 'Search',
   [C.FILTERS_BUTTONS_PLACEHOLDER_VALUE]: 'Value',
-  [C.FILTERS_BUTTONS_PLACEHOLDER_SECOND_VALUE]: 'Second value'
+  [C.FILTERS_BUTTONS_PLACEHOLDER_SECOND_VALUE]: 'Second value',
+  [C.FILTERS_CLEAR_COLUMN]: 'Clear filter',
+
+  [C.COLUMN_MENU_BUTTON]: 'Column menu',
+  [C.COLUMN_MENU_SORT_ASC]: 'Sort A → Z',
+  [C.COLUMN_MENU_SORT_DESC]: 'Sort Z → A',
+  [C.COLUMN_MENU_CLEAR_SORT]: 'Clear sorting',
 };
 
 export default dictionary;

@@ -33,6 +33,7 @@ import DefaultSettings from './defaultSettings';
 import { rootInstanceSymbol } from './utils/rootInstance';
 import { getTranslatedPhrase } from './i18n';
 import * as constants from './i18n/constants';
+import { registerCondition, getCondition, getConditionNames } from './plugins/filters/conditions';
 import { registerLanguageDictionary, getLanguagesDictionaries, getLanguageDictionary } from './i18n/dictionariesManager';
 
 /**
@@ -128,6 +129,13 @@ FreeSheet.validators = {
 FreeSheet.plugins = {
   ...Object.fromEntries(Object.entries(plugins).map(([name, plugin]) => [name === 'Base' ? 'BasePlugin' : name, plugin])),
   registerPlugin,
+};
+
+// Filter conditions: built-in ones and the ones added with `registerCondition`.
+FreeSheet.filters = {
+  registerCondition,
+  getCondition,
+  getConditionNames,
 };
 
 FreeSheet.languages = {
