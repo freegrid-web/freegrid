@@ -24,6 +24,8 @@ const PAGES = [
   { path: 'guide/sheets.html', grids: 0 },
   { path: 'examples/hidden-rows-and-columns.html', grids: 1 },
   { path: 'guide/hidden-rows-and-columns.html', grids: 0 },
+  { path: 'examples/filters.html', grids: 1 },
+  { path: 'guide/filters.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },

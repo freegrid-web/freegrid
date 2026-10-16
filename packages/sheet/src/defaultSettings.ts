@@ -2413,36 +2413,48 @@ DefaultSettings.prototype = {
   columnSummary: void 0,
 
   /**
-   * This plugin allows adding a configurable dropdown menu to the table's column headers. The dropdown menu acts like
-   * the {@link Options#contextMenu}, but is triggered by clicking the button in the header.
+   * The column menu: a ▾ button in each column header opens a menu with sorting (with `columnSorting`), filtering by
+   * condition and by values (with `filters`) and hiding the column (with `hiddenColumns`). `true` shows the items of
+   * the plugins that are on; a list chooses them: `sort_asc`, `sort_desc`, `clear_sort`, `filter_by_condition`,
+   * `filter_by_value`, `filter_action_bar` (OK and Cancel), `clear_filter`, `hide_column`, `---------` (a separator),
+   * and custom items `{ name, callback(column), disabled }`.
    *
-   * @pro
-   * @type {Boolean|Object|String[]}
+   * @type {Boolean|Array|Object}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable dropdown menu
    * dropdownMenu: true,
    *
    * // or
-   * // enable and configure dropdown menu options
-   * dropdownMenu: ['remove_col', '---------', 'make_read_only', 'alignment']
+   * dropdownMenu: ['sort_asc', 'sort_desc', '---------', 'filter_by_value', 'filter_action_bar',
+   *   { name: 'Show details', callback: column => showDetails(column) }],
    * ```
    */
   dropdownMenu: void 0,
 
   /**
-   * The {@link Filters} plugin allows filtering the table data either by the built-in component or with the API.
+   * Filters: rows whose values do not meet the conditions are hidden (they leave the visual order, as hidden rows do).
+   * Use the column menu (`dropdownMenu`) or the API: `getPlugin('filters')` with `addCondition(column, name, args,
+   * operation)`, `removeConditions`, `clearConditions`, `filter`, `getConditions`, `getColumnValues`,
+   * `exportConditions`, `importConditions`. An object can set:
+   *  * `conditions`: conditions applied at start, as `exportConditions()` gives them;
+   *  * `reapplyOnChange`: filter again after every change (by default an edited row stays visible until the next
+   *    filter, as in Excel).
    *
-   * @pro
-   * @type {Boolean}
+   * Conditions: `empty`, `not_empty`, `eq`, `neq`, `begins_with`, `ends_with`, `contains`, `not_contains`, `gt`, `gte`,
+   * `lt`, `lte`, `between`, `not_between`, `date_before`, `date_after`, `date_today`, `date_tomorrow`,
+   * `date_yesterday`, and `by_value` (a list of values to keep, as text).
+   *
+   * @type {Boolean|Object}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable filters
    * filters: true,
+   *
+   * // or
+   * filters: { conditions: [{ column: 1, operation: 'conjunction', conditions: [{ name: 'gt', args: [100] }] }] },
    * ```
    */
   filters: void 0,

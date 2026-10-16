@@ -1,0 +1,198 @@
+/* The ▾ button in the column headers: shown on hover, and always while the column is filtered or sorted. */
+.freesheet.fs-has-dropdown-menu thead th .relative {
+  padding-right: 20px;
+}
+
+.freesheet thead th .fs-dropdown-button {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--fs-header-text, currentcolor);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.freesheet thead th .fs-dropdown-button::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 4px;
+  border: 4px solid transparent;
+  border-top-color: currentcolor;
+  border-bottom-width: 0;
+}
+
+.freesheet thead th:hover .fs-dropdown-button,
+.freesheet thead th .fs-dropdown-button--active,
+.freesheet thead th .fs-dropdown-button--open {
+  opacity: 1;
+}
+
+.freesheet thead th .fs-dropdown-button:hover,
+.freesheet thead th .fs-dropdown-button--open {
+  border-color: var(--fs-cell-border-color);
+  background: var(--fs-cell-background);
+}
+
+/* A filtered column: a funnel instead of the arrow. */
+.freesheet thead th.fs-filtered .fs-dropdown-button {
+  color: var(--fs-selection-border-color);
+}
+
+.freesheet thead th.fs-filtered .fs-dropdown-button::before {
+  top: 4px;
+  left: 3px;
+  border-width: 5px 4px 0;
+  border-style: solid;
+  border-color: currentcolor transparent transparent;
+}
+
+.freesheet thead th.fs-filtered .fs-dropdown-button::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 6px;
+  width: 2px;
+  height: 4px;
+  background: currentcolor;
+}
+
+/* The menu. */
+.fs-dropdown-menu {
+  position: fixed;
+  z-index: 1060;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 240px;
+  max-height: calc(100vh - 8px);
+  padding: 4px 0;
+  overflow: auto;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-radius);
+  background: var(--fs-menu-background);
+  color: var(--fs-cell-text);
+  box-shadow: var(--fs-shadow);
+  font-family: var(--fs-font-family, var(--fs-style-font-family, inherit));
+  font-size: var(--fs-font-size, var(--fs-style-font-size, 13px));
+  text-align: left;
+}
+
+.fs-dropdown-menu__item {
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fs-dropdown-menu__item:not(:disabled):hover,
+.fs-dropdown-menu__item:focus-visible {
+  background: var(--fs-header-background);
+  outline: none;
+}
+
+.fs-dropdown-menu__item:disabled {
+  color: var(--fs-menu-disabled-text);
+  cursor: default;
+}
+
+.fs-dropdown-menu__separator {
+  margin: 4px 0;
+  border-top: 1px solid var(--fs-menu-border-color);
+}
+
+.fs-dropdown-menu__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 12px;
+}
+
+.fs-dropdown-menu__title {
+  font-weight: 600;
+}
+
+.fs-dropdown-menu select,
+.fs-dropdown-menu input[type="text"],
+.fs-dropdown-menu input[type="search"] {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-radius);
+  background: var(--fs-editor-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-dropdown-menu [hidden] {
+  display: none !important;
+}
+
+.fs-filter-operation {
+  display: flex;
+  gap: 12px;
+}
+
+.fs-filter-links {
+  display: flex;
+  gap: 12px;
+}
+
+.fs-filter-links button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fs-selection-border-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.fs-filter-values {
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-radius);
+}
+
+.fs-filter-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.fs-dropdown-menu__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.fs-dropdown-menu__actions button {
+  padding: 4px 12px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-radius);
+  background: var(--fs-menu-background);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fs-dropdown-menu__actions .fs-filter-ok {
+  border-color: var(--fs-selection-border-color);
+  background: var(--fs-selection-border-color);
+  color: var(--fs-cell-background);
+}

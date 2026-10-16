@@ -315,6 +315,12 @@ declare namespace FreeSheet {
   namespace plugins {
     // utils for Filters
     namespace FiltersPlugin {
+      type ColumnConditions = {
+        column: number;
+        operation: 'conjunction' | 'disjunction';
+        conditions: { name: string; args: any[] }[];
+      };
+
       type OperationType = 'conjunction' | 'disjunction';
       type ConditionName = 'begins_with' | 'between' | 'by_value' | 'contains' | 'empty' | 'ends_with' | 'eq' | 'gt' |
         'gte' | 'lt' | 'lte' | 'not_between' | 'not_contains' | 'not_empty' | 'neq';
@@ -826,15 +832,11 @@ declare namespace FreeSheet {
       name: string;
     }
     interface DropdownMenu extends Base {
-      eventManager: EventManager;
-      commandExecutor: CommandExecutor;
-      itemsFactory: ItemsFactory | void;
-      menu: Menu | void;
-      SEPARATOR: SeparatorObject
+      element: HTMLDivElement | null;
+      column: number | null;
 
+      open(column: number): void;
       close(): void;
-      executeCommand(commandName: string, ...params: any[]): void;
-      open(event: Event): void;
     }
 
     interface ExportFile extends Base {
@@ -844,23 +846,16 @@ declare namespace FreeSheet {
     }
 
     interface Filters extends Base {
-      actionBarComponent: FiltersPlugin.ActionBarComponent | void;
-      dropdownMenuPlugin: DropdownMenu | void;
-      eventManager: EventManager;
-      conditionComponent: FiltersPlugin.ConditionComponent | void;
-      conditionCollection: FiltersPlugin.ConditionCollection | void;
-      conditionUpdateObserver: FiltersPlugin.ConditionUpdateObserver | void;
-      lastSelectedColumn?: number | void;
-      trimRowsPlugin: TrimRows | void;
-      valueComponent: FiltersPlugin.ValueComponent | void;
-
-      addCondition(column: number, name: string, args: any[], operationId: FiltersPlugin.OperationType): void;
-      clearColumnSelection(): void;
-      clearConditions(column?: number | void): void;
-      getDataMapAtColumn(column: number): FiltersPlugin.CellLikeData[];
-      getSelectedColumn(): number | void;
-      filter(): void;
+      addCondition(column: number, name: string, args?: any[], operation?: 'conjunction' | 'disjunction'): void;
       removeConditions(column: number): void;
+      clearConditions(column?: number): void;
+      getConditions(column: number): { name: string; args: any[] }[];
+      getOperation(column: number): 'conjunction' | 'disjunction';
+      hasConditions(column: number): boolean;
+      getColumnValues(column: number): string[];
+      exportConditions(): FiltersPlugin.ColumnConditions[];
+      importConditions(conditions: FiltersPlugin.ColumnConditions[]): void;
+      filter(): void;
     }
 
     interface RecordTranslator {
@@ -1467,14 +1462,14 @@ declare namespace FreeSheet {
     defaultDate?: string;
     disableVisualSelection?: boolean | string | any[];
     dragToScroll?: boolean;
-    dropdownMenu?: boolean | object | any[]; // pro
+    dropdownMenu?: boolean | (string | { key?: string; name: string | ((column: number) => string); callback?: (column: number) => void; disabled?: boolean | ((column: number) => boolean) })[] | { items: any[] };
     editor?: string | (() => void) | boolean;
     enterBeginsEditing?: boolean;
     enterMoves?: object | (() => void);
     fillHandle?: boolean | string | object;
     filter?: boolean;
     filteringCaseSensitive?: boolean;
-    filters?: boolean; // pro
+    filters?: boolean | { conditions?: FreeSheet.plugins.FiltersPlugin.ColumnConditions[]; reapplyOnChange?: boolean };
     fixedColumnsLeft?: number;
     fixedRowsBottom?: number; // pro
     fixedRowsTop?: number;
@@ -1570,9 +1565,9 @@ declare namespace FreeSheet {
     afterDocumentKeyDown?: (event: Event) => void;
     afterDrawSelection?: (currentRow: number, currentColumn: number, cornersOfSelection: number[], layerLevel: number | void) => string | void
     afterDropdownMenuDefaultOptions?: (predefinedItems: any[]) => void;
-    afterDropdownMenuHide?: (instance: FreeSheet.plugins.DropdownMenu) => void;
-    afterDropdownMenuShow?: (instance: FreeSheet.plugins.DropdownMenu) => void;
-    afterFilter?: (formulasStack: any[]) => void;
+    afterDropdownMenuHide?: (column: number) => void;
+    afterDropdownMenuShow?: (column: number) => void;
+    afterFilter?: (conditions: FreeSheet.plugins.FiltersPlugin.ColumnConditions[]) => void;
     afterGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     afterGetColHeader?: (col: number, TH: Element) => void;
     afterGetColumnHeaderRenderers?: (array: any[]) => void;
@@ -1646,9 +1641,9 @@ declare namespace FreeSheet {
     beforeCut?: (data: any[], coords: any[]) => any;
     beforeDetachChild?: (parent: object, element: object) => void;
     beforeDrawBorders?: (corners: any[], borderClassName: string) => void;
-    beforeDropdownMenuSetItems?: (menuItems: any[]) => void;
-    beforeDropdownMenuShow?: (instance: FreeSheet.plugins.DropdownMenu) => void;
-    beforeFilter?: (formulasStack: any[]) => void;
+    beforeDropdownMenuSetItems?: (items: any[], column: number) => void;
+    beforeDropdownMenuShow?: (column: number) => void | boolean;
+    beforeFilter?: (conditions: FreeSheet.plugins.FiltersPlugin.ColumnConditions[]) => void | boolean;
     beforeGetCellMeta?: (row: number, col: number, cellProperties: GridSettings) => void;
     beforeInit?: () => void;
     beforeInitWalkontable?: (walkontableConfig: object) => void;
@@ -2083,6 +2078,16 @@ declare class FreeSheet extends _FreeSheet.Core {
   static version: string;
   static cellTypes: FreeSheet.CellTypes;
   static languages: FreeSheet.I18n.Internationalization;
+  static filters: {
+    registerCondition(name: string, condition: {
+      title?: string;
+      arity?: 0 | 1 | 2;
+      types?: string[];
+      test(value: any, args: any[], context: { type?: string; dateFormat?: string }): boolean;
+    }): void;
+    getCondition(name: string): { arity: number; title?: string; types?: string[] } | undefined;
+    getConditionNames(): string[];
+  };
   static dom: FreeSheet.Dom;
   static editors: FreeSheet.Editors;
   static helper: FreeSheet.Helper;

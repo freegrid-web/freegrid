@@ -130,24 +130,21 @@ const REGISTERED_HOOKS: string[] = [
   'beforeContextMenuSetItems',
 
   /**
-   * Fired by {@link DropdownMenu} plugin after setting up the Dropdown Menu's default options. These options are a
-   * collection which user can select by setting an array of keys or an array of objects in {@link Options#dropdownMenu}
-   * option.
+   * Not fired by FreeSheet; kept so configurations that listen to it still load. Use
+   * {@link Hooks#beforeDropdownMenuSetItems}.
    *
-   * @pro
    * @event Hooks#afterDropdownMenuDefaultOptions
-   * @param {Object[]} predefinedItems An array of objects containing information about the pre-defined Context Menu items.
+   * @param {Object[]} items The items.
    */
   'afterDropdownMenuDefaultOptions',
 
   /**
-   * Fired by {@link DropdownMenu} plugin before setting up the Dropdown Menu's items but after filtering these options
-   * by user (`dropdownMenu` option). This hook can by helpful to determine if user use specified menu item or to set
-   * up one of the menu item to by always visible.
+   * Fired before the column menu is built, with its items (keys such as `sort_asc` and custom items). Change the array
+   * to change the menu.
    *
-   * @pro
    * @event Hooks#beforeDropdownMenuSetItems
-   * @param {Object[]} menuItems An array of objects containing information about to generated Dropdown Menu items.
+   * @param {Array} items The items, in order.
+   * @param {Number} column The visual column of the menu.
    */
   'beforeDropdownMenuSetItems',
 
@@ -1338,61 +1335,22 @@ const REGISTERED_HOOKS: string[] = [
   'beforeStretchingColumnWidth',
 
   /**
-   * Fired by {@link Filters} plugin before applying [filtering]{@link https://github.com/freegrid-web/sheet}. This hook is fired when
-   * {@link Options#filters} option is enabled.
+   * Fired before `filter()` applies the conditions. Return `false` to cancel, for example to filter on a server.
    *
-   * @pro
    * @event Hooks#beforeFilter
-   * @param {Object[]} conditionsStack An array of objects with added formulas.
+   * @param {Object[]} conditions Every column's conditions, as `getPlugin('filters').exportConditions()` gives them:
    * ```js
-   * // Example format of the conditionsStack argument:
-   * [
-   *   {
-   *     column: 2,
-   *     conditions: [
-   *       {name: 'begins_with', args: [['S']]}
-   *     ],
-   *     operation: 'conjunction'
-   *   },
-   *   {
-   *     column: 4,
-   *     conditions: [
-   *       {name: 'not_empty', args: []}
-   *     ],
-   *     operation: 'conjunction'
-   *   },
-   * ]
+   * [{ column: 2, operation: 'conjunction', conditions: [{ name: 'begins_with', args: ['S'] }] }]
    * ```
-   * @returns {Boolean} If hook returns `false` value then filtering won't be applied on the UI side (server-side filtering).
+   * @returns {Boolean|undefined}
    */
   'beforeFilter',
 
   /**
-   * Fired by {@link Filters} plugin after applying [filtering]{@link https://github.com/freegrid-web/sheet}. This hook is fired when
-   * {@link Options#filters} option is enabled.
+   * Fired after `filter()` hid the rows that do not meet the conditions.
    *
-   * @pro
    * @event Hooks#afterFilter
-   * @param {Object[]} conditionsStack An array of objects with added conditions.
-   * ```js
-   * // Example format of the conditionsStack argument:
-   * [
-   *   {
-   *     column: 2,
-   *     conditions: [
-   *       {name: 'begins_with', args: [['S']]}
-   *     ],
-   *     operation: 'conjunction'
-   *   },
-   *   {
-   *     column: 4,
-   *     conditions: [
-   *       {name: 'not_empty', args: []}
-   *     ],
-   *     operation: 'conjunction'
-   *   },
-   * ]
-   * ```
+   * @param {Object[]} conditions Every column's conditions (physical columns), as for {@link Hooks#beforeFilter}.
    */
   'afterFilter',
 
@@ -1548,32 +1506,27 @@ const REGISTERED_HOOKS: string[] = [
   'afterUntrimRow',
 
   /**
-   * Fired by {@link DropdownMenu} plugin before opening the dropdown menu. This hook is fired when {@link Options#dropdownMenu}
-   * option is enabled.
+   * Fired before the column menu opens. Return `false` to keep it closed.
    *
-   * @pro
    * @event Hooks#beforeDropdownMenuShow
-   * @param {DropdownMenu} dropdownMenu The DropdownMenu instance.
+   * @param {Number} column The visual column.
+   * @returns {Boolean|undefined}
    */
   'beforeDropdownMenuShow',
 
   /**
-   * Fired by {@link DropdownMenu} plugin after opening the Dropdown Menu. This hook is fired when {@link Options#dropdownMenu}
-   * option is enabled.
+   * Fired after the column menu opened.
    *
-   * @pro
    * @event Hooks#afterDropdownMenuShow
-   * @param {DropdownMenu} dropdownMenu The DropdownMenu instance.
+   * @param {Number} column The visual column.
    */
   'afterDropdownMenuShow',
 
   /**
-   * Fired by {@link DropdownMenu} plugin after hiding the Dropdown Menu. This hook is fired when {@link Options#dropdownMenu}
-   * option is enabled.
+   * Fired after the column menu closed.
    *
-   * @pro
    * @event Hooks#afterDropdownMenuHide
-   * @param {DropdownMenu} instance The DropdownMenu instance.
+   * @param {Number} column The visual column it was open for.
    */
   'afterDropdownMenuHide',
 

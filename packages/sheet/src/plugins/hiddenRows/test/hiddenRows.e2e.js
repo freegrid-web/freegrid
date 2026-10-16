@@ -205,6 +205,19 @@ describe('HiddenRows', () => {
     expect(firstColumn()).toEqual(['A3', 'A4', 'A5', 'A6']);
   });
 
+  it('keeps the rows users hid when other settings change, and applies a changed hiddenRows setting', () => {
+    const hot = handsontable({ data: data(), hiddenRows: { rows: [1] } });
+
+    hot.getPlugin('hiddenRows').hideRows([2]);
+    updateSettings({ colWidths: 80 });
+
+    expect(hot.getPlugin('hiddenRows').getHiddenRows()).toEqual([1, 3]);
+
+    updateSettings({ hiddenRows: { rows: [0] } });
+
+    expect(hot.getPlugin('hiddenRows').getHiddenRows()).toEqual([0]);
+  });
+
   it('shows every row when turned off', () => {
     handsontable({ data: data(), hiddenRows: { rows: [1] } });
 

@@ -2293,6 +2293,10 @@ class Core {
    * @returns {Array} Array of cell values.
    */
   getDataAtCol(column: number) {
+    if (this.#lastRow() < 0) {
+      return [];
+    }
+
     return ([] as unknown[]).concat(...this.#datamap.getRange(new CellCoords(0, column), new CellCoords(this.#lastRow(), column), this.#datamap.DESTINATION_RENDERER));
   }
 
@@ -2308,6 +2312,9 @@ class Core {
    */
   // The values in visual row order (as getDataAtCol), read through the column's property.
   getDataAtProp(prop: Prop) {
+    if (this.#lastRow() < 0) {
+      return [];
+    }
     const range = this.#datamap.getRange(
       new CellCoords(0, this.#datamap.propToCol(prop)),
       new CellCoords(this.#lastRow(), this.#datamap.propToCol(prop)),

@@ -32,6 +32,8 @@ export type SheetDocument = {
   /** Hidden rows and columns (physical indexes). */
   hiddenRows?: number[];
   hiddenColumns?: number[];
+  /** Filter conditions (as `getPlugin('filters').exportConditions()` gives them). */
+  filters?: AnyObject[];
   cell?: AnyObject[];
 };
 
@@ -89,6 +91,11 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
       saved[name] = hidden;
     }
   });
+  const filters = plugin('filters')?.enabled ? (plugin('filters')!.exportConditions as () => AnyObject[])() : [];
+
+  if (filters.length) {
+    saved.filters = JSON.parse(JSON.stringify(filters));
+  }
   if (cell.length) {
     saved.cell = JSON.parse(JSON.stringify(cell));
   }
@@ -114,6 +121,9 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   }
   if (sheet.hiddenColumns) {
     settings.hiddenColumns = { columns: sheet.hiddenColumns };
+  }
+  if (sheet.filters) {
+    settings.filters = { conditions: sheet.filters };
   }
   settings.cell = sheet.cell || [];
 
@@ -801,7 +811,7 @@ export class Workbook {
       settings.mergeCells = [];
     }
     // The first sheet keeps its hiding options; what is hidden follows the saved sheet.
-    ([['hiddenRows', 'rows'], ['hiddenColumns', 'columns']] as const).forEach(([name, key]) => {
+    ([['hiddenRows', 'rows'], ['hiddenColumns', 'columns'], ['filters', 'conditions']] as const).forEach(([name, key]) => {
       const current = this.root.getSettings()[name];
 
       if (current || settings[name]) {

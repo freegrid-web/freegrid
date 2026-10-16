@@ -111,8 +111,13 @@ const contextMenu: Handsontable.plugins.ContextMenu = hot.getPlugin('contextMenu
 const copyPaste: Handsontable.plugins.CopyPaste = hot.getPlugin('copyPaste');
 const dragToScroll: Handsontable.plugins.DragToScroll = hot.getPlugin('dragToScroll');
 const dropdownMenu: Handsontable.plugins.DropdownMenu = hot.getPlugin('dropdownMenu');
+dropdownMenu.open(0);
+dropdownMenu.close();
 const exportFile: Handsontable.plugins.ExportFile = hot.getPlugin('exportFile');
 const filters: Handsontable.plugins.Filters = hot.getPlugin('filters');
+filters.addCondition(0, 'gt', [1], 'disjunction');
+filters.importConditions(filters.exportConditions());
+filters.filter();
 const headerTooltips: Handsontable.plugins.HeaderTooltips = hot.getPlugin('headerTooltips');
 const hiddenColumns: Handsontable.plugins.HiddenColumns = hot.getPlugin('hiddenColumns');
 const hiddenRows: Handsontable.plugins.HiddenRows = hot.getPlugin('hiddenRows');
@@ -135,3 +140,6 @@ const ganttChart: Handsontable.plugins.GanttChart = hot.getPlugin('ganttChart');
 const nestedRows: Handsontable.plugins.NestedRows = hot.getPlugin('nestedRows');
 
 autoColumnSize.samplesGenerator.setSampleCount(5);
+
+Handsontable.filters.registerCondition('even', { arity: 0, types: ['numeric'], test: value => Number(value) % 2 === 0 });
+const conditionNames: string[] = Handsontable.filters.getConditionNames();

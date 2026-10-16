@@ -80,11 +80,24 @@ abstract class HiddenIndexes extends BasePlugin {
     super.disablePlugin();
   }
 
+  /** Whether the last `updateSettings` gave the hidden rows (columns): only then are they set again. */
+  #listGiven = false;
+
+  onUpdateSettings(newSettings?: unknown): void {
+    const setting = (newSettings as Record<string, unknown> | undefined)?.[this.settingName];
+
+    this.#listGiven = !!setting && typeof setting === 'object' &&
+      Object.prototype.hasOwnProperty.call(setting, this.axis === 'row' ? 'rows' : 'columns');
+    super.onUpdateSettings(newSettings);
+  }
+
   updatePlugin(): void {
-    this.disablePlugin();
-    this.enablePlugin();
-    super.updatePlugin();
+    // Other settings changing keeps what users hid since.
+    if (this.#listGiven) {
+      this.applySettings();
+    }
     this.refresh();
+    super.updatePlugin();
   }
 
   /** Hides the rows (columns) the setting lists. */
