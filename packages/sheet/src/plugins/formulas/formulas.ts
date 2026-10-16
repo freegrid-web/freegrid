@@ -136,9 +136,20 @@ class Formulas extends BasePlugin {
     super.disablePlugin();
   }
 
+  /** Whether the last `updateSettings` gave `formulas` (only then is the engine's model made again). */
+  #engineGiven = false;
+
+  onUpdateSettings(newSettings?: unknown): void {
+    this.#engineGiven = !!newSettings && Object.prototype.hasOwnProperty.call(newSettings, 'formulas');
+    super.onUpdateSettings(newSettings);
+  }
+
   updatePlugin(): void {
-    this.disablePlugin();
-    this.enablePlugin();
+    // Other settings changing keeps the model (a document's sheets share it); new data is read by afterLoadData.
+    if (this.#engineGiven) {
+      this.disablePlugin();
+      this.enablePlugin();
+    }
     super.updatePlugin();
   }
 

@@ -35,6 +35,10 @@ declare namespace _FreeSheet {
     openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
+    exportFile(format?: 'xlsx' | 'csv', options?: { headers?: boolean; delimiter?: string }): Promise<Blob>;
+    downloadFile(format?: 'xlsx' | 'csv', filename?: string, options?: { headers?: boolean; delimiter?: string }): Promise<void>;
+    importFile(source: Blob | ArrayBuffer | Uint8Array | string,
+      options?: { headers?: boolean; delimiter?: string; format?: 'xlsx' | 'csv' }): Promise<void>;
     renameSheet(id: string, name: string): void;
     removeSheet(id: string): void;
     moveSheet(id: string, index: number): void;
@@ -1570,6 +1574,9 @@ declare namespace FreeSheet {
     afterConditionalFormattingChange?: (rules: FreeSheet.plugins.ConditionalFormattingRule[]) => void;
     afterPanelOpen?: (name: string) => void;
     afterPanelClose?: (name: string) => void;
+    beforeImportFile?: (format: 'xlsx' | 'csv', source: Blob | ArrayBuffer | Uint8Array | string) => void | boolean;
+    afterImportFile?: (format: 'xlsx' | 'csv') => void;
+    afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;

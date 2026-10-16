@@ -29,6 +29,11 @@ export type SheetDocument = {
   colWidths?: (number | null)[];
   rowHeights?: (number | null)[];
   mergeCells?: { row: number; col: number; rowspan: number; colspan: number }[];
+  /** Frozen rows at the top and columns at the left. */
+  fixedRowsTop?: number;
+  fixedColumnsLeft?: number;
+  /** Column headers (an imported file's first row). */
+  colHeaders?: string[];
   /** Hidden rows and columns (physical indexes). */
   hiddenRows?: number[];
   hiddenColumns?: number[];
@@ -46,7 +51,7 @@ export type SavedDocument = { version: 1; activeSheet: string; sheets: SheetDocu
 
 /** Cell settings a saved document keeps (what users change in the grid: comments, formats, read-only cells). */
 const SAVED_CELL_SETTINGS = ['comment', 'className', 'readOnly', 'type', 'numericFormat', 'dateFormat', 'timeFormat',
-  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap'];
+  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style'];
 
 const sparse = <T>(values: (T | undefined)[]): (T | null)[] | undefined => {
   if (!values.some(value => value !== void 0 && value !== null)) {
@@ -114,6 +119,14 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   if (collapsedRows.length) {
     saved.collapsedRows = collapsedRows;
   }
+  const { fixedRowsTop, fixedColumnsLeft } = instance.getSettings();
+
+  if (fixedRowsTop) {
+    saved.fixedRowsTop = fixedRowsTop;
+  }
+  if (fixedColumnsLeft) {
+    saved.fixedColumnsLeft = fixedColumnsLeft;
+  }
   if (cell.length) {
     saved.cell = JSON.parse(JSON.stringify(cell));
   }
@@ -146,7 +159,16 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   if (sheet.conditionalFormatting) {
     settings.conditionalFormatting = sheet.conditionalFormatting;
   }
+  settings.fixedRowsTop = sheet.fixedRowsTop || 0;
+  settings.fixedColumnsLeft = sheet.fixedColumnsLeft || 0;
+  if (sheet.colHeaders) {
+    settings.colHeaders = sheet.colHeaders;
+  }
   settings.cell = sheet.cell || [];
+  // Comments show with the comments plugin.
+  if (settings.cell.some((meta: AnyObject) => meta.comment)) {
+    settings.comments = true;
+  }
 
   return settings;
 };

@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Added
+
+- Excel (.xlsx) and CSV files, read and written by FreeSheet itself (no dependency): `exportFile(format, options)`
+  (a Blob), `downloadFile(format, filename, options)`, `importFile(source, options)` (an .xlsx file replaces the
+  document; CSV replaces the active sheet's data). An Excel file keeps the sheets, values and formulas (with their
+  results), number and date formats, cell styles and alignment, column widths and row heights, merged, hidden and
+  frozen cells, conditional formatting and comments. Options `headers` (the column headers as a first row) and
+  `delimiter` (CSV). Events `beforeImportFile`, `afterImportFile`, `afterExportFile`. New guide page and example.
+- Cell styles: the `style` cell setting (`fontWeight`, `fontStyle`, `textDecoration`, `color`, `background`,
+  `border`) draws on the cell, under conditional formatting; `getDocument()` keeps it.
+- `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
+
+### Fixed
+
+- `updateSettings` on a sheet with formulas no longer makes the formula engine's model again when `formulas` did not
+  change: in a document with several sheets this freed the model the other sheets use (`loadDocument` with formulas
+  failed).
+
 ## 0.7.0 (2026-10-17)
 
 FreeSheet becomes a data tool: hidden rows and columns, filters with a column menu (and conditions of your own),

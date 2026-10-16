@@ -592,7 +592,7 @@ class ConditionalFormatting extends BasePlugin {
 
   drawCell(TD: HTMLTableCellElement, row: number, column: number, value: unknown, context: ConditionContext): void {
     // The cell may have been another cell's before (cells are reused while scrolling).
-    this.clearCell(TD);
+    this.clearCell(TD, (context as { style?: Record<string, string> } | undefined)?.style);
     if (!this.#rules.length || row < 0 || column < 0) {
       return;
     }
@@ -682,7 +682,8 @@ class ConditionalFormatting extends BasePlugin {
     TD.dataset.fsCf = JSON.stringify({ properties, classes });
   }
 
-  clearCell(TD: HTMLTableCellElement): void {
+  /** Removes what this plugin drew on a cell; the cell's own style (`base`) comes back. */
+  clearCell(TD: HTMLTableCellElement, base?: Record<string, string>): void {
     const applied = TD.dataset.fsCf;
 
     if (!applied) {
@@ -691,7 +692,7 @@ class ConditionalFormatting extends BasePlugin {
     const { properties, classes } = JSON.parse(applied) as { properties: string[]; classes: string[] };
 
     properties.forEach((property) => {
-      (TD.style as unknown as Record<string, string>)[property] = '';
+      (TD.style as unknown as Record<string, string>)[property] = base?.[property] || '';
     });
     classes.forEach(name => TD.classList.remove(name));
     TD.querySelectorAll('.fs-cf-icon').forEach(span => span.remove());

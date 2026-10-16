@@ -154,3 +154,6 @@ conditionalFormatting.moveRule(ruleId, 0);
 hot.openPanel('comments');
 const openPanel: string | null = hot.getOpenPanel();
 hot.closePanel();
+
+hot.exportFile('xlsx', { headers: true }).then((file: Blob) => hot.importFile(file));
+hot.downloadFile('csv', 'data.csv');
