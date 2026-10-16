@@ -61,6 +61,7 @@
     "test:e2e:webkit": "node build/build-tests.js e2e && node test/runner/run.js --suite e2e --browser webkit; node ../../tools/check-known-failures.mjs webkit test-results/e2e-dev-webkit.json"
   },
   "devDependencies": {
+    "@ironcalc/wasm": "0.8.4",
     "jasmine-core": "^5.13.0",
     "jsdom": "^30.1.2",
     "moment": "^2.31.0",

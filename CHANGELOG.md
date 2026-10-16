@@ -4,6 +4,11 @@
 
 ### Added
 
+- Formulas: cells that start with `=` show their result (`=SUM(A1:A3)`, `=B2*C2`, …). FreeSheet has no engine of its
+  own; pass one with `formulas: { engine }`, for example IronCalc's `Model` from `@ironcalc/wasm` (tested with 0.8.4),
+  so `@freegrid/sheet` keeps no dependencies. The editor and `getSourceDataAtCell` show the formula; `getDataAtCell`,
+  the renderers, copying and sorting use the result. Inserting and removing rows and columns moves the references
+  and updates the formulas in the data; errors get the class `fs-formula-error`. New guide page and example.
 - `getColumnMeta(column)`: the column meta, the grid settings together with the column's settings from `columns`.
   Every cell meta of the column inherits from it. Unlike `getCellMeta`, it creates no cell meta and runs no hooks.
 

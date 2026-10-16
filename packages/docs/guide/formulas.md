@@ -1,0 +1,45 @@
+---
+api: [Data, Cell types and meta]
+---
+
+# Formulas
+
+A cell whose value starts with `=` (for example `=SUM(A1:A3)`) shows the result of its formula. FreeSheet has no
+formula engine of its own, so `@freegrid/sheet` stays small and has no dependencies. You add an engine:
+[IronCalc](https://github.com/ironcalc/IronCalc) (MIT/Apache-2.0), a spreadsheet engine compiled to WebAssembly, with
+several hundred Excel functions.
+
+```sh
+npm install @ironcalc/wasm
+```
+
+```js
+import FreeSheet from '@freegrid/sheet';
+import init, { Model } from '@ironcalc/wasm';
+
+await init(); // loads the WebAssembly (about 2 MB, 0.6 MB compressed) once
+
+new FreeSheet(container, {
+  data: [[1, 2, '=A1+B1']],
+  formulas: { engine: Model },
+});
+```
+
+FreeSheet is tested with `@ironcalc/wasm` 0.8.4. Optional settings: `locale`, `timezone` and `language`, passed to
+the engine (default `'en'`, `'UTC'`, `'en'`).
+
+## How it works
+
+- **The data keeps the formula.** `getSourceDataAtCell` and the editor show `=A1+B1`; `getDataAtCell`, the
+  renderers, copying and sorting use the result. `getPlugin('formulas').getFormula(row, column)` returns a cell's
+  formula, or `null`.
+- **Changes recalculate.** Editing, pasting, undo and redo update the results that depend on the changed cells.
+- **Inserting and removing rows and columns moves the references**, as in Excel, and the formulas in your data are
+  updated to match. A reference to a removed cell becomes `#REF!`.
+- **Errors** (`#DIV/0!`, `#NAME?`, `#REF!`, …) are shown as text, and the cell gets the class `fs-formula-error`.
+- **References follow the data rows and columns.** Sorting and moving rows or columns only change how they are
+  shown: after sorting, `=A1` still means the first row of your data, not the first row on screen.
+- Column letters in formulas are the data columns (`A` is the first column of the data). One grid is one sheet;
+  references to other grids are not supported yet.
+
+See it working in the [Formulas example](../examples/formulas).

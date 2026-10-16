@@ -5,7 +5,7 @@
 // Settings and events of features FreeSheet does not have (yet): the code still knows their names, the reference does
 // not list them. See the roadmap.
 export const UNAVAILABLE = new Set([
-  'licenseKey', 'collapsibleColumns', 'columnSummary', 'dropdownMenu', 'filters', 'formulas', 'ganttChart',
+  'licenseKey', 'collapsibleColumns', 'columnSummary', 'dropdownMenu', 'filters', 'ganttChart',
   'headerTooltips', 'hiddenColumns', 'hiddenRows', 'nestedHeaders', 'trimRows', 'nestedRows', 'multiColumnSorting',
   'afterDropdownMenuDefaultOptions', 'beforeDropdownMenuSetItems', 'beforeDropdownMenuShow', 'afterDropdownMenuShow',
   'afterDropdownMenuHide', 'beforeFilter', 'afterFilter', 'hiddenRow', 'hiddenColumn', 'afterTrimRow',
@@ -30,7 +30,8 @@ export const TOPICS = [
     events: ['afterChange', 'beforeChange', 'afterLoadData', 'afterSetDataAtCell', 'afterSetDataAtRowProp',
       'modifyData', 'modifyRowData', 'afterChangesObserved'],
     settings: ['data', 'dataSchema', 'startRows', 'startCols', 'minRows', 'minCols', 'maxRows', 'maxCols',
-      'minSpareRows', 'minSpareCols', 'observeChanges', 'trimWhitespace', 'isEmptyRow', 'isEmptyCol'],
+      'minSpareRows', 'minSpareCols', 'observeChanges', 'trimWhitespace', 'isEmptyRow', 'isEmptyCol',
+      'formulas'],
     match: /^(set|get)(Source)?Data|^getDataAt|^getDataType/,
   },
   {

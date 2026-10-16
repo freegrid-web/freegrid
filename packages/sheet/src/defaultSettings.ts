@@ -2448,24 +2448,22 @@ DefaultSettings.prototype = {
   filters: void 0,
 
   /**
-   * The {@link Formulas} plugin allows FreeSheet to process formula expressions defined in the provided data.
+   * Turns on formulas: a cell whose value starts with `=` (for example `=SUM(A1:A3)`) shows the formula's result.
+   * The editor shows the formula, `getDataAtCell` returns the result. FreeSheet has no formula engine of its own:
+   * pass one, for example IronCalc's `Model` from `@ironcalc/wasm`, after initializing it. See the Formulas guide.
    *
-   * @pro
-   * @type {Boolean|Object}
+   * - `engine`: the engine's model class (required);
+   * - `locale`, `timezone`, `language`: passed to the engine (default `'en'`, `'UTC'`, `'en'`).
+   *
+   * @type {Object}
    * @default undefined
    *
    * @example
    * ```js
-   * // enable formulas plugin
-   * formulas: true,
+   * import init, { Model } from '@ironcalc/wasm';
    *
-   * // or as an object with custom variables to be used in formula expressions
-   * formulas: {
-   *   variables: {
-   *     FOO: 64,
-   *     BAR: 'baz',
-   *   }
-   * },
+   * await init();
+   * new FreeSheet(container, { data, formulas: { engine: Model } });
    * ```
    */
   formulas: void 0,

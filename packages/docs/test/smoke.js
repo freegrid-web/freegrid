@@ -17,6 +17,8 @@ const PAGES = [
   { path: 'examples/merged-cells-and-comments.html', grids: 1 },
   { path: 'examples/large-data.html', grids: 1 },
   { path: 'examples/search-and-languages.html', grids: 1 },
+  { path: 'examples/formulas.html', grids: 1 },
+  { path: 'guide/formulas.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },
@@ -80,6 +82,11 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     await page.waitForSelector('.live-example .handsontable .htCore', { timeout: 10000 }).catch(() => {});
   }
   const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
+  // The formulas example loads IronCalc: Apples' total (=B2*C2) shows its result.
+  if (path === 'examples/formulas.html' &&
+    !(await page.locator('.live-example .ht_master td').allTextContents()).includes('12')) {
+    failures.push(`${path}: the formula =B2*C2 does not show 12`);
+  }
   // The docs theme must not restyle the grid: tables keep `display: table`, rows keep FreeSheet's height
   // (--fs-row-height, plus the first row's top border) and the grid's viewport shows more than a sliver.
   const layoutProblems = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.flatMap((el) => {

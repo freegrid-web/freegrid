@@ -13,6 +13,7 @@
     "@freegrid/sheet": "workspace:*"
   },
   "devDependencies": {
+    "@ironcalc/wasm": "0.8.4",
     "playwright": "1.64.0",
     "vitepress": "^1.6.4",
     "vitepress-carbon": "^1.7.0",

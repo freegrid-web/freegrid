@@ -9,7 +9,7 @@ FreeSheet is developed in stages. Larger stages get their own design document in
 | **2** | TypeScript rewrite of the grid (core, plugins, editors, renderers, validators, selection, helpers). Theming with CSS variables and a dark theme. FreeSheet's own date and number formatting and date picker (no runtime dependencies). A generated API reference. A review of known bugs, with fixes. | ✅ Done (`0.2.0`, `0.3.0`) |
 | **3** | The package becomes `@freegrid/sheet`: FreeSheet is an Excel-style spreadsheet, and more components will follow under `@freegrid/*`. | ✅ Done (`0.3.0`, `0.4.0`) |
 | **4** | The rendering engine (Walkontable): first in TypeScript, then reworked — rendering straight to the DOM, `position: sticky` for frozen rows, columns and headers instead of cloned overlays, cell meta computed only when needed. | In progress |
-| **5** | Features that were never part of the MIT release, written from scratch: formulas (through a formula engine plugin), filters, a column dropdown menu, hidden rows and columns, nested headers, export, a new context menu. React, Vue and Angular wrappers. An optional Tailwind preset. | Planned |
+| **5** | Features that were never part of the MIT release, written from scratch: formulas (through a formula engine plugin; first version with IronCalc in `0.5.0`), filters, a column dropdown menu, hidden rows and columns, nested headers, export, a new context menu. React, Vue and Angular wrappers. An optional Tailwind preset. | Planned |
 
 `1.0.0` will mark FreeSheet's own stable API. The compatibility layer for older code and the deprecated APIs are
 removed then.
