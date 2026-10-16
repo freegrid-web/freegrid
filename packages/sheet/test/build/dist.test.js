@@ -5,10 +5,10 @@ const dist = f => new URL(`../../dist/${f}`, import.meta.url);
 const read = f => readFileSync(dist(f), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'CollapsibleColumns', 'ColumnSorting', 'Comments',
-  'ContextMenu', 'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FormulaBar', 'Formulas',
-  'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove', 'ManualColumnResize', 'ManualRowMove',
-  'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedHeaders', 'NestedRows', 'ObserveChanges',
-  'PersistentState', 'Search', 'TouchScroll', 'UndoRedo'];
+  'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters',
+  'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove',
+  'ManualColumnResize', 'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedHeaders',
+  'NestedRows', 'ObserveChanges', 'PersistentState', 'Search', 'TouchScroll', 'UndoRedo'];
 
 function windowWith(...scripts) {
   const { window } = new JSDOM('<!doctype html><div id="root"></div>', { runScripts: 'outside-only', pretendToBeVisual: true });

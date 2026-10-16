@@ -1743,6 +1743,14 @@ const REGISTERED_HOOKS: string[] = [
   'afterColumnExpand',
 
   /**
+   * Fired after conditional formatting rules were added, changed, moved or removed.
+   *
+   * @event Hooks#afterConditionalFormattingChange
+   * @param {Object[]} rules The sheet's rules, as `getPlugin('conditionalFormatting').getRules()` gives them.
+   */
+  'afterConditionalFormattingChange',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

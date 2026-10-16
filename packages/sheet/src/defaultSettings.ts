@@ -384,6 +384,37 @@ DefaultSettings.prototype = {
   columns: void 0,
 
   /**
+   * Conditional formatting: cells format themselves from their values, as in Excel. A list of rules, each with a
+   * `range` (A1: `B2`, `B2:F20`, `C:C`, `3:5`; data rows and columns, as formulas use) and one kind:
+   *  * `when` and `value`: a condition (`gt`, `lt`, `between`, `eq`, `contains`, `empty`, `date_today`,
+   *    `date_last_7_days`, …, custom ones from `FreeSheet.filters.registerCondition`), or `duplicate`, `unique`,
+   *    `top` / `bottom` (`value` cells, or a share with `percent: true`), `aboveAverage`, `belowAverage`, or a formula
+   *    (`'=$F2<0'`, written for the range's first cell; needs `formulas`). These draw with `style` (`background`,
+   *    `color`, `fontWeight`, `fontStyle`, `textDecoration`, `border`) or `className`;
+   *  * `colorScale`: 2 or 3 colors (`#rrggbb`) from the lowest number to the highest;
+   *  * `dataBar`: a color, for a bar as long as the number;
+   *  * `iconSet`: `'arrows'`, `'trafficLights'` or `'signs'`, by thirds of the numbers.
+   *
+   * The first rule wins where rules set the same style; `stopIfTrue` stops the rules after it. A column's `format`
+   * (in `columns`) is a list of rules for that whole column. `true` turns it on without rules. The API is
+   * `getPlugin('conditionalFormatting')`: `addRule`, `updateRule`, `removeRule`, `moveRule`, `getRules`,
+   * `getRulesAt`, `clearRules`.
+   *
+   * @type {Boolean|Object[]}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * conditionalFormatting: [
+   *   { range: 'F2:F20', when: 'gt', value: 1000, style: { background: '#f8d7da', color: '#842029' } },
+   *   { range: 'B2:E20', colorScale: ['#f8696b', '#ffeb84', '#63be7b'] },
+   *   { range: 'A2:F20', when: '=$F2<0', style: { color: '#c00000' } },
+   * ],
+   * ```
+   */
+  conditionalFormatting: void 0,
+
+  /**
    * @description
    * Defines the cell properties for given `row`, `col`, `prop` coordinates. Any constructor or column option may be
    * overwritten for a particular cell (row/column combination) using the `cells` property in the FreeSheet constructor.

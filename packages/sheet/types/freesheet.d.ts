@@ -817,6 +817,30 @@ declare namespace FreeSheet {
     type SeparatorObject = {
       name: string;
     }
+    interface ConditionalFormatting extends Base {
+      addRule(rule: ConditionalFormattingRule, index?: number): string;
+      updateRule(id: string, rule: ConditionalFormattingRule): void;
+      removeRule(id: string): void;
+      moveRule(id: string, index: number): void;
+      getRules(): (ConditionalFormattingRule & { id: string })[];
+      getRulesAt(row: number, column: number): (ConditionalFormattingRule & { id: string })[];
+      clearRules(range?: string | string[]): void;
+    }
+
+    type ConditionalFormattingRule = {
+      range?: string | string[];
+      when?: string;
+      value?: any;
+      percent?: boolean;
+      colorScale?: string[];
+      dataBar?: string | { color: string };
+      iconSet?: 'arrows' | 'trafficLights' | 'signs';
+      style?: { background?: string; color?: string; fontWeight?: string; fontStyle?: string;
+        textDecoration?: string; border?: string };
+      className?: string;
+      stopIfTrue?: boolean;
+    };
+
     interface DropdownMenu extends Base {
       element: HTMLDivElement | null;
       column: number | null;
@@ -1420,6 +1444,9 @@ declare namespace FreeSheet {
     className?: string | any[];
     colHeaders?: ((index?: number) => void) | boolean | any[];
     collapsibleColumns?: boolean | { row: number; col: number; show?: 'first' | 'last' | number }[];
+    conditionalFormatting?: boolean | FreeSheet.plugins.ConditionalFormattingRule[];
+    /** A column's conditional formatting rules (without `range`). */
+    format?: FreeSheet.plugins.ConditionalFormattingRule[];
     columnHeaderHeight?: number | any[];
     columns?: ((index?: number) => void) | any[];
     columnSorting?: boolean | columnSorting.Settings;
@@ -1536,6 +1563,7 @@ declare namespace FreeSheet {
 
   interface Hooks {
     afterAddChild?: (parent: object, element: object) => void;
+    afterConditionalFormattingChange?: (rules: FreeSheet.plugins.ConditionalFormattingRule[]) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;
@@ -1951,6 +1979,7 @@ declare namespace FreeSheet {
     BindRowsWithHeaders: plugins.BindRowsWithHeaders,
     CollapsibleColumns: plugins.CollapsibleColumns,
     ColumnSorting: plugins.ColumnSorting,
+    ConditionalFormatting: plugins.ConditionalFormatting,
     ColumnSummary: plugins.ColumnSummary,
     Comments: plugins.Comments,
     ContextMenu: plugins.ContextMenu,
@@ -1989,6 +2018,7 @@ declare namespace FreeSheet {
     bindRowsWithHeaders: plugins.BindRowsWithHeaders,
     collapsibleColumns: plugins.CollapsibleColumns,
     columnSorting: plugins.ColumnSorting,
+    conditionalFormatting: plugins.ConditionalFormatting,
     columnSummary: plugins.ColumnSummary,
     comments: plugins.Comments,
     contextMenu: plugins.ContextMenu,

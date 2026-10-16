@@ -146,3 +146,7 @@ const conditionNames: string[] = Handsontable.filters.getConditionNames();
 
 nestedRows.addChild(0, { name: 'child' });
 const rowNumber: string = nestedRows.getRowNumber(1);
+
+const conditionalFormatting: Handsontable.plugins.ConditionalFormatting = hot.getPlugin('conditionalFormatting');
+const ruleId: string = conditionalFormatting.addRule({ range: 'B2:B10', when: 'gt', value: 100, style: { color: 'red' } });
+conditionalFormatting.moveRule(ruleId, 0);

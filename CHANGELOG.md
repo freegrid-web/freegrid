@@ -44,6 +44,15 @@
   `collapse`, `expand`, `isCollapsed`, `collapseAll`, `expandAll`; events `before/afterColumnCollapse` and
   `before/afterColumnExpand`. `nestedHeaders` and `collapsibleColumns: [{ row, col, show }]` work too, for older
   configurations. New guide page and example.
+- Conditional formatting (`conditionalFormatting`): rules over A1 ranges (or a column's `format`) that format cells
+  from the value they show, formula results included. Conditions (`gt`, `between`, `contains`, `empty`, dates in a
+  period, custom conditions), `duplicate` / `unique`, `top` / `bottom` (count or percent), `aboveAverage` /
+  `belowAverage`, formulas (`'=$F2<0'`, with `formulas`); color scales, data bars and icon sets (arrows, traffic
+  lights, signs). Priority by order, `stopIfTrue`. Ranges move with inserted and removed rows and columns. API
+  `getPlugin('conditionalFormatting')`: `addRule`, `updateRule`, `removeRule`, `moveRule`, `getRules`, `getRulesAt`,
+  `clearRules`; event `afterConditionalFormattingChange`; `getDocument()` saves the rules. New date conditions
+  `date_last_7_days`, `date_this_week`, `date_last_week`, `date_next_week`, `date_this_month`, `date_last_month`,
+  `date_next_month`. New guide page and example.
 - `beforeLoadData` event: a callback can return the data to load instead.
 
 ### Fixed

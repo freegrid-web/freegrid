@@ -69,6 +69,11 @@ export class IndexVisibility {
     this.#orderedToVisual = null;
   }
 
+  /** The number of indexes, hidden ones included. */
+  total(): number {
+    return this.#getTotal();
+  }
+
   /** The number of visible indexes. */
   count(): number {
     const total = this.#getTotal();

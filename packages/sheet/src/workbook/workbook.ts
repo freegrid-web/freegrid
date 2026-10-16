@@ -34,6 +34,8 @@ export type SheetDocument = {
   hiddenColumns?: number[];
   /** Filter conditions (as `getPlugin('filters').exportConditions()` gives them). */
   filters?: AnyObject[];
+  /** Conditional formatting rules (as `getPlugin('conditionalFormatting').getRules()` gives them). */
+  conditionalFormatting?: AnyObject[];
   /** Nested rows: the physical rows of the collapsed parents. */
   collapsedRows?: number[];
   cell?: AnyObject[];
@@ -100,6 +102,12 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   if (filters.length) {
     saved.filters = JSON.parse(JSON.stringify(filters));
   }
+  const rules = plugin('conditionalFormatting')?.enabled ?
+    (plugin('conditionalFormatting')!.getRules as () => AnyObject[])() : [];
+
+  if (rules.length) {
+    saved.conditionalFormatting = rules.map(({ id: _id, ...rule }) => rule);
+  }
   const collapsedRows = plugin('nestedRows')?.enabled ? (plugin('nestedRows')!.getCollapsedRows as () => number[])() :
     [];
 
@@ -134,6 +142,9 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   }
   if (sheet.filters) {
     settings.filters = { conditions: sheet.filters };
+  }
+  if (sheet.conditionalFormatting) {
+    settings.conditionalFormatting = sheet.conditionalFormatting;
   }
   settings.cell = sheet.cell || [];
 
@@ -828,6 +839,10 @@ export class Workbook {
         settings[name] = { ...(typeof current === 'object' ? current : {}), [key]: first[name] || [] };
       }
     });
+    // The rules follow the saved sheet (none when it has none).
+    if (!settings.conditionalFormatting && plugin('conditionalFormatting')?.enabled) {
+      settings.conditionalFormatting = true;
+    }
     this.root.updateSettings(settings);
     others.forEach(sheet => this.add(sheet.id, { name: sheet.name, ...sheetSettings(sheet) }));
     // Nested rows: the parents that were collapsed.
