@@ -9,22 +9,20 @@
 
 ### Changed
 
-- Removing many rows is faster for large deletion lists. Small deletions keep the linear lookup, with filter
-  hooks and surviving row order preserved.
-
-- Nested object cell writes reuse their parsed property path for the safety check and traversal, reducing
-  temporary allocations when pasting large ranges.
 - Column sorting reads a column's settings (`type`, `dateFormat`, `columnSorting`, …) from the column meta, not from
   the column's first cell. Settings that only the `cells` function or `cell` give to row 0 no longer affect sorting
   (#65).
-- Bulk row and column index mapping avoids repeated array shifts and scans of removed indexes. Repeated reverse
-  translations reuse an index for large, unchanged maps.
-
-- Column headers skip source-column enumeration when `columns` is not a function, speeding up wide grids and
-  retrieving all headers without retaining additional cached state.
+- Faster data operations on large grids, with the same results and the same hook calls:
+  - removing many rows at once (10,000 of 100,000 rows: about 59 → 27 ms);
+  - inserting or removing many rows or columns while rows are sorted or rows/columns are moved;
+  - column headers no longer scan the source columns when `columns` is not a function (pasting 100 cells into
+    an object-based grid: about 27 → 17 ms);
+  - writing to nested properties (`a.b.c`) splits the property path once, which helps large pastes.
 
 ### Internal
 
+- `tools/performance`: benchmarks on the production build (browser scenarios and microbenchmarks), used to measure
+  every performance change before and after.
 - Column sorting no longer keeps its own cache of the columns' settings, and no longer clears it when columns are
   added or removed (#65).
 

@@ -2,26 +2,9 @@ import { arrayMax } from './../helpers/array';
 import { defineGetter } from './../helpers/object';
 import { rangeEach } from './../helpers/number';
 
-type ReverseLookup = { queries: number; indexes: Map<number, number> | null };
-const reverseLookups = new WeakMap<number[], ReverseLookup>();
-const exposedMaps = new WeakSet<number[]>();
+// Below these sizes the native splice/filter path is as fast or faster (measured with tools/performance).
 const BULK_THRESHOLD = 256;
 const RENUMBER_THRESHOLD = 32;
-const REVERSE_LOOKUP_THRESHOLD = 256;
-const REVERSE_QUERY_THRESHOLD = 1024;
-
-/** Call before changing an existing map in place. Replacing the array needs no invalidation. */
-export function invalidateArrayMap(map: number[]): void {
-  reverseLookups.delete(map);
-}
-
-/** Hooks can retain a live array and mutate it later. Such arrays must keep using indexOf. */
-export function exposeArrayMap(map: number[]): void {
-  if (Array.isArray(map)) {
-    exposedMaps.add(map);
-    invalidateArrayMap(map);
-  }
-}
 
 /** Shift the tail once, keeping the array's identity and holes. Only used for ordinary insertion indexes/counts. */
 function insertRange(map: number[], index: number, amount: number, firstValue: number): void {
@@ -72,29 +55,7 @@ const arrayMapper = {
 
   /** The physical index of `translatedIndex`, or `null`. */
   getIndexByValue(this: ArrayMapper, translatedIndex: number): number | null {
-    const map = this._arrayMap;
-
-    if (map.length >= REVERSE_LOOKUP_THRESHOLD && Array.isArray(map) && !exposedMaps.has(map)) {
-      // indexOf never matches NaN, whereas Map does.
-      if (Number.isNaN(translatedIndex)) return null;
-      let lookup = reverseLookups.get(map);
-
-      if (!lookup) {
-        lookup = { queries: 0, indexes: null };
-        reverseLookups.set(map, lookup);
-      }
-      // Moving entries interleaves mutations and lookups. Do not rebuild an entire inverse for each moved entry.
-      if (!lookup.indexes && ++lookup.queries >= REVERSE_QUERY_THRESHOLD) {
-        const indexes = new Map<number, number>();
-
-        for (let index = 0; index < map.length; index++) {
-          if (index in map && !indexes.has(map[index])) indexes.set(map[index], index);
-        }
-        lookup.indexes = indexes;
-      }
-      if (lookup.indexes) return lookup.indexes.get(translatedIndex) ?? null;
-    }
-    const physicalIndex = map.indexOf(translatedIndex);
+    const physicalIndex = this._arrayMap.indexOf(translatedIndex);
 
     return physicalIndex === -1 ? null : physicalIndex;
   },
@@ -107,7 +68,6 @@ const arrayMapper = {
     const newIndex = (arrayMax(this._arrayMap) as number) + 1;
     const addedItems: number[][] = [];
 
-    invalidateArrayMap(this._arrayMap);
     if (canInsertRange(this._arrayMap, physicalIndex, amount)) {
       insertRange(this._arrayMap, physicalIndex, amount, newIndex);
       for (let count = 0; count < amount; count++) addedItems.push([]);
@@ -123,7 +83,6 @@ const arrayMapper = {
 
   /** Removes `amount` entries at `physicalIndex`, or the entries at each index of a list. Returns their values. */
   removeItems(this: ArrayMapper, physicalIndex: number | number[], amount = 1): number[] {
-    invalidateArrayMap(this._arrayMap);
     if (!Array.isArray(physicalIndex)) {
       return this._arrayMap.splice(physicalIndex, amount);
     }
@@ -220,12 +179,10 @@ const arrayMapper = {
 
   /** Moves the entry at `physicalIndexFrom` to `physicalIndexTo`. */
   swapIndexes(this: ArrayMapper, physicalIndexFrom: number, physicalIndexTo: number): void {
-    invalidateArrayMap(this._arrayMap);
     this._arrayMap.splice(physicalIndexTo, 0, ...this._arrayMap.splice(physicalIndexFrom, 1));
   },
 
   clearMap(this: ArrayMapper): void {
-    invalidateArrayMap(this._arrayMap);
     this._arrayMap.length = 0;
   },
 };

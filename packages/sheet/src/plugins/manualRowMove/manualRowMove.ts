@@ -6,7 +6,6 @@ import { rangeEach } from './../../helpers/number';
 import EventManager from './../../eventManager';
 import { registerPlugin } from './../../plugins';
 import RowsMapper from './rowsMapper';
-import { exposeArrayMap } from './../../mixins/arrayMapper';
 import BacklightUI from './ui/backlight';
 import GuidelineUI from './ui/guideline';
 import type { CellCoords } from './../../3rdparty/walkontable/src';
@@ -310,9 +309,6 @@ class ManualRowMove extends BasePlugin {
    * @fires Hooks#manualRowMove
    */
   persistentStateSave(): void {
-    if (this.hot.hasHook('persistentStateSave') || Hooks.getSingleton().has('persistentStateSave')) {
-      exposeArrayMap(this.rowsMapper._arrayMap);
-    }
     this.hot.runHooks('persistentStateSave', 'manualRowMove', this.rowsMapper._arrayMap);
   }
 

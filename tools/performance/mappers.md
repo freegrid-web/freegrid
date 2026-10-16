@@ -1,5 +1,8 @@
 # Mapper performance measurements
 
+The reverse-lookup cache measured by this runner was not adopted: reverse lookups still use `indexOf` until the
+mappers keep their arrays private (stage 4). The bulk insertion, removal and renumbering paths were adopted.
+
 `mappers.mjs` uses Node built-ins, the existing Playwright installation and the production minified
 bundle in `packages/sheet/dist`. It runs independently of the other performance entry points and adds
 no dependencies. Use Node 24 with the repository dependencies installed.

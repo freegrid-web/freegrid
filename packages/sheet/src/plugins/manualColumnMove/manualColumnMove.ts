@@ -6,7 +6,6 @@ import { rangeEach } from './../../helpers/number';
 import EventManager from './../../eventManager';
 import { registerPlugin } from './../../plugins';
 import ColumnsMapper from './columnsMapper';
-import { exposeArrayMap } from './../../mixins/arrayMapper';
 import BacklightUI from './ui/backlight';
 import GuidelineUI from './ui/guideline';
 import type { CellCoords } from './../../3rdparty/walkontable/src';
@@ -304,9 +303,6 @@ class ManualColumnMove extends BasePlugin {
    * Saves the manual column positions to the persistent state (the {@link Options#persistentState} option has to be enabled).
    */
   persistentStateSave(): void {
-    if (this.hot.hasHook('persistentStateSave') || Hooks.getSingleton().has('persistentStateSave')) {
-      exposeArrayMap(this.columnsMapper._arrayMap);
-    }
     this.hot.runHooks('persistentStateSave', 'manualColumnMove', this.columnsMapper._arrayMap);
   }
 
@@ -319,7 +315,6 @@ class ManualColumnMove extends BasePlugin {
     this.hot.runHooks('persistentStateLoad', 'manualColumnMove', storedState);
 
     if (storedState.value) {
-      exposeArrayMap(storedState.value);
       this.columnsMapper._arrayMap = storedState.value;
     }
   }

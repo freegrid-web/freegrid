@@ -1,4 +1,4 @@
-import arrayMapper, { invalidateArrayMap } from '../../mixins/arrayMapper';
+import arrayMapper from '../../mixins/arrayMapper';
 import type { ArrayMapper } from '../../mixins/arrayMapper';
 import { mixin } from '../../helpers/object';
 
@@ -35,7 +35,6 @@ class RowsMapper {
   createMap(length?: number): void {
     const originLength = length === undefined ? this._arrayMap.length : length;
 
-    invalidateArrayMap(this._arrayMap);
     this._arrayMap.length = 0;
 
     for (let itemIndex = 0; itemIndex < originLength; itemIndex += 1) {
