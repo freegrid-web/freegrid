@@ -119,4 +119,74 @@ describe('NestedHeaders and CollapsibleColumns', () => {
     expect(headerRows().length).toBe(1);
     expect(rowTexts(headerRows()[0]).slice(0, 2)).toEqual(['A', 'B']);
   });
+
+  describe('groups in columns', () => {
+    const columns = () => [
+      { data: 0, title: 'Region' },
+      { title: '2026', collapsible: true, columns: [
+        { data: 1, title: 'Q1' },
+        { data: 2, title: 'Q2', hidden: true },
+        { data: 3, title: 'Q3' },
+        { data: 4, title: 'Q4' },
+        { data: 5, title: 'Total', type: 'numeric', showWhenCollapsed: true },
+      ] },
+      { title: '2027', collapsible: true, collapsed: true, columns: [{ data: 6, title: 'Q1' }, { data: 7, title: 'Q2' }] },
+    ];
+
+    it('makes header rows from the groups, and the columns from the columns without children', () => {
+      const hot = handsontable({ data: data(), columns: columns() });
+
+      expect(hot.getSettings().columns.length).toBe(8);
+      expect(headerRows().length).toBe(2);
+      expect(rowTexts(headerRows()[0])).toEqual(['', '2026', '', '', '', '2027']);
+      expect(rowTexts(headerRows()[1])).toEqual(['Region', 'Q1', 'Q3', 'Q4', 'Total', 'Q1']);
+      expect(getCellMeta(0, 4).type).toBe('numeric');
+    });
+
+    it('hides columns marked hidden, and the menu can show them again', () => {
+      const hot = handsontable({ data: data(), columns: columns() });
+
+      expect(getDataAtRow(0)).toEqual(['North', 1, 3, 4, 10, 5]);
+      expect(hot.getPlugin('hiddenColumns').getHiddenColumns()).toEqual([2]);
+
+      hot.getPlugin('hiddenColumns').showAllColumns();
+      expect(getDataAtRow(0)).toEqual(['North', 1, 2, 3, 4, 10, 5]);
+    });
+
+    it('collapses a collapsible group to its showWhenCollapsed column, and starts collapsed groups collapsed', () => {
+      const hot = handsontable({ data: data(), columns: columns() });
+
+      expect(headerRows()[0].querySelectorAll('.fs-group-toggle').length).toBe(2);
+
+      hot.getPlugin('collapsibleColumns').collapse(0, 1);
+      expect(getDataAtRow(0)).toEqual(['North', 10, 5]);
+
+      hot.getPlugin('collapsibleColumns').expand(0, 1);
+      expect(getDataAtRow(0)).toEqual(['North', 1, 3, 4, 10, 5]);
+    });
+
+    it('nests groups in groups', () => {
+      handsontable({ data: data(), columns: [
+        { data: 0, title: 'Region' },
+        { title: 'Year', columns: [
+          { title: 'H1', columns: [{ data: 1, title: 'Q1' }, { data: 2, title: 'Q2' }] },
+          { title: 'H2', columns: [{ data: 3, title: 'Q3' }, { data: 4, title: 'Q4' }] },
+        ] },
+      ] });
+
+      expect(headerRows().length).toBe(3);
+      expect(rowTexts(headerRows()[0])).toEqual(['', 'Year', '', '', '']);
+      expect(rowTexts(headerRows()[1])).toEqual(['', 'H1', '', 'H2', '']);
+      expect(rowTexts(headerRows()[2])).toEqual(['Region', 'Q1', 'Q2', 'Q3', 'Q4']);
+    });
+
+    it('takes new groups with updateSettings', () => {
+      handsontable({ data: data(), columns: columns() });
+
+      updateSettings({ columns: [{ data: 0, title: 'Region' }, { data: 1, title: 'Q1' }] });
+
+      expect(headerRows().length).toBe(1);
+      expect(rowTexts(headerRows()[0])).toEqual(['Region', 'Q1']);
+    });
+  });
 });

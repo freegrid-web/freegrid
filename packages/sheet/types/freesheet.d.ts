@@ -1513,6 +1513,12 @@ declare namespace FreeSheet {
     tableClassName?: string | any[];
     tabMoves?: object;
     title?: string;
+    /** Column groups (a column with `columns`): its − / + button, and whether it starts collapsed. */
+    collapsible?: boolean;
+    collapsed?: boolean;
+    /** The column a collapsed group keeps, and a column that starts hidden. */
+    showWhenCollapsed?: boolean;
+    hidden?: boolean;
     trimDropdown?: boolean;
     trimRows?: boolean; // pro
     trimWhitespace?: boolean;

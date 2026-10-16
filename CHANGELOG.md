@@ -37,11 +37,13 @@
   parents. Indent and Outdent never move rows, so formulas keep their references. `getDocument()` saves the tree and
   the collapsed parents. New events `before/afterRowExpand`, `before/afterRowCollapse`; `beforeAddChild`,
   `afterAddChild`, `beforeDetachChild` and `afterDetachChild` are fired. New guide page and example.
-- Column groups: `nestedHeaders` adds header rows with headers over several columns (`{ label, colspan }`); a click
-  on a group selects its columns, and columns move only inside their group. `collapsibleColumns` gives groups a −/+
-  button; a collapsed group keeps its first, last (`show: 'last'`, for a total) or chosen column. API
-  `getPlugin('collapsibleColumns')`: `collapse`, `expand`, `isCollapsed`, `collapseAll`, `expandAll`; events
-  `before/afterColumnCollapse` and `before/afterColumnExpand`. New guide page and example.
+- Column groups: a column with `columns` of its own is a group, shown in a header row above its columns; groups can
+  be nested. `collapsible: true` gives a group a − / + button, `collapsed: true` starts it collapsed, and
+  `showWhenCollapsed: true` marks the column it keeps (a total). `hidden: true` on a column starts it hidden. A click
+  on a group selects its columns; columns move only inside their group. API `getPlugin('collapsibleColumns')`:
+  `collapse`, `expand`, `isCollapsed`, `collapseAll`, `expandAll`; events `before/afterColumnCollapse` and
+  `before/afterColumnExpand`. `nestedHeaders` and `collapsibleColumns: [{ row, col, show }]` work too, for older
+  configurations. New guide page and example.
 - `beforeLoadData` event: a callback can return the data to load instead.
 
 ### Fixed

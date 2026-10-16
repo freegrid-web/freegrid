@@ -1,7 +1,7 @@
 # Column groups
 
-Years over quarters. Click − on 2026 to collapse the year to its Total column, + to expand it again; click a year to
-select its columns.
+Years over quarters, written as groups in `columns`. Click − on 2026 to collapse the year to its Total column, + on
+2027 to expand it; click a year to select its columns.
 
 <LiveExample name="column-groups" />
 

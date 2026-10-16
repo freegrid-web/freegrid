@@ -4,17 +4,32 @@ import '@freegrid/sheet/dist/freesheet.full.css';
 export default function createGrid(container) {
   return new FreeSheet(container, {
     data: [
-      ['North', 120, 135, 150, 160, 565, 170, 180],
-      ['South', 90, 95, 110, 105, 400, 115, 120],
-      ['East', 130, 125, 140, 155, 550, 160, 165],
-      ['West', 80, 85, 95, 100, 360, 105, 110],
+      { region: 'North', q1: 120, q2: 135, q3: 150, q4: 160, total: 565, q1_27: 170, q2_27: 180 },
+      { region: 'South', q1: 90, q2: 95, q3: 110, q4: 105, total: 400, q1_27: 115, q2_27: 120 },
+      { region: 'East', q1: 130, q2: 125, q3: 140, q4: 155, total: 550, q1_27: 160, q2_27: 165 },
+      { region: 'West', q1: 80, q2: 85, q3: 95, q4: 100, total: 360, q1_27: 105, q2_27: 110 },
     ],
-    nestedHeaders: [
-      ['Region', { label: '2026', colspan: 5 }, { label: '2027', colspan: 2 }],
-      ['', 'Q1', 'Q2', 'Q3', 'Q4', 'Total', 'Q1', 'Q2'],
+    // A column with `columns` is a group: its title goes in a header row above them.
+    columns: [
+      { data: 'region', title: 'Region' },
+      {
+        title: '2026',
+        collapsible: true, // − / +
+        columns: [
+          { data: 'q1', title: 'Q1' },
+          { data: 'q2', title: 'Q2' },
+          { data: 'q3', title: 'Q3' },
+          { data: 'q4', title: 'Q4' },
+          { data: 'total', title: 'Total', showWhenCollapsed: true }, // stays when 2026 is collapsed
+        ],
+      },
+      {
+        title: '2027',
+        collapsible: true,
+        collapsed: true, // starts collapsed
+        columns: [{ data: 'q1_27', title: 'Q1' }, { data: 'q2_27', title: 'Q2' }],
+      },
     ],
-    // −/+ on the year headers; 2026 keeps its Total column when collapsed.
-    collapsibleColumns: [{ row: 0, col: 1, show: 'last' }, { row: 0, col: 6 }],
     rowHeaders: true,
     stretchH: 'all',
   });

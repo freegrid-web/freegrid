@@ -216,15 +216,24 @@ nestedRows: {
 - Hooks: `beforeRowExpand`, `afterRowExpand`, `beforeRowCollapse`, `afterRowCollapse`, `beforeAddChild`,
   `afterAddChild`, `beforeDetachChild`, `afterDetachChild` (Outdent).
 
+## Settings live on the objects they describe
+
+A feature's settings go on the object they describe (a column in `columns`, a row object), not in a separate setting
+that refers to columns or rows by index; indexes stay for API methods. Settings kept for older configurations
+(`nestedHeaders`, `collapsibleColumns` lists, `hiddenColumns.columns`) keep working and are documented as older
+forms; they are removed in `1.0`.
+
 ## 5. Column groups (PR 4)
 
 ```js
-nestedHeaders: [
-  ['Name', { label: '2026', colspan: 4 }, { label: '2027', colspan: 4 }],
-  ['', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'],
+columns: [
+  { data: 'name', title: 'Name' },
+  { title: '2026', collapsible: true, collapsed: false, columns: [
+    { data: 'q1', title: 'Q1' }, { data: 'q2', title: 'Q2', hidden: true },
+    { data: 'total', title: 'Total', showWhenCollapsed: true },
+  ] },
 ],
-collapsibleColumns: true,                         // every group wider than one column
-collapsibleColumns: [{ row: 0, col: 1, show: 'last' }], // or chosen groups; show: 'first' | 'last' | offset
+// Older form, kept: nestedHeaders rows with colspan, and collapsibleColumns: true | [{ row, col, show }].
 ```
 
 - The last row of `nestedHeaders` is the column headers; the rows above are group rows.

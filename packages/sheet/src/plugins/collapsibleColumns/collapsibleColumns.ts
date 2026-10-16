@@ -1,6 +1,7 @@
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { getTranslator } from './../../utils/recordTranslator';
+import { columnTreeLevels, getColumnTree } from './../../utils/columnTree';
 import * as C from './../../i18n/constants';
 import type NestedHeaders from './../nestedHeaders/nestedHeaders';
 import type { HeaderGroup } from './../nestedHeaders/nestedHeaders';
@@ -31,6 +32,8 @@ const key = (group: HeaderGroup): string => `${group.level}:${group.start}:${gro
 class CollapsibleColumns extends BasePlugin {
   /** The collapsed groups, by `level:start:end` (groups are read again when settings change). */
   #collapsed = new Set<string>();
+  /** The column tree whose `collapsed` groups were applied. */
+  #appliedTree: unknown = null;
 
   get nestedHeaders(): NestedHeaders | null {
     const plugin = this.hot.getPlugin('nestedHeaders' as 'search') as unknown as NestedHeaders | undefined;
@@ -43,7 +46,11 @@ class CollapsibleColumns extends BasePlugin {
   }
 
   isEnabled(): boolean {
-    return !!this.hot.getSettings().collapsibleColumns;
+    // `collapsible` on a group in `columns`, or (kept for older configurations) the `collapsibleColumns` setting.
+    const tree = getColumnTree(this.hot);
+
+    return !!this.hot.getSettings().collapsibleColumns || (!!tree && columnTreeLevels(tree).some(level =>
+      level.some(group => group?.collapsible)));
   }
 
   enablePlugin(): void {
@@ -57,6 +64,7 @@ class CollapsibleColumns extends BasePlugin {
   disablePlugin(): void {
     this.hot.rootElement.removeEventListener('mousedown', this.onMouseDown, true);
     this.#collapsed.clear();
+    this.#appliedTree = null;
     this.visibility.setHidden(SOURCE, null);
     super.disablePlugin();
   }
@@ -73,6 +81,10 @@ class CollapsibleColumns extends BasePlugin {
 
   /** The setting of a group, or `null` when it is not collapsible. */
   settingFor(group: HeaderGroup): CollapsibleGroup | null {
+    // A group from `columns` says it itself.
+    if (group.collapsible !== void 0) {
+      return group.collapsible ? { row: group.level, col: group.start } : null;
+    }
     const setting = this.hot.getSettings().collapsibleColumns as boolean | CollapsibleGroup[];
 
     if (setting === true) {
@@ -85,6 +97,9 @@ class CollapsibleColumns extends BasePlugin {
 
   /** The physical column that stays visible when a group is collapsed. */
   keptColumn(group: HeaderGroup): number {
+    if (group.kept !== void 0) {
+      return group.kept;
+    }
     const show = this.settingFor(group)?.show;
 
     if (show === 'last') {
@@ -216,6 +231,14 @@ class CollapsibleColumns extends BasePlugin {
     const groups = (this.nestedHeaders?.groups() || []).filter(group => this.settingFor(group));
     const hidden: number[] = [];
     const current = new Set(groups.map(key));
+    const tree = getColumnTree(this.hot) || null;
+
+    // A new column tree: its groups marked `collapsed` start collapsed.
+    // (Once the groups are read: nested headers may start after this plugin.)
+    if (tree !== this.#appliedTree && groups.length) {
+      this.#appliedTree = tree;
+      groups.filter(group => group.collapsed).forEach(group => this.#collapsed.add(key(group)));
+    }
 
     // Groups that are gone or no longer collapsible open.
     this.#collapsed.forEach(name => !current.has(name) && this.#collapsed.delete(name));

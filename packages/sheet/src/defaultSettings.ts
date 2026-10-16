@@ -333,6 +333,22 @@ DefaultSettings.prototype = {
    *
    * __Note:__ Using this option sets a fixed number of columns (options `startCols`, `minCols`, `maxCols` will be ignored).
    *
+   * A column with `columns` of its own is a group: a header row above the column headers shows its `title` over its
+   * columns, and groups can be nested. A group with `collapsible: true` gets a − / + button (`collapsed: true` starts
+   * it collapsed); a collapsed group keeps the column marked `showWhenCollapsed: true` (or its first). A column with
+   * `hidden: true` starts hidden. `getSettings().columns` lists the columns without children.
+   *
+   * ```js
+   * columns: [
+   *   { data: 'region', title: 'Region' },
+   *   { title: '2026', collapsible: true, columns: [
+   *     { data: 'q1', title: 'Q1' },
+   *     { data: 'q2', title: 'Q2', hidden: true },
+   *     { data: 'total', title: 'Total', showWhenCollapsed: true },
+   *   ] },
+   * ],
+   * ```
+   *
    *
    * @type {Object[]|Function}
    * @default undefined
@@ -2342,20 +2358,16 @@ DefaultSettings.prototype = {
   bindRowsWithHeaders: void 0,
 
   /**
-   * Collapsible column groups (with `nestedHeaders`): a group's header gets a −/+ button, and a collapsed group hides
-   * its columns but one. `true` makes every group wider than one column collapsible; a list chooses groups by their
-   * header row and first column, and the column that stays (`show`: `'first'`, the default, `'last'`, or an offset in
-   * the group). The API is `getPlugin('collapsibleColumns')`: `collapse(level, column)`, `expand`, `isCollapsed`,
-   * `collapseAll`, `expandAll`.
+   * Collapsible groups for `nestedHeaders`: `true` (every group wider than one column) or a list of
+   * `{ row, col, show }` (`show`: `'first'`, `'last'` or an offset). Kept for older configurations: with groups in
+   * `columns`, use `collapsible: true` on the group and `showWhenCollapsed: true` on a column. The API is
+   * `getPlugin('collapsibleColumns')`: `collapse(level, column)`, `expand`, `isCollapsed`, `collapseAll`, `expandAll`.
    *
    * @type {Boolean|Object[]}
    * @default undefined
    *
    * @example
    * ```js
-   * collapsibleColumns: true,
-   *
-   * // or: the 2026 group keeps its Total column when collapsed
    * collapsibleColumns: [{ row: 0, col: 1, show: 'last' }],
    * ```
    */
@@ -2644,10 +2656,8 @@ DefaultSettings.prototype = {
   hiddenRows: void 0,
 
   /**
-   * Header rows with headers that span columns. Each row is a list of labels, or `{ label, colspan }` for a header over
-   * several columns. The last row is the column headers; the rows above it are group rows. A click on a group header
-   * selects its columns; columns can be moved inside their group only. `getPlugin('nestedHeaders').getGroup(level,
-   * column)` gives a group's label and columns.
+   * Header rows as lists of labels, `{ label, colspan }` for a header over several columns; the last row is the column
+   * headers. Kept for older configurations: groups in `columns` (a column with `columns`) say the same more simply.
    *
    * @type {Array[]}
    * @default undefined
@@ -2655,8 +2665,8 @@ DefaultSettings.prototype = {
    * @example
    * ```js
    * nestedHeaders: [
-   *   ['Region', { label: '2026', colspan: 4 }, { label: '2027', colspan: 4 }],
-   *   ['', 'Q1', 'Q2', 'Q3', 'Q4', 'Q1', 'Q2', 'Q3', 'Q4'],
+   *   ['Region', { label: '2026', colspan: 4 }],
+   *   ['', 'Q1', 'Q2', 'Q3', 'Q4'],
    * ],
    * ```
    */

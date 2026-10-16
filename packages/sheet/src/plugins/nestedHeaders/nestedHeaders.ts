@@ -1,12 +1,14 @@
 import './nestedHeaders.css';
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
+import { columnTreeLevels, getColumnTree } from './../../utils/columnTree';
+import type { ColumnGroup } from './../../utils/columnTree';
 
 /** One header cell of `nestedHeaders`: a label, or a label over several columns. */
 export type NestedHeader = string | { label: string; colspan?: number };
 
 /** A group: a header over physical columns `start` to `end` (inclusive) on a header row (`level`, 0 = the top). */
-export type HeaderGroup = { level: number; label: string; start: number; end: number };
+export type HeaderGroup = ColumnGroup;
 
 /** What a group's header needs from collapsible columns. */
 type GroupButtons = { enabled: boolean; button(group: HeaderGroup): HTMLElement | null };
@@ -33,14 +35,15 @@ class NestedHeaders extends BasePlugin {
   #levels: (HeaderGroup | undefined)[][] = [];
 
   isEnabled(): boolean {
-    return Array.isArray(this.hot.getSettings().nestedHeaders) && this.hot.getSettings().nestedHeaders.length > 0;
+    // Groups in `columns`, or (kept for older configurations) the `nestedHeaders` rows.
+    return !!getColumnTree(this.hot) ||
+      (Array.isArray(this.hot.getSettings().nestedHeaders) && this.hot.getSettings().nestedHeaders.length > 0);
   }
 
   enablePlugin(): void {
     if (this.enabled) {
       return;
     }
-    this.readSettings();
     this.addHook('afterGetColumnHeaderRenderers', (renderers: ((column: number, TH: HTMLTableCellElement) => void)[]) =>
       this.onAfterGetColumnHeaderRenderers(renderers));
     this.addHook('afterGetColHeader', (column: number, TH: HTMLTableCellElement) => this.onAfterGetColHeader(column, TH));
@@ -50,6 +53,8 @@ class NestedHeaders extends BasePlugin {
     this.addHook('afterCreateCol', () => this.readSettings());
     this.addHook('afterRemoveCol', () => this.readSettings());
     super.enablePlugin();
+    // Once enabled: collapsible columns reads the groups through this plugin.
+    this.readSettings();
   }
 
   disablePlugin(): void {
@@ -64,9 +69,10 @@ class NestedHeaders extends BasePlugin {
 
   /** Reads the header rows into groups. */
   readSettings(): void {
+    const tree = getColumnTree(this.hot);
     const rows = this.hot.getSettings().nestedHeaders as NestedHeader[][] || [];
 
-    this.#levels = rows.map((row, level) => {
+    this.#levels = tree ? columnTreeLevels(tree) : rows.map((row, level) => {
       const groups: (HeaderGroup | undefined)[] = [];
       let column = 0;
 
