@@ -1,6 +1,10 @@
 # FreeGrid changelog
 
-## Unreleased
+## 0.5.0 (2026-10-16)
+
+Formulas, through the IronCalc engine (`formulas: { engine }`), and a formula bar above the grid. Large grids scroll
+smoothly: at 1,000,000 rows the slowest frames fell from about 580 to 50 ms. Faster data operations (removing many
+rows, pasting, inserting and removing rows and columns). New `getColumnMeta`.
 
 ### Added
 
