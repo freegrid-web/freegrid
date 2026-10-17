@@ -50,6 +50,10 @@
   `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
+- Data validation: a cell's or a column's `validation` (`list` with a dropdown, `number`, `integer`, `date`,
+  `textLength` with an operator) refuses other values, or with `strict: false` keeps and marks them; `message` and
+  `inputMessage` explain the rule. The side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on
+  the selected cells in one undo step. `getDocument()` and Excel files keep them. New guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

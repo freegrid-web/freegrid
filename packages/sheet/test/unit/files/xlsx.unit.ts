@@ -16,6 +16,11 @@ const book = (): Book => ({
           // Sides of their own: a thick bottom line and a thin top one.
           { value: true, style: { borderTop: '1px solid #000000', borderBottom: '3px solid #c00000' } }],
         [{ value: '<b>&"quotes"</b>' }, { error: '#DIV/0!', formula: '=1/0' }],
+        // Data validation: a list, numbers between, a date after (not strict), with messages.
+        [{ value: 'Open', validation: { type: 'list', source: ['Open', 'Done', 'Say "hi"'] } },
+          { value: 5, validation: { type: 'integer', operator: 'between', value: 1, value2: 10, message: 'From 1 to 10' } },
+          { value: '2026-02-01', validation: { type: 'date', operator: 'greater', value: '2026-01-01', strict: false,
+            inputMessage: 'A date in 2026' } }],
       ],
       columnWidths: [120, undefined, 80],
       rowHeights: [40],

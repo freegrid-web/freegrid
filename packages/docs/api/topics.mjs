@@ -146,6 +146,13 @@ export const TOPICS = [
     settings: ['findAndReplace'],
   },
   {
+    name: 'Data validation',
+    description: 'Rules for the values of cells: lists (dropdowns), numbers, dates, text lengths, with messages.',
+    methods: [],
+    events: [],
+    settings: ['dataValidation'],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],

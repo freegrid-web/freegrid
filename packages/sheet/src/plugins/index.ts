@@ -9,6 +9,7 @@ import Comments from './comments/comments';
 import ContextMenu from './contextMenu/contextMenu';
 import CopyPaste from './copyPaste/copyPaste';
 import CustomBorders from './customBorders/customBorders';
+import DataValidation from './dataValidation/dataValidation';
 import DragToScroll from './dragToScroll/dragToScroll';
 import DropdownMenu from './dropdownMenu/dropdownMenu';
 import Filters from './filters/filters';
@@ -46,6 +47,7 @@ export {
   ContextMenu,
   CopyPaste,
   CustomBorders,
+  DataValidation,
   DragToScroll,
   DropdownMenu,
   Filters,

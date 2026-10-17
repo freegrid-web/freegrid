@@ -32,7 +32,7 @@ declare namespace _FreeSheet {
     getSheets(): Array<{ id: string; name: string }>;
     getActiveSheet(): Core;
     activateSheet(id: string): void;
-    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | string, options?: object): void;
+    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
     setLoading(state: boolean | string): void;
@@ -1472,6 +1472,12 @@ declare namespace FreeSheet {
     commentedCellClassName?: string;
     comments?: boolean | CommentObject[];
     contextMenu?: boolean | any[] | contextMenu.Settings;
+    dataValidation?: boolean;
+    /** A data validation rule. */
+    validation?: { type: 'list' | 'number' | 'integer' | 'date' | 'textLength'; source?: any[] | string;
+      operator?: 'between' | 'notBetween' | 'equal' | 'notEqual' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual';
+      value?: number | string; value2?: number | string; allowBlank?: boolean; strict?: boolean; message?: string;
+      inputMessage?: string };
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |

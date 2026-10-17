@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar, .fs-status-bar, .fs-find) {
+  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar, .fs-status-bar, .fs-find, .fs-validation-card) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
@@ -154,6 +154,8 @@
   --fs-menu-background: var(--fs-color-background); /* Menu background. */
   --fs-menu-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Menu border. */
   --fs-menu-disabled-text: var(--fs-color-muted-text); /* Disabled items. */
+  --fs-validation-card-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* The card of a validation message. */
+  --fs-validation-error-color: #d9363e; /* A refused value's card and the panel's errors. */
   --fs-find-radius: 4px; /* Corners of the find and replace box. */
   --fs-find-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* Its shadow. */
   --fs-find-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */
