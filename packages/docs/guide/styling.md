@@ -44,7 +44,7 @@ cell: [{ row: 0, col: 0, style: { fontWeight: 'bold', color: '#c00000', backgrou
 
 The properties are `fontWeight`, `fontStyle`, `textDecoration`, `color`, `background` and `border`.
 
-Users format cells as in a spreadsheet:
+Users format cells as in a spreadsheet ([example](../examples/formatting)):
 
 - **Ctrl+B**, **Ctrl+I** and **Ctrl+U** toggle bold, italic and underline for the selected cells (on for all of them,
   or off when all of them have it).
