@@ -8,9 +8,10 @@ const book = (): Book => ({
     {
       name: 'Sales & costs',
       cells: [
-        [{ value: 'Region', style: { fontWeight: 'bold', background: '#d9e1f2' }, align: { horizontal: 'center' } },
+        [{ value: 'Region', style: { fontFamily: 'Georgia', fontSize: '14pt', fontWeight: 'bold', background: '#d9e1f2' },
+          align: { horizontal: 'center' } },
           { value: 'Q1' }, { value: 'Total' }],
-        [{ value: 'North' }, { value: 1200.5, numFmt: '#,##0.00' },
+        [{ value: 'North', link: 'https://example.com/north?a=1&b=2' }, { value: 1200.5, numFmt: '#,##0.00' },
           { value: 1200.5, formula: '=B2*1', style: { color: '#c00000', border: '1px solid #000000' } }],
         [{ value: 'Due' }, { value: 46037, numFmt: 'yyyy-mm-dd' },
           // Sides of their own: a thick bottom line and a thin top one.
@@ -45,6 +46,8 @@ const book = (): Book => ({
       ],
       // An outline: rows 5 to 8, and inside it rows 6 and 7, collapsed.
       rowGroups: [{ from: 4, to: 7 }, { from: 5, to: 6, collapsed: true }],
+      // Columns D to E, collapsed (apart from the hidden column B).
+      columnGroups: [{ from: 3, to: 4, collapsed: true }],
     },
     { name: 'Empty', cells: [], columnWidths: [], rowHeights: [], hiddenRows: [], hiddenColumns: [], merges: [],
       frozenRows: 0, frozenColumns: 0, comments: [], conditionalFormatting: [] },

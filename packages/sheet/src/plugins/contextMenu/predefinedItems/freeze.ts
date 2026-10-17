@@ -1,6 +1,7 @@
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'freeze';
 
@@ -29,6 +30,7 @@ const option = (name: string, label: string, callback: (grid: PluginHost) => voi
  */
 const freezeItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.freeze,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FREEZE);
   },

@@ -406,4 +406,61 @@ describe('Core formatting', () => {
       expect(hot.getCellMeta(0, 1).style).toBeUndefined();
     });
   });
+
+  describe('font and font size', () => {
+    afterEach(() => {
+      $('.fs-formatting-bar').remove();
+    });
+
+    it('makes rows tall enough for the font sizes of their cells, also from the settings', () => {
+      handsontable({ data: [['Title', 1], ['b', 2]], rowHeaders: true,
+        cell: [{ row: 0, col: 0, style: { fontSize: '18pt' } }] });
+
+      expect(getCell(0, 0).offsetHeight).toBeGreaterThan(30);
+      expect(getCell(1, 0).offsetHeight).toBeLessThan(30);
+      // The row header grows with it.
+      expect(getCell(0, -1).offsetHeight).toBe(getCell(0, 0).offsetHeight);
+    });
+
+    it('sets the font from its list and the size from its field or list, in one undo step each', async() => {
+      const hot = handsontable({ data: [['a', 'b']], contextMenu: true, formattingBar: true });
+
+      selectCell(0, 0);
+      contextMenu();
+      await sleep(0);
+      const bar = $('.fs-formatting-bar');
+
+      expect(bar.find('[data-font-label]').text()).toBe('Default');
+
+      bar.find('[data-palette="font_family"]').simulate('mousedown');
+      const georgia = $('.fs-formatting-bar__list [data-value="Georgia"]');
+
+      expect(georgia.get(0).style.fontFamily).toBe('Georgia');
+      georgia.simulate('mousedown');
+      expect(hot.getCellMeta(0, 0).style).toEqual({ fontFamily: 'Georgia' });
+      expect(getCell(0, 0).style.fontFamily).toBe('Georgia');
+      expect(bar.find('[data-font-label]').text()).toBe('Georgia');
+
+      const size = bar.find('[data-font-size]');
+
+      size.val('14');
+      size.get(0).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(hot.getCellMeta(0, 0).style).toEqual({ fontFamily: 'Georgia', fontSize: '14pt' });
+      expect(getCell(0, 0).style.fontSize).toBe('14pt');
+
+      bar.find('[data-palette="font_size"]').simulate('mousedown');
+      $('.fs-formatting-bar__list [data-value="20"]').simulate('mousedown');
+      expect(hot.getCellMeta(0, 0).style.fontSize).toBe('20pt');
+      // A bigger font makes the row taller (20pt is about 27px of text).
+      expect(getCell(0, 0).offsetHeight).toBeGreaterThan(30);
+
+      hot.undo();
+      expect(hot.getCellMeta(0, 0).style.fontSize).toBe('14pt');
+
+      bar.find('[data-palette="font_family"]').simulate('mousedown');
+      $('.fs-formatting-bar__list [data-value=""]').simulate('mousedown');
+      expect(hot.getCellMeta(0, 0).style).toEqual({ fontSize: '14pt' });
+    });
+  });
 });
+

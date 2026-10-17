@@ -98,6 +98,9 @@ const bookCell = (source: unknown, shown: unknown, meta: Meta): BookCell | null 
   if (meta.validation && typeof meta.validation === 'object') {
     cell.validation = meta.validation as BookCell['validation'];
   }
+  if (typeof meta.link === 'string' && meta.link) {
+    cell.link = meta.link;
+  }
   const align: Record<string, string> = {};
 
   String(meta.className || '').split(/\s+/).forEach((name) => {
@@ -168,6 +171,13 @@ const gridToSheet = (grid: Core, name: string, headers: boolean): BookSheet => {
 
   if (groups.length) {
     sheet.rowGroups = groups;
+  }
+  const columnOutline = plugin(grid, 'columnOutline');
+  const columnGroups = columnOutline ? (columnOutline.getSavedGroups as () => NonNullable<BookSheet['columnGroups']>)() :
+    [];
+
+  if (columnGroups.length) {
+    sheet.columnGroups = columnGroups;
   }
   sheet.hiddenColumns = hiddenColumns ? (hiddenColumns.getHidden as () => number[])() : [];
   const merge = plugin(grid, 'mergeCells');
@@ -281,6 +291,9 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
           if (cell.validation) {
             meta.validation = cell.validation;
           }
+          if (cell.link) {
+            meta.link = cell.link;
+          }
           const classes = [cell.align?.horizontal && `fs-${cell.align.horizontal}`,
             cell.align?.vertical && `fs-${cell.align.vertical}`].filter(Boolean);
 
@@ -317,6 +330,7 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
         rowspan: rect.r2 - rect.r1 + 1, colspan: rect.c2 - rect.c1 + 1 })) } : {}),
       ...(hiddenRows.length ? { hiddenRows } : {}),
       ...(rowGroups.length ? { rowGroups } : {}),
+      ...(sheet.columnGroups?.length ? { columnOutline: sheet.columnGroups } : {}),
       ...(sheet.hiddenColumns.length ? { hiddenColumns: sheet.hiddenColumns } : {}),
       ...(conditionalFormatting.length ? { conditionalFormatting } : {}),
       ...(frozenRows ? { fixedRowsTop: frozenRows } : {}),

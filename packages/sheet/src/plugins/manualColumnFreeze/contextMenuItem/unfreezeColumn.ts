@@ -2,10 +2,12 @@ import * as C from './../../../i18n/constants';
 import type ManualColumnFreeze from './../manualColumnFreeze';
 import type { MenuItem } from './../../contextMenu/menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../../contextMenu/icons';
 
 /** The context menu entry that unfreezes the selected column (shown when one frozen column is selected). */
 const unfreezeColumnItem = (manualColumnFreezePlugin: ManualColumnFreeze): MenuItem => ({
   key: 'unfreeze_column',
+  icon: ICONS.freeze,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_UNFREEZE_COLUMN);
   },

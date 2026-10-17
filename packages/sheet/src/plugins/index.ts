@@ -2,7 +2,9 @@ import PersistentState from './persistentState/persistentState';
 import AutoColumnSize from './autoColumnSize/autoColumnSize';
 import AutoFill from './autofill/autofill';
 import AutoRowSize from './autoRowSize/autoRowSize';
+import ChangeHistory from './changeHistory/changeHistory';
 import CollapsibleColumns from './collapsibleColumns/collapsibleColumns';
+import ColumnOutline from './rowGroups/columnOutline';
 import ColumnSorting from './columnSorting/columnSorting';
 import ConditionalFormatting from './conditionalFormatting/conditionalFormatting';
 import Comments from './comments/comments';
@@ -18,6 +20,7 @@ import FormattingBar from './formattingBar/formattingBar';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
 import HiddenColumns from './hiddenColumns/hiddenColumns';
+import Hyperlinks from './hyperlinks/hyperlinks';
 import HiddenRows from './hiddenRows/hiddenRows';
 import ManualColumnFreeze from './manualColumnFreeze/manualColumnFreeze';
 import ManualColumnMove from './manualColumnMove/manualColumnMove';
@@ -40,7 +43,9 @@ export {
   AutoColumnSize,
   AutoFill,
   AutoRowSize,
+  ChangeHistory,
   CollapsibleColumns,
+  ColumnOutline,
   ColumnSorting,
   ConditionalFormatting,
   Comments,
@@ -57,6 +62,7 @@ export {
   Formulas,
   HiddenColumns,
   HiddenRows,
+  Hyperlinks,
   ManualColumnFreeze,
   ManualColumnMove,
   ManualColumnResize,

@@ -1,5 +1,9 @@
 /** A cell's own style (its `style` meta): what Excel's fonts, fills and borders become. */
 export type CellStyle = {
+  /** The font (`Arial`, `'Times New Roman', serif`). */
+  fontFamily?: string;
+  /** The font size, in points as a spreadsheet gives it (`'14pt'`), or any CSS size. */
+  fontSize?: string;
   fontWeight?: string;
   fontStyle?: string;
   textDecoration?: string;
@@ -13,11 +17,13 @@ export type CellStyle = {
   borderLeft?: string;
 };
 
-export const CELL_STYLE_PROPERTIES: (keyof CellStyle)[] = ['fontWeight', 'fontStyle', 'textDecoration', 'color',
+export const CELL_STYLE_PROPERTIES: (keyof CellStyle)[] = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
+  'textDecoration', 'color',
   'background', 'border', 'borderTop', 'borderRight', 'borderBottom', 'borderLeft'];
 
 /** The properties a cell's own element style takes as they are (the borders are drawn as shadows). */
-const DIRECT_PROPERTIES: (keyof CellStyle)[] = ['fontWeight', 'fontStyle', 'textDecoration', 'color', 'background'];
+const DIRECT_PROPERTIES: (keyof CellStyle)[] = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'textDecoration',
+  'color', 'background'];
 
 const SIDES = [['borderTop', '0 {w}'], ['borderRight', '-{w} 0'], ['borderBottom', '0 -{w}'],
   ['borderLeft', '{w} 0']] as const;

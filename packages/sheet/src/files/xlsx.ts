@@ -23,6 +23,8 @@ export type BookCell = {
   align?: { horizontal?: string; vertical?: string; wrap?: boolean };
   /** A data validation rule (see the dataValidation plugin). */
   validation?: Validation;
+  /** A hyperlink (`https://…`, `mailto:…`). */
+  link?: string;
 };
 export type BookComment = { row: number; column: number; text: string; author?: string };
 export type BookSheet = {
@@ -40,6 +42,8 @@ export type BookSheet = {
   conditionalFormatting: ConditionalRule[];
   /** Row groups (an outline): rows from `from` to `to`, hidden when collapsed. */
   rowGroups?: { from: number; to: number; collapsed?: boolean }[];
+  /** Column groups (an outline): columns from `from` to `to`, hidden when collapsed. */
+  columnGroups?: { from: number; to: number; collapsed?: boolean }[];
 };
 export type Book = { sheets: BookSheet[]; active: number };
 
@@ -246,8 +250,13 @@ class StyleSheet {
     const underline = /underline/.test(style.textDecoration || '') ? '<u/>' : '';
     const color = toArgb(style.color);
 
-    return `<font>${bold}${italic}${strike}${underline}${color ? `<color rgb="${color}"/>` : ''}${dxf ? '' :
-      '<sz val="11"/><name val="Calibri"/><family val="2"/>'}</font>`;
+    const points = fontPoints(style.fontSize);
+    const name = style.fontFamily?.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+    const size = points ? `<sz val="${points}"/>` : '';
+    const family = name ? `<name val="${escapeXml(name)}"/>` : '';
+
+    return `<font>${bold}${italic}${strike}${underline}${color ? `<color rgb="${color}"/>` : ''}${dxf ? `${size}${family}` :
+      `${size || '<sz val="11"/>'}${family || '<name val="Calibri"/><family val="2"/>'}`}</font>`;
   }
 
   fillXml(style: CellStyle, dxf = false): string | null {
@@ -399,6 +408,21 @@ const validationsXml = (sheet: BookSheet): string => {
 
   return `<dataValidations count="${rules.length}">${rules.join('')}</dataValidations>`;
 };
+/** The cells of a sheet that have a hyperlink, in reading order (their relationships are `rIdLink1`, `rIdLink2`, …). */
+const linksOf = (sheet: BookSheet): { row: number; column: number; link: string }[] => sheet.cells.flatMap((cells, row) =>
+  (cells || []).map((cell, column) => (cell && cell.link ? { row, column, link: cell.link } : null))
+    .filter((link): link is { row: number; column: number; link: string } => !!link));
+
+/** A CSS font size in points (`14pt`, `16px` → 12), or `null`. */
+const fontPoints = (size: string | undefined): number | null => {
+  const match = /^\s*(\d+(\.\d+)?)\s*(pt|px)?\s*$/i.exec(size || '');
+
+  if (!match) {
+    return null;
+  }
+
+  return Math.round((match[3]?.toLowerCase() === 'px' ? Number(match[1]) * 0.75 : Number(match[1])) * 2) / 2;
+};
 
 const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: StyleSheet, hasComments: boolean): string => {
   const rows = sheet.cells.length;
@@ -409,12 +433,22 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
   const pane = frozen ? `<pane${sheet.frozenColumns ? ` xSplit="${sheet.frozenColumns}"` : ''}${sheet.frozenRows ?
     ` ySplit="${sheet.frozenRows}"` : ''} topLeftCell="${cellRef(sheet.frozenRows, sheet.frozenColumns)}" activePane="${
     sheet.frozenRows && sheet.frozenColumns ? 'bottomRight' : sheet.frozenRows ? 'bottomLeft' : 'topRight'}" state="frozen"/>` : '';
-  const cols = Array.from({ length: columns }, (_, column) => {
+  const columnGroups = sheet.columnGroups || [];
+  const columnLevelOf = (column: number) => columnGroups.filter(group => group.from <= column && group.to >= column)
+    .length;
+  const outlineLevelCol = columnGroups.reduce((deepest, group) => Math.max(deepest, columnLevelOf(group.from)), 0);
+  // A collapsed group hides its columns; the column after it is marked collapsed.
+  const columnGroupHidden = new Set(columnGroups.filter(group => group.collapsed).flatMap(group => Array.from(
+    { length: group.to - group.from + 1 }, (_, i) => group.from + i)));
+  const columnSummaries = new Set(columnGroups.filter(group => group.collapsed).map(group => group.to + 1));
+  const cols = Array.from({ length: Math.max(columns, ...columnGroups.map(group => group.to + 2)) }, (_, column) => {
     const width = sheet.columnWidths[column];
-    const hidden = hiddenColumns.has(column);
+    const hidden = hiddenColumns.has(column) || columnGroupHidden.has(column);
+    const level = columnLevelOf(column);
+    const outline = `${level ? ` outlineLevel="${level}"` : ''}${columnSummaries.has(column) ? ' collapsed="1"' : ''}`;
 
-    return width || hidden ? `<col min="${column + 1}" max="${column + 1}" width="${pixelsToWidth(width || 64)}"${
-      width ? ' customWidth="1"' : ''}${hidden ? ' hidden="1"' : ''}/>` : '';
+    return width || hidden || outline ? `<col min="${column + 1}" max="${column + 1}" width="${
+      pixelsToWidth(width || 64)}"${width ? ' customWidth="1"' : ''}${hidden ? ' hidden="1"' : ''}${outline}/>` : '';
   }).join('');
   const groups = sheet.rowGroups || [];
   const levelOf = (row: number) => groups.filter(group => group.from <= row && group.to >= row).length;
@@ -450,14 +484,18 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
 
     return `<conditionalFormatting sqref="${escapeXml(ranges.join(' '))}">${xml}</conditionalFormatting>`;
   }).join('');
+  const links = linksOf(sheet);
+  const hyperlinks = links.length ? `<hyperlinks>${links.map((link, i) => `<hyperlink ref="${
+    cellRef(link.row, link.column)}" r:id="rIdLink${i + 1}"/>`).join('')}</hyperlinks>` : '';
   const dimension = rows && columns ? formatRange({ r1: 0, c1: 0, r2: Math.max(0, rows - 1), c2: Math.max(0, columns - 1) }) :
     'A1';
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="${NS}" xmlns:r="${REL_NS}"><dimension ref="${dimension}"/><sheetViews><sheetView${active ?
     ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${
-    outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${validationsXml(sheet)}${hasComments ?
+    outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}${outlineLevelCol ? ` outlineLevelCol="${
+    outlineLevelCol}"` : ''}/>${cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${
+    formatting}${validationsXml(sheet)}${hyperlinks}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
 
@@ -499,13 +537,20 @@ export const writeXlsx = async(book: Book): Promise<Uint8Array> => {
 
     files.push({ name: `xl/worksheets/sheet${number}.xml`, content: xml });
     overrides.push(`<Override PartName="/xl/worksheets/sheet${number}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`);
+    const relationshipsXml: string[] = linksOf(sheet).map((link, i) => `<Relationship Id="rIdLink${i + 1}" Type="${
+      REL_TYPE}/hyperlink" Target="${escapeXml(link.link)}" TargetMode="External"/>`);
+
     if (hasComments) {
       files.push({ name: `xl/comments${number}.xml`, content: commentsXml(sheet.comments) });
       files.push({ name: `xl/drawings/vmlDrawing${number}.vml`, content: vmlXml(sheet.comments) });
-      files.push({ name: `xl/worksheets/_rels/sheet${number}.xml.rels`, content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="${PKG_REL_NS}"><Relationship Id="rIdComments${number}" Type="${REL_TYPE}/comments" Target="../comments${number}.xml"/>`
-        + `<Relationship Id="rIdVml${number}" Type="${REL_TYPE}/vmlDrawing" Target="../drawings/vmlDrawing${number}.vml"/></Relationships>` });
+      relationshipsXml.push(`<Relationship Id="rIdComments${number}" Type="${REL_TYPE}/comments" Target="../comments${
+        number}.xml"/>`, `<Relationship Id="rIdVml${number}" Type="${REL_TYPE}/vmlDrawing" Target="../drawings/vmlDrawing${
+        number}.vml"/>`);
       overrides.push(`<Override PartName="/xl/comments${number}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>`);
+    }
+    if (relationshipsXml.length) {
+      files.push({ name: `xl/worksheets/_rels/sheet${number}.xml.rels`, content: `<?xml version="1.0" encoding="UTF-8" ${
+        ''}standalone="yes"?>\n<Relationships xmlns="${PKG_REL_NS}">${relationshipsXml.join('')}</Relationships>` });
     }
 
     return `<sheet name="${escapeXml(sheet.name)}" sheetId="${number}" r:id="rIdSheet${number}"/>`;
@@ -569,15 +614,18 @@ const resolve = (from: string, target: string): string => {
   return parts.join('/');
 };
 
-const relationships = (files: Map<string, Uint8Array>, part: string): Map<string, { type: string; target: string }> => {
+const relationships = (files: Map<string, Uint8Array>, part: string):
+  Map<string, { type: string; target: string; external: boolean; href: string }> => {
   const folder = part.split('/').slice(0, -1).join('/');
   const name = part.split('/').pop();
   const xml = parseXml(files.get(`${folder ? `${folder}/` : ''}_rels/${name}.rels`));
-  const map = new Map<string, { type: string; target: string }>();
+  const map = new Map<string, { type: string; target: string; external: boolean; href: string }>();
 
   all(xml, 'Relationship').forEach((relationship) => {
-    map.set(attr(relationship, 'Id') || '', { type: attr(relationship, 'Type') || '',
-      target: resolve(part, attr(relationship, 'Target') || '') });
+    const href = attr(relationship, 'Target') || '';
+
+    map.set(attr(relationship, 'Id') || '', { type: attr(relationship, 'Type') || '', target: resolve(part, href),
+      external: attr(relationship, 'TargetMode') === 'External', href });
   });
 
   return map;
@@ -597,11 +645,21 @@ const colorOf = (node: Element | undefined): string | undefined => {
   return theme !== null && THEME_COLORS[Number(theme)] ? `#${THEME_COLORS[Number(theme)].toLowerCase()}` : void 0;
 };
 
-const fontStyle = (font: Element | undefined): CellStyle => {
+const fontStyle = (font: Element | undefined, base?: Element): CellStyle => {
   const style: CellStyle = {};
 
   if (!font) {
     return style;
+  }
+  // Size and font only where they differ from the workbook's own (its first font).
+  const size = attr(child(font, 'sz'), 'val');
+  const name = attr(child(font, 'name'), 'val');
+
+  if (size && size !== (attr(child(base, 'sz'), 'val') || '11')) {
+    style.fontSize = `${Number(size)}pt`;
+  }
+  if (name && name !== (attr(child(base, 'name'), 'val') || 'Calibri')) {
+    style.fontFamily = name;
   }
   if (child(font, 'b') && attr(child(font, 'b'), 'val') !== '0') {
     style.fontWeight = 'bold';
@@ -798,7 +856,7 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
   const borders = children(child(styles?.documentElement, 'borders'), 'border');
   const xfs = children(child(styles?.documentElement, 'cellXfs'), 'xf').map((xf) => {
     const alignment = child(xf, 'alignment');
-    const style = { ...fontStyle(fonts[Number(attr(xf, 'fontId') || 0)]),
+    const style = { ...fontStyle(fonts[Number(attr(xf, 'fontId') || 0)], fonts[0]),
       ...fillStyle(fills[Number(attr(xf, 'fillId') || 0)]), ...borderStyle(borders[Number(attr(xf, 'borderId') || 0)]) };
     const horizontal = attr(alignment, 'horizontal');
     const vertical = attr(alignment, 'vertical');
@@ -809,7 +867,7 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
     return { numFmt: numFmts.get(Number(attr(xf, 'numFmtId') || 0)), style, align };
   });
   const dxfs = children(child(styles?.documentElement, 'dxfs'), 'dxf').map(dxf => ({
-    ...fontStyle(child(dxf, 'font')), ...fillStyle(child(dxf, 'fill'), true), ...borderStyle(child(dxf, 'border')) }));
+    ...fontStyle(child(dxf, 'font'), fonts[0]), ...fillStyle(child(dxf, 'fill'), true), ...borderStyle(child(dxf, 'border')) }));
 
   const sheetElements = all(workbook, 'sheet');
   const activeTab = Number(attr(all(workbook, 'workbookView')[0], 'activeTab') || 0);
@@ -908,11 +966,20 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
 
       sheet.hiddenRows = sheet.hiddenRows.filter(row => !inCollapsed(row));
     }
+    const columnLevels: number[] = [];
+    const collapsedColumns = new Set<number>();
+
     all(xml, 'col').forEach((col) => {
       const min = Number(attr(col, 'min')) - 1;
       const max = Math.min(Number(attr(col, 'max')) - 1, min + 16383);
 
       for (let column = min; column <= max; column += 1) {
+        if (Number(attr(col, 'outlineLevel')) > 0) {
+          columnLevels[column] = Number(attr(col, 'outlineLevel'));
+        }
+        if (attr(col, 'collapsed') === '1') {
+          collapsedColumns.add(column);
+        }
         if (attr(col, 'customWidth') === '1' && attr(col, 'width')) {
           sheet.columnWidths[column] = widthToPixels(Number(attr(col, 'width')));
         }
@@ -921,6 +988,14 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
         }
       }
     });
+    const columnGroups = groupsFromLevels(columnLevels, collapsedColumns, new Set(sheet.hiddenColumns));
+
+    if (columnGroups.length) {
+      sheet.columnGroups = columnGroups;
+      // The columns a collapsed group hides are the group's, not hidden columns of their own.
+      sheet.hiddenColumns = sheet.hiddenColumns.filter(column => !columnGroups.some(group => group.collapsed &&
+        column >= group.from && column <= group.to));
+    }
     // Columns hidden at the end of a sheet (Excel writes up to XFD) only count within the data.
     const columnCount = Math.max(0, ...sheet.cells.map(row => (row ? row.length : 0)));
 
@@ -1013,6 +1088,21 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
 
     // Notes: the comments part of the sheet.
     const sheetRels = relationships(files, path);
+
+    // Hyperlinks to web pages and mail addresses (links inside the workbook are left out).
+    all(xml, 'hyperlink').forEach((hyperlink) => {
+      const ref = parseRange(attr(hyperlink, 'ref') || '');
+      const id = hyperlink.getAttributeNS(REL_NS, 'id') || attr(hyperlink, 'r:id') || '';
+      const target = sheetRels.get(id);
+
+      if (ref && target?.external && /^(https?:|mailto:)/i.test(target.href)) {
+        const cells = (sheet.cells[ref.r1] = sheet.cells[ref.r1] || []);
+
+        cells[ref.c1] = { ...cells[ref.c1], link: target.href };
+      }
+    });
+
+    // Notes: the comments part of the sheet.
     const commentsPath = Array.from(sheetRels.values()).find(relationship => /\/comments$/.test(relationship.type))
       ?.target;
     const comments = parseXml(files.get(commentsPath || ''));

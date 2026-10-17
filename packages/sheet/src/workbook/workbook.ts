@@ -45,6 +45,8 @@ export type SheetDocument = {
   collapsedRows?: number[];
   /** Row groups (rows as data indexes). */
   rowGroups?: { from: number; to: number; collapsed?: boolean }[];
+  /** Column groups as an outline (columns as data indexes). */
+  columnOutline?: { from: number; to: number; collapsed?: boolean }[];
   cell?: AnyObject[];
 };
 
@@ -53,7 +55,7 @@ export type SavedDocument = { version: 1; activeSheet: string; sheets: SheetDocu
 
 /** Cell settings a saved document keeps (what users change in the grid: comments, formats, read-only cells). */
 const SAVED_CELL_SETTINGS = ['comment', 'className', 'readOnly', 'type', 'numericFormat', 'dateFormat', 'timeFormat',
-  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style', 'validation'];
+  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style', 'validation', 'link'];
 
 const sparse = <T>(values: (T | undefined)[]): (T | null)[] | undefined => {
   if (!values.some(value => value !== void 0 && value !== null)) {
@@ -127,6 +129,12 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   if (rowGroups.length) {
     saved.rowGroups = rowGroups;
   }
+  const columnOutline = plugin('columnOutline')?.enabled ?
+    (plugin('columnOutline')!.getSavedGroups as () => SheetDocument['columnOutline'])()! : [];
+
+  if (columnOutline.length) {
+    saved.columnOutline = columnOutline;
+  }
   const { fixedRowsTop, fixedColumnsLeft } = instance.getSettings();
 
   if (fixedRowsTop) {
@@ -169,6 +177,9 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   }
   if (sheet.rowGroups) {
     settings.rowGroups = { groups: sheet.rowGroups };
+  }
+  if (sheet.columnOutline) {
+    settings.columnOutline = { groups: sheet.columnOutline };
   }
   settings.fixedRowsTop = sheet.fixedRowsTop || 0;
   settings.fixedColumnsLeft = sheet.fixedColumnsLeft || 0;
@@ -866,7 +877,7 @@ export class Workbook {
     }
     // The first sheet keeps its hiding options; what is hidden follows the saved sheet.
     const kept = [['hiddenRows', 'rows'], ['hiddenColumns', 'columns'], ['filters', 'conditions'],
-      ['rowGroups', 'groups']] as const;
+      ['rowGroups', 'groups'], ['columnOutline', 'groups']] as const;
 
     kept.forEach(([name, key]) => {
       const current = this.root.getSettings()[name];

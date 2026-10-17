@@ -1802,6 +1802,14 @@ const REGISTERED_HOOKS: string[] = [
   'afterSetCellStyle',
 
   /**
+   * Fired after the change history recorded a change (`changeHistory`), or forgot them all (`null`).
+   *
+   * @event Hooks#afterChangeRecorded
+   * @param {Object|null} change `{ id, time, user, kind, cells: [{ row, col, before, after }], index, amount, source }`.
+   */
+  'afterChangeRecorded',
+
+  /**
    * Fired after cells' settings changed together (the format painter, a number format, borders).
    *
    * @event Hooks#afterSetCellFormat

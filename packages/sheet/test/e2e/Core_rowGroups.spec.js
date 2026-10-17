@@ -155,3 +155,91 @@ describe('Core row groups', () => {
     expect(sheet.countRows()).toBe(8);
   });
 });
+
+describe('Core column outline', () => {
+  const id = 'testContainer';
+
+  beforeEach(function() {
+    this.$container = $(`<div id="${id}"></div>`).appendTo('body');
+  });
+
+  afterEach(function() {
+    if (this.$container) {
+      destroy();
+      this.$container.remove();
+    }
+    $('.fs-context-menu, .fs-sheet-tabs').remove();
+  });
+
+  const grid = (settings = {}) => handsontable({
+    data: createSpreadsheetData(3, 8), rowHeaders: true, colHeaders: true, columnOutline: true, ...settings });
+  /** The visible header of a column (in the top overlay, after the corner). */
+  const header = column => spec().$container.find('.fs-clone-top thead tr:first-child th').eq(column + 1);
+  const toggle = column => header(column).find('.fs-row-groups__toggle');
+
+  it('groups columns, draws the gutter above the headers and collapses a group with its button', () => {
+    const hot = grid();
+    const plugin = hot.getPlugin('columnOutline');
+
+    plugin.groupColumns(1, 3);
+    expect(plugin.getGroups()).toEqual([{ from: 1, to: 3, level: 1, collapsed: false }]);
+    expect(header(2).find('.fs-column-outline__line').length).toBe(1);
+    expect(toggle(4).text()).toBe('−');
+
+    // A click where the button shows reaches it.
+    const box = toggle(4).get(0).getBoundingClientRect();
+    const hit = document.elementFromPoint(box.left + (box.width / 2), box.top + (box.height / 2));
+
+    expect(hit.closest('.fs-row-groups__toggle')).not.toBeNull();
+
+    toggle(4).simulate('mousedown');
+    expect(hot.countCols()).toBe(5);
+    expect(getDataAtCell(0, 1)).toBe('E1');
+    toggle(1).simulate('mousedown');
+    expect(hot.countCols()).toBe(8);
+  });
+
+  it('nests groups in levels with the corner buttons, and groups from the context menu', () => {
+    const hot = grid({ contextMenu: true });
+    const plugin = hot.getPlugin('columnOutline');
+
+    selectCell(0, 1, 0, 5);
+    contextMenu();
+    hot.getPlugin('contextMenu').executeCommand('column_outline_group');
+    plugin.groupColumns(2, 3);
+    expect(plugin.getGroups().map(group => group.level)).toEqual([1, 2]);
+
+    const levels = $('.fs-column-outline__levels').first().find('.fs-row-groups__level');
+
+    expect(levels.map((i, level) => level.textContent).get()).toEqual(['1', '2', '3']);
+    levels.eq(0).simulate('mousedown');
+    expect(hot.countCols()).toBe(3);
+
+    selectCell(0, 0);
+    hot.getPlugin('contextMenu').executeCommand('column_outline_ungroup');
+    expect(plugin.getGroups().length).toBe(2);
+  });
+
+  it('is kept by getDocument, loadDocument and Excel files, next to row groups', async() => {
+    const hot = grid({ rowGroups: true });
+
+    hot.getPlugin('columnOutline').groupColumns(2, 4);
+    hot.getPlugin('columnOutline').collapseGroup(2);
+    hot.getPlugin('rowGroups').groupRows(1, 1);
+    const doc = hot.getDocument();
+
+    expect(doc.sheets[0].columnOutline).toEqual([{ from: 2, to: 4, collapsed: true }]);
+
+    const blob = await hot.exportFile('xlsx');
+
+    destroy();
+    const next = handsontable({ data: [[null]], colHeaders: true });
+
+    await next.importFile(blob);
+    const sheet = next.getActiveSheet();
+
+    expect(sheet.getPlugin('columnOutline').getGroups()).toEqual([{ from: 2, to: 4, level: 1, collapsed: true }]);
+    expect(sheet.getPlugin('rowGroups').getGroups()).toEqual([{ from: 1, to: 1, level: 1, collapsed: false }]);
+    expect(sheet.countCols()).toBe(5);
+  });
+});

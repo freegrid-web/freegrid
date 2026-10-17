@@ -4,9 +4,10 @@ import { JSDOM } from 'jsdom';
 const dist = f => new URL(`../../dist/${f}`, import.meta.url);
 const read = f => readFileSync(dist(f), 'utf8');
 
-const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'CollapsibleColumns', 'ColumnSorting', 'Comments',
-  'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DataValidation', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace',
-  'FormattingBar', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove',
+const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ChangeHistory', 'CollapsibleColumns',
+  'ColumnOutline', 'ColumnSorting', 'Comments', 'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders',
+  'DataValidation', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace', 'FormattingBar', 'FormulaBar',
+  'Formulas', 'HiddenColumns', 'HiddenRows', 'Hyperlinks', 'ManualColumnFreeze', 'ManualColumnMove',
   'ManualColumnResize', 'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedHeaders',
   'NestedRows', 'ObserveChanges', 'PersistentState', 'RowGroups', 'Search', 'StatusBar', 'TouchScroll', 'UndoRedo'];
 

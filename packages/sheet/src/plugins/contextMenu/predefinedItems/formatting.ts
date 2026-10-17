@@ -6,14 +6,18 @@ import { KEY as SEPARATOR } from './separator';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'formatting';
 
 type FormattingGrid = PluginHost & Parameters<typeof setCellStyle>[0];
 
 /** An entry that toggles bold, italic, underline or strikethrough: checked when every selected cell has it. */
+const SHORTCUTS: Partial<Record<StyleToggle, string>> = { bold: 'Ctrl+B', italic: 'Ctrl+I', underline: 'Ctrl+U' };
+
 const toggleOption = (toggle: StyleToggle, label: string): MenuItem => ({
   key: `${KEY}:${toggle}`,
+  shortcut: SHORTCUTS[toggle],
   name(this: PluginHost) {
     const text = this.getTranslatedPhrase(label);
 
@@ -65,6 +69,7 @@ const colorMenu = (name: string, label: string, property: 'color' | 'background'
 /** The context menu entry with the formatting commands (disabled without a selection). */
 const formattingItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.format,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT);
   },

@@ -32,7 +32,8 @@ declare namespace _FreeSheet {
     getSheets(): Array<{ id: string; name: string }>;
     getActiveSheet(): Core;
     activateSheet(id: string): void;
-    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | string, options?: object): void;
+    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | 'changes' |
+      string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
     setLoading(state: boolean | string): void;
@@ -798,6 +799,7 @@ declare namespace FreeSheet {
       copyableRanges: any[];
       pasteMode: PasteModeType;
       formats: boolean;
+      pasteSpecial(mode?: 'all' | 'values' | 'formulas' | 'formats' | 'transpose'): Promise<void>;
       rowsLimit: number;
       focusableElement: FocusableWrapper;
 
@@ -847,7 +849,8 @@ declare namespace FreeSheet {
       colorScale?: string[];
       dataBar?: string | { color: string };
       iconSet?: 'arrows' | 'trafficLights' | 'signs';
-      style?: { background?: string; color?: string; fontWeight?: string; fontStyle?: string;
+      style?: { background?: string; color?: string; fontFamily?: string; fontSize?: string; fontWeight?: string;
+        fontStyle?: string;
         textDecoration?: string; border?: string };
       className?: string;
       stopIfTrue?: boolean;
@@ -1478,10 +1481,16 @@ declare namespace FreeSheet {
       operator?: 'between' | 'notBetween' | 'equal' | 'notEqual' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual';
       value?: number | string; value2?: number | string; allowBlank?: boolean; strict?: boolean; message?: string;
       inputMessage?: string };
+    hyperlinks?: boolean;
+    /** A cell's link (`https://…`, `mailto:…`). */
+    link?: string;
+    changeHistory?: boolean | { user?: string; limit?: number };
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
-    formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
-      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
+    columnOutline?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
+    formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
+      'strikethrough' | 'fill_color' | 'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' |
+      'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {
         item?: 'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum';
@@ -1608,6 +1617,9 @@ declare namespace FreeSheet {
     beforeImportFile?: (format: 'xlsx' | 'csv', source: Blob | ArrayBuffer | Uint8Array | string) => void | boolean;
     afterImportFile?: (format: 'xlsx' | 'csv') => void;
     afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
+    afterChangeRecorded?: (change: { id: number; time: number; user?: string; kind: string;
+      cells: Array<{ row: number; col: number; before: any; after: any }>; index?: number; amount?: number;
+      source?: string } | null) => void;
     afterSetCellStyle?: (changes: Array<[number, number, object | undefined, object | undefined]>) => void;
     afterSetCellFormat?: (changes: Array<[number, number, object, object]>) => void;
     afterRowCollapse?: (row: number) => void;
@@ -2113,6 +2125,18 @@ declare namespace FreeSheet {
     interface Options {
       start: wot.CellCoords,
       end: wot.CellCoords
+    }
+    interface MenuItem {
+      key?: string;
+      name?: string | ((this: _FreeSheet.Core) => string);
+      callback?: (this: _FreeSheet.Core, key: string, selection: Options[], event?: MouseEvent) => void;
+      disabled?: boolean | ((this: _FreeSheet.Core) => boolean);
+      hidden?: boolean | ((this: _FreeSheet.Core) => boolean);
+      submenu?: { items: MenuItem[] };
+      /** SVG (or other HTML) shown at the left. */
+      icon?: string;
+      /** Keys shown at the right, such as `'Ctrl+K'`. */
+      shortcut?: string;
     }
     interface Settings {
       callback: (key: string, options: contextMenu.Options) => void;

@@ -130,3 +130,43 @@
 .fs-format-painting .fs-master td {
   cursor: copy;
 }
+
+/* The font and its size: a dropdown with the font's name, a field with the size. */
+.fs-formatting-bar__font {
+  width: 110px;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fs-formatting-bar__size {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 2px;
+  border-left: 1px solid var(--fs-menu-separator-color);
+}
+
+.fs-formatting-bar__size input {
+  width: 32px;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: 3px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+
+.fs-formatting-bar__list[data-item='font_size'] {
+  min-width: 60px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.fs-formatting-bar__list[data-item='font_family'] {
+  max-height: 300px;
+  overflow-y: auto;
+}

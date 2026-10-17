@@ -54,6 +54,28 @@
   `textLength` with an operator) refuses other values, or with `strict: false` keeps and marks them; `message` and
   `inputMessage` explain the rule. The side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on
   the selected cells in one undo step. `getDocument()` and Excel files keep them. New guide page.
+- The context menu shows an icon at the left of each built-in entry and its keyboard shortcut at the right (Ctrl+Z,
+  Ctrl+C, Ctrl+B…; ⌘ on a Mac); entries of your own take `icon` and `shortcut`. The Modern style gives the menu round
+  corners, a shadow and round hovered entries. New CSS variables `--fs-menu-icon-color`, `--fs-menu-shortcut-color`.
+  New guide page "Context menu".
+- Paste and Paste Special in the context menu (keys `'paste'` and `'paste_special'`): values only, formulas only,
+  formatting only, transposed; formulas move with the paste (`=A1` becomes `=C3`); one undo step.
+  `getPlugin('copyPaste').pasteSpecial(mode)`.
+- Hyperlinks: a cell's `link` setting makes its text a link; a card under the selected link shows the address (opens in
+  a new tab), Edit and Remove; Ctrl+click opens it; Ctrl+K (or Insert link in the context menu, key `'link'`) edits
+  text and link in one undo step. Only web and mail links are kept. `getDocument()` and Excel files keep them. Plugin
+  `hyperlinks` (on unless `false`). New guide page.
+- Font and font size: `fontFamily` and `fontSize` (points, `'14pt'`) in the `style` setting; the formatting bar starts
+  with a font list (each font shown in itself) and a size field with a list. Rows grow to fit their biggest font.
+  Excel files keep the font and its size.
+- Change history ("Show Changes", `changeHistory: { user, limit }`): every edit (old and new values), and rows and
+  columns added or removed, with the time and the user. The side panel `'changes'` (context menu key `'show_changes'`)
+  lists them newest first by day; a click selects the cells; a filter shows only the selected cells' changes. Plugin
+  methods `getChanges()`, `clearChanges()`; event `afterChangeRecorded`. New guide page.
+- Column groups as an outline (`columnOutline: true`), as Excel's Group for columns: brackets and −/+ buttons in a
+  gutter above the column headers, level buttons in the corner, Group columns and Ungroup columns in the context menu,
+  `getPlugin('columnOutline').groupColumns(from, to)`. `getDocument()` and Excel files keep them. Row groups and
+  column groups share one outline model.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

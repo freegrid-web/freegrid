@@ -118,6 +118,13 @@ export const TOPICS = [
     settings: ['rowGroups'],
   },
   {
+    name: 'Column outline',
+    description: 'An outline of columns: groups in levels that collapse, as Excel\'s Group for columns.',
+    methods: [],
+    events: [],
+    settings: ['columnOutline'],
+  },
+  {
     name: 'Conditional formatting',
     description: 'Cells that format themselves from their values: highlights, color scales, data bars, icons.',
     methods: [],
@@ -153,11 +160,32 @@ export const TOPICS = [
     settings: ['dataValidation'],
   },
   {
+    name: 'Hyperlinks',
+    description: 'Links in cells: the card under a selected link, Ctrl+K to edit, Ctrl+click to open.',
+    methods: [],
+    events: [],
+    settings: ['hyperlinks'],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],
     events: ['beforeImportFile', 'afterImportFile', 'afterExportFile'],
     settings: [],
+  },
+  {
+    name: 'Context menu',
+    description: 'The right-click menu: built-in entries, entries of your own with icons and shortcuts.',
+    methods: [],
+    events: ['beforeContextMenuShow', 'afterContextMenuShow', 'afterContextMenuHide'],
+    settings: ['contextMenu'],
+  },
+  {
+    name: 'Change history',
+    description: 'Show Changes: every edit with its user, time and old and new values, in the Changes panel.',
+    methods: [],
+    events: ['afterChangeRecorded'],
+    settings: ['changeHistory'],
   },
   {
     name: 'Side panel',
