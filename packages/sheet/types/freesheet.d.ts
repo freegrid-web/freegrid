@@ -847,7 +847,8 @@ declare namespace FreeSheet {
       colorScale?: string[];
       dataBar?: string | { color: string };
       iconSet?: 'arrows' | 'trafficLights' | 'signs';
-      style?: { background?: string; color?: string; fontWeight?: string; fontStyle?: string;
+      style?: { background?: string; color?: string; fontFamily?: string; fontSize?: string; fontWeight?: string;
+        fontStyle?: string;
         textDecoration?: string; border?: string };
       className?: string;
       stopIfTrue?: boolean;
@@ -1474,7 +1475,8 @@ declare namespace FreeSheet {
     contextMenu?: boolean | any[] | contextMenu.Settings;
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
-    formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
+    formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
+      'strikethrough' | 'fill_color' |
       'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {

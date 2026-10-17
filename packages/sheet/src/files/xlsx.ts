@@ -242,8 +242,13 @@ class StyleSheet {
     const underline = /underline/.test(style.textDecoration || '') ? '<u/>' : '';
     const color = toArgb(style.color);
 
-    return `<font>${bold}${italic}${strike}${underline}${color ? `<color rgb="${color}"/>` : ''}${dxf ? '' :
-      '<sz val="11"/><name val="Calibri"/><family val="2"/>'}</font>`;
+    const points = fontPoints(style.fontSize);
+    const name = style.fontFamily?.split(',')[0].trim().replace(/^['"]|['"]$/g, '');
+    const size = points ? `<sz val="${points}"/>` : '';
+    const family = name ? `<name val="${escapeXml(name)}"/>` : '';
+
+    return `<font>${bold}${italic}${strike}${underline}${color ? `<color rgb="${color}"/>` : ''}${dxf ? `${size}${family}` :
+      `${size || '<sz val="11"/>'}${family || '<name val="Calibri"/><family val="2"/>'}`}</font>`;
   }
 
   fillXml(style: CellStyle, dxf = false): string | null {
@@ -341,6 +346,17 @@ const cellXml = (cell: BookCell, ref: string, styles: StyleSheet): string => {
   }
 
   return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${escapeXml(value)}</t></is></c>`;
+};
+
+/** A CSS font size in points (`14pt`, `16px` → 12), or `null`. */
+const fontPoints = (size: string | undefined): number | null => {
+  const match = /^\s*(\d+(\.\d+)?)\s*(pt|px)?\s*$/i.exec(size || '');
+
+  if (!match) {
+    return null;
+  }
+
+  return Math.round((match[3]?.toLowerCase() === 'px' ? Number(match[1]) * 0.75 : Number(match[1])) * 2) / 2;
 };
 
 const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: StyleSheet, hasComments: boolean): string => {
@@ -540,11 +556,21 @@ const colorOf = (node: Element | undefined): string | undefined => {
   return theme !== null && THEME_COLORS[Number(theme)] ? `#${THEME_COLORS[Number(theme)].toLowerCase()}` : void 0;
 };
 
-const fontStyle = (font: Element | undefined): CellStyle => {
+const fontStyle = (font: Element | undefined, base?: Element): CellStyle => {
   const style: CellStyle = {};
 
   if (!font) {
     return style;
+  }
+  // Size and font only where they differ from the workbook's own (its first font).
+  const size = attr(child(font, 'sz'), 'val');
+  const name = attr(child(font, 'name'), 'val');
+
+  if (size && size !== (attr(child(base, 'sz'), 'val') || '11')) {
+    style.fontSize = `${Number(size)}pt`;
+  }
+  if (name && name !== (attr(child(base, 'name'), 'val') || 'Calibri')) {
+    style.fontFamily = name;
   }
   if (child(font, 'b') && attr(child(font, 'b'), 'val') !== '0') {
     style.fontWeight = 'bold';
@@ -741,7 +767,7 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
   const borders = children(child(styles?.documentElement, 'borders'), 'border');
   const xfs = children(child(styles?.documentElement, 'cellXfs'), 'xf').map((xf) => {
     const alignment = child(xf, 'alignment');
-    const style = { ...fontStyle(fonts[Number(attr(xf, 'fontId') || 0)]),
+    const style = { ...fontStyle(fonts[Number(attr(xf, 'fontId') || 0)], fonts[0]),
       ...fillStyle(fills[Number(attr(xf, 'fillId') || 0)]), ...borderStyle(borders[Number(attr(xf, 'borderId') || 0)]) };
     const horizontal = attr(alignment, 'horizontal');
     const vertical = attr(alignment, 'vertical');
@@ -752,7 +778,7 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
     return { numFmt: numFmts.get(Number(attr(xf, 'numFmtId') || 0)), style, align };
   });
   const dxfs = children(child(styles?.documentElement, 'dxfs'), 'dxf').map(dxf => ({
-    ...fontStyle(child(dxf, 'font')), ...fillStyle(child(dxf, 'fill'), true), ...borderStyle(child(dxf, 'border')) }));
+    ...fontStyle(child(dxf, 'font'), fonts[0]), ...fillStyle(child(dxf, 'fill'), true), ...borderStyle(child(dxf, 'border')) }));
 
   const sheetElements = all(workbook, 'sheet');
   const activeTab = Number(attr(all(workbook, 'workbookView')[0], 'activeTab') || 0);

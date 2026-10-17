@@ -50,6 +50,9 @@
   `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
+- Font and font size: `fontFamily` and `fontSize` (points, `'14pt'`) in the `style` setting; the formatting bar starts
+  with a font list (each font shown in itself) and a size field with a list. Rows grow to fit their biggest font.
+  Excel files keep the font and its size.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
