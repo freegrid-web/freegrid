@@ -84,6 +84,16 @@
   left: 4px;
 }
 
+/* The color of a "Text color" or "Fill color" entry. */
+.fs-context-menu .fs-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 1px solid var(--fs-cell-border-color);
+}
+
 .fs-context-menu .fs-master .fs-holder {
   overflow: hidden;
 }

@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host) {
+  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
@@ -147,6 +147,13 @@
   --fs-menu-background: var(--fs-color-background); /* Menu background. */
   --fs-menu-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Menu border. */
   --fs-menu-disabled-text: var(--fs-color-muted-text); /* Disabled items. */
+  --fs-formatting-bar-radius: 4px; /* Corners of the formatting bar and its palettes. */
+  --fs-formatting-bar-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* Their shadow. */
+  --fs-formatting-bar-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */
+  --fs-formatting-bar-pressed-background: var(--fs-menu-separator-color); /* A button whose formatting the cells have. */
+  --fs-palette-swatch-border: var(--fs-menu-border-color); /* The line around a palette color. */
+  --fs-palette-thumb-color: #fff; /* The ring that marks the color in "More colors". */
+  --fs-palette-thumb-shadow: 0 0 0 1px rgb(0 0 0 / 50%); /* Its outline. */
 
   /* == Comments == */
   --fs-comment-background: var(--fs-color-background); /* Comment editor background. */

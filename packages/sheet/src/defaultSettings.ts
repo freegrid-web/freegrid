@@ -2547,6 +2547,23 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
+   * palette that shows a color on the selected cells while the pointer is on it), alignment and clear formatting.
+   * `true` shows the default buttons; `{ items }` chooses them from `'bold'`, `'italic'`, `'underline'`,
+   * `'strikethrough'`, `'fill_color'`, `'text_color'`, `'alignment'` and `'clear'`. Needs `contextMenu`.
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * contextMenu: true,
+   * formattingBar: true,
+   * ```
+   */
+  formattingBar: void 0,
+
+  /**
    * The id of this grid's sheet in its document (see `addSheet`). The grid created with `new FreeSheet` is
    * `sheet1` by default.
    *

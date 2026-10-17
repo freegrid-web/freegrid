@@ -69,6 +69,7 @@ export default defineConfigWithTheme({
             { text: 'Column groups', link: '/examples/column-groups' },
             { text: 'Conditional formatting', link: '/examples/conditional-formatting' },
             { text: 'Excel and CSV files', link: '/examples/files' },
+            { text: 'Formatting', link: '/examples/formatting' },
             { text: 'Merged cells and comments', link: '/examples/merged-cells-and-comments' },
             { text: '10,000 rows', link: '/examples/large-data' },
             { text: 'Search and languages', link: '/examples/search-and-languages' },

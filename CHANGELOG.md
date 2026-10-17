@@ -15,10 +15,21 @@
   reads a file.
 - Cell styles: the `style` cell setting (`fontWeight`, `fontStyle`, `textDecoration`, `color`, `background`,
   `border`) draws on the cell, under conditional formatting; `getDocument()` keeps it.
+- Formatting: Ctrl+B, Ctrl+I and Ctrl+U toggle bold, italic and underline; the context menu has a **Format** entry
+  (bold, italic, underline, strikethrough, text and fill colors, clear formatting; add the key `'formatting'` to
+  `contextMenu`); `setCellStyle(style, ranges?)` sets the `style` of cells; undo takes formatting back. Event
+  `afterSetCellStyle`.
+- Formatting bar (`formattingBar: true`, or `{ items }` to choose the buttons): a toolbar above the context menu, as
+  in Excel, with bold, italic, underline, fill and text colors, alignment and clear formatting. Its color palettes (also
+  in the menu's Text color and Fill color) show a color on the selected cells while the pointer is on it; a click keeps
+  it. "More colors…" opens a color area with a hex field: the cells show the color while you choose, OK keeps it, and
+  Cancel, Escape or a click elsewhere leaves the cells as they were. New example page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
 
+- A command in a submenu inside a submenu (Conditional formatting ▸ Data Bars ▸ a color) did nothing when clicked, and
+  left the first menu open.
 - `updateSettings` on a sheet with formulas no longer makes the formula engine's model again when `formulas` did not
   change: in a document with several sheets this freed the model the other sheets use (`loadDocument` with formulas
   failed).

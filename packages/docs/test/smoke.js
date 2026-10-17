@@ -34,6 +34,7 @@ const PAGES = [
   { path: 'guide/conditional-formatting.html', grids: 0 },
   { path: 'guide/side-panel.html', grids: 0 },
   { path: 'examples/files.html', grids: 1 },
+  { path: 'examples/formatting.html', grids: 1 },
   { path: 'guide/files.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },

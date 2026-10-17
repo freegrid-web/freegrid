@@ -135,6 +135,11 @@ class Menu {
     return this.parentMenu !== null;
   }
 
+  /** The menu this menu opened from (through its submenus), or this menu. */
+  getRootMenu(): Menu {
+    return this.parentMenu ? this.parentMenu.getRootMenu() : this;
+  }
+
   /**
    * Open menu.
    *
@@ -212,7 +217,7 @@ class Menu {
       return;
     }
     if (closeParent && this.parentMenu) {
-      this.parentMenu.close();
+      this.parentMenu.close(true);
     } else {
       this.closeAllSubMenus();
       this.container.style.display = 'none';
@@ -338,8 +343,9 @@ class Menu {
 
     this.runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
 
+    // The root menu runs the command, also from a submenu inside a submenu.
     if (this.isSubMenu()) {
-      this.parentMenu!.runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
+      this.getRootMenu().runLocalHooks('executeCommand', selectedItem.key, normalizedSelection, event);
     }
 
     if (autoClose) {
@@ -528,7 +534,7 @@ class Menu {
 
     } else if (typeof item.renderer === 'function') {
       addClass(TD, 'fs-custom-menu-renderer');
-      TD.appendChild(item.renderer(hot, wrapper, row, col, prop, itemValue));
+      TD.appendChild(item.renderer.call(this.hot, hot, wrapper, row, col, prop, itemValue));
 
     } else {
       fastInnerHTML(wrapper, itemValue as string);

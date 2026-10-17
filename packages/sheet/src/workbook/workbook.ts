@@ -18,7 +18,7 @@ type SheetsModel = {
 export type CreateSheet = (rootElement: HTMLElement, settings: AnyObject) => Core;
 
 /** Settings a new sheet takes from the document's first sheet unless it sets its own. */
-const INHERITED_SETTINGS = ['formulas', 'formulaBar', 'rowHeaders', 'colHeaders', 'contextMenu', 'width', 'height',
+const INHERITED_SETTINGS = ['formulas', 'formulaBar', 'formattingBar', 'rowHeaders', 'colHeaders', 'contextMenu', 'width', 'height',
   'stretchH', 'language', 'manualColumnResize', 'manualRowResize', 'columnSorting', 'outsideClickDeselects'];
 
 /** One sheet in a saved document (`getDocument`). */
