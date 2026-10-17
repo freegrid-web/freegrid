@@ -3,11 +3,13 @@ import { transformSelectionToRowDistance } from './../../../selection/utils';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'remove_row';
 
 const removeRowItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.removeRow,
   name(this: PluginHost) {
     const selection = this.getSelected();
     let pluralForm = 0;

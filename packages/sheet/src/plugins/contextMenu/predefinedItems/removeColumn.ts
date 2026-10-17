@@ -3,11 +3,13 @@ import { transformSelectionToColumnDistance } from './../../../selection/utils';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'remove_col';
 
 const removeColumnItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.removeColumn,
   name(this: PluginHost) {
     const selection = this.getSelected();
     let pluralForm = 0;

@@ -4,6 +4,7 @@ import { KEY as SEPARATOR } from './separator';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'alignment';
 
@@ -38,6 +39,7 @@ const alignmentOption = (name: string, label: string, type: 'horizontal' | 'vert
 /** The context menu entry with the alignment options (disabled without a selection). */
 const alignmentItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.alignment,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_ALIGNMENT);
   },

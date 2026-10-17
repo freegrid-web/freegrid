@@ -425,7 +425,8 @@ TextRenderer readOnly cell
   position: relative;
 }
 
-.freesheet .fs-submenu :after{
+/* One arrow per entry with a submenu (its wrapper's, not every element's inside it). */
+.freesheet .fs-submenu > .fs-item-wrapper::after {
   content: '▶';
   color: var(--fs-menu-arrow-color);
   position: absolute;

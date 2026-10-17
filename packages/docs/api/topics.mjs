@@ -160,6 +160,13 @@ export const TOPICS = [
     settings: [],
   },
   {
+    name: 'Context menu',
+    description: 'The right-click menu: built-in entries, entries of your own with icons and shortcuts.',
+    methods: [],
+    events: ['beforeContextMenuShow', 'afterContextMenuShow', 'afterContextMenuHide'],
+    settings: ['contextMenu'],
+  },
+  {
     name: 'Side panel',
     description: 'The panel at the right of the document: comments, conditional formatting rules.',
     methods: ['openPanel', 'closePanel', 'getOpenPanel'],

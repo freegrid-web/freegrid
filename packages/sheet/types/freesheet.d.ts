@@ -2114,6 +2114,18 @@ declare namespace FreeSheet {
       start: wot.CellCoords,
       end: wot.CellCoords
     }
+    interface MenuItem {
+      key?: string;
+      name?: string | ((this: _FreeSheet.Core) => string);
+      callback?: (this: _FreeSheet.Core, key: string, selection: Options[], event?: MouseEvent) => void;
+      disabled?: boolean | ((this: _FreeSheet.Core) => boolean);
+      hidden?: boolean | ((this: _FreeSheet.Core) => boolean);
+      submenu?: { items: MenuItem[] };
+      /** SVG (or other HTML) shown at the left. */
+      icon?: string;
+      /** Keys shown at the right, such as `'Ctrl+K'`. */
+      shortcut?: string;
+    }
     interface Settings {
       callback: (key: string, options: contextMenu.Options) => void;
       items: any;

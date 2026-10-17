@@ -54,6 +54,10 @@
   `textLength` with an operator) refuses other values, or with `strict: false` keeps and marks them; `message` and
   `inputMessage` explain the rule. The side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on
   the selected cells in one undo step. `getDocument()` and Excel files keep them. New guide page.
+- The context menu shows an icon at the left of each built-in entry and its keyboard shortcut at the right (Ctrl+Z,
+  Ctrl+C, Ctrl+B…; ⌘ on a Mac); entries of your own take `icon` and `shortcut`. The Modern style gives the menu round
+  corners, a shadow and round hovered entries. New CSS variables `--fs-menu-icon-color`, `--fs-menu-shortcut-color`.
+  New guide page "Context menu".
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
