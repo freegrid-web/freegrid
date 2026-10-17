@@ -1431,6 +1431,10 @@ declare namespace FreeSheet {
     interface Text extends Base {}
   }
 
+  type StatusBarContext = { values: unknown[]; numbers: number[]; cells: [number, number][]; grid: _FreeSheet.Core;
+    item?: string };
+  type StatusBarFormat = Intl.NumberFormatOptions | ((value: unknown, context: StatusBarContext) => unknown);
+
   interface DefaultSettings extends GridSettings {}
   interface DefaultSettings extends Hooks {}
 
@@ -1469,7 +1473,17 @@ declare namespace FreeSheet {
     contextMenu?: boolean | any[] | contextMenu.Settings;
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
       'text_color' | 'alignment' | 'clear'> };
-    statusBar?: boolean | { items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum'> };
+    statusBar?: boolean | {
+      items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {
+        item?: 'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum';
+        label?: string;
+        value?: (context: StatusBarContext) => unknown;
+        format?: StatusBarFormat;
+        align?: 'left' | 'right';
+        always?: boolean;
+      }>;
+      format?: StatusBarFormat;
+    };
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;

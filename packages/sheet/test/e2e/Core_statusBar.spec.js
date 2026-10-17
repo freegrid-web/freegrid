@@ -77,6 +77,55 @@ describe('Core status bar', () => {
     expect(items()).toEqual(['Average: 5.5', 'Count: 2', 'Sum: 11']);
   });
 
+  it('shows items of your own, renames and formats the built-in ones', () => {
+    handsontable({
+      data: [[1, 2.5, 'x'], [4, 10, null]],
+      statusBar: {
+        items: [
+          { item: 'sum', label: 'Total', format: { style: 'currency', currency: 'EUR' } },
+          'average',
+          { label: 'Median', value: ({ numbers }) => [...numbers].sort((a, b) => a - b)[Math.floor(numbers.length / 2)] },
+          { label: 'Cells', value: ({ cells }) => cells.length, format: value => `${value} selected` },
+          { value: () => null },
+        ],
+        format: { maximumFractionDigits: 1 },
+      },
+    });
+
+    selectCell(0, 0, 1, 2);
+    expect(items()).toEqual(['Total: €17.50', 'Average: 4.4', 'Median: 4', 'Cells: 6 selected']);
+  });
+
+  it('formats every number with a function of the bar, which gets the item', () => {
+    handsontable({
+      data: [[1000, 2000]],
+      statusBar: { items: ['sum', 'count'], format: (value, { item }) => (item === 'sum' ? `${value / 1000}k` : value) },
+    });
+
+    selectCell(0, 0, 0, 1);
+    expect(items()).toEqual(['Sum: 3k', 'Count: 2']);
+  });
+
+  it('shows left items always, and refreshes for state of your own', () => {
+    let saved = false;
+    const hot = handsontable({
+      data: [[1, 2]],
+      statusBar: { items: [{ align: 'left', value: () => (saved ? 'Saved' : 'Unsaved changes') }, 'sum',
+        { label: 'Rows', value: ({ grid }) => grid.countRows(), always: true }] },
+    });
+    const left = () => bar().find('.fs-status-bar__left .fs-status-bar__item').map((i, item) => item.textContent).get();
+
+    expect(left()).toEqual(['Unsaved changes']);
+    expect(items()).toEqual(['Unsaved changes', 'Rows: 1']);
+
+    saved = true;
+    hot.getPlugin('statusBar').refresh();
+    expect(left()).toEqual(['Saved']);
+
+    selectCell(0, 0, 0, 1);
+    expect(items()).toEqual(['Saved', 'Sum: 3', 'Rows: 1']);
+  });
+
   it('goes away when the setting is turned off', () => {
     const hot = handsontable({ data: [[1, 2]], statusBar: true });
 

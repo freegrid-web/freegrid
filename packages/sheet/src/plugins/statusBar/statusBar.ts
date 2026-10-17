@@ -13,6 +13,39 @@ export type StatusBarItem = typeof STATUS_BAR_ITEMS[number];
 
 const DEFAULT_ITEMS: StatusBarItem[] = ['average', 'count', 'sum'];
 
+/** What an item's `value` and a `format` function get: the selected cells, their values and numbers, the grid. */
+export type StatusBarContext = {
+  /** The selected cells' values (formula results), empty ones too. */
+  values: unknown[];
+  /** The numbers among them. */
+  numbers: number[];
+  /** The selected cells, `[row, col]` (visual indexes). */
+  cells: [number, number][];
+  /** The grid whose selection the bar shows (the active sheet). */
+  grid: PluginHost;
+  /** The built-in item being formatted, or the item's label. */
+  item?: string;
+};
+
+/** How numbers are written: `Intl.NumberFormat` options, or a function that writes the value as it likes. */
+export type StatusBarFormat = Intl.NumberFormatOptions | ((value: unknown, context: StatusBarContext) => unknown);
+
+/**
+ * An item of the bar: a built-in one by name, or an object. The object either renames or formats a built-in item
+ * (`item`), or computes a value of its own (`value`, which returns a number, a text, or `null` to hide the item).
+ * `align: 'left'` puts it at the left, where it always shows; `always` shows a right item without a selection too.
+ */
+export type StatusBarItemSetting = StatusBarItem | {
+  item?: StatusBarItem;
+  label?: string;
+  value?: (context: StatusBarContext) => unknown;
+  format?: StatusBarFormat;
+  align?: 'left' | 'right';
+  always?: boolean;
+};
+
+type StatusBarSettings = { items?: StatusBarItemSetting[]; format?: StatusBarFormat };
+
 const LABELS: Record<StatusBarItem, string> = {
   average: C.STATUS_BAR_AVERAGE,
   count: C.STATUS_BAR_COUNT,
@@ -26,8 +59,10 @@ const LABELS: Record<StatusBarItem, string> = {
 const SHEET_HOOKS = ['afterSelectionEnd', 'afterDeselect', 'afterChange', 'afterSetDataAtCell', 'afterLoadData'];
 
 /** The figures of the selected cells: values (formula results), not empty, and the numbers among them. */
-export const summarize = (grid: PluginHost): Record<StatusBarItem, number> & { cells: number } => {
+export const summarize = (grid: PluginHost): Record<StatusBarItem, number> &
+  { cells: number; context: StatusBarContext } => {
   const values: unknown[] = [];
+  const positions: [number, number][] = [];
   const seen = new Set<string>();
   let cells = 0;
 
@@ -40,6 +75,7 @@ export const summarize = (grid: PluginHost): Record<StatusBarItem, number> & { c
         if (!seen.has(`${row}:${col}`)) {
           seen.add(`${row}:${col}`);
           cells += 1;
+          positions.push([row, col]);
           values.push(grid.getDataAtCell(row, col));
         }
       }
@@ -51,6 +87,7 @@ export const summarize = (grid: PluginHost): Record<StatusBarItem, number> & { c
 
   return {
     cells,
+    context: { values, numbers, cells: positions, grid },
     count: filled.length,
     numericalCount: numbers.length,
     sum: numbers.length ? sum : NaN,
@@ -99,8 +136,12 @@ class StatusBar extends BasePlugin {
     this.#hooks.forEach(([name, callback]) => Hooks.getSingleton().add(name, callback));
     this.addHook('afterSheetActivate', () => this.refresh());
     this.addHook('afterRender', () => this.matchGridWidth());
+    // Items of your own may read the grid: the first refresh waits for it.
+    this.addHook('afterInit', () => this.refresh());
     super.enablePlugin();
-    this.refresh();
+    if (this.hot.view) {
+      this.refresh();
+    }
   }
 
   disablePlugin(): void {
@@ -130,12 +171,20 @@ class StatusBar extends BasePlugin {
     return (workbook?.get(workbook.activeId)?.instance as unknown as PluginHost | undefined) || this.hot;
   }
 
-  /** The items the `statusBar` setting asks for. */
-  getItems(): StatusBarItem[] {
-    const setting = this.hot.getSettings().statusBar as boolean | { items?: StatusBarItem[] };
-    const items = typeof setting === 'object' && Array.isArray(setting.items) ? setting.items : DEFAULT_ITEMS;
+  /** The `statusBar` setting as an object. */
+  get settings(): StatusBarSettings {
+    const setting = this.hot.getSettings().statusBar as boolean | StatusBarSettings;
 
-    return items.filter(item => STATUS_BAR_ITEMS.includes(item));
+    return typeof setting === 'object' && setting ? setting : {};
+  }
+
+  /** The items the `statusBar` setting asks for (unknown names left out). */
+  getItems(): StatusBarItemSetting[] {
+    const { items } = this.settings;
+
+    return (Array.isArray(items) ? items : DEFAULT_ITEMS).filter(item => (typeof item === 'string' ?
+      STATUS_BAR_ITEMS.includes(item) : !!item && typeof item === 'object' &&
+      (typeof item.value === 'function' || STATUS_BAR_ITEMS.includes(item.item!))));
   }
 
   createElement(): void {
@@ -170,35 +219,59 @@ class StatusBar extends BasePlugin {
     this.element.style.width = width > 0 ? `${width}px` : '';
   }
 
-  /** Shows the figures of the active sheet's selected cells (nothing for one cell or no numbers to count). */
+  /**
+   * Shows the items for the active sheet's selection: the right ones when more than one cell with a value is selected
+   * (or with `always`), the left ones always. Call it when an item of your own depends on something else.
+   */
   refresh(): void {
     if (!this.element) {
       return;
     }
     const themeClasses = Array.from(this.hot.rootElement.classList).filter(name => /^fs-(theme|style)-/.test(name));
+    const figures = summarize(this.activeSheet());
+    const selected = figures.cells >= 2 && figures.count > 0;
+    const left = document.createElement('div');
+    const right = document.createElement('div');
 
     this.element.className = ['fs-status-bar', ...themeClasses].join(' ');
-    const figures = summarize(this.activeSheet());
-    const format = new Intl.NumberFormat(void 0, { maximumFractionDigits: 10 });
+    left.className = 'fs-status-bar__left';
+    right.className = 'fs-status-bar__right';
+    this.getItems().forEach((setting, index) => {
+      const item = typeof setting === 'string' ? { item: setting } : setting;
+      const atLeft = item.align === 'left';
 
-    this.element.textContent = '';
-    if (figures.cells < 2 || figures.count === 0) {
-      return;
-    }
-    this.getItems().forEach((item) => {
-      const value = figures[item];
-
-      // Average, minimum, maximum and sum need numbers (Excel leaves them out too).
-      if (Number.isNaN(value)) {
+      if (!atLeft && !item.always && !selected) {
         return;
       }
+      const context = { ...figures.context, item: item.item || item.label };
+      const value = item.value ? item.value(context) : figures[item.item!];
+
+      // No value: average, minimum, maximum and sum need numbers (Excel leaves them out too); `null` hides an item.
+      if (value === null || value === void 0 || (typeof value === 'number' && Number.isNaN(value))) {
+        return;
+      }
+      const label = item.label ?? (item.item ? String(this.hot.getTranslatedPhrase(LABELS[item.item])) : '');
+      const text = this.format(value, item.format ?? this.settings.format, context);
       const element = document.createElement('span');
 
       element.className = 'fs-status-bar__item';
-      element.dataset.item = item;
-      element.textContent = `${this.hot.getTranslatedPhrase(LABELS[item])}: ${format.format(value)}`;
-      this.element!.appendChild(element);
+      element.dataset.item = item.item || `item${index}`;
+      element.textContent = label ? `${label}: ${text}` : text;
+      (atLeft ? left : right).appendChild(element);
     });
+    this.element.replaceChildren(left, right);
+  }
+
+  /** A value as text: with a format function, `Intl.NumberFormat` options (numbers), or as it is. */
+  format(value: unknown, format: StatusBarFormat | undefined, context: StatusBarContext): string {
+    if (typeof format === 'function') {
+      return String(format(value, context));
+    }
+    if (typeof value === 'number') {
+      return new Intl.NumberFormat(void 0, { maximumFractionDigits: 10, ...format }).format(value);
+    }
+
+    return String(value);
   }
 }
 

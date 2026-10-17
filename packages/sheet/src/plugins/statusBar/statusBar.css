@@ -4,7 +4,7 @@
  */
 .fs-status-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 20px;
   box-sizing: border-box;
   min-height: 26px;
@@ -22,4 +22,15 @@
 
 .fs-document > .fs-status-bar {
   flex: 0 0 auto;
+}
+
+.fs-status-bar__left,
+.fs-status-bar__right {
+  display: flex;
+  gap: 20px;
+  min-width: 0;
+}
+
+.fs-status-bar__right {
+  margin-left: auto;
 }
