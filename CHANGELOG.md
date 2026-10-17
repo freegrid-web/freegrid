@@ -22,7 +22,8 @@
 - Formatting bar (`formattingBar: true`, or `{ items }` to choose the buttons): a toolbar above the context menu, as
   in Excel, with bold, italic, underline, fill and text colors, alignment and clear formatting. Its color palettes (also
   in the menu's Text color and Fill color) show a color on the selected cells while the pointer is on it; a click keeps
-  it. New example page.
+  it. "More colors…" opens a color area with a hex field: the cells show the color while you choose, OK keeps it, and
+  Cancel, Escape or a click elsewhere leaves the cells as they were. New example page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

@@ -207,6 +207,81 @@ describe('Core formatting', () => {
       expect(hot.isUndoAvailable()).toBe(false);
     });
 
+    /** Opens the bar's fill palette and its "More colors"; returns the color area. */
+    const openMoreColors = async() => {
+      contextMenu();
+      await sleep(0);
+      $('.fs-formatting-bar [data-palette="fill_color"]').simulate('mousedown');
+      $('.fs-formatting-bar .fs-palette__more').simulate('mousedown');
+
+      return $('.fs-formatting-bar .fs-palette__area').get(0);
+    };
+    const pointAt = (area, x, y) => {
+      const box = area.getBoundingClientRect();
+
+      area.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1,
+        clientX: box.left + box.width * x, clientY: box.top + box.height * y }));
+      area.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+    };
+
+    it('previews the "More colors" color, and puts the cells back when a click elsewhere closes it', async() => {
+      const hot = handsontable({ data: [[1, 2], [3, 4]], contextMenu: true, formattingBar: true });
+
+      selectCell(0, 0);
+      const area = await openMoreColors();
+
+      pointAt(area, 1, 0);
+      expect(hot.getCellMeta(0, 0).style.background).toMatch(/^#/);
+      // Leaving the palette keeps showing it: the color is not chosen yet.
+      $('.fs-formatting-bar .fs-palette').simulate('mouseleave');
+      expect(hot.getCellMeta(0, 0).style).toBeDefined();
+
+      $('body').simulate('mousedown');
+      expect(hot.getCellMeta(0, 0).style).toBeUndefined();
+      expect(getCell(0, 0).style.background).toBe('');
+      expect(hot.isUndoAvailable()).toBe(false);
+    });
+
+    it('sets the "More colors" color with OK, and puts the cells back with Cancel', async() => {
+      const hot = handsontable({ data: [[1, 2], [3, 4]], contextMenu: true, formattingBar: true });
+
+      selectCell(0, 0);
+      const area = await openMoreColors();
+
+      pointAt(area, 1, 0);
+      $('.fs-formatting-bar .fs-palette__cancel').simulate('click');
+      expect(hot.getCellMeta(0, 0).style).toBeUndefined();
+      expect($('.fs-formatting-bar .fs-palette__swatch').length).toBe(70);
+
+      $('.fs-formatting-bar .fs-palette__more').simulate('mousedown');
+      const hex = $('.fs-formatting-bar .fs-palette__hex').val('#123456').get(0);
+
+      hex.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(hot.getCellMeta(0, 0).style).toEqual({ background: '#123456' });
+      $('.fs-formatting-bar .fs-palette__ok').simulate('click');
+
+      expect(hot.getCellMeta(0, 0).style).toEqual({ background: '#123456' });
+      expect($('.fs-formatting-bar .fs-palette').length).toBe(0);
+      hot.undo();
+      expect(hot.getCellMeta(0, 0).style).toBeUndefined();
+    });
+
+    it('closes the palette with Escape and puts the cells back', async() => {
+      const hot = handsontable({ data: [[1, 2], [3, 4]], contextMenu: true, formattingBar: true });
+
+      selectCell(0, 0);
+      contextMenu();
+      await sleep(0);
+      $('.fs-formatting-bar [data-palette="fill_color"]').simulate('mousedown');
+      $('.fs-formatting-bar .fs-palette [data-color="#c00000"]').simulate('mouseover');
+      expect(hot.getCellMeta(0, 0).style).toEqual({ background: '#c00000' });
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(hot.getCellMeta(0, 0).style).toBeUndefined();
+      expect($('.fs-formatting-bar .fs-palette').length).toBe(0);
+      expect($('.fs-formatting-bar').length).toBe(1);
+    });
+
     it('shows the buttons of its items setting', async() => {
       handsontable({ data: [[1]], contextMenu: true, formattingBar: { items: ['italic', 'strikethrough'] } });
 

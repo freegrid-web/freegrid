@@ -67,6 +67,14 @@ class FormattingBar extends BasePlugin {
   /** The color the fill and text color buttons set (the last one chosen). */
   #colors = { fill_color: '#ffff00', text_color: '#ff0000' };
   #palette: HTMLElement | null = null;
+  /** Escape closes the palette, then the menu. */
+  #onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.#palette) {
+      event.stopPropagation();
+      event.preventDefault();
+      this.closePalette();
+    }
+  };
 
   isEnabled(): boolean {
     return !!this.hot.getSettings().formattingBar;
@@ -127,6 +135,7 @@ class FormattingBar extends BasePlugin {
 
     bar.style.left = `${left + window.scrollX}px`;
     this.element = bar;
+    document.addEventListener('keydown', this.#onKeyDown, true);
     this.refresh();
   }
 
@@ -135,6 +144,7 @@ class FormattingBar extends BasePlugin {
     this.closePalette();
     this.element?.remove();
     this.element = null;
+    document.removeEventListener('keydown', this.#onKeyDown, true);
   }
 
   /** Marks the buttons whose formatting every selected cell has. */

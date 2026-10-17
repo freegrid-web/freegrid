@@ -152,6 +152,8 @@
   --fs-formatting-bar-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */
   --fs-formatting-bar-pressed-background: var(--fs-menu-separator-color); /* A button whose formatting the cells have. */
   --fs-palette-swatch-border: var(--fs-menu-border-color); /* The line around a palette color. */
+  --fs-palette-thumb-color: #fff; /* The ring that marks the color in "More colors". */
+  --fs-palette-thumb-shadow: 0 0 0 1px rgb(0 0 0 / 50%); /* Its outline. */
 
   /* == Comments == */
   --fs-comment-background: var(--fs-color-background); /* Comment editor background. */

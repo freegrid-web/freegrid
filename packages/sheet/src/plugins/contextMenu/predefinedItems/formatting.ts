@@ -32,6 +32,8 @@ export const paletteFor = (grid: PluginHost, property: 'color' | 'background', d
       standard: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_STANDARD_COLORS) as string,
       none: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_NO_COLOR) as string,
       more: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_MORE_COLORS) as string,
+      ok: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_OK) as string,
+      cancel: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_CANCEL) as string,
     },
     preview: color => previewCellStyle(grid as FormattingGrid, color === void 0 ? void 0 : { [property]: color }),
     pick: (color) => {

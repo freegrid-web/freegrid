@@ -41,6 +41,8 @@ const dictionary: LanguageDictionary = {
   [C.CONTEXTMENU_ITEMS_FORMAT_THEME_COLORS]: 'Theme colors',
   [C.CONTEXTMENU_ITEMS_FORMAT_STANDARD_COLORS]: 'Standard colors',
   [C.CONTEXTMENU_ITEMS_FORMAT_MORE_COLORS]: 'More colors…',
+  [C.CONTEXTMENU_ITEMS_FORMAT_OK]: 'OK',
+  [C.CONTEXTMENU_ITEMS_FORMAT_CANCEL]: 'Cancel',
   [C.FORMATTING_BAR]: 'Formatting',
 
   [C.CONTEXTMENU_ITEMS_FREEZE_COLUMN]: 'Freeze column',
