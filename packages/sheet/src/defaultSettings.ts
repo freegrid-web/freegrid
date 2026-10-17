@@ -2547,6 +2547,23 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * Data validation: a cell's (or a column's) `validation` allows only some values — a list of items (a dropdown), a
+   * number, a whole number, a date or a text length that compares with `value` (and `value2`). Values that are not
+   * valid are refused, or with `strict: false` kept and marked; `message` and `inputMessage` explain the rule. The
+   * side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on the selected cells. On unless
+   * `false`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * columns: [{}, { validation: { type: 'list', source: ['Open', 'Done'] } }],
+   * ```
+   */
+  dataValidation: void 0,
+
+  /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,
    * <kbd>Ctrl</kbd>+<kbd>H</kbd> the same box with a replace field. Matches are highlighted; <kbd>Enter</kbd> goes to
    * the next one. Options: match case, entire cell, search in formulas. Replace all is one undo step; read-only cells

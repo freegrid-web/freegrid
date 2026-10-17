@@ -160,6 +160,7 @@ hot.downloadFile('csv', 'data.csv');
 
 hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
+hot.updateSettings({ columns: [{ validation: { type: 'list', source: ['a', 'b'], strict: false } }] }, false);
 hot.updateSettings({ copyPaste: { formats: false } }, false);
 hot.updateSettings({ rowGroups: { groups: [{ from: 1, to: 3, collapsed: true }] } }, false);
 hot.setCellStyle({ fontWeight: 'bold', color: null });

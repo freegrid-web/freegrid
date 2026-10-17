@@ -1,8 +1,10 @@
 import { readZip, writeZip } from './zip';
-import { BUILT_IN_FORMATS } from './formats';
+import { BUILT_IN_FORMATS, serialToDate } from './formats';
+import { formatDate } from './../helpers/dateFormat';
 import { formatRange, parseRange, shiftFormula } from './../plugins/conditionalFormatting/ranges';
 import type { Rect } from './../plugins/conditionalFormatting/ranges';
 import { lineOf, type CellStyle } from './../utils/cellStyle';
+import type { Validation } from './../plugins/dataValidation/rules';
 import type { ConditionalRule } from './../plugins/conditionalFormatting/conditionalFormatting';
 
 /**
@@ -19,6 +21,8 @@ export type BookCell = {
   numFmt?: string;
   style?: CellStyle;
   align?: { horizontal?: string; vertical?: string; wrap?: boolean };
+  /** A data validation rule (see the dataValidation plugin). */
+  validation?: Validation;
 };
 export type BookComment = { row: number; column: number; text: string; author?: string };
 export type BookSheet = {
@@ -343,6 +347,59 @@ const cellXml = (cell: BookCell, ref: string, styles: StyleSheet): string => {
   return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${escapeXml(value)}</t></is></c>`;
 };
 
+const VALIDATION_TYPES: Record<Validation['type'], string> = { list: 'list', number: 'decimal', integer: 'whole',
+  date: 'date', textLength: 'textLength' };
+const VALIDATION_OPERATORS: Record<string, string> = { between: 'between', notBetween: 'notBetween', equal: 'equal',
+  notEqual: 'notEqual', greater: 'greaterThan', less: 'lessThan', greaterOrEqual: 'greaterThanOrEqual',
+  lessOrEqual: 'lessThanOrEqual' };
+
+/** A rule's value as an Excel formula: a date as its serial number. */
+const validationValue = (rule: Validation, value: unknown): string => {
+  if (rule.type === 'date') {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+
+    return match ? String(Math.round((Date.UTC(+match[1], +match[2] - 1, +match[3]) - Date.UTC(1899, 11, 30)) /
+      86400000)) : String(value);
+  }
+
+  return String(value);
+};
+
+/** The data validation rules of a sheet: one element per rule, with every cell that has it. */
+const validationsXml = (sheet: BookSheet): string => {
+  const groups = new Map<string, { rule: Validation; refs: string[] }>();
+
+  sheet.cells.forEach((cells, row) => (cells || []).forEach((cell, column) => {
+    if (cell?.validation) {
+      const key = JSON.stringify(cell.validation);
+
+      if (!groups.has(key)) {
+        groups.set(key, { rule: cell.validation, refs: [] });
+      }
+      groups.get(key)!.refs.push(cellRef(row, column));
+    }
+  }));
+  if (!groups.size) {
+    return '';
+  }
+  const rules = [...groups.values()].map(({ rule, refs }) => {
+    const list = rule.type === 'list';
+    const formula1 = list ? (Array.isArray(rule.source) ? `"${rule.source.map(item => String(item).replace(/"/g, '""'))
+      .join(',')}"` : String(rule.source || '')) : validationValue(rule, rule.value);
+    const between = rule.operator === 'between' || rule.operator === 'notBetween' || !rule.operator;
+    const formula2 = !list && between && rule.value2 !== void 0 ? `<formula2>${escapeXml(validationValue(rule,
+      rule.value2))}</formula2>` : '';
+
+    return `<dataValidation type="${VALIDATION_TYPES[rule.type]}"${!list ? ` operator="${
+      VALIDATION_OPERATORS[rule.operator || 'between']}"` : ''}${rule.allowBlank === false ? '' : ' allowBlank="1"'}${
+      rule.strict === false ? ' errorStyle="warning"' : ''}${rule.inputMessage ? ` showInputMessage="1" prompt="${
+      escapeXml(rule.inputMessage)}"` : ''} showErrorMessage="1"${rule.message ? ` error="${escapeXml(rule.message)}"` :
+      ''} sqref="${refs.join(' ')}"><formula1>${escapeXml(formula1)}</formula1>${formula2}</dataValidation>`;
+  });
+
+  return `<dataValidations count="${rules.length}">${rules.join('')}</dataValidations>`;
+};
+
 const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: StyleSheet, hasComments: boolean): string => {
   const rows = sheet.cells.length;
   const columns = Math.max(0, ...sheet.cells.map(row => (row ? row.length : 0)), sheet.columnWidths.length);
@@ -400,7 +457,7 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
 <worksheet xmlns="${NS}" xmlns:r="${REL_NS}"><dimension ref="${dimension}"/><sheetViews><sheetView${active ?
     ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${
     outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hasComments ?
+    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${validationsXml(sheet)}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
 
@@ -896,6 +953,63 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
       });
     });
     sheet.conditionalFormatting = rules.sort((a, b) => a.priority - b.priority).map(({ rule }) => rule);
+
+    // Data validation: each rule on the cells of its ranges (whole columns only as far as the data goes).
+    const TYPES = Object.fromEntries(Object.entries(VALIDATION_TYPES).map(([key, value]) => [value, key]));
+    const OPERATORS = Object.fromEntries(Object.entries(VALIDATION_OPERATORS).map(([key, value]) => [value, key]));
+
+    all(xml, 'dataValidation').forEach((element) => {
+      const type = TYPES[attr(element, 'type') || ''] as Validation['type'] | undefined;
+      const formula1 = child(element, 'formula1')?.textContent ?? '';
+      const formula2 = child(element, 'formula2')?.textContent;
+
+      if (!type) {
+        return;
+      }
+      const value = (text: string) => (type === 'date' ? formatDate(serialToDate(Number(text)), 'YYYY-MM-DD') :
+        Number(text));
+      const rule: Validation = { type };
+
+      if (type === 'list') {
+        rule.source = /^".*"$/s.test(formula1) ? formula1.slice(1, -1).split(',').map(item => item.replace(/""/g, '"')) :
+          formula1.replace(/\$/g, '');
+      } else {
+        rule.operator = (OPERATORS[attr(element, 'operator') || 'between'] || 'between') as Validation['operator'];
+        rule.value = value(formula1);
+        if (formula2 !== void 0 && (rule.operator === 'between' || rule.operator === 'notBetween')) {
+          rule.value2 = value(formula2);
+        }
+      }
+      if (attr(element, 'allowBlank') !== '1') {
+        rule.allowBlank = false;
+      }
+      if (attr(element, 'errorStyle') === 'warning' || attr(element, 'errorStyle') === 'information') {
+        rule.strict = false;
+      }
+      if (attr(element, 'error')) {
+        rule.message = attr(element, 'error')!;
+      }
+      if (attr(element, 'prompt')) {
+        rule.inputMessage = attr(element, 'prompt')!;
+      }
+      (attr(element, 'sqref') || '').split(/\s+/).forEach((ref) => {
+        const rect = parseRange(ref);
+
+        if (!rect) {
+          return;
+        }
+        const lastRow = Math.min(rect.r2, Math.max(sheet.cells.length - 1, rect.r1 + 999));
+        const lastColumn = Math.min(rect.c2, rect.c1 + 255);
+
+        for (let row = rect.r1; row <= lastRow; row += 1) {
+          for (let column = rect.c1; column <= lastColumn; column += 1) {
+            const cells = (sheet.cells[row] = sheet.cells[row] || []);
+
+            cells[column] = { ...cells[column], validation: rule };
+          }
+        }
+      });
+    });
 
     // Notes: the comments part of the sheet.
     const sheetRels = relationships(files, path);

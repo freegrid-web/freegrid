@@ -1,0 +1,65 @@
+/* The card under a cell: its input message, or why a value was refused. */
+.fs-validation-card {
+  position: absolute;
+  z-index: 1055;
+  max-width: 280px;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  background: var(--fs-menu-background);
+  color: var(--fs-cell-text);
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-link-card-radius, 4px);
+  box-shadow: var(--fs-validation-card-shadow);
+  font: 13px/1.35 sans-serif;
+  pointer-events: none;
+}
+
+.fs-validation-card--error {
+  border-left: 3px solid var(--fs-validation-error-color);
+}
+
+/* The Data validation panel. */
+.fs-validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fs-validation-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fs-validation-panel__field[hidden] {
+  display: none;
+}
+
+.fs-validation-panel select,
+.fs-validation-panel input:not([type='checkbox']),
+.fs-validation-panel textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 28px;
+  padding: 3px 6px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: 4px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-validation-panel__check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fs-validation-panel__error {
+  margin: 0;
+  color: var(--fs-validation-error-color);
+}
+
+.fs-validation-panel__error:empty {
+  display: none;
+}

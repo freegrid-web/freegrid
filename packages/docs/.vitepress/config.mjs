@@ -50,6 +50,7 @@ export default defineConfigWithTheme({
             { text: 'Excel and CSV files', link: '/guide/files' },
             { text: 'Find and replace', link: '/guide/find-and-replace' },
             { text: 'Fill and paste', link: '/guide/fill-and-paste' },
+            { text: 'Data validation', link: '/guide/data-validation' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },
