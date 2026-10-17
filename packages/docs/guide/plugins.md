@@ -20,8 +20,8 @@ Most features are plugins that you switch on with a setting. Each can be reached
 | `manualColumnMove`, `manualRowMove` | Reorder by dragging headers |
 | `manualColumnFreeze` | Freeze columns from the context menu |
 | `autoColumnSize`, `autoRowSize` | Size columns and rows to their content |
-| `fillHandle` | Drag to fill (on by default) |
-| `copyPaste` | Clipboard support (on by default) |
+| `fillHandle` | Drag to fill, with series (on by default; [guide](./fill-and-paste)) |
+| `copyPaste` | Clipboard support, with formatting (on by default; [guide](./fill-and-paste)) |
 | `undo` | Undo and redo (on by default): `grid.undo()`, `grid.redo()` |
 | `persistentState` | Remember column order, size and sorting in `localStorage` |
 | `observeChanges` | Re-render when the data source is changed directly |

@@ -10,6 +10,9 @@ import type { MenuItem } from './../contextMenu/menuItem';
 import { createElement, destroyElement } from './focusableElement';
 import type { FocusableWrapper } from './focusableElement';
 import { arrayToTable, tableToArray } from './utils';
+import { tableToFormats, type CellFormat } from './formats';
+import { setCellFormats } from './../../formatting/formatting';
+import type { CellStyle } from './../../utils/cellStyle';
 
 import './copyPaste.css';
 
@@ -83,6 +86,13 @@ class CopyPaste extends BasePlugin {
   pasteMode = 'overwrite';
 
   /**
+   * Whether copy and paste carry the cells' formatting (bold, italic, underline, colors, alignment): a copy writes it
+   * in the clipboard's HTML (so it reaches spreadsheets), a paste of an HTML table (from FreeSheet, Excel, Google
+   * Sheets) takes it. `copyPaste: { formats: false }` turns it off.
+   */
+  formats = true;
+
+  /**
    * Maximum number of rows than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
    *
    * @default 1000
@@ -124,6 +134,7 @@ class CopyPaste extends BasePlugin {
       this.pasteMode = settings.copyPaste.pasteMode || this.pasteMode;
       this.rowsLimit = settings.copyPaste.rowsLimit || this.rowsLimit;
       this.columnsLimit = settings.copyPaste.columnsLimit || this.columnsLimit;
+      this.formats = settings.copyPaste.formats !== false;
     }
 
     this.addHook('afterContextMenuDefaultOptions',
@@ -201,6 +212,30 @@ class CopyPaste extends BasePlugin {
    * @param ranges Array of objects with properties `startRow`, `startCol`, `endRow` and `endCol`.
    * @returns Returns array of arrays which will be copied into clipboard.
    */
+  /** The formatting of the cells `getRangedData` reads, in the same rows and columns. */
+  getRangedFormats(ranges: CopyableRange[]): CellFormat[][] {
+    const rows = new Set<number>();
+    const columns = new Set<number>();
+
+    ranges.forEach(({ startRow, endRow, startCol, endCol }) => {
+      for (let row = startRow; row <= endRow; row += 1) {
+        rows.add(row);
+      }
+      for (let column = startCol; column <= endCol; column += 1) {
+        columns.add(column);
+      }
+    });
+
+    return [...rows].map(row => [...columns].map((column) => {
+      const { style, className } = this.hot.getCellMeta(row, column) as { style?: CellStyle; className?: unknown };
+      const classes = Array.isArray(className) ? className : String(className || '').split(/\s+/);
+      const align = ['left', 'center', 'right', 'justify'].find(name => classes.includes(`fs-${name}`) ||
+        classes.includes(`ht${name[0].toUpperCase()}${name.slice(1)}`)) as CellFormat['align'];
+
+      return { style, align };
+    }));
+  }
+
   getRangedData(ranges: CopyableRange[]): unknown[][] {
     const copyableRows = new Set<number>();
     const copyableColumns = new Set<number>();
@@ -317,6 +352,26 @@ class CopyPaste extends BasePlugin {
   }
 
   /**
+   * Gives the pasted cells the pasted formatting (repeated as the values are over a bigger selection).
+   *
+   * @private
+   */
+  pasteFormats(formats: CellFormat[][], startRow: number, startColumn: number, endRow: number,
+    endColumn: number): void {
+    const cells = [];
+
+    for (let row = startRow; row <= Math.min(endRow, this.hot.countRows() - 1); row += 1) {
+      for (let col = startColumn; col <= Math.min(endColumn, this.hot.countCols() - 1); col += 1) {
+        const rowFormats = formats[(row - startRow) % formats.length];
+        const format = rowFormats[(col - startColumn) % rowFormats.length] || {};
+
+        cells.push({ row, col, style: format.style, align: format.align });
+      }
+    }
+    setCellFormats(this.hot as unknown as Parameters<typeof setCellFormats>[0], cells);
+  }
+
+  /**
    * `copy` event callback on textarea element.
    *
    * @param event ClipboardEvent.
@@ -332,7 +387,7 @@ class CopyPaste extends BasePlugin {
     const rangedData = this.getRangedData(this.copyableRanges);
 
     if (this.hot.runHooks('beforeCopy', rangedData, this.copyableRanges)) {
-      this.#putOnClipboard(event, rangedData);
+      this.#putOnClipboard(event, rangedData, this.formats ? this.getRangedFormats(this.copyableRanges) : void 0);
       this.hot.runHooks('afterCopy', rangedData, this.copyableRanges);
     }
 
@@ -355,7 +410,7 @@ class CopyPaste extends BasePlugin {
     const rangedData = this.getRangedData(this.copyableRanges);
 
     if (this.hot.runHooks('beforeCut', rangedData, this.copyableRanges)) {
-      this.#putOnClipboard(event, rangedData);
+      this.#putOnClipboard(event, rangedData, this.formats ? this.getRangedFormats(this.copyableRanges) : void 0);
       this.hot.emptySelectedCells();
       this.hot.runHooks('afterCut', rangedData, this.copyableRanges);
     }
@@ -378,13 +433,15 @@ class CopyPaste extends BasePlugin {
     }
 
     let pastedData: string | unknown[][] | undefined;
+    let formats: CellFormat[][] | null = null;
 
     if (event?.clipboardData) {
       const textHTML = event.clipboardData.getData('text/html');
+      const isTable = textHTML && /(<table)|(<TABLE)/.test(textHTML);
 
-      // An HTML table is pasted cell by cell.
-      pastedData = textHTML && /(<table)|(<TABLE)/.test(textHTML) ?
-        tableToArray(textHTML) : event.clipboardData.getData('text/plain');
+      // An HTML table is pasted cell by cell, with its formatting.
+      pastedData = isTable ? tableToArray(textHTML) : event.clipboardData.getData('text/plain');
+      formats = isTable && this.formats ? tableToFormats(textHTML) : null;
     }
 
     const inputArray: unknown[][] = typeof pastedData === 'string' ? SheetClip.parse(pastedData) : pastedData ?? [];
@@ -396,7 +453,16 @@ class CopyPaste extends BasePlugin {
       return;
     }
 
+    // The values and their formatting are one undo step.
+    const undoRedo = (this.hot as unknown as { undoRedo?: { beginGroup(): void; endGroup(): void } }).undoRedo;
+
+    undoRedo?.beginGroup();
     const [startRow, startColumn, endRow, endColumn] = this.populateValues(inputArray)!;
+
+    if (formats) {
+      this.pasteFormats(formats, startRow, startColumn, endRow, endColumn);
+    }
+    undoRedo?.endGroup();
 
     this.hot.selectCell(
       startRow,
@@ -487,10 +553,10 @@ class CopyPaste extends BasePlugin {
   }
 
   /** Puts the values on the clipboard as text (tab separated) and as an HTML table. */
-  #putOnClipboard(event: ClipboardEvent, rangedData: unknown[][]): void {
+  #putOnClipboard(event: ClipboardEvent, rangedData: unknown[][], formats?: CellFormat[][]): void {
     if (event?.clipboardData) {
       event.clipboardData.setData('text/plain', SheetClip.stringify(rangedData));
-      event.clipboardData.setData('text/html', arrayToTable(rangedData));
+      event.clipboardData.setData('text/html', arrayToTable(rangedData, formats));
     }
   }
 }

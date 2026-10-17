@@ -38,6 +38,7 @@ const PAGES = [
   { path: 'guide/files.html', grids: 0 },
   { path: 'guide/status-bar-and-freezing.html', grids: 0 },
   { path: 'guide/find-and-replace.html', grids: 0 },
+  { path: 'guide/fill-and-paste.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },

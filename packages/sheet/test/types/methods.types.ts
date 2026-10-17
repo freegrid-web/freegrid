@@ -160,6 +160,7 @@ hot.downloadFile('csv', 'data.csv');
 
 hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
+hot.updateSettings({ copyPaste: { formats: false } }, false);
 hot.setCellStyle({ fontWeight: 'bold', color: null });
 hot.setCellStyle(null, hot.getSelectedRange());
 hot.updateSettings({ formattingBar: { items: ['bold', 'fill_color'] } }, false);

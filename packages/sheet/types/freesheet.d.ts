@@ -797,6 +797,7 @@ declare namespace FreeSheet {
       columnsLimit: number;
       copyableRanges: any[];
       pasteMode: PasteModeType;
+      formats: boolean;
       rowsLimit: number;
       focusableElement: FocusableWrapper;
 
@@ -1488,7 +1489,8 @@ declare namespace FreeSheet {
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;
-    copyPaste?: boolean;
+    copyPaste?: boolean | { pasteMode?: 'overwrite' | 'shift_down' | 'shift_right'; rowsLimit?: number;
+      columnsLimit?: number; formats?: boolean };
     copyRowsLimit?: number;
     correctFormat?: boolean;
     currentColClassName?: string;

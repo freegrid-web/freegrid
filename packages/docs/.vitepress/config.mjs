@@ -48,6 +48,7 @@ export default defineConfigWithTheme({
             { text: 'Status bar and frozen panes', link: '/guide/status-bar-and-freezing' },
             { text: 'Excel and CSV files', link: '/guide/files' },
             { text: 'Find and replace', link: '/guide/find-and-replace' },
+            { text: 'Fill and paste', link: '/guide/fill-and-paste' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },
