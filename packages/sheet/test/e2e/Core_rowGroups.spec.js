@@ -38,6 +38,31 @@ describe('Core row groups', () => {
     expect(getDataAtCell(1, 0)).toBe('A2');
   });
 
+  it('can click every −/+ and level button, also of inner groups (nothing covers them)', () => {
+    const hot = grid();
+    const plugin = hot.getPlugin('rowGroups');
+
+    plugin.groupRows(1, 7);
+    plugin.groupRows(2, 3);
+    plugin.groupRows(5, 6);
+    const buttons = $('.fs-row-groups__toggle, .fs-row-groups__level').filter((i, button) => {
+      const box = button.getBoundingClientRect();
+
+      return box.width > 0 && document.elementFromPoint(box.left + 1, box.top + 1) !== null;
+    }).get();
+
+    expect(buttons.length).toBeGreaterThan(0);
+    // Each button, where it shows, is what a click there reaches.
+    const topmost = buttons.map((button) => {
+      const box = button.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + (box.width / 2), box.top + (box.height / 2));
+
+      return hit && hit.closest('.fs-row-groups__toggle, .fs-row-groups__level') ? hit.textContent : hit?.className;
+    });
+
+    expect(topmost.filter(text => !['−', '+', '1', '2', '3'].includes(text))).toEqual([]);
+  });
+
   it('nests groups in levels, and shows the outline down to a level from the corner', () => {
     const hot = grid();
     const plugin = hot.getPlugin('rowGroups');

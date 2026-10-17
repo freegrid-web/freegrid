@@ -8,6 +8,7 @@
 
 .fs-row-groups__gutter {
   position: absolute;
+  z-index: 1; /* above the header's label, which spans the whole header */
   top: 0;
   bottom: 0;
   left: 0;
@@ -63,6 +64,7 @@
 
 .fs-row-groups__levels {
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 1px;
   display: flex;
