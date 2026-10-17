@@ -2,6 +2,7 @@ import PersistentState from './persistentState/persistentState';
 import AutoColumnSize from './autoColumnSize/autoColumnSize';
 import AutoFill from './autofill/autofill';
 import AutoRowSize from './autoRowSize/autoRowSize';
+import ChangeHistory from './changeHistory/changeHistory';
 import CollapsibleColumns from './collapsibleColumns/collapsibleColumns';
 import ColumnSorting from './columnSorting/columnSorting';
 import ConditionalFormatting from './conditionalFormatting/conditionalFormatting';
@@ -39,6 +40,7 @@ export {
   AutoColumnSize,
   AutoFill,
   AutoRowSize,
+  ChangeHistory,
   CollapsibleColumns,
   ColumnSorting,
   ConditionalFormatting,

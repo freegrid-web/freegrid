@@ -1,0 +1,32 @@
+/* The Changes panel: days, and the changes of each day as cards. */
+.fs-changes-panel__filter {
+  flex: 1;
+  height: 28px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: 4px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-changes-panel__day {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fs-color-muted-text);
+}
+
+.fs-changes-panel__what {
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.fs-changes-panel__value {
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

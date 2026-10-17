@@ -160,6 +160,7 @@ hot.downloadFile('csv', 'data.csv');
 
 hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
+hot.updateSettings({ changeHistory: { user: 'Ada', limit: 50 } }, false);
 hot.updateSettings({ copyPaste: { formats: false } }, false);
 hot.updateSettings({ rowGroups: { groups: [{ from: 1, to: 3, collapsed: true }] } }, false);
 hot.setCellStyle({ fontWeight: 'bold', color: null });

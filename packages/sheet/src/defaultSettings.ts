@@ -2547,6 +2547,22 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * The change history ("Show Changes"): records every edit of the cells (the old and the new value) and the rows and
+   * columns added and removed, with the time and `user`. The side panel `'changes'` (`openPanel('changes')`, or the
+   * context menu entry `'show_changes'`) lists them; the plugin's `getChanges()` gives them. `limit` keeps the last
+   * changes (1000 by default).
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * changeHistory: { user: 'Ada' },
+   * ```
+   */
+  changeHistory: void 0,
+
+  /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,
    * <kbd>Ctrl</kbd>+<kbd>H</kbd> the same box with a replace field. Matches are highlighted; <kbd>Enter</kbd> goes to
    * the next one. Options: match case, entire cell, search in formulas. Replace all is one undo step; read-only cells

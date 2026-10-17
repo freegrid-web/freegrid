@@ -50,6 +50,10 @@
   `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
+- Change history ("Show Changes", `changeHistory: { user, limit }`): every edit (old and new values), and rows and
+  columns added or removed, with the time and the user. The side panel `'changes'` (context menu key `'show_changes'`)
+  lists them newest first by day; a click selects the cells; a filter shows only the selected cells' changes. Plugin
+  methods `getChanges()`, `clearChanges()`; event `afterChangeRecorded`. New guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
