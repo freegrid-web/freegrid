@@ -410,8 +410,6 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
 <worksheet xmlns="${NS}" xmlns:r="${REL_NS}"><dimension ref="${dimension}"/><sheetViews><sheetView${active ?
     ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${
     outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hasComments ?
-    ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${
     cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hyperlinks}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
