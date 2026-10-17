@@ -366,6 +366,9 @@ class GroupAction extends Action {
 
   redo(instance: PluginHost, redoneCallback: Done): void {
     this.#run(instance, this.actions, 'redo', redoneCallback);
+  }
+}
+
 /** A change of cells' settings (format painter, number formats, borders): `[row, col, before, after]`. */
 class CellFormatAction extends Action {
   changes: [number, number, Record<string, unknown>, Record<string, unknown>][];
