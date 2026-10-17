@@ -89,4 +89,24 @@ describe('Core formatting', () => {
     expect(hot.getCellMeta(0, 0).style).toBeUndefined();
     expect(hot.getCellMeta(1, 0).style).toBeUndefined();
   });
+
+  it('runs a command of a submenu inside a submenu by mouse, and closes every menu', async() => {
+    const hot = handsontable({ data: [[1, 2], [3, 4]], contextMenu: ['alignment', 'formatting'] });
+    const itemOf = (menu, text) => $(menu).find('.fs-core tbody td').filter((i, td) => $(td).text().endsWith(text));
+
+    selectCell(0, 0);
+    contextMenu();
+    itemOf('.fs-context-menu', 'Format').simulate('mouseover');
+    await sleep(350);
+    itemOf('.fs-context-menu-sub_Format', 'Fill color').simulate('mouseover');
+    await sleep(350);
+    const swatch = itemOf('.fs-context-menu-sub_Fill_color', '#ffff00');
+
+    expect(swatch.length).withContext('the color item').toBe(1);
+    swatch.simulate('mouseover').simulate('mousedown').simulate('mouseup');
+    await sleep(50);
+
+    expect(hot.getCellMeta(0, 0).style).toEqual({ background: '#ffff00' });
+    expect($('.fs-context-menu:visible').length).toBe(0);
+  });
 });
