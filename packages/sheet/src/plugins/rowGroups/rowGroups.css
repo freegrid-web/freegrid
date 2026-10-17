@@ -1,0 +1,79 @@
+/*
+ * Row groups (the rowGroups setting): a gutter at the left of the row headers, one column per level, with a bracket
+ * along each group's rows and a −/+ button on the row after it; the corner has the level buttons 1, 2, …
+ */
+.freesheet th.fs-row-groups__header {
+  position: relative;
+}
+
+.fs-row-groups__gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.fs-row-groups__line {
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  width: 6px;
+  margin-left: 6px;
+  border-left: 1px solid var(--fs-row-groups-line-color);
+}
+
+.fs-row-groups__line--start {
+  top: 3px;
+}
+
+/* The end of a group: a tick to the right. */
+.fs-row-groups__line--end {
+  bottom: 50%;
+  border-bottom: 1px solid var(--fs-row-groups-line-color);
+}
+
+.fs-row-groups__toggle,
+.fs-row-groups__level {
+  position: absolute;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--fs-row-groups-line-color);
+  border-radius: 2px;
+  background: var(--fs-header-background);
+  color: var(--fs-header-text);
+  font: 11px/10px sans-serif;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.fs-row-groups__toggle {
+  top: 50%;
+  margin: -6px 0 0 1px;
+}
+
+.fs-row-groups__toggle:hover,
+.fs-row-groups__level:hover {
+  background: var(--fs-row-groups-hover-background);
+  color: var(--fs-row-groups-hover-text);
+}
+
+.fs-row-groups__levels {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  display: flex;
+  gap: 2px;
+  margin-top: -6px;
+}
+
+.fs-row-groups__level {
+  position: static;
+}
+
+.freesheet th:has(> .fs-row-groups__levels) {
+  position: relative;
+}

@@ -1473,6 +1473,7 @@ declare namespace FreeSheet {
     comments?: boolean | CommentObject[];
     contextMenu?: boolean | any[] | contextMenu.Settings;
     findAndReplace?: boolean;
+    rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
       'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     statusBar?: boolean | {

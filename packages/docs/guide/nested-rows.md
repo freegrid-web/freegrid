@@ -4,6 +4,8 @@ api: [Nested rows]
 
 # Nested rows
 
+For an outline of flat rows (Excel's Group), see [row groups](./row-groups).
+
 Rows can have children, as in a tree grid. Put a row's children in `__children` and turn on `nestedRows`; a parent
 row expands and collapses its children with the ▾ button in its row header.
 

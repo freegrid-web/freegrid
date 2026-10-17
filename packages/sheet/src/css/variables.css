@@ -123,6 +123,9 @@
   --fs-hidden-indicator-color: var(--fs-cell-border-color); /* The double line where rows or columns are hidden. */
   --fs-loading-background: var(--fs-cell-background); /* The layer over a loading grid (see --fs-loading-opacity). */
   --fs-loading-opacity: 0.75; /* How much of the grid it hides. */
+  --fs-row-groups-line-color: var(--fs-header-text); /* Row groups: brackets and buttons in the row headers. */
+  --fs-row-groups-hover-background: var(--fs-color-accent, var(--fs-style-color-accent)); /* A hovered −/+ or level button. */
+  --fs-row-groups-hover-text: var(--fs-color-background); /* Its text. */
   --fs-side-panel-width: 300px; /* The side panel (comments, conditional formatting). */
   --fs-side-panel-background: var(--fs-header-background, var(--fs-color-background)); /* Its background. */
   --fs-cf-icon-good: #2e9e50; /* Conditional formatting icons: the high third. */

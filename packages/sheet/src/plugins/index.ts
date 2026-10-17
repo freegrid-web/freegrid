@@ -28,6 +28,7 @@ import NestedHeaders from './nestedHeaders/nestedHeaders';
 import NestedRows from './nestedRows/nestedRows';
 import MultipleSelectionHandles from './multipleSelectionHandles/multipleSelectionHandles';
 import ObserveChanges from './observeChanges/observeChanges';
+import RowGroups from './rowGroups/rowGroups';
 import Search from './search/search';
 import StatusBar from './statusBar/statusBar';
 import TouchScroll from './touchScroll/touchScroll';
@@ -65,6 +66,7 @@ export {
   NestedRows,
   ObserveChanges,
   PersistentState,
+  RowGroups,
   Search,
   StatusBar,
   TouchScroll,

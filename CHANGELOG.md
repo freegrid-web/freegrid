@@ -46,6 +46,10 @@
   next selected cells; Escape cancels). Each is one undo step; event `afterSetCellFormat`.
 - Cell borders per side: `borderTop`, `borderRight`, `borderBottom` and `borderLeft` in the `style` setting, drawn
   inside the cell (so its size never changes; `border` too), and kept side by side in Excel files.
+- Row groups (`rowGroups: true`), as Excel's outline: group adjacent rows (context menu, Alt+Shift+→ and ←, or
+  `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
+  and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
+  `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

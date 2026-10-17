@@ -9,6 +9,7 @@ const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'CollapsibleCo
   'FormattingBar', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove',
   'ManualColumnResize', 'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedHeaders',
   'NestedRows', 'ObserveChanges', 'PersistentState', 'Search', 'StatusBar', 'TouchScroll', 'UndoRedo'];
+  'NestedRows', 'ObserveChanges', 'PersistentState', 'RowGroups', 'Search', 'TouchScroll', 'UndoRedo'];
 
 function windowWith(...scripts) {
   const { window } = new JSDOM('<!doctype html><div id="root"></div>', { runScripts: 'outside-only', pretendToBeVisual: true });
