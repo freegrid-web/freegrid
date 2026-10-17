@@ -32,3 +32,11 @@ test('the playground runs an example file with the page\'s #grid', () => {
   assert.equal(playgroundCode(code), 'import X from "x";\n\nasync function createGrid(container) {\n  return 1;\n}\n\ncreateGrid(document.getElementById(\'grid\'));\n');
   assert.equal(playgroundCode(block), block);
 });
+
+test('an API summary is the first sentence, without links', async() => {
+  const { summary } = await import('../api/related.data.mjs');
+
+  assert.equal(summary('Groups rows (see [rows](./x)). More text.'), 'Groups rows (see rows).');
+  assert.equal(summary('Sets `a.b` to 1.\nThen more.'), 'Sets `a.b` to 1.');
+  assert.equal(summary(''), '');
+});

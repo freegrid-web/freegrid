@@ -1,5 +1,6 @@
 import { h } from 'vue';
 import { VPCarbon } from 'vitepress-carbon';
+import ApiBlock from './ApiBlock.vue';
 import LiveExample from './LiveExample.vue';
 import RelatedApi from './RelatedApi.vue';
 import StyleSwitch from './StyleSwitch.vue';
@@ -10,8 +11,8 @@ export default {
   extends: VPCarbon,
   Layout: () => h(VPCarbon.Layout, null, {
     'nav-bar-content-after': () => h(StyleSwitch),
-    'aside-outline-after': () => h(RelatedApi, { place: 'aside' }),
-    'doc-footer-before': () => h(RelatedApi, { place: 'bottom' }),
+    'aside-outline-after': () => h(RelatedApi),
+    'doc-footer-before': () => h(ApiBlock),
   }),
   enhanceApp({ app }) {
     app.component('LiveExample', LiveExample);

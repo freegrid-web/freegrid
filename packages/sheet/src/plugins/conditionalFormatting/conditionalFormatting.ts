@@ -181,7 +181,11 @@ class ConditionalFormatting extends BasePlugin {
     return formulas && formulas.enabled ? formulas : null;
   }
 
-  /** The rules of the columns' `format`, each over its whole column. */
+  /**
+   * The rules of the columns' `format`, each over its whole column.
+   *
+   * @private
+   */
   columnRules(): { column: number; rule: ConditionalRule }[] {
     const columns = this.hot.getSettings().columns;
 
@@ -189,7 +193,11 @@ class ConditionalFormatting extends BasePlugin {
       (column && Array.isArray(column.format) ? column.format.map(rule => ({ column: index, rule })) : [])) : [];
   }
 
-  /** Takes the rules of the settings: `conditionalFormatting` and the columns' `format`. */
+  /**
+   * Takes the rules of the settings: `conditionalFormatting` and the columns' `format`.
+   *
+   * @private
+   */
   applySettings(): void {
     const setting = this.hot.getSettings().conditionalFormatting;
 
@@ -345,7 +353,11 @@ class ConditionalFormatting extends BasePlugin {
 
   // -- Context menu ------------------------------------------------------------------------------------------------
 
-  /** Conditional formatting ▸ in the context menu, as Excel's menu. */
+  /**
+   * Conditional formatting ▸ in the context menu, as Excel's menu.
+   *
+   * @private
+   */
   addMenuItems(options: { items: MenuItem[] }): void {
     const phrase = (key: string) => this.hot.getTranslatedPhrase(key, 0) as string;
     const editor = (preset: ConditionalRule) => () => this.hot.openPanel('conditionalFormattingRule', { preset });
@@ -407,7 +419,11 @@ class ConditionalFormatting extends BasePlugin {
 
   // -- Evaluation ---------------------------------------------------------------------------------------------------
 
-  /** After a change: statistics are computed again; formulas are put again after structure changes. */
+  /**
+   * After a change: statistics are computed again; formulas are put again after structure changes.
+   *
+   * @private
+   */
   invalidate(formulas: boolean): void {
     this.#stats.clear();
     if (formulas) {
@@ -431,14 +447,22 @@ class ConditionalFormatting extends BasePlugin {
     return typeof rule.rule.when === 'string' && rule.rule.when.charAt(0) === '=';
   }
 
-  /** The number of data rows and columns, hidden ones included. */
+  /**
+   * The number of data rows and columns, hidden ones included.
+   *
+   * @private
+   */
   size(): { rows: number; columns: number } {
     const translator = getTranslator(this.hot);
 
     return { rows: translator.rows!.total(), columns: translator.columns!.total() };
   }
 
-  /** The cells of a rule's ranges, within the data. */
+  /**
+   * The cells of a rule's ranges, within the data.
+   *
+   * @private
+   */
   cells(rule: Rule): { row: number; column: number }[] {
     const { rows, columns } = this.size();
     const cells: { row: number; column: number }[] = [];
@@ -454,7 +478,11 @@ class ConditionalFormatting extends BasePlugin {
     return cells;
   }
 
-  /** Puts the formulas of formula rules into the engine, moved for each cell of their ranges. */
+  /**
+   * Puts the formulas of formula rules into the engine, moved for each cell of their ranges.
+   *
+   * @private
+   */
   installFormulas(): void {
     if (!this.#formulasDirty) {
       return;
@@ -485,7 +513,11 @@ class ConditionalFormatting extends BasePlugin {
     });
   }
 
-  /** The values of a rule's cells, as the cells show them. */
+  /**
+   * The values of a rule's cells, as the cells show them.
+   *
+   * @private
+   */
   stats(rule: Rule): Stats {
     const cached = this.#stats.get(rule.id);
 
@@ -535,7 +567,11 @@ class ConditionalFormatting extends BasePlugin {
     return stats;
   }
 
-  /** Whether a highlight or formula rule matches a cell. */
+  /**
+   * Whether a highlight or formula rule matches a cell.
+   *
+   * @private
+   */
   matches(rule: Rule, row: number, column: number, value: unknown, context: ConditionContext): boolean {
     const { when, value: argument, percent } = rule.rule;
 
@@ -582,7 +618,11 @@ class ConditionalFormatting extends BasePlugin {
     return condition.test(value, args, { type: context?.type, dateFormat: context?.dateFormat });
   }
 
-  /** Where a number is between the range's lowest and highest number, from 0 to 1. */
+  /**
+   * Where a number is between the range's lowest and highest number, from 0 to 1.
+   *
+   * @private
+   */
   share(rule: Rule, number: number): number {
     const { min, max } = this.stats(rule);
 
@@ -683,7 +723,11 @@ class ConditionalFormatting extends BasePlugin {
     TD.dataset.fsCf = JSON.stringify({ properties, classes });
   }
 
-  /** Removes what this plugin drew on a cell; the cell's own style (`base`) comes back. */
+  /**
+   * Removes what this plugin drew on a cell; the cell's own style (`base`) comes back.
+   *
+   * @private
+   */
   clearCell(TD: HTMLTableCellElement, base?: Record<string, string>): void {
     const applied = TD.dataset.fsCf;
 

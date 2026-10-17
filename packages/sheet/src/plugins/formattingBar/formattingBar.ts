@@ -316,7 +316,11 @@ class FormattingBar extends BasePlugin {
     return bar;
   }
 
-  /** Gives the selected cells a font size in points (an empty field: the grid's own size). */
+  /**
+   * Gives the selected cells a font size in points (an empty field: the grid's own size).
+   *
+   * @private
+   */
   setFontSize(text: string): void {
     const points = Number(String(text).replace(',', '.'));
 
@@ -328,7 +332,11 @@ class FormattingBar extends BasePlugin {
     this.refresh();
   }
 
-  /** Runs a button's command on the selected cells. */
+  /**
+   * Runs a button's command on the selected cells.
+   *
+   * @private
+   */
   run(action: string): void {
     const grid = this.hot as unknown as FormattingGrid;
 
@@ -360,7 +368,11 @@ class FormattingBar extends BasePlugin {
     this.refresh();
   }
 
-  /** Opens (or closes) the palette of the fill or text color button under it. */
+  /**
+   * Opens (or closes) the palette of the fill or text color button under it.
+   *
+   * @private
+   */
   togglePalette(item: 'fill_color' | 'text_color', anchor: HTMLElement): void {
     const wasOpen = this.#palette?.dataset.item === item;
 
@@ -390,7 +402,11 @@ class FormattingBar extends BasePlugin {
     this.#palette = palette;
   }
 
-  /** Places a palette or a list under its button, inside the window. */
+  /**
+   * Places a palette or a list under its button, inside the window.
+   *
+   * @private
+   */
   placePopup(popup: HTMLElement, left: number): void {
     popup.style.left = `${left}px`;
     const overflow = popup.getBoundingClientRect().right - document.documentElement.clientWidth + 4;
@@ -400,7 +416,11 @@ class FormattingBar extends BasePlugin {
     }
   }
 
-  /** Opens (or closes) the list of the Borders arrow or of the Number format button. */
+  /**
+   * Opens (or closes) the list of the Borders arrow or of the Number format button.
+   *
+   * @private
+   */
   toggleList(item: 'borders' | 'number_format' | 'font_family' | 'font_size', anchor: HTMLElement): void {
     const wasOpen = this.#palette?.dataset.item === item;
 
@@ -470,6 +490,8 @@ class FormattingBar extends BasePlugin {
   /**
    * The format painter: copies the formats of the selected cells (style, alignment, number format), closes the menu,
    * and gives them to the next cells the user selects. Escape puts it away.
+   *
+   * @private
    */
   startPainter(): void {
     this.painterFormats = copyCellFormats(this.hot as unknown as FormattingGrid);

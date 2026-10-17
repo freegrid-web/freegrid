@@ -189,6 +189,14 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
       await target.close();
     }
   }
+  // A guide page ends with the API of its topics: Row groups has the settings and both plugins' methods.
+  if (path === 'guide/row-groups.html') {
+    const entries = await page.locator('.api-block dt a').evaluateAll(els => els.map(el => el.textContent));
+
+    ['rowGroups: Boolean|Object', 'groupRows(from, to)', 'groupColumns(from, to?)'].forEach((entry) => {
+      if (!entries.includes(entry)) failures.push(`${path}: the API block has no ${entry}`);
+    });
+  }
   if (path === 'guide/theming.html') {
     const rows = await page.locator('table.theming-variables tbody tr').count();
 
