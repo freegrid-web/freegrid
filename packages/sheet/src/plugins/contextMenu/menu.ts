@@ -12,6 +12,7 @@ import Cursor from './cursor';
 import type { CursorSource } from './cursor';
 import EventManager from './../../eventManager';
 import { applyTheme, getRowHeight } from './../../helpers/dom/theme';
+import { formatShortcut } from './icons';
 import { mixin, hasOwnProperty } from './../../helpers/object';
 import { isUndefined, isDefined } from './../../helpers/mixed';
 import { debounce, isFunction } from './../../helpers/function';
@@ -526,6 +527,7 @@ class Menu {
       itemValue = itemValue.call(this.hot);
     }
     empty(TD);
+    TD.removeAttribute('aria-keyshortcuts');
     addClass(wrapper, 'fs-item-wrapper');
     TD.appendChild(wrapper);
 
@@ -537,7 +539,26 @@ class Menu {
       TD.appendChild(item.renderer.call(this.hot, hot, wrapper, row, col, prop, itemValue));
 
     } else {
-      fastInnerHTML(wrapper, itemValue as string);
+      // [icon] label [shortcut]: the label is the entry's name (HTML, like the ✓ of a checked entry).
+      const icon = document.createElement('span');
+      const label = document.createElement('span');
+
+      icon.className = 'fs-menu-item__icon';
+      label.className = 'fs-menu-item__label';
+      if (typeof item.icon === 'string') {
+        fastInnerHTML(icon, item.icon);
+      }
+      fastInnerHTML(label, itemValue as string);
+      wrapper.append(icon, label);
+      if (typeof item.shortcut === 'string' && item.shortcut) {
+        const shortcut = document.createElement('span');
+
+        // Drawn by CSS from the attribute: the entry's text stays its name.
+        shortcut.className = 'fs-menu-item__shortcut';
+        shortcut.dataset.shortcut = formatShortcut(item.shortcut);
+        wrapper.appendChild(shortcut);
+        TD.setAttribute('aria-keyshortcuts', item.shortcut.replace(/Ctrl/g, 'Control'));
+      }
     }
     if (itemIsDisabled(item)) {
       addClass(TD, 'fs-disabled');

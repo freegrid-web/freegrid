@@ -22,6 +22,7 @@ import * as C from './../../i18n/constants';
 
 import './comments.css';
 import './commentsPanel';
+import { ICONS } from './../contextMenu/icons';
 
 /** A cell's comment (its `comment` cell meta). */
 type CommentMeta = { value?: string; readOnly?: boolean; style?: { width?: number; height?: number } };
@@ -662,6 +663,7 @@ class Comments extends BasePlugin {
       },
       {
         key: 'commentsAddEdit',
+        icon: ICONS.comment,
         name: () => {
           if (this.checkSelectionCommentsConsistency()) {
             return this.hot.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_EDIT_COMMENT);
@@ -676,6 +678,7 @@ class Comments extends BasePlugin {
       },
       {
         key: 'commentsRemove',
+        icon: ICONS.commentRemove,
         name(this: PluginHost) {
           return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_REMOVE_COMMENT);
         },

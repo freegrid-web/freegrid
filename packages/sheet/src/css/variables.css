@@ -154,6 +154,8 @@
   --fs-menu-background: var(--fs-color-background); /* Menu background. */
   --fs-menu-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Menu border. */
   --fs-menu-disabled-text: var(--fs-color-muted-text); /* Disabled items. */
+  --fs-menu-icon-color: var(--fs-cell-text); /* Entry icons. */
+  --fs-menu-shortcut-color: var(--fs-color-muted-text); /* Entry shortcuts (Ctrl+Z). */
   --fs-find-radius: 4px; /* Corners of the find and replace box. */
   --fs-find-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* Its shadow. */
   --fs-find-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */

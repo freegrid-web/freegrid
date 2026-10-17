@@ -73,15 +73,49 @@
   display: none;
 }
 
+/* An entry: [icon] label [shortcut]. */
 .fs-context-menu table tbody tr td .fs-item-wrapper {
-  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 2px;
   margin-right: 6px;
 }
 
+.fs-context-menu .fs-menu-item__icon {
+  display: inline-flex;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--fs-menu-icon-color);
+}
+
+.fs-context-menu .fs-menu-item__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.fs-context-menu .fs-menu-item__label {
+  flex: 1 1 auto;
+}
+
+/* The shortcut is drawn from its attribute, so the entry's text stays its name. */
+.fs-context-menu .fs-menu-item__shortcut::after {
+  content: attr(data-shortcut);
+  margin-left: 24px;
+  color: var(--fs-menu-shortcut-color);
+  font-size: 0.9em;
+}
+
+.fs-context-menu table tbody tr td.fs-disabled .fs-menu-item__icon {
+  opacity: 0.5;
+}
+
+/* The check of a checked entry sits where an icon would. */
 .fs-context-menu table tbody tr td div span.selected {
   margin-top: -2px;
   position: absolute;
-  left: 4px;
+  left: 9px;
 }
 
 /* The color of a "Text color" or "Fill color" entry. */
@@ -96,4 +130,16 @@
 
 .fs-context-menu .fs-master .fs-holder {
   overflow: hidden;
+}
+
+/* Modern style: round corners, a shadow, and round hovered entries. */
+.fs-context-menu.fs-style-modern table.fs-core {
+  border-width: 1px;
+  border-radius: var(--fs-radius);
+  box-shadow: var(--fs-menu-shadow);
+}
+
+.fs-context-menu.fs-style-modern table tbody tr td {
+  padding: 2px 6px;
+  border-radius: 4px;
 }

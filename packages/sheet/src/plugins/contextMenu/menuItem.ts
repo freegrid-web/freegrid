@@ -14,5 +14,9 @@ export type MenuItem = {
   disabled?: boolean | ((this: PluginHost) => boolean);
   hidden?: boolean | ((this: PluginHost) => boolean);
   submenu?: { items: MenuItem[] };
+  /** An icon at the left: SVG (or other HTML) written by your code, never by users. */
+  icon?: string;
+  /** The keys that do the same, shown at the right (`'Ctrl+K'`; a Mac shows ⌘K). */
+  shortcut?: string;
   [option: string]: unknown;
 };

@@ -14,6 +14,7 @@ import {
   subtractRect,
 } from './ranges';
 import type { Rect } from './ranges';
+import { ICONS } from './../contextMenu/icons';
 
 /** The style a highlight or formula rule gives a cell. */
 export type ConditionalStyle = {
@@ -365,7 +366,7 @@ class ConditionalFormatting extends BasePlugin {
     }) as MenuItem;
     const path = (...parts: string[]) => [ROOT, ...parts].join(':');
 
-    options.items.push({ name: '---------' } as MenuItem, group(ROOT, phrase(C.CF_MENU), [
+    options.items.push({ name: '---------' } as MenuItem, { ...group(ROOT, phrase(C.CF_MENU), [
       group(path('highlight'), phrase(C.CF_HIGHLIGHT), [
         item(path('highlight', 'gt'), phrase(C.CF_GREATER), editor({ when: 'gt', value: '' })),
         item(path('highlight', 'lt'), phrase(C.CF_LESS), editor({ when: 'lt', value: '' })),
@@ -401,7 +402,7 @@ class ConditionalFormatting extends BasePlugin {
         item(path('clear', 'clear_sheet'), phrase(C.CF_CLEAR_SHEET), () => this.clearRules()),
       ]),
       item(path('manage'), phrase(C.CF_MANAGE), () => this.hot.openPanel('conditionalFormatting')),
-    ]));
+    ]), icon: ICONS.conditionalFormatting } as MenuItem);
   }
 
   // -- Evaluation ---------------------------------------------------------------------------------------------------

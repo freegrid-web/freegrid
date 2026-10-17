@@ -2,11 +2,13 @@ import { getValidSelection } from './../utils';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'col_left';
 
 const columnLeftItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.columnLeft,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_INSERT_LEFT);
   },

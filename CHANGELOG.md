@@ -50,6 +50,10 @@
   `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
+- The context menu shows an icon at the left of each built-in entry and its keyboard shortcut at the right (Ctrl+Z,
+  Ctrl+C, Ctrl+B…; ⌘ on a Mac); entries of your own take `icon` and `shortcut`. The Modern style gives the menu round
+  corners, a shadow and round hovered entries. New CSS variables `--fs-menu-icon-color`, `--fs-menu-shortcut-color`.
+  New guide page "Context menu".
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

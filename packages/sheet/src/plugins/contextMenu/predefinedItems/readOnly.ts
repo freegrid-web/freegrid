@@ -2,11 +2,13 @@ import { checkSelectionConsistency, markLabelAsSelected } from './../utils';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'make_read_only';
 
 const readOnlyItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.lock,
   name(this: PluginHost) {
     let label = this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_READ_ONLY);
     const atLeastOneReadOnly = checkSelectionConsistency(this.getSelectedRange(), (row, col) => this.getCellMeta(row, col).readOnly);

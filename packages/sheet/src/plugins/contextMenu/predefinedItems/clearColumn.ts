@@ -2,11 +2,13 @@ import { getValidSelection } from './../utils';
 import * as C from './../../../i18n/constants';
 import type { MenuItem } from './../menuItem';
 import type { PluginHost } from './../../_base';
+import { ICONS } from './../icons';
 
 export const KEY = 'clear_column';
 
 const clearColumnItem = (): MenuItem => ({
   key: KEY,
+  icon: ICONS.clear,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_CLEAR_COLUMN);
   },
