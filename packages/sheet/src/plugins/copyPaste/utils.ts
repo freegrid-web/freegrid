@@ -1,12 +1,14 @@
 import { isEmpty } from './../../helpers/mixed';
+import { formatToCss, type CellFormat } from './formats';
 
 /**
  * Converts javascript array into HTMLTable.
  *
  * @param input Input array which will be converted to HTMLTable
+ * @param formats The cells' formatting (bold, colors, alignment), written as inline styles.
  * @returns `<table><tbody><tr><td>…` with the values as text (HTML escaped).
  */
-export const arrayToTable = (input: unknown[][]): string => {
+export const arrayToTable = (input: unknown[][], formats?: CellFormat[][]): string => {
   const result = ['<table>'];
   // Escapes the values: an element's innerHTML after setting its innerText.
   const tempElement = document.createElement('div');
@@ -17,10 +19,12 @@ export const arrayToTable = (input: unknown[][]): string => {
     if (row === 0) {
       result.push('<tbody>');
     }
-    const columnsResult = rowData.map((value) => {
+    const columnsResult = rowData.map((value, column) => {
       tempElement.innerText = `${isEmpty(value) ? '' : value}`;
+      // The formatting as an inline style (made of known properties and normalized colors only).
+      const css = formats?.[row]?.[column] ? formatToCss(formats[row][column]) : '';
 
-      return `<td>${tempElement.innerHTML}</td>`;
+      return css ? `<td style="${css}">${tempElement.innerHTML}</td>` : `<td>${tempElement.innerHTML}</td>`;
     });
 
     result.push('<tr>', ...columnsResult, '</tr>');
@@ -79,19 +83,23 @@ const cellText = (cell: HTMLTableCellElement): string => {
 };
 
 /**
+ * The first `<table>` of pasted HTML. A parsed document is inert: pasted HTML runs no code and loads nothing
+ * (`innerHTML` of an element would, e.g. an image's `onerror`); its text and styles are only read.
+ */
+export const parseTable = (html: string): HTMLTableElement | null => {
+  const table = new DOMParser().parseFromString(html.replace(/\n/g, ''), 'text/html').querySelector('table');
+
+  return isHTMLTable(table) ? table : null;
+};
+
+/**
  * Converts HTMLTable or string into array.
  *
  * @param element Node element or string, which should contain `<table>...</table>`.
  * @returns The cells' text, by rows (a `<br>` is a new line).
  */
 export const tableToArray = (element: Element | string | null): string[][] => {
-  let checkElement: Element | null = element as Element | null;
-
-  if (typeof element === 'string') {
-    // A parsed document is inert: pasted HTML runs no code and loads nothing (`innerHTML` of an element would, e.g.
-    // an image's `onerror`).
-    checkElement = new DOMParser().parseFromString(element.replace(/\n/g, ''), 'text/html').querySelector('table');
-  }
+  const checkElement: Element | null = typeof element === 'string' ? parseTable(element) : element;
 
   if (!isHTMLTable(checkElement)) {
     return [];

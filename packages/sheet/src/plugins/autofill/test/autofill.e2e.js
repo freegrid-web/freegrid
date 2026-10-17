@@ -788,9 +788,10 @@ describe('AutoFill', () => {
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-        [null, 2, 3, null],
-        [null, 1, 4, null],
-        [null, 0, 5, null],
+        // Text, not numbers: numbers would go on as a series.
+        [null, 'c', 'd', null],
+        [null, 'b', 'e', null],
+        [null, 'a', 'f', null],
         [null, null, null, null],
       ]
     });
@@ -801,15 +802,16 @@ describe('AutoFill', () => {
     spec().$container.find('.wtBorder.area.corner').simulate('mousedown');
     $(getCell(0, 2, true)).simulate('mouseover').simulate('mouseup');
 
-    expect(JSON.stringify(getData(0, 1, 3, 2))).toEqual(JSON.stringify([[0, 5], [2, 3], [1, 4], [0, 5]]));
+    expect(JSON.stringify(getData(0, 1, 3, 2))).toEqual(JSON.stringify([['a', 'f'], ['c', 'd'], ['b', 'e'], ['a', 'f']]));
   });
 
   it('should populate the filled data in the correct order, when dragging the fill handle towards left', () => {
     handsontable({
       data: [
         [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, 0, 1, 2],
-        [null, null, null, null, null, 3, 4, 5],
+        // Text, not numbers: numbers would go on as a series.
+        [null, null, null, null, null, 'a', 'b', 'c'],
+        [null, null, null, null, null, 'd', 'e', 'f'],
         [null, null, null, null, null, null, null, null],
       ]
     });
@@ -820,7 +822,7 @@ describe('AutoFill', () => {
     spec().$container.find('.wtBorder.area.corner').simulate('mousedown');
     $(getCell(2, 1, true)).simulate('mouseover').simulate('mouseup');
 
-    expect(JSON.stringify(getData(1, 1, 2, 4))).toEqual(JSON.stringify([[2, 0, 1, 2], [5, 3, 4, 5]]));
+    expect(JSON.stringify(getData(1, 1, 2, 4))).toEqual(JSON.stringify([['c', 'a', 'b', 'c'], ['f', 'd', 'e', 'f']]));
   });
 
   describe('should works properly when two or more instances of Handsontable was initialized with other settings (#3257)', () => {

@@ -5,6 +5,7 @@ import { offset, outerHeight, outerWidth } from './../../helpers/dom/element';
 import EventManager from './../../eventManager';
 import { registerPlugin } from './../../plugins';
 import { CellCoords } from './../../3rdparty/walkontable/src';
+import { extendSeries } from './series';
 import { getDeltas, getDragDirectionAndRange, DIRECTIONS, getMappedFillHandleSetting } from './utils';
 
 /** Selection corners: `[row, column, row2, column2]`. */
@@ -164,7 +165,7 @@ class Autofill extends BasePlugin {
       this.hot.runHooks('beforeAutofill', startOfDragCoords, endOfDragCoords, selectionData);
 
       const endCoords = endOfDragCoords!;
-      const deltas = getDeltas(startOfDragCoords, endCoords, selectionData, directionOfDrag!);
+      let deltas = getDeltas(startOfDragCoords, endCoords, selectionData, directionOfDrag!);
       let fillData = selectionData;
 
       // Dragging up or left repeats the selection backwards from its first row or column.
@@ -182,6 +183,10 @@ class Autofill extends BasePlugin {
         fillData = selectionData.map(row => Array.from({ length: dragLength },
           (_, j) => row[(j + (row.length - fillOffset)) % row.length]));
       }
+
+      ({ fillData, deltas } = this.withSeries(fillData, deltas, directionOfDrag!,
+        directionOfDrag === 'up' || directionOfDrag === 'down' ? endCoords.row - startOfDragCoords.row + 1 :
+          endCoords.col - startOfDragCoords.col + 1));
 
       this.hot.populateFromArray(
         startOfDragCoords.row,
@@ -203,6 +208,55 @@ class Autofill extends BasePlugin {
     }
 
     return true;
+  }
+
+  /**
+   * The fill with series: each dragged column (or row, dragging sideways) whose values are a series goes on as one
+   * (numbers by their step, dates, month and weekday names, text ending with a number); the others repeat. Columns
+   * with formulas keep the repeat (the formulas move their references).
+   *
+   * @private
+   */
+  withSeries(fillData: unknown[][], deltas: number[][], direction: string,
+    dragLength: number): { fillData: unknown[][]; deltas: number[][] } {
+    const { from, to } = this.hot.getSelectedRangeLast()!;
+    const top = Math.min(from.row, to.row);
+    const left = Math.min(from.col, to.col);
+    const selection = this.getSelectionData();
+    const vertical = direction === 'up' || direction === 'down';
+    const backwards = direction === 'up' || direction === 'left';
+    const lines = vertical ? selection[0].length : selection.length;
+    const length = vertical ? selection.length : selection[0].length;
+    // The whole dragged area, each cell's value from the repeat.
+    const area = vertical ?
+      Array.from({ length: dragLength }, (_, i) => [...fillData[backwards ? i : i % fillData.length]]) :
+      fillData.map(row => Array.from({ length: dragLength }, (_, j) => row[backwards ? j : j % row.length]));
+    const seriesDeltas = deltas.map(row => [...row]);
+
+    for (let line = 0; line < lines; line += 1) {
+      const cells = Array.from({ length }, (_, i) => (vertical ? [top + i, left + line] : [top + line, left + i]));
+      const hasFormula = cells.some(([row, col]) => /^=/.test(String(this.hot.getSourceDataAtCell(row, col) ?? '')));
+      const meta = this.hot.getCellMeta(cells[0][0], cells[0][1]);
+      const series = hasFormula ? null : extendSeries(cells.map(([row, col]) => selection[row - top][col - left]),
+        dragLength, backwards, meta.type === 'date' ? meta.dateFormat as string : void 0);
+
+      if (series) {
+        series.forEach((value, i) => {
+          if (vertical) {
+            area[i][line] = value;
+          } else {
+            area[line][i] = value;
+          }
+        });
+        if (vertical) {
+          seriesDeltas[0][line] = 0;
+        } else {
+          seriesDeltas[line] = [0];
+        }
+      }
+    }
+
+    return { fillData: area, deltas: seriesDeltas };
   }
 
   /**

@@ -35,6 +35,12 @@
   the matches and goes through them ("2 of 5"); Ctrl+H adds Replace and Replace all (one undo step). Options: match
   case, entire cell, search in formulas. Read-only cells stay. The plugin's `find` and `replace` work from code. New
   guide page.
+- The fill handle goes on with series, as in a spreadsheet: numbers by their step, dates (by days, or by months when
+  they share the day; date cells in their `dateFormat`), month and weekday names, and text that ends with a number
+  (`Item 1` → `Item 2`). A single number, other text and formulas repeat as before. New guide page "Fill and paste".
+- Copy and paste keep formatting: a copy writes bold, italic, underline, strikethrough, colors and alignment into the
+  clipboard's HTML, and a paste of a table from FreeSheet, Excel or Google Sheets gives the cells that formatting
+  (one undo step with the values). `copyPaste: { formats: false }` pastes values only.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

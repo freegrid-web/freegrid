@@ -309,9 +309,9 @@ class CellAlignmentAction extends Action {
 
 /** A change of cells' `style` meta (`setCellStyle`, the Format menu, Ctrl+B and the like). */
 class CellStyleAction extends Action {
-  changes: [number, number, unknown, unknown][];
+  changes: unknown[][];
 
-  constructor(changes: [number, number, unknown, unknown][]) {
+  constructor(changes: unknown[][]) {
     super();
     this.changes = changes;
     this.actionType = 'style';
@@ -319,7 +319,11 @@ class CellStyleAction extends Action {
 
   #apply(instance: PluginHost, done: Done, index: 2 | 3): void {
     this.changes.forEach((change) => {
-      instance.setCellMeta(change[0], change[1], 'style', change[index]);
+      instance.setCellMeta(change[0] as number, change[1] as number, 'style', change[index]);
+      // A paste also changes the alignment class: `[…, classNameBefore, classNameAfter]`.
+      if (change.length > 4) {
+        instance.setCellMeta(change[0] as number, change[1] as number, 'className', change[index + 2]);
+      }
     });
     instance.addHookOnce('afterRender', done);
     instance.render();
@@ -331,6 +335,37 @@ class CellStyleAction extends Action {
 
   redo(instance: PluginHost, redoneCallback: Done): void {
     this.#apply(instance, redoneCallback, 3);
+  }
+}
+
+/** Several actions undone and redone as one (a paste of values with their formatting). */
+class GroupAction extends Action {
+  actions: Action[];
+
+  constructor(actions: Action[]) {
+    super();
+    this.actions = actions;
+    this.actionType = 'group';
+  }
+
+  /** Runs the actions in order; done when all of them are (not from inside one's render, which would render again). */
+  #run(instance: PluginHost, actions: Action[], step: 'undo' | 'redo', done: Done): void {
+    let pending = actions.length;
+
+    actions.forEach(action => action[step](instance, () => {
+      pending -= 1;
+      if (pending === 0) {
+        done();
+      }
+    }));
+  }
+
+  undo(instance: PluginHost, undoneCallback: Done): void {
+    this.#run(instance, [...this.actions].reverse(), 'undo', undoneCallback);
+  }
+
+  redo(instance: PluginHost, redoneCallback: Done): void {
+    this.#run(instance, this.actions, 'redo', redoneCallback);
   }
 }
 
@@ -616,7 +651,7 @@ class UndoRedo {
         this.done(new CellAlignmentAction(stateBefore, range, type, alignment));
       });
 
-    instance.addHook('afterSetCellStyle', (changes: [number, number, unknown, unknown][]) => {
+    instance.addHook('afterSetCellStyle', (changes: unknown[][]) => {
       this.done(new CellStyleAction(changes));
     });
 
@@ -649,9 +684,32 @@ class UndoRedo {
    * @private
    */
   done(action: Action): void {
-    if (!this.ignoreNewActions) {
+    if (this.ignoreNewActions) {
+      return;
+    }
+    if (this.#group) {
+      this.#group.push(action);
+    } else {
       this.doneActions.push(action);
-      this.undoneActions.length = 0;
+    }
+    this.undoneActions.length = 0;
+  }
+
+  /** The actions done since `beginGroup`, which become one undo step. */
+  #group: Action[] | null = null;
+
+  /** Starts a group: the actions until `endGroup` are undone and redone as one. */
+  beginGroup(): void {
+    this.#group = this.#group || [];
+  }
+
+  /** Ends the group started by `beginGroup`. */
+  endGroup(): void {
+    const actions = this.#group;
+
+    this.#group = null;
+    if (actions && actions.length) {
+      this.doneActions.push(actions.length === 1 ? actions[0] : new GroupAction(actions));
     }
   }
 

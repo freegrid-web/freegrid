@@ -4,7 +4,7 @@ import { CELL_STYLE_PROPERTIES, type CellStyle } from './../utils/cellStyle';
 /** A grid as formatting sees it. */
 type FormattingHost = {
   getSelectedRange(): CellRange[] | undefined;
-  getCellMeta(row: number, col: number): { style?: CellStyle };
+  getCellMeta(row: number, col: number): { style?: CellStyle; className?: string | string[] };
   setCellMeta(row: number, col: number, key: string, value: unknown): void;
   countRows(): number;
   countCols(): number;
@@ -172,4 +172,36 @@ export const toggleCellStyle = (grid: FormattingHost, toggle: StyleToggle): void
       return compact({ ...before, textDecoration: (on ? [...lines, DECORATIONS[toggle]!] : lines).join(' ') });
     });
   }
+};
+
+/** The horizontal alignment classes (with their older names). */
+const HORIZONTAL = /^(fs-(left|center|right|justify)|ht(Left|Center|Right|Justify))$/;
+
+/**
+ * Gives cells a style and a horizontal alignment at once (a paste with formatting): each cell's style is replaced,
+ * and its alignment class too (`undefined`: no alignment). One `afterSetCellStyle` (undo) for all of them.
+ */
+export const setCellFormats = (grid: FormattingHost,
+  cells: { row: number; col: number; style?: CellStyle; align?: string }[]): void => {
+  endPreview(grid);
+  const changes: unknown[][] = [];
+
+  cells.forEach(({ row, col, style, align }) => {
+    const meta = grid.getCellMeta(row, col);
+    const classBefore = meta.className;
+    const classes = (Array.isArray(classBefore) ? classBefore : String(classBefore || '').split(/\s+/))
+      .filter(name => name && !HORIZONTAL.test(name));
+    const classAfter = [...classes, ...(align ? [`fs-${align}`] : [])].join(' ') || void 0;
+    const after = style ? compact(style as Record<string, unknown>) : void 0;
+
+    if (JSON.stringify(meta.style) !== JSON.stringify(after) || (classBefore || void 0) !== classAfter) {
+      changes.push([row, col, meta.style, after, classBefore, classAfter]);
+      grid.setCellMeta(row, col, 'style', after);
+      grid.setCellMeta(row, col, 'className', classAfter);
+    }
+  });
+  if (changes.length) {
+    grid.runHooks('afterSetCellStyle', changes);
+  }
+  grid.render();
 };
