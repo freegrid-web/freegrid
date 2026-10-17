@@ -38,6 +38,8 @@ const book = (): Book => ({
         { range: 'C2:C9', dataBar: '#638ec6' },
         { range: 'B2:B9', iconSet: 'trafficLights' },
       ],
+      // An outline: rows 5 to 8, and inside it rows 6 and 7, collapsed.
+      rowGroups: [{ from: 4, to: 7 }, { from: 5, to: 6, collapsed: true }],
     },
     { name: 'Empty', cells: [], columnWidths: [], rowHeights: [], hiddenRows: [], hiddenColumns: [], merges: [],
       frozenRows: 0, frozenColumns: 0, comments: [], conditionalFormatting: [] },

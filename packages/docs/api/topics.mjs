@@ -111,6 +111,13 @@ export const TOPICS = [
     settings: ['nestedHeaders', 'collapsibleColumns'],
   },
   {
+    name: 'Row groups',
+    description: 'An outline of rows: groups in levels that collapse, as Excel\'s Group.',
+    methods: [],
+    events: [],
+    settings: ['rowGroups'],
+  },
+  {
     name: 'Conditional formatting',
     description: 'Cells that format themselves from their values: highlights, color scales, data bars, icons.',
     methods: [],

@@ -1,0 +1,137 @@
+/*
+ * Row groups (the rowGroups setting), drawn as a spreadsheet's outline: a gutter at the left of the row headers, in
+ * the headers' color, with a column per level. A group's bracket runs from a tick at its first row down to its −/+
+ * button on the row after it; the corner has the level buttons 1, 2, … over the columns.
+ */
+.freesheet th.fs-row-groups__header,
+.freesheet th.fs-row-groups__corner {
+  position: relative;
+}
+
+/*
+ * The row lines stop at the gutter: it reaches over the header's bottom line (the header keeps its line, so its row
+ * stays as tall as the cells').
+ */
+.freesheet th.fs-row-groups__header,
+.freesheet th.fs-row-groups__corner {
+  overflow: visible;
+}
+
+.fs-row-groups__gutter,
+.fs-row-groups__levels {
+  position: absolute;
+  z-index: 1; /* above the header's label, which spans the whole header */
+  top: 0;
+  bottom: -1px;
+  left: 0;
+  background: var(--fs-row-groups-background);
+  border-right: 1px solid var(--fs-row-groups-edge-color);
+  pointer-events: none;
+}
+
+/* The bracket: a vertical line through the column's middle. */
+.fs-row-groups__line {
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  width: 16px;
+}
+
+.fs-row-groups__line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7px;
+  border-left: 1px solid var(--fs-row-groups-line-color);
+}
+
+/* The group's first row: the line starts with a tick to the left. */
+.fs-row-groups__line--first::before {
+  top: 4px;
+}
+
+.fs-row-groups__line--first::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 4px;
+  border-top: 1px solid var(--fs-row-groups-line-color);
+}
+
+/* The row of the button: the line reaches the button from above (or leaves it downwards). */
+.fs-row-groups__line--to-button::before {
+  bottom: 50%;
+}
+
+.fs-row-groups__line--from-button::before {
+  top: 50%;
+}
+
+.fs-row-groups__line--last::before {
+  bottom: 4px;
+}
+
+.fs-row-groups__line--last::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 3px;
+  width: 4px;
+  border-top: 1px solid var(--fs-row-groups-line-color);
+}
+
+.fs-row-groups__toggle,
+.fs-row-groups__level {
+  position: absolute;
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  margin-left: 2px;
+  border: 1px solid var(--fs-row-groups-line-color);
+  background: var(--fs-row-groups-button-background);
+  color: var(--fs-row-groups-text);
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+
+/* − and + as thin lines (the text is for screen readers and copy). */
+.fs-row-groups__toggle {
+  top: 50%;
+  margin-top: -6px;
+  font-size: 0;
+}
+
+.fs-row-groups__toggle::before,
+.fs-row-groups__toggle--collapsed::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  width: 5px;
+  border-top: 1px solid var(--fs-row-groups-text);
+}
+
+.fs-row-groups__toggle--collapsed::after {
+  top: 2px;
+  left: 4px;
+  width: 0;
+  height: 5px;
+  border-top: 0;
+  border-left: 1px solid var(--fs-row-groups-text);
+}
+
+.fs-row-groups__level {
+  top: 50%;
+  margin-top: -6px;
+  font: 8px/9px sans-serif;
+  text-align: center;
+}
+
+.fs-row-groups__toggle:hover,
+.fs-row-groups__level:hover {
+  border-color: var(--fs-row-groups-hover-color);
+  background: var(--fs-row-groups-hover-background);
+}

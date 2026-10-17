@@ -160,6 +160,12 @@ const gridToSheet = (grid: Core, name: string, headers: boolean): BookSheet => {
   const hiddenColumns = plugin(grid, 'hiddenColumns');
 
   sheet.hiddenRows = hiddenRows ? (hiddenRows.getHidden as () => number[])() : [];
+  const rowGroups = plugin(grid, 'rowGroups');
+  const groups = rowGroups ? (rowGroups.getSavedGroups as () => NonNullable<BookSheet['rowGroups']>)() : [];
+
+  if (groups.length) {
+    sheet.rowGroups = groups;
+  }
   sheet.hiddenColumns = hiddenColumns ? (hiddenColumns.getHidden as () => number[])() : [];
   const merge = plugin(grid, 'mergeCells');
 
@@ -184,6 +190,7 @@ const gridToSheet = (grid: Core, name: string, headers: boolean): BookSheet => {
     });
     sheet.rowHeights.unshift(void 0);
     sheet.hiddenRows = sheet.hiddenRows.map(row => row + 1);
+    sheet.rowGroups = sheet.rowGroups?.map(group => ({ ...group, from: group.from + 1, to: group.to + 1 }));
     sheet.merges = sheet.merges.map(rect => ({ ...rect, r1: rect.r1 + 1, r2: rect.r2 + 1 }));
     sheet.comments = sheet.comments.map(comment => ({ ...comment, row: comment.row + 1 }));
     sheet.conditionalFormatting = sheet.conditionalFormatting.map(rule => ({ ...rule,
@@ -214,7 +221,7 @@ export const documentToBook = (hot: Core, options: FileOptions = {}): Book => {
 export const bookToDocument = (book: Book, options: FileOptions = {}): Record<string, unknown> => {
   const sheets = book.sheets.map((sheet, index) => {
     let cells = sheet.cells;
-    let { rowHeights, hiddenRows, comments, merges, frozenRows, conditionalFormatting } = sheet;
+    let { rowHeights, hiddenRows, comments, merges, frozenRows, conditionalFormatting, rowGroups = [] } = sheet;
     let colHeaders: string[] | undefined;
 
     if (options.headers) {
@@ -223,6 +230,8 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
       cells = cells.slice(1);
       rowHeights = rowHeights.slice(1);
       hiddenRows = hiddenRows.filter(row => row > 0).map(row => row - 1);
+      rowGroups = rowGroups.filter(group => group.from > 0).map(group => ({ ...group, from: group.from - 1,
+        to: group.to - 1 }));
       comments = comments.filter(comment => comment.row > 0).map(comment => ({ ...comment, row: comment.row - 1 }));
       merges = merges.filter(rect => rect.r1 > 0).map(rect => ({ ...rect, r1: rect.r1 - 1, r2: rect.r2 - 1 }));
       frozenRows = Math.max(0, frozenRows - 1);
@@ -301,6 +310,7 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
       ...(merges.length ? { mergeCells: merges.map(rect => ({ row: rect.r1, col: rect.c1,
         rowspan: rect.r2 - rect.r1 + 1, colspan: rect.c2 - rect.c1 + 1 })) } : {}),
       ...(hiddenRows.length ? { hiddenRows } : {}),
+      ...(rowGroups.length ? { rowGroups } : {}),
       ...(sheet.hiddenColumns.length ? { hiddenColumns: sheet.hiddenColumns } : {}),
       ...(conditionalFormatting.length ? { conditionalFormatting } : {}),
       ...(frozenRows ? { fixedRowsTop: frozenRows } : {}),

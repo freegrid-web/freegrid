@@ -43,6 +43,8 @@ export type SheetDocument = {
   conditionalFormatting?: AnyObject[];
   /** Nested rows: the physical rows of the collapsed parents. */
   collapsedRows?: number[];
+  /** Row groups (rows as data indexes). */
+  rowGroups?: { from: number; to: number; collapsed?: boolean }[];
   cell?: AnyObject[];
 };
 
@@ -119,6 +121,12 @@ const saveSheet = (sheet: Sheet): SheetDocument => {
   if (collapsedRows.length) {
     saved.collapsedRows = collapsedRows;
   }
+  const rowGroups = plugin('rowGroups')?.enabled ?
+    (plugin('rowGroups')!.getSavedGroups as () => SheetDocument['rowGroups'])()! : [];
+
+  if (rowGroups.length) {
+    saved.rowGroups = rowGroups;
+  }
   const { fixedRowsTop, fixedColumnsLeft } = instance.getSettings();
 
   if (fixedRowsTop) {
@@ -158,6 +166,9 @@ const sheetSettings = (sheet: SheetDocument): AnyObject => {
   }
   if (sheet.conditionalFormatting) {
     settings.conditionalFormatting = sheet.conditionalFormatting;
+  }
+  if (sheet.rowGroups) {
+    settings.rowGroups = { groups: sheet.rowGroups };
   }
   settings.fixedRowsTop = sheet.fixedRowsTop || 0;
   settings.fixedColumnsLeft = sheet.fixedColumnsLeft || 0;
@@ -854,7 +865,10 @@ export class Workbook {
       settings.mergeCells = [];
     }
     // The first sheet keeps its hiding options; what is hidden follows the saved sheet.
-    ([['hiddenRows', 'rows'], ['hiddenColumns', 'columns'], ['filters', 'conditions']] as const).forEach(([name, key]) => {
+    const kept = [['hiddenRows', 'rows'], ['hiddenColumns', 'columns'], ['filters', 'conditions'],
+      ['rowGroups', 'groups']] as const;
+
+    kept.forEach(([name, key]) => {
       const current = this.root.getSettings()[name];
 
       if (current || settings[name]) {

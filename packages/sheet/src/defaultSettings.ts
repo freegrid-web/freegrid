@@ -2563,6 +2563,22 @@ DefaultSettings.prototype = {
   findAndReplace: void 0,
 
   /**
+   * Row groups, as a spreadsheet's outline: group any adjacent rows (the context menu's Group rows, Alt+Shift+→, or
+   * `getPlugin('rowGroups').groupRows(from, to)`), up to 7 levels, and collapse a group to hide its rows with the −/+
+   * button in the row headers; the corner's level buttons show the outline down to a level. `getDocument()` and Excel
+   * files keep the groups, saved as `{ groups: [{ from, to, collapsed }] }` (rows as data indexes).
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * rowGroups: true,
+   * ```
+   */
+  rowGroups: void 0,
+
+  /**
    * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
    * palette that shows a color on the selected cells while the pointer is on it), borders, alignment, number format,
    * the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
