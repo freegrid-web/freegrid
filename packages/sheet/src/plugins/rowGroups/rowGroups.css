@@ -1,6 +1,6 @@
 /*
  * Row groups (the rowGroups setting), drawn as a spreadsheet's outline: a gutter at the left of the row headers, in
- * the sheet's color, with a column per level. A group's bracket runs from a tick at its first row down to its −/+
+ * the headers' color, with a column per level. A group's bracket runs from a tick at its first row down to its −/+
  * button on the row after it; the corner has the level buttons 1, 2, … over the columns.
  */
 .freesheet th.fs-row-groups__header,
@@ -90,7 +90,7 @@
   height: 11px;
   margin-left: 2px;
   border: 1px solid var(--fs-row-groups-line-color);
-  background: var(--fs-row-groups-background);
+  background: var(--fs-row-groups-button-background);
   color: var(--fs-row-groups-text);
   cursor: pointer;
   pointer-events: auto;
