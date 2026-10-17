@@ -94,6 +94,8 @@ class FormulaBar extends BasePlugin {
     this.nameBox!.addEventListener('keydown', event => this.onNameKeyDown(event));
     this.nameBox!.addEventListener('input', () => this.setNameInvalid(null));
 
+    // A hidden sheet of a document (new settings make its bar again) keeps its bar hidden too.
+    bar.style.display = root.style.display === 'none' ? 'none' : '';
     root.parentNode?.insertBefore(bar, root);
     this.matchGridWidth();
   }

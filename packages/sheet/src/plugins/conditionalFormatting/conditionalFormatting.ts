@@ -15,6 +15,7 @@ import {
 } from './ranges';
 import type { Rect } from './ranges';
 import { ICONS } from './../contextMenu/icons';
+import { isTextOnFill, textOnFill } from './../../utils/cellStyle';
 
 /** The style a highlight or formula rule gives a cell. */
 export type ConditionalStyle = {
@@ -704,9 +705,16 @@ class ConditionalFormatting extends BasePlugin {
   }
 
   paint(TD: HTMLTableCellElement, style: Record<string, string>, ruleClasses: string[], icon: string | null): void {
-    const properties = Object.keys(style);
     // With an icon, the icon and the number stay on one line, as in a spreadsheet.
     const classes = icon ? [...ruleClasses, 'fs-cf-has-icon'] : ruleClasses;
+    // A fill without a text color keeps the text readable, unless the cell has a color of its own.
+    const text = style.background && !style.color && (!TD.style.color || isTextOnFill(TD.style.color)) ?
+      textOnFill(style.background) : null;
+
+    if (text) {
+      style.color = text;
+    }
+    const properties = Object.keys(style);
 
     if (!properties.length && !classes.length) {
       return;

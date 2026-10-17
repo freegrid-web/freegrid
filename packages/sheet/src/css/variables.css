@@ -23,6 +23,8 @@
   --fs-color-invalid: #ff4c42; /* Background of cells that failed validation. */
   --fs-color-readonly-text: #6e6e6e; /* Text of read-only cells. */
   --fs-color-link: #0563c1; /* Links in cells. */
+  --fs-text-on-light-fill: #1f1f1f; /* Text on a light fill (a cell style or a rule without a text color). */
+  --fs-text-on-dark-fill: #fff; /* Text on a dark fill. */
   --fs-color-muted-text: #999; /* Placeholders and disabled menu items. */
   --fs-shadow: rgba(0, 0, 0, 0.117647) 0 1px 3px, rgba(0, 0, 0, 0.239216) 0 1px 2px; /* Popup shadow. */
   --fs-row-height: 23px; /* Row height, including the bottom border; FreeSheet reads it when the grid is created. */

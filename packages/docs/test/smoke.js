@@ -65,6 +65,14 @@ if (!existsSync(dist)) {
 for (const file of readdirSync(join(dist, 'guide')).filter(name => name.endsWith('.html'))) {
   if (!PAGES.some(page => page.path === `guide/${file}`)) PAGES.push({ path: `guide/${file}`, grids: 0 });
 }
+// Every example page has its grid; the gallery and the demo's code page have none.
+for (const file of readdirSync(join(dist, 'examples')).filter(name => name.endsWith('.html'))) {
+  if (!PAGES.some(page => page.path === `examples/${file}`)) {
+    PAGES.push({ path: `examples/${file}`, grids: ['index.html', 'demo-source.html'].includes(file) ? 0 : 1 });
+  }
+}
+// The full demo: one document of three sheets, each with a formula bar, only the active one shown.
+PAGES.push({ path: 'demo.html', grids: 0 });
 
 // Serves the built site under BASE, like GitHub Pages (including `/x` → `/x.html`).
 const server = createServer(async(req, res) => {
@@ -136,7 +144,8 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     // The visible sheet's grid (a document with several sheets hides the others).
     const master = Array.from(el.querySelectorAll('.ht_master')).find(node => node.offsetParent !== null);
     const table = master && master.querySelector('table.htCore');
-    const cell = master && master.querySelector('td');
+    // A cell without a font size of its own (a bigger font makes its row taller, as it should).
+    const cell = master && Array.from(master.querySelectorAll('td')).find(td => !td.style.fontSize && !td.closest('tr').querySelector('td[style*="font-size"]'));
     const holder = master && master.querySelector('.wtHolder');
 
     if (!table || !cell || !holder) return [];
@@ -204,6 +213,16 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     ['rowGroups: Boolean|Object', 'groupRows(from, to)', 'groupColumns(from, to?)'].forEach((entry) => {
       if (!entries.includes(entry)) failures.push(`${path}: the API block has no ${entry}`);
     });
+  }
+  if (path === 'demo.html') {
+    await page.waitForSelector('.demo-app .htCore', { timeout: 15000 }).catch(() => {});
+    const tabs = await page.locator('.demo-app .fs-sheet-tab').count();
+    const bars = await page.locator('.demo-app .fs-formula-bar').evaluateAll(els => els.filter(el => el.offsetParent).length);
+    const fills = await page.locator('.demo-app').evaluate(el => el.getBoundingClientRect().bottom - window.innerHeight);
+
+    if (tabs !== 3) failures.push(`${path}: ${tabs} sheet tabs, expected 3`);
+    if (bars !== 1) failures.push(`${path}: ${bars} visible formula bars, expected 1`);
+    if (Math.abs(fills) > 1) failures.push(`${path}: the demo ends ${fills}px from the window's bottom`);
   }
   if (path === 'guide/theming.html') {
     const rows = await page.locator('table.theming-variables tbody tr').count();

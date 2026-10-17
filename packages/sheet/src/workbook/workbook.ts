@@ -474,7 +474,8 @@ export class Workbook {
       return;
     }
     this.sheets.forEach(({ instance }) => {
-      const formulas = instance.getPlugin('formulas') as unknown as { enabled: boolean; syncFormulas(): void };
+      // A sheet still being created (its data loads into the engine) has no grid yet.
+      const formulas = instance?.getPlugin('formulas') as unknown as { enabled: boolean; syncFormulas(): void } | undefined;
 
       if (formulas && formulas.enabled) {
         formulas.syncFormulas();

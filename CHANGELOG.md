@@ -91,6 +91,11 @@
 
 ### Fixed
 
+- Text on a fill is readable in every theme: a cell style or a conditional formatting rule with a background and no
+  text color gets dark text on a light fill and white text on a dark one (`--fs-text-on-light-fill`,
+  `--fs-text-on-dark-fill`). Before, a light fill in the dark theme had light text.
+- In a document of several sheets, new settings for a sheet that is not shown no longer show its formula bar.
+- A sheet with `minSpareRows` (or `minSpareCols`) in a document with formulas no longer fails while it is created.
 - Conditional formatting: in a narrow column, an icon set's icon and its number stay on one line instead of the
   number moving under the icon and making the row twice as tall.
 - Links in cells and the text of read-only cells are readable on the cell background (WCAG AA contrast): links have
