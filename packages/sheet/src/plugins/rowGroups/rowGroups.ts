@@ -9,7 +9,9 @@ import type { MenuItem } from './../contextMenu/menuItem';
 
 const SOURCE = 'rowGroups';
 /** The width of one level in the row headers' gutter. */
-const LEVEL_WIDTH = 14;
+const LEVEL_WIDTH = 16;
+/** The space before the first level and after the last one. */
+const GUTTER_PADDING = 4;
 /** Excel's limit. */
 const MAX_LEVELS = 7;
 
@@ -282,7 +284,12 @@ class RowGroups extends BasePlugin {
   onModifyRowHeaderWidth(width: number): number {
     const levels = this.maxLevel();
 
-    return levels ? Math.max(width || 50, 50) + levels * LEVEL_WIDTH : width;
+    return levels ? Math.max(width || 50, 50) + this.gutterWidth() : width;
+  }
+
+  /** The width of the gutter: a column per level, and one more for the last level button (as in a spreadsheet). */
+  gutterWidth(): number {
+    return (this.maxLevel() + 1) * LEVEL_WIDTH + GUTTER_PADDING;
   }
 
   /** The gutter of a row header: the groups' brackets and −/+ buttons, one column per level. */
@@ -290,55 +297,71 @@ class RowGroups extends BasePlugin {
     const container = (TH.firstElementChild || TH) as HTMLElement;
 
     TH.querySelector('.fs-row-groups__gutter')?.remove();
-    container.style.paddingLeft = row >= 0 && this.#groups.length ? `${this.maxLevel() * LEVEL_WIDTH}px` : '';
+    TH.classList.remove('fs-row-groups__header');
+    container.style.paddingLeft = row >= 0 && this.#groups.length ? `${this.gutterWidth()}px` : '';
     if (row < 0 || !this.#groups.length) {
       return;
     }
     const physical = this.toPhysical(row);
     const gutter = document.createElement('span');
+    const part = (className: string, level: number) => {
+      const element = document.createElement('span');
+
+      element.className = className;
+      element.style.left = `${GUTTER_PADDING + (level - 1) * LEVEL_WIDTH}px`;
+      gutter.appendChild(element);
+
+      return element;
+    };
 
     gutter.className = 'fs-row-groups__gutter';
-    gutter.style.width = `${this.maxLevel() * LEVEL_WIDTH}px`;
+    gutter.style.width = `${this.gutterWidth()}px`;
     this.#groups.forEach((group, index) => {
       const level = this.levelOf(group);
-      const left = `${(level - 1) * LEVEL_WIDTH}px`;
+      const toggleRow = this.toggleRowOf(group);
+      const below = toggleRow !== null && toggleRow > group.end;
 
+      // A bracket along the rows: from a tick at the first row to the button (or from the button, above the group).
       if (!group.collapsed && physical >= group.start && physical <= group.end) {
-        const line = document.createElement('span');
+        const first = below ? physical === group.start : false;
+        const last = !below && physical === group.end;
 
-        line.className = `fs-row-groups__line${physical === group.end ? ' fs-row-groups__line--end' : ''}${
-          physical === group.start ? ' fs-row-groups__line--start' : ''}`;
-        line.style.left = left;
-        gutter.appendChild(line);
+        part(`fs-row-groups__line${first ? ' fs-row-groups__line--first' : ''}${last ? ' fs-row-groups__line--last' :
+          ''}`, level);
       }
-      if (this.toggleRowOf(group) === physical) {
-        const toggle = document.createElement('span');
-        const label = this.hot.getTranslatedPhrase(group.collapsed ? C.ROW_GROUPS_EXPAND : C.ROW_GROUPS_COLLAPSE);
+      if (toggleRow === physical) {
+        if (!group.collapsed) {
+          part(`fs-row-groups__line fs-row-groups__line--${below ? 'to-button' : 'from-button'}`, level);
+        }
+        const toggle = part(`fs-row-groups__toggle${group.collapsed ? ' fs-row-groups__toggle--collapsed' : ''}`,
+          level);
+        const label = String(this.hot.getTranslatedPhrase(group.collapsed ? C.ROW_GROUPS_EXPAND :
+          C.ROW_GROUPS_COLLAPSE));
 
-        toggle.className = `fs-row-groups__toggle${group.collapsed ? ' fs-row-groups__toggle--collapsed' : ''}`;
         toggle.setAttribute('role', 'button');
         toggle.setAttribute('aria-expanded', String(!group.collapsed));
-        toggle.setAttribute('aria-label', String(label));
-        toggle.title = String(label);
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
         toggle.dataset.group = String(index);
         toggle.textContent = group.collapsed ? '+' : '−';
-        toggle.style.left = left;
-        gutter.appendChild(toggle);
       }
     });
     TH.classList.add('fs-row-groups__header');
+    TH.style.setProperty('--fs-row-groups-gutter', `${this.gutterWidth()}px`);
     TH.insertBefore(gutter, TH.firstChild);
   }
 
-  /** The corner's level buttons (1, 2, …: show the outline down to that level). */
+  /** The corner's level buttons (1, 2, …: show the outline down to that level), over the gutter's columns. */
   decorateCorner(column: number, TH: HTMLTableCellElement): void {
     TH.querySelector('.fs-row-groups__levels')?.remove();
+    TH.classList.remove('fs-row-groups__corner');
     if (column !== -1 || !this.#groups.length) {
       return;
     }
     const levels = document.createElement('span');
 
     levels.className = 'fs-row-groups__levels';
+    levels.style.width = `${this.gutterWidth()}px`;
     for (let level = 1; level <= this.maxLevel() + 1; level += 1) {
       const button = document.createElement('span');
 
@@ -348,8 +371,11 @@ class RowGroups extends BasePlugin {
         String(level)));
       button.dataset.level = String(level);
       button.textContent = String(level);
+      button.style.left = `${GUTTER_PADDING + (level - 1) * LEVEL_WIDTH}px`;
       levels.appendChild(button);
     }
+    TH.classList.add('fs-row-groups__corner');
+    TH.style.setProperty('--fs-row-groups-gutter', `${this.gutterWidth()}px`);
     TH.insertBefore(levels, TH.firstChild);
   }
 
