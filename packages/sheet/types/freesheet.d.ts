@@ -33,6 +33,7 @@ declare namespace _FreeSheet {
     getActiveSheet(): Core;
     activateSheet(id: string): void;
     openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | string, options?: object): void;
+    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'changes' | string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
     setLoading(state: boolean | string): void;
@@ -1483,6 +1484,7 @@ declare namespace FreeSheet {
     hyperlinks?: boolean;
     /** A cell's link (`https://…`, `mailto:…`). */
     link?: string;
+    changeHistory?: boolean | { user?: string; limit?: number };
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
     formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
@@ -1614,6 +1616,9 @@ declare namespace FreeSheet {
     beforeImportFile?: (format: 'xlsx' | 'csv', source: Blob | ArrayBuffer | Uint8Array | string) => void | boolean;
     afterImportFile?: (format: 'xlsx' | 'csv') => void;
     afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
+    afterChangeRecorded?: (change: { id: number; time: number; user?: string; kind: string;
+      cells: Array<{ row: number; col: number; before: any; after: any }>; index?: number; amount?: number;
+      source?: string } | null) => void;
     afterSetCellStyle?: (changes: Array<[number, number, object | undefined, object | undefined]>) => void;
     afterSetCellFormat?: (changes: Array<[number, number, object, object]>) => void;
     afterRowCollapse?: (row: number) => void;

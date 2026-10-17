@@ -6,6 +6,8 @@ const read = f => readFileSync(dist(f), 'utf8');
 
 const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'CollapsibleColumns', 'ColumnSorting', 'Comments',
   'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DataValidation', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace',
+const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'ChangeHistory', 'CollapsibleColumns', 'ColumnSorting', 'Comments',
+  'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace',
   'FormattingBar', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove',
   'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace',
   'FormattingBar', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'Hyperlinks', 'ManualColumnFreeze', 'ManualColumnMove',

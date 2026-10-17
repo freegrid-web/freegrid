@@ -174,6 +174,13 @@ export const TOPICS = [
     settings: ['contextMenu'],
   },
   {
+    name: 'Change history',
+    description: 'Show Changes: every edit with its user, time and old and new values, in the Changes panel.',
+    methods: [],
+    events: ['afterChangeRecorded'],
+    settings: ['changeHistory'],
+  },
+  {
     name: 'Side panel',
     description: 'The panel at the right of the document: comments, conditional formatting rules.',
     methods: ['openPanel', 'closePanel', 'getOpenPanel'],

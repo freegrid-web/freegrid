@@ -47,6 +47,7 @@ export default defineConfigWithTheme({
             { text: 'Conditional formatting', link: '/guide/conditional-formatting' },
             { text: 'Context menu', link: '/guide/context-menu' },
             { text: 'Side panel', link: '/guide/side-panel' },
+            { text: 'Change history', link: '/guide/change-history' },
             { text: 'Status bar and frozen panes', link: '/guide/status-bar-and-freezing' },
             { text: 'Excel and CSV files', link: '/guide/files' },
             { text: 'Find and replace', link: '/guide/find-and-replace' },

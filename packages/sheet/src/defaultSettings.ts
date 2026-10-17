@@ -2557,6 +2557,12 @@ DefaultSettings.prototype = {
    * edits the text and the link. On unless `false`.
    *
    * @type {Boolean}
+   * The change history ("Show Changes"): records every edit of the cells (the old and the new value) and the rows and
+   * columns added and removed, with the time and `user`. The side panel `'changes'` (`openPanel('changes')`, or the
+   * context menu entry `'show_changes'`) lists them; the plugin's `getChanges()` gives them. `limit` keeps the last
+   * changes (1000 by default).
+   *
+   * @type {Boolean|Object}
    * @default undefined
    *
    * @example
@@ -2569,6 +2575,10 @@ DefaultSettings.prototype = {
    * ```
    */
   hyperlinks: void 0,
+   * changeHistory: { user: 'Ada' },
+   * ```
+   */
+  changeHistory: void 0,
 
   /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,

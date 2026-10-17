@@ -162,6 +162,7 @@ hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
 hot.updateSettings({ columns: [{ validation: { type: 'list', source: ['a', 'b'], strict: false } }] }, false);
 hot.updateSettings({ hyperlinks: false, cell: [{ row: 0, col: 0, link: 'https://example.com' }] }, false);
+hot.updateSettings({ changeHistory: { user: 'Ada', limit: 50 } }, false);
 hot.updateSettings({ copyPaste: { formats: false } }, false);
 hot.updateSettings({ rowGroups: { groups: [{ from: 1, to: 3, collapsed: true }] } }, false);
 hot.setCellStyle({ fontWeight: 'bold', color: null });

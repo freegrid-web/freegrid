@@ -68,6 +68,10 @@
 - Font and font size: `fontFamily` and `fontSize` (points, `'14pt'`) in the `style` setting; the formatting bar starts
   with a font list (each font shown in itself) and a size field with a list. Rows grow to fit their biggest font.
   Excel files keep the font and its size.
+- Change history ("Show Changes", `changeHistory: { user, limit }`): every edit (old and new values), and rows and
+  columns added or removed, with the time and the user. The side panel `'changes'` (context menu key `'show_changes'`)
+  lists them newest first by day; a click selects the cells; a filter shows only the selected cells' changes. Plugin
+  methods `getChanges()`, `clearChanges()`; event `afterChangeRecorded`. New guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
