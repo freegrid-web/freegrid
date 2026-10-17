@@ -9,6 +9,8 @@ import {
   isInput,
   isOutsideInput
 } from './helpers/dom/element';
+import { applyCellStyle } from './utils/cellStyle';
+import type { CellStyle } from './utils/cellStyle';
 import EventManager from './eventManager';
 import Hooks from './pluginHooks';
 import { stopPropagation, isImmediatePropagationStopped, isRightClick, isLeftClick } from './helpers/dom/event';
@@ -332,6 +334,8 @@ class TableView {
 
         instance.runHooks('beforeRenderer', TD, row, col, prop, value, cellProperties);
         instance.getCellRenderer(cellProperties)(instance, TD, row, col, prop, value, cellProperties);
+        // The cell's own style (`style` meta), under what afterRenderer hooks (conditional formatting) draw.
+        applyCellStyle(TD, cellProperties.style as CellStyle | undefined);
         instance.runHooks('afterRenderer', TD, row, col, prop, value, cellProperties);
       },
       selections: instance.selection.highlight,

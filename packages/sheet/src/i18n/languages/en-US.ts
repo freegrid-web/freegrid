@@ -111,6 +111,7 @@ const dictionary: LanguageDictionary = {
   [C.NESTED_ROWS_INDENT]: 'Indent',
   [C.NESTED_ROWS_OUTDENT]: 'Outdent',
 
+  [C.LOADING]: 'Loading…',
   [C.PANEL_BACK]: 'Back',
   [C.PANEL_CLOSE]: 'Close',
   [C.COMMENTS_PANEL_TITLE]: 'Comments',

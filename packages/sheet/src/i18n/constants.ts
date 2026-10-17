@@ -184,3 +184,5 @@ export const CF_SIGNS = 'ConditionalFormatting:signs';
 export const CF_FORMULA_HINT = 'ConditionalFormatting:formulaHint';
 export const CF_INFO = 'ConditionalFormatting:info';
 export const CF_INVALID_RANGE = 'ConditionalFormatting:invalidRange';
+
+export const LOADING = 'Loading:text';

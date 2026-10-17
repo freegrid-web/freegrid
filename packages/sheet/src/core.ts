@@ -52,6 +52,9 @@ import type { getEditorInstance } from './editors';
 import type { AnyFunction, AnyObject, GridSettings } from './types';
 import { Workbook, getWorkbook } from './workbook/workbook';
 import { findSidePanel, getSidePanel } from './sidePanel/sidePanel';
+import { exportFile, downloadFile, importFile } from './files';
+import { setLoading, isLoading } from './loading/loading';
+import type { FileFormat, FileOptions } from './files';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
 type Change = [number, Prop, unknown, unknown];
@@ -2741,6 +2744,53 @@ class Core {
   }
 
   /**
+   * The document as an Excel file (`'xlsx'`: every sheet with its values, formulas, formats, styles, sizes, merged,
+   * hidden and frozen cells, conditional formatting and comments) or the active sheet as CSV (`'csv'`: the values).
+   *
+   * @memberof Core#
+   * @function exportFile
+   * @param {String} [format='xlsx'] `'xlsx'` or `'csv'`.
+   * @param {Object} [options] `headers`: write the column headers as a first row; `delimiter` (CSV).
+   * @returns {Promise<Blob>}
+   * @fires Hooks#afterExportFile
+   */
+  exportFile(format?: FileFormat, options?: FileOptions) {
+    return exportFile(this, format, options);
+  }
+
+  /**
+   * Saves the document as an Excel file (or the active sheet as CSV) in the browser.
+   *
+   * @memberof Core#
+   * @function downloadFile
+   * @param {String} [format='xlsx'] `'xlsx'` or `'csv'`.
+   * @param {String} [filename] The file's name (the first sheet's name by default).
+   * @param {Object} [options] As for `exportFile`.
+   * @returns {Promise}
+   */
+  downloadFile(format?: FileFormat, filename?: string, options?: FileOptions) {
+    return downloadFile(this, format, filename, options);
+  }
+
+  /**
+   * Opens a file: an Excel file (.xlsx) replaces the document (its sheets, values, formulas, formats, styles, sizes,
+   * merged, hidden and frozen cells, conditional formatting and comments); CSV (a `.csv` file, or text) replaces the
+   * active sheet's data.
+   *
+   * @memberof Core#
+   * @function importFile
+   * @param {File|Blob|ArrayBuffer|String} source The file (from `<input type="file">`), its bytes, or CSV text.
+   * @param {Object} [options] `headers`: the first row becomes the column headers; `format`: `'xlsx'` or `'csv'`
+   * when the source does not say; `delimiter` (CSV, guessed by default).
+   * @returns {Promise}
+   * @fires Hooks#beforeImportFile
+   * @fires Hooks#afterImportFile
+   */
+  importFile(source: Blob | ArrayBuffer | Uint8Array | string, options?: FileOptions) {
+    return importFile(this, source, options);
+  }
+
+  /**
    * Closes the side panel.
    *
    * @memberof Core#
@@ -2749,6 +2799,30 @@ class Core {
    */
   closePanel() {
     findSidePanel(this)?.close();
+  }
+
+  /**
+   * Shows the loading state: a layer over the grid with a spinner and a text (`true`: "Loading…", or your text), which
+   * takes the clicks while the grid ignores the keyboard; `false` hides it. `importFile` shows it while it reads a
+   * file.
+   *
+   * @memberof Core#
+   * @function setLoading
+   * @param {Boolean|String} state `true`, a text, or `false`.
+   */
+  setLoading(state: boolean | string) {
+    setLoading(this, state);
+  }
+
+  /**
+   * Whether the grid shows its loading state.
+   *
+   * @memberof Core#
+   * @function isLoading
+   * @returns {Boolean}
+   */
+  isLoading() {
+    return isLoading(this);
   }
 
   /**

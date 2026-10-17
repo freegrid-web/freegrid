@@ -1767,6 +1767,33 @@ const REGISTERED_HOOKS: string[] = [
   'afterPanelClose',
 
   /**
+   * Fired before `importFile` reads a file. Return `false` to cancel.
+   *
+   * @event Hooks#beforeImportFile
+   * @param {String} format `'xlsx'` or `'csv'`.
+   * @param {File|Blob|ArrayBuffer|String} source The file.
+   * @returns {Boolean|undefined}
+   */
+  'beforeImportFile',
+
+  /**
+   * Fired after `importFile` loaded a file.
+   *
+   * @event Hooks#afterImportFile
+   * @param {String} format `'xlsx'` or `'csv'`.
+   */
+  'afterImportFile',
+
+  /**
+   * Fired after `exportFile` (or `downloadFile`) made a file.
+   *
+   * @event Hooks#afterExportFile
+   * @param {String} format `'xlsx'` or `'csv'`.
+   * @param {Blob} file The file.
+   */
+  'afterExportFile',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

@@ -118,6 +118,13 @@ export const TOPICS = [
     settings: ['conditionalFormatting'],
   },
   {
+    name: 'Files',
+    description: 'Excel (.xlsx) and CSV files: export, download and import.',
+    methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],
+    events: ['beforeImportFile', 'afterImportFile', 'afterExportFile'],
+    settings: [],
+  },
+  {
     name: 'Side panel',
     description: 'The panel at the right of the document: comments, conditional formatting rules.',
     methods: ['openPanel', 'closePanel', 'getOpenPanel'],
