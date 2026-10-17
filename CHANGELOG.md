@@ -72,6 +72,10 @@
   columns added or removed, with the time and the user. The side panel `'changes'` (context menu key `'show_changes'`)
   lists them newest first by day; a click selects the cells; a filter shows only the selected cells' changes. Plugin
   methods `getChanges()`, `clearChanges()`; event `afterChangeRecorded`. New guide page.
+- Column groups as an outline (`columnOutline: true`), as Excel's Group for columns: brackets and −/+ buttons in a
+  gutter above the column headers, level buttons in the corner, Group columns and Ungroup columns in the context menu,
+  `getPlugin('columnOutline').groupColumns(from, to)`. `getDocument()` and Excel files keep them. Row groups and
+  column groups share one outline model.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

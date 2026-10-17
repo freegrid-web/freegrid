@@ -19,6 +19,7 @@ export default function createGrid(container) {
     stretchH: 'all',
     contextMenu: true,
     rowGroups: true,
+    columnOutline: true,
   });
   const groups = grid.getPlugin('rowGroups');
 
@@ -27,6 +28,8 @@ export default function createGrid(container) {
   groups.groupRows(2, 3);
   groups.groupRows(5, 6);
   groups.collapseGroup(5);
+  // The quarters as a group of columns.
+  grid.getPlugin('columnOutline').groupColumns(1, 2);
 
   return grid;
 }

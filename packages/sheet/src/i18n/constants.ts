@@ -306,4 +306,7 @@ export const CHANGES_INSERT_ROWS = 'Changes:insertRows';
 export const CHANGES_REMOVE_ROWS = 'Changes:removeRows';
 export const CHANGES_INSERT_COLUMNS = 'Changes:insertColumns';
 export const CHANGES_REMOVE_COLUMNS = 'Changes:removeColumns';
+export const COLUMN_OUTLINE_GROUP = 'ColumnOutline:group';
+export const COLUMN_OUTLINE_UNGROUP = 'ColumnOutline:ungroup';
+export const COLUMN_OUTLINE_LEVEL = 'ColumnOutline:level';
 export const LOADING = 'Loading:text';

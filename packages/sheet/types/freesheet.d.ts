@@ -1489,6 +1489,8 @@ declare namespace FreeSheet {
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
     formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
       'strikethrough' | 'fill_color' |
+    columnOutline?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
+    formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
       'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {

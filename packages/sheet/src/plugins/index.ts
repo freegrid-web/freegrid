@@ -4,6 +4,7 @@ import AutoFill from './autofill/autofill';
 import AutoRowSize from './autoRowSize/autoRowSize';
 import ChangeHistory from './changeHistory/changeHistory';
 import CollapsibleColumns from './collapsibleColumns/collapsibleColumns';
+import ColumnOutline from './rowGroups/columnOutline';
 import ColumnSorting from './columnSorting/columnSorting';
 import ConditionalFormatting from './conditionalFormatting/conditionalFormatting';
 import Comments from './comments/comments';
@@ -44,6 +45,7 @@ export {
   AutoRowSize,
   ChangeHistory,
   CollapsibleColumns,
+  ColumnOutline,
   ColumnSorting,
   ConditionalFormatting,
   Comments,

@@ -1,8 +1,8 @@
 ---
-api: [Row groups]
+api: [Row groups, Column outline]
 ---
 
-# Row groups
+# Row and column groups (outline)
 
 Row groups are a spreadsheet's outline, like Excel's **Data ▸ Group**. Group any adjacent rows, put groups inside
 groups, and collapse a group to hide its rows. The data stays flat. For data that is a tree, with parent rows that
@@ -41,8 +41,33 @@ groups.getGroups();            // [{ from, to, level, collapsed }], rows of the 
 
 See the [example](../examples/row-groups).
 
+## Column groups
+
+`columnOutline: true` does the same for columns. Each part works like the rows' outline:
+
+- **Gutter:** brackets and **−/+** buttons sit in a gutter above the column headers, and the buttons are on the
+  column after each group.
+- **Levels:** the level buttons sit one under another in the corner.
+- **Context menu:** **Group columns** and **Ungroup columns**.
+- **Hiding:** a collapsed group hides its columns.
+
+```js
+const grid = new FreeSheet(container, { data, colHeaders: true, contextMenu: true, columnOutline: true });
+const columns = grid.getPlugin('columnOutline');
+
+columns.groupColumns(1, 3);   // B to D
+columns.collapseGroup(1);
+columns.showLevel(1);
+columns.getGroups();          // [{ from, to, level, collapsed }], columns of the data
+```
+
+This is not the same as [column groups](./column-groups): those are header groups, a title over several columns,
+made with `columns`. The outline groups any columns and hides them, as Excel's **Group** does.
+
+Rows and columns can have an outline at the same time.
+
 ## Saving
 
-`getDocument()` and Excel files keep the groups: their levels and the collapsed groups. Imported Excel files show their
+`getDocument()` and Excel files keep the groups of rows and of columns: their levels and the collapsed groups. Imported Excel files show their
 outline. A saved document has them as `rowGroups: [{ from, to, collapsed }]`. The grid takes the same list as
 `rowGroups: { groups: [...] }`, with rows as data indexes.

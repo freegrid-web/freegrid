@@ -1,0 +1,98 @@
+/*
+ * Column groups as an outline (the columnOutline setting): a gutter above the column headers, a row per level, with a
+ * bracket along each group's columns and a −/+ button on the column after it; the corner has the level buttons.
+ * The buttons look as the row groups' do.
+ */
+.freesheet th.fs-column-outline__header {
+  position: relative;
+  overflow: visible; /* the gutter reaches over the headers' column lines */
+}
+
+.fs-column-outline__gutter {
+  position: absolute;
+  z-index: 1; /* above the header's label */
+  top: 0;
+  left: 0;
+  right: -1px;
+  border-bottom: 1px solid var(--fs-row-groups-edge-color);
+  background: var(--fs-row-groups-background);
+  pointer-events: none;
+}
+
+/* The bracket: a horizontal line through the row's middle. */
+.fs-column-outline__line {
+  position: absolute;
+  left: 0;
+  right: -1px;
+  height: 16px;
+}
+
+.fs-column-outline__line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+  border-top: 1px solid var(--fs-row-groups-line-color);
+}
+
+/* The group's first column: the line starts with a tick upwards. */
+.fs-column-outline__line--first::before {
+  left: 4px;
+}
+
+.fs-column-outline__line--first::after,
+.fs-column-outline__line--last::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  height: 4px;
+  border-left: 1px solid var(--fs-row-groups-line-color);
+}
+
+.fs-column-outline__line--first::after {
+  left: 4px;
+}
+
+.fs-column-outline__line--last::before {
+  right: 4px;
+}
+
+.fs-column-outline__line--last::after {
+  right: 4px;
+}
+
+/* The column of the button: the line reaches the button from the left (or leaves it to the right). */
+.fs-column-outline__line--to-button::before {
+  right: 50%;
+}
+
+.fs-column-outline__line--from-button::before {
+  left: 50%;
+}
+
+.fs-column-outline__gutter .fs-row-groups__toggle {
+  left: 50%;
+  margin: 1px 0 0 -6px;
+}
+
+/* The corner: the columns' level buttons one under another at the right, the rows' along the bottom. */
+.fs-column-outline__levels {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 2px;
+  width: 14px;
+  height: var(--fs-column-outline-gutter);
+}
+
+.fs-column-outline__levels .fs-row-groups__level {
+  left: 0;
+  margin-top: 1px;
+}
+
+.fs-column-outline__header .fs-row-groups__levels .fs-row-groups__level {
+  top: auto;
+  bottom: 4px;
+  margin-top: 0;
+}

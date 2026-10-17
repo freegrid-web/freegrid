@@ -42,6 +42,8 @@ export type BookSheet = {
   conditionalFormatting: ConditionalRule[];
   /** Row groups (an outline): rows from `from` to `to`, hidden when collapsed. */
   rowGroups?: { from: number; to: number; collapsed?: boolean }[];
+  /** Column groups (an outline): columns from `from` to `to`, hidden when collapsed. */
+  columnGroups?: { from: number; to: number; collapsed?: boolean }[];
 };
 export type Book = { sheets: BookSheet[]; active: number };
 
@@ -431,12 +433,22 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
   const pane = frozen ? `<pane${sheet.frozenColumns ? ` xSplit="${sheet.frozenColumns}"` : ''}${sheet.frozenRows ?
     ` ySplit="${sheet.frozenRows}"` : ''} topLeftCell="${cellRef(sheet.frozenRows, sheet.frozenColumns)}" activePane="${
     sheet.frozenRows && sheet.frozenColumns ? 'bottomRight' : sheet.frozenRows ? 'bottomLeft' : 'topRight'}" state="frozen"/>` : '';
-  const cols = Array.from({ length: columns }, (_, column) => {
+  const columnGroups = sheet.columnGroups || [];
+  const columnLevelOf = (column: number) => columnGroups.filter(group => group.from <= column && group.to >= column)
+    .length;
+  const outlineLevelCol = columnGroups.reduce((deepest, group) => Math.max(deepest, columnLevelOf(group.from)), 0);
+  // A collapsed group hides its columns; the column after it is marked collapsed.
+  const columnGroupHidden = new Set(columnGroups.filter(group => group.collapsed).flatMap(group => Array.from(
+    { length: group.to - group.from + 1 }, (_, i) => group.from + i)));
+  const columnSummaries = new Set(columnGroups.filter(group => group.collapsed).map(group => group.to + 1));
+  const cols = Array.from({ length: Math.max(columns, ...columnGroups.map(group => group.to + 2)) }, (_, column) => {
     const width = sheet.columnWidths[column];
-    const hidden = hiddenColumns.has(column);
+    const hidden = hiddenColumns.has(column) || columnGroupHidden.has(column);
+    const level = columnLevelOf(column);
+    const outline = `${level ? ` outlineLevel="${level}"` : ''}${columnSummaries.has(column) ? ' collapsed="1"' : ''}`;
 
-    return width || hidden ? `<col min="${column + 1}" max="${column + 1}" width="${pixelsToWidth(width || 64)}"${
-      width ? ' customWidth="1"' : ''}${hidden ? ' hidden="1"' : ''}/>` : '';
+    return width || hidden || outline ? `<col min="${column + 1}" max="${column + 1}" width="${
+      pixelsToWidth(width || 64)}"${width ? ' customWidth="1"' : ''}${hidden ? ' hidden="1"' : ''}${outline}/>` : '';
   }).join('');
   const groups = sheet.rowGroups || [];
   const levelOf = (row: number) => groups.filter(group => group.from <= row && group.to >= row).length;
@@ -484,6 +496,9 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
     outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
     cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${validationsXml(sheet)}${hasComments ?
     cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hyperlinks}${hasComments ?
+    outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}${outlineLevelCol ? ` outlineLevelCol="${
+    outlineLevelCol}"` : ''}/>${
+    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
 
@@ -954,11 +969,20 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
 
       sheet.hiddenRows = sheet.hiddenRows.filter(row => !inCollapsed(row));
     }
+    const columnLevels: number[] = [];
+    const collapsedColumns = new Set<number>();
+
     all(xml, 'col').forEach((col) => {
       const min = Number(attr(col, 'min')) - 1;
       const max = Math.min(Number(attr(col, 'max')) - 1, min + 16383);
 
       for (let column = min; column <= max; column += 1) {
+        if (Number(attr(col, 'outlineLevel')) > 0) {
+          columnLevels[column] = Number(attr(col, 'outlineLevel'));
+        }
+        if (attr(col, 'collapsed') === '1') {
+          collapsedColumns.add(column);
+        }
         if (attr(col, 'customWidth') === '1' && attr(col, 'width')) {
           sheet.columnWidths[column] = widthToPixels(Number(attr(col, 'width')));
         }
@@ -967,6 +991,14 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
         }
       }
     });
+    const columnGroups = groupsFromLevels(columnLevels, collapsedColumns, new Set(sheet.hiddenColumns));
+
+    if (columnGroups.length) {
+      sheet.columnGroups = columnGroups;
+      // The columns a collapsed group hides are the group's, not hidden columns of their own.
+      sheet.hiddenColumns = sheet.hiddenColumns.filter(column => !columnGroups.some(group => group.collapsed &&
+        column >= group.from && column <= group.to));
+    }
     // Columns hidden at the end of a sheet (Excel writes up to XFD) only count within the data.
     const columnCount = Math.max(0, ...sheet.cells.map(row => (row ? row.length : 0)));
 

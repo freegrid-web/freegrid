@@ -171,6 +171,13 @@ const gridToSheet = (grid: Core, name: string, headers: boolean): BookSheet => {
   if (groups.length) {
     sheet.rowGroups = groups;
   }
+  const columnOutline = plugin(grid, 'columnOutline');
+  const columnGroups = columnOutline ? (columnOutline.getSavedGroups as () => NonNullable<BookSheet['columnGroups']>)() :
+    [];
+
+  if (columnGroups.length) {
+    sheet.columnGroups = columnGroups;
+  }
   sheet.hiddenColumns = hiddenColumns ? (hiddenColumns.getHidden as () => number[])() : [];
   const merge = plugin(grid, 'mergeCells');
 
@@ -321,6 +328,7 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
         rowspan: rect.r2 - rect.r1 + 1, colspan: rect.c2 - rect.c1 + 1 })) } : {}),
       ...(hiddenRows.length ? { hiddenRows } : {}),
       ...(rowGroups.length ? { rowGroups } : {}),
+      ...(sheet.columnGroups?.length ? { columnOutline: sheet.columnGroups } : {}),
       ...(sheet.hiddenColumns.length ? { hiddenColumns: sheet.hiddenColumns } : {}),
       ...(conditionalFormatting.length ? { conditionalFormatting } : {}),
       ...(frozenRows ? { fixedRowsTop: frozenRows } : {}),
