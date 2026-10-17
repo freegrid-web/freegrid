@@ -12,6 +12,7 @@ import CustomBorders from './customBorders/customBorders';
 import DragToScroll from './dragToScroll/dragToScroll';
 import DropdownMenu from './dropdownMenu/dropdownMenu';
 import Filters from './filters/filters';
+import FindAndReplace from './findAndReplace/findAndReplace';
 import FormattingBar from './formattingBar/formattingBar';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
@@ -47,6 +48,7 @@ export {
   DragToScroll,
   DropdownMenu,
   Filters,
+  FindAndReplace,
   FormattingBar,
   FormulaBar,
   Formulas,

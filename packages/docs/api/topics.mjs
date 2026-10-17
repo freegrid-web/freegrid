@@ -132,6 +132,13 @@ export const TOPICS = [
     settings: ['statusBar'],
   },
   {
+    name: 'Find and replace',
+    description: 'Ctrl+F and Ctrl+H: a find box that highlights matches and replaces them.',
+    methods: [],
+    events: [],
+    settings: ['findAndReplace'],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],

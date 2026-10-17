@@ -2547,6 +2547,22 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,
+   * <kbd>Ctrl</kbd>+<kbd>H</kbd> the same box with a replace field. Matches are highlighted; <kbd>Enter</kbd> goes to
+   * the next one. Options: match case, entire cell, search in formulas. Replace all is one undo step; read-only cells
+   * stay. The plugin also has `find(query, options)` and `replace(query, replacement, options)`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * findAndReplace: true,
+   * ```
+   */
+  findAndReplace: void 0,
+
+  /**
    * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
    * palette that shows a color on the selected cells while the pointer is on it), alignment and clear formatting.
    * `true` shows the default buttons; `{ items }` chooses them from `'bold'`, `'italic'`, `'underline'`,

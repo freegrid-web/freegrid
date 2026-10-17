@@ -1,0 +1,107 @@
+/*
+ * The find and replace box (the findAndReplace setting), at the top right of the grid:
+ * [ find…           2 of 5  ↑ ↓ ⇄ × ]
+ * [ replace with…  Replace  Replace all ]   (Ctrl+H, or ⇄)
+ * [ ☐ Match case ☐ Entire cell ☐ Formulas ]
+ */
+.fs-find {
+  position: absolute;
+  z-index: 1055;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 340px;
+  box-sizing: border-box;
+  padding: 8px;
+  background: var(--fs-menu-background);
+  color: var(--fs-cell-text);
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-find-radius);
+  box-shadow: var(--fs-find-shadow);
+  font: 13px/1.3 sans-serif;
+}
+
+.fs-find__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fs-find__replace-row {
+  display: none;
+}
+
+.fs-find--replace .fs-find__replace-row {
+  display: flex;
+}
+
+.fs-find__query,
+.fs-find__replacement {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: 3px;
+  background: var(--fs-cell-background);
+  color: inherit;
+  font: inherit;
+}
+
+.fs-find__status {
+  min-width: 52px;
+  color: var(--fs-menu-disabled-text);
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.fs-find__icon,
+.fs-find__button {
+  height: 26px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fs-find__icon {
+  width: 26px;
+  padding: 0;
+  font-size: 15px;
+}
+
+.fs-find__button {
+  padding: 0 8px;
+  border: 1px solid var(--fs-menu-border-color);
+}
+
+.fs-find__icon:hover,
+.fs-find__button:hover {
+  background: var(--fs-find-hover-background);
+}
+
+.fs-find__options {
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.fs-find__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+}
+
+/* The matching cells, and the current one. */
+.freesheet td.fs-find-result {
+  background: var(--fs-find-result-background);
+}
+
+.freesheet td.fs-find-result--current {
+  background: var(--fs-find-current-background);
+}
