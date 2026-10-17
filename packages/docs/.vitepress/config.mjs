@@ -52,6 +52,7 @@ export default defineConfigWithTheme({
             { text: 'Find and replace', link: '/guide/find-and-replace' },
             { text: 'Fill and paste', link: '/guide/fill-and-paste' },
             { text: 'Data validation', link: '/guide/data-validation' },
+            { text: 'Hyperlinks', link: '/guide/hyperlinks' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },
             { text: 'Localization', link: '/guide/localization' },

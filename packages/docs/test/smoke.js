@@ -40,6 +40,7 @@ const PAGES = [
   { path: 'guide/files.html', grids: 0 },
   { path: 'guide/data-validation.html', grids: 0 },
   { path: 'guide/context-menu.html', grids: 0 },
+  { path: 'guide/hyperlinks.html', grids: 0 },
   { path: 'guide/status-bar-and-freezing.html', grids: 0 },
   { path: 'guide/find-and-replace.html', grids: 0 },
   { path: 'guide/fill-and-paste.html', grids: 0 },

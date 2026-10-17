@@ -15,6 +15,12 @@ export const CONTEXTMENU_ITEMS_READ_ONLY = `${CONTEXT_MENU_ITEMS_NAMESPACE}.read
 export const CONTEXTMENU_ITEMS_CLEAR_COLUMN = `${CONTEXT_MENU_ITEMS_NAMESPACE}.clearColumn`;
 
 export const CONTEXTMENU_ITEMS_COPY = `${CONTEXT_MENU_ITEMS_NAMESPACE}.copy`;
+export const CONTEXTMENU_ITEMS_PASTE = `${CONTEXT_MENU_ITEMS_NAMESPACE}.paste`;
+export const CONTEXTMENU_ITEMS_PASTE_SPECIAL = `${CONTEXT_MENU_ITEMS_NAMESPACE}.pasteSpecial`;
+export const CONTEXTMENU_ITEMS_PASTE_VALUES = `${CONTEXT_MENU_ITEMS_NAMESPACE}.pasteSpecial.values`;
+export const CONTEXTMENU_ITEMS_PASTE_FORMULAS = `${CONTEXT_MENU_ITEMS_NAMESPACE}.pasteSpecial.formulas`;
+export const CONTEXTMENU_ITEMS_PASTE_FORMATS = `${CONTEXT_MENU_ITEMS_NAMESPACE}.pasteSpecial.formats`;
+export const CONTEXTMENU_ITEMS_PASTE_TRANSPOSE = `${CONTEXT_MENU_ITEMS_NAMESPACE}.pasteSpecial.transpose`;
 export const CONTEXTMENU_ITEMS_CUT = `${CONTEXT_MENU_ITEMS_NAMESPACE}.cut`;
 
 export const CONTEXTMENU_ITEMS_FREEZE_COLUMN = `${CONTEXT_MENU_ITEMS_NAMESPACE}.freezeColumn`;
@@ -274,4 +280,12 @@ export const VALIDATION_REMOVE = 'DataValidation:remove';
 export const VALIDATION_NEEDS_ITEMS = 'DataValidation:needs_items';
 export const VALIDATION_NEEDS_VALUES = 'DataValidation:needs_values';
 export const VALIDATION_DEFAULT_MESSAGE = 'DataValidation:default_message';
+export const LINK_INSERT = 'Hyperlinks:insert';
+export const LINK_EDIT = 'Hyperlinks:edit';
+export const LINK_EDIT_BUTTON = 'Hyperlinks:editButton';
+export const LINK_REMOVE = 'Hyperlinks:remove';
+export const LINK_TEXT = 'Hyperlinks:text';
+export const LINK_ADDRESS = 'Hyperlinks:address';
+export const LINK_APPLY = 'Hyperlinks:apply';
+export const LINK_CANCEL = 'Hyperlinks:cancel';
 export const LOADING = 'Loading:text';

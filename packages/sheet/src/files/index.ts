@@ -97,6 +97,8 @@ const bookCell = (source: unknown, shown: unknown, meta: Meta): BookCell | null 
   }
   if (meta.validation && typeof meta.validation === 'object') {
     cell.validation = meta.validation as BookCell['validation'];
+  if (typeof meta.link === 'string' && meta.link) {
+    cell.link = meta.link;
   }
   const align: Record<string, string> = {};
 
@@ -280,6 +282,8 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
           }
           if (cell.validation) {
             meta.validation = cell.validation;
+          if (cell.link) {
+            meta.link = cell.link;
           }
           const classes = [cell.align?.horizontal && `fs-${cell.align.horizontal}`,
             cell.align?.vertical && `fs-${cell.align.vertical}`].filter(Boolean);

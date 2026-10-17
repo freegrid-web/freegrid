@@ -2552,6 +2552,9 @@ DefaultSettings.prototype = {
    * valid are refused, or with `strict: false` kept and marked; `message` and `inputMessage` explain the rule. The
    * side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on the selected cells. On unless
    * `false`.
+   * Hyperlinks in cells: a cell's `link` setting (a web or mail address) makes its text a link. Selecting the cell
+   * shows the address (it opens in a new tab), Ctrl+click opens it, and Ctrl+K (or the context menu's Insert link)
+   * edits the text and the link. On unless `false`.
    *
    * @type {Boolean}
    * @default undefined
@@ -2562,6 +2565,10 @@ DefaultSettings.prototype = {
    * ```
    */
   dataValidation: void 0,
+   * cell: [{ row: 0, col: 0, link: 'https://example.com' }],
+   * ```
+   */
+  hyperlinks: void 0,
 
   /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,

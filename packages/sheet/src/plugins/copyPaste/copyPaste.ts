@@ -5,6 +5,7 @@ import { getSelectionText } from './../../helpers/dom/element';
 import { registerPlugin } from './../../plugins';
 import copyItem from './contextMenuItem/copy';
 import cutItem from './contextMenuItem/cut';
+import './contextMenuItem/paste';
 import PasteEvent from './pasteEvent';
 import type { MenuItem } from './../contextMenu/menuItem';
 import { createElement, destroyElement } from './focusableElement';
@@ -12,6 +13,7 @@ import type { FocusableWrapper } from './focusableElement';
 import { arrayToTable, parseTable, tableToArray } from './utils';
 import { tableToFormats, type CellFormat } from './formats';
 import { setCellFormats } from './../../formatting/formatting';
+import { shiftFormula } from './../conditionalFormatting/ranges';
 import type { CellStyle } from './../../utils/cellStyle';
 
 import './copyPaste.css';
@@ -91,6 +93,10 @@ class CopyPaste extends BasePlugin {
    * Sheets) takes it. `copyPaste: { formats: false }` turns it off.
    */
   formats = true;
+
+  /** What the last copy (or cut) of this grid put on the clipboard, for Paste and Paste Special. */
+  #lastCopy: { text: string; values: unknown[][]; sources: unknown[][]; formats?: CellFormat[][]; row: number;
+    column: number; } | null = null;
 
   /**
    * Maximum number of rows than can be copied to clipboard using <kbd>CTRL</kbd> + <kbd>C</kbd>.
@@ -212,6 +218,91 @@ class CopyPaste extends BasePlugin {
    * @param ranges Array of objects with properties `startRow`, `startCol`, `endRow` and `endCol`.
    * @returns Returns array of arrays which will be copied into clipboard.
    */
+  /** The values `read` gives for the cells `getRangedData` reads, in the same rows and columns. */
+  getRangedValues(ranges: CopyableRange[], read: (row: number, column: number) => unknown): unknown[][] {
+    const rows = new Set<number>();
+    const columns = new Set<number>();
+
+    ranges.forEach(({ startRow, endRow, startCol, endCol }) => {
+      for (let row = startRow; row <= endRow; row += 1) {
+        rows.add(row);
+      }
+      for (let column = startCol; column <= endCol; column += 1) {
+        columns.add(column);
+      }
+    });
+
+    return [...rows].map(row => [...columns].map(column => read(row, column)));
+  }
+
+  /**
+   * Pastes what was copied, all of it or a part, as a spreadsheet's Paste Special: `'all'` (values or formulas, with
+   * their formatting), `'values'` (formula results, no formatting), `'formulas'` (no formatting), `'formats'` (only
+   * the formatting) or `'transpose'` (rows become columns). It takes what this grid copied last; when the browser lets
+   * it read the clipboard and the clipboard holds something else, that text is pasted (values only). One undo step.
+   *
+   * @param mode What to paste.
+   */
+  async pasteSpecial(mode: 'all' | 'values' | 'formulas' | 'formats' | 'transpose' = 'all'): Promise<void> {
+    const selected = this.hot.getSelectedLast();
+
+    if (!selected) {
+      return;
+    }
+    let text: string | null = null;
+
+    try {
+      // Only when the user already allowed it: a menu entry should not ask for a permission.
+      const permission = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+
+      if (permission.state === 'granted') {
+        text = await navigator.clipboard.readText();
+      }
+    } catch {
+      // The browser does not let the page read the clipboard: what this grid copied last.
+    }
+    const copied = this.#lastCopy && (text === null || text === this.#lastCopy.text) ? this.#lastCopy : null;
+    let values: unknown[][] | null;
+    let formats: CellFormat[][] | null = null;
+
+    if (copied) {
+      values = mode === 'formats' ? null : mode === 'values' ? copied.values : copied.sources;
+      formats = mode === 'all' || mode === 'formats' || mode === 'transpose' ? copied.formats || null : null;
+    } else if (text !== null && mode !== 'formats') {
+      values = SheetClip.parse(text);
+    } else {
+      return;
+    }
+    if (mode === 'transpose') {
+      values = values && values[0] ? values[0].map((_, column) => values!.map(row => row[column])) : values;
+      formats = formats && formats[0] ? formats[0].map((_, column) => formats!.map(row => row[column])) : formats;
+    }
+    const undoRedo = (this.hot as unknown as { undoRedo?: { beginGroup(): void; endGroup(): void } }).undoRedo;
+    const startRow = Math.min(selected[0], selected[2]);
+    const startColumn = Math.min(selected[1], selected[3]);
+
+    // Formulas move with the paste, as in a spreadsheet (=A1 copied from A2 to C4 becomes =C3).
+    if (copied && values && mode !== 'values') {
+      const rows = startRow - copied.row;
+      const columns = startColumn - copied.column;
+
+      values = values.map(row => row.map(value => (typeof value === 'string' && value.startsWith('=') ?
+        `=${shiftFormula(value.slice(1), rows, columns)}` : value)));
+    }
+
+    undoRedo?.beginGroup();
+    const area = values ? this.populateValues(values, selected)! : [startRow, startColumn,
+      Math.max(selected[0], selected[2], startRow + formats!.length - 1),
+      Math.max(selected[1], selected[3], startColumn + formats![0].length - 1)];
+
+    if (formats && this.formats) {
+      this.pasteFormats(formats, area[0], area[1], area[2], area[3]);
+    }
+    undoRedo?.endGroup();
+    this.hot.selectCell(area[0], area[1], Math.min(this.hot.countRows() - 1, area[2]),
+      Math.min(this.hot.countCols() - 1, area[3]));
+  }
+
   /** The formatting of the cells `getRangedData` reads, in the same rows and columns. */
   getRangedFormats(ranges: CopyableRange[]): CellFormat[][] {
     const rows = new Set<number>();
@@ -554,6 +645,14 @@ class CopyPaste extends BasePlugin {
 
   /** Puts the values on the clipboard as text (tab separated) and as an HTML table. */
   #putOnClipboard(event: ClipboardEvent, rangedData: unknown[][], formats?: CellFormat[][]): void {
+    this.#lastCopy = {
+      text: SheetClip.stringify(rangedData),
+      values: this.getRangedValues(this.copyableRanges, (row, column) => this.hot.getDataAtCell(row, column)),
+      sources: this.getRangedValues(this.copyableRanges, (row, column) => this.hot.getSourceDataAtCell(row, column)),
+      formats: this.getRangedFormats(this.copyableRanges),
+      row: Math.min(...this.copyableRanges.map(range => range.startRow)),
+      column: Math.min(...this.copyableRanges.map(range => range.startCol)),
+    };
     if (event?.clipboardData) {
       event.clipboardData.setData('text/plain', SheetClip.stringify(rangedData));
       event.clipboardData.setData('text/html', arrayToTable(rangedData, formats));

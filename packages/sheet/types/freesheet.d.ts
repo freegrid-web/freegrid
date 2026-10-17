@@ -798,6 +798,7 @@ declare namespace FreeSheet {
       copyableRanges: any[];
       pasteMode: PasteModeType;
       formats: boolean;
+      pasteSpecial(mode?: 'all' | 'values' | 'formulas' | 'formats' | 'transpose'): Promise<void>;
       rowsLimit: number;
       focusableElement: FocusableWrapper;
 
@@ -1478,6 +1479,9 @@ declare namespace FreeSheet {
       operator?: 'between' | 'notBetween' | 'equal' | 'notEqual' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual';
       value?: number | string; value2?: number | string; allowBlank?: boolean; strict?: boolean; message?: string;
       inputMessage?: string };
+    hyperlinks?: boolean;
+    /** A cell's link (`https://…`, `mailto:…`). */
+    link?: string;
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
