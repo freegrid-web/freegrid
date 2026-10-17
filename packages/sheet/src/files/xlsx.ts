@@ -2,7 +2,7 @@ import { readZip, writeZip } from './zip';
 import { BUILT_IN_FORMATS } from './formats';
 import { formatRange, parseRange, shiftFormula } from './../plugins/conditionalFormatting/ranges';
 import type { Rect } from './../plugins/conditionalFormatting/ranges';
-import type { CellStyle } from './../utils/cellStyle';
+import { lineOf, type CellStyle } from './../utils/cellStyle';
 import type { ConditionalRule } from './../plugins/conditionalFormatting/conditionalFormatting';
 
 /**
@@ -256,11 +256,22 @@ class StyleSheet {
   }
 
   borderXml(style: CellStyle): string | null {
-    if (!style.border || /none|^0/.test(style.border)) {
+    const sides = { left: style.borderLeft, right: style.borderRight, top: style.borderTop, bottom: style.borderBottom };
+    const lines = Object.fromEntries(Object.entries(sides).map(([name, value]) => [name, lineOf(value ?? style.border)]));
+
+    if (!Object.values(lines).some(Boolean)) {
       return null;
     }
-    const color = toArgb(/#[0-9a-f]{3,6}\b|rgba?\([^)]*\)/i.exec(style.border)?.[0]) || 'FF000000';
-    const side = (name: string) => `<${name} style="thin"><color rgb="${color}"/></${name}>`;
+    const side = (name: string) => {
+      const line = lines[name];
+
+      if (!line) {
+        return `<${name}/>`;
+      }
+      const weight = line.width >= 3 ? 'thick' : line.width >= 2 ? 'medium' : 'thin';
+
+      return `<${name} style="${weight}"><color rgb="${toArgb(line.color) || 'FF000000'}"/></${name}>`;
+    };
 
     return `<border>${side('left')}${side('right')}${side('top')}${side('bottom')}<diagonal/></border>`;
   }
@@ -556,11 +567,29 @@ const fillStyle = (fill: Element | undefined, dxf = false): CellStyle => {
   return color ? { background: color } : {};
 };
 
-const borderStyle = (border: Element | undefined): CellStyle => {
-  const side = ['left', 'right', 'top', 'bottom'].map(name => child(border, name))
-    .find(element => element && attr(element, 'style'));
+const BORDER_WIDTHS: Record<string, number> = { thin: 1, hair: 1, dotted: 1, dashed: 1, medium: 2, mediumDashed: 2,
+  thick: 3, double: 3 };
 
-  return side ? { border: `1px solid ${colorOf(child(side, 'color')) || '#000000'}` } : {};
+/** A cell's borders: `border` when every side has the same line, otherwise each side's own. */
+const borderStyle = (border: Element | undefined): CellStyle => {
+  const keys = { top: 'borderTop', right: 'borderRight', bottom: 'borderBottom', left: 'borderLeft' } as const;
+  const lines = (Object.keys(keys) as (keyof typeof keys)[]).map((name) => {
+    const element = child(border, name);
+    const weight = element && attr(element, 'style');
+
+    return [name, weight ? `${BORDER_WIDTHS[weight] || 1}px solid ${colorOf(child(element, 'color')) || '#000000'}` :
+      null] as const;
+  });
+  const drawn = lines.filter(([, line]) => line);
+
+  if (!drawn.length) {
+    return {};
+  }
+  if (drawn.length === 4 && drawn.every(([, line]) => line === drawn[0][1])) {
+    return { border: drawn[0][1]! };
+  }
+
+  return Object.fromEntries(drawn.map(([name, line]) => [keys[name], line])) as CellStyle;
 };
 
 const RULE_FROM_CELL_IS = Object.fromEntries(Object.entries(CELL_IS).map(([key, value]) => [value, key]));

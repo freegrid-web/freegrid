@@ -129,6 +129,163 @@ export const setCellStyle = (grid: FormattingHost, style: Partial<Record<keyof C
   restyleCells(grid, ranges, before => (style === null ? void 0 : compact({ ...before, ...style })));
 };
 
+/** A grid that can also remove a cell's own setting. */
+type MetaHost = FormattingHost & { removeCellMeta(row: number, col: number, key: string): void };
+
+/** The settings a cell's format is made of (format painter, number formats). */
+const FORMAT_KEYS = ['style', 'className', 'type', 'numericFormat', 'renderer', 'editor', 'validator', 'dataType'];
+
+/** Changes of cells' settings, for undo: `[row, col, before, after]` with `undefined` for "not the cell's own". */
+export type CellFormatChange = [number, number, Record<string, unknown>, Record<string, unknown>];
+
+/** Sets (or, for `undefined`, removes) a cell's own settings. */
+export const writeCellMeta = (grid: MetaHost, row: number, col: number, values: Record<string, unknown>): void => {
+  Object.entries(values).forEach(([key, value]) => {
+    if (value === void 0) {
+      grid.removeCellMeta(row, col, key);
+    } else {
+      grid.setCellMeta(row, col, key, value);
+    }
+  });
+};
+
+/**
+ * Sets settings of cells, one undo step for all: each `values` object is written (an `undefined` removes the
+ * cell's own setting, so the column's applies). Runs `afterSetCellFormat` and renders.
+ */
+export const formatCells = (grid: MetaHost, cells: { row: number; col: number; values: Record<string, unknown> }[]):
+  void => {
+  endPreview(grid);
+  const changes: CellFormatChange[] = [];
+
+  cells.forEach(({ row, col, values }) => {
+    const meta = grid.getCellMeta(row, col) as Record<string, unknown>;
+    const before = Object.fromEntries(Object.keys(values).map(key => [key,
+      Object.prototype.hasOwnProperty.call(meta, key) ? meta[key] : void 0]));
+
+    if (JSON.stringify(before) !== JSON.stringify(values) || Object.keys(values).some(key => before[key] !==
+      values[key])) {
+      changes.push([row, col, before, values]);
+      writeCellMeta(grid, row, col, values);
+    }
+  });
+  if (changes.length) {
+    grid.runHooks('afterSetCellFormat', changes);
+  }
+  grid.render();
+};
+
+/** Where `setCellBorders` draws lines in the selected ranges. */
+export type BorderKind = 'all' | 'outside' | 'thick_outside' | 'top' | 'bottom' | 'left' | 'right' | 'none';
+
+/**
+ * Draws lines on the selected cells, as a spreadsheet's Borders menu: every side of every cell (`all`), around each
+ * range (`outside`, `thick_outside`), one side of each range, or none (removes every line of the cells).
+ */
+export const setCellBorders = (grid: FormattingHost, kind: BorderKind, color = '#000000'): void => {
+  const ranges = grid.getSelectedRange() || [];
+  const line = `${kind === 'thick_outside' ? 2 : 1}px solid ${color}`;
+  const sidesOf = new Map<string, Partial<CellStyle>>();
+
+  ranges.forEach((range) => {
+    const from = range.getTopLeftCorner();
+    const to = range.getBottomRightCorner();
+
+    eachCell(grid, [range], (row, col) => {
+      const sides: Partial<CellStyle> = { ...sidesOf.get(`${row}:${col}`) };
+      const edge = { borderTop: row === from.row, borderBottom: row === to.row, borderLeft: col === from.col,
+        borderRight: col === to.col };
+
+      (Object.keys(edge) as (keyof typeof edge)[]).forEach((side) => {
+        const outside = kind === 'outside' || kind === 'thick_outside';
+
+        if (kind === 'all' || (outside && edge[side]) || (kind === side.slice(6).toLowerCase() && edge[side])) {
+          sides[side] = line;
+        }
+      });
+      sidesOf.set(`${row}:${col}`, sides);
+    });
+  });
+  if (kind === 'none') {
+    restyleCells(grid, ranges, before => compact({ ...before, border: null, borderTop: null, borderRight: null,
+      borderBottom: null, borderLeft: null }));
+
+    return;
+  }
+  // Each cell gets its own sides.
+  formatCells(grid as MetaHost, [...sidesOf].map(([key, sides]) => {
+    const [row, col] = key.split(':').map(Number);
+
+    return { row, col, values: { style: compact({ ...grid.getCellMeta(row, col).style, ...sides }) } };
+  }));
+};
+
+/** The number formats of the formatting bar: `null` is General (the column's own type and format). */
+export const NUMBER_FORMATS: Record<string, string | null> = {
+  general: null,
+  number: '0,0.00',
+  currency: '$0,0.00',
+  percent: '0.00%',
+};
+
+/** Gives the selected cells a number format (a numbro pattern), or General with `null`. One undo step. */
+export const setNumberFormat = (grid: MetaHost, pattern: string | null): void => {
+  const cells: { row: number; col: number; values: Record<string, unknown> }[] = [];
+
+  eachCell(grid, grid.getSelectedRange() || [], (row, col) => {
+    cells.push({ row, col, values: {
+      type: pattern === null ? void 0 : 'numeric',
+      numericFormat: pattern === null ? void 0 : { pattern },
+      // The type's renderer, editor and validator follow the type.
+      renderer: void 0, editor: void 0, validator: void 0, dataType: void 0,
+    } });
+  });
+  formatCells(grid, cells);
+};
+
+/** The formats of the selected cells (the last range), by rows: what the format painter copies. */
+export const copyCellFormats = (grid: FormattingHost): Record<string, unknown>[][] => {
+  const range = grid.getSelectedRange()?.slice(-1)[0];
+
+  if (!range) {
+    return [];
+  }
+  const from = range.getTopLeftCorner();
+  const to = range.getBottomRightCorner();
+  const formats: Record<string, unknown>[][] = [];
+
+  for (let row = Math.max(0, from.row); row <= Math.min(to.row, grid.countRows() - 1); row += 1) {
+    formats.push([]);
+    for (let col = Math.max(0, from.col); col <= Math.min(to.col, grid.countCols() - 1); col += 1) {
+      const meta = grid.getCellMeta(row, col) as Record<string, unknown>;
+
+      formats[formats.length - 1].push(Object.fromEntries(FORMAT_KEYS.map(key => [key,
+        Object.prototype.hasOwnProperty.call(meta, key) ? meta[key] : void 0])));
+    }
+  }
+
+  return formats;
+};
+
+/** Gives the selected cells copied formats, repeated over a bigger selection. One undo step. */
+export const pasteCellFormats = (grid: MetaHost, formats: Record<string, unknown>[][]): void => {
+  if (!formats.length || !formats[0].length) {
+    return;
+  }
+  const cells: { row: number; col: number; values: Record<string, unknown> }[] = [];
+
+  (grid.getSelectedRange() || []).forEach((range) => {
+    const from = range.getTopLeftCorner();
+
+    eachCell(grid, [range], (row, col) => {
+      const rowFormats = formats[(row - Math.max(0, from.row)) % formats.length];
+
+      cells.push({ row, col, values: { ...rowFormats[(col - Math.max(0, from.col)) % rowFormats.length] } });
+    });
+  });
+  formatCells(grid, cells);
+};
+
 /** Whether a cell's style has the toggle (bold, italic, underline or strikethrough). */
 export const hasToggle = (style: CellStyle | undefined, toggle: StyleToggle): boolean => {
   if (toggle === 'bold') {

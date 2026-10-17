@@ -88,3 +88,45 @@
   border-radius: var(--fs-formatting-bar-radius);
   box-shadow: var(--fs-formatting-bar-shadow);
 }
+
+.fs-formatting-bar__text {
+  font-size: 11px;
+  letter-spacing: -0.5px;
+}
+
+.fs-formatting-bar__dropdown::after {
+  content: '';
+  display: inline-block;
+  margin-left: 3px;
+  border: 4px solid transparent;
+  border-top-color: currentColor;
+  border-bottom-width: 0;
+  vertical-align: middle;
+}
+
+/* The Borders and Number format lists. */
+.fs-formatting-bar__list {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+.fs-formatting-bar__list button {
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fs-formatting-bar__list button:hover {
+  background: var(--fs-formatting-bar-hover-background);
+}
+
+/* The format painter waits for cells to give its formats to. */
+.fs-format-painting .fs-master td {
+  cursor: copy;
+}

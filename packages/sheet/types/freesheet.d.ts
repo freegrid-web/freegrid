@@ -1486,6 +1486,7 @@ declare namespace FreeSheet {
       }>;
       format?: StatusBarFormat;
     };
+      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;
@@ -1602,6 +1603,7 @@ declare namespace FreeSheet {
     afterImportFile?: (format: 'xlsx' | 'csv') => void;
     afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
     afterSetCellStyle?: (changes: Array<[number, number, object | undefined, object | undefined]>) => void;
+    afterSetCellFormat?: (changes: Array<[number, number, object, object]>) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;
