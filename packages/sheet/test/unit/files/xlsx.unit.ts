@@ -40,6 +40,8 @@ const book = (): Book => ({
       ],
       // An outline: rows 5 to 8, and inside it rows 6 and 7, collapsed.
       rowGroups: [{ from: 4, to: 7 }, { from: 5, to: 6, collapsed: true }],
+      // Columns D to E, collapsed (apart from the hidden column B).
+      columnGroups: [{ from: 3, to: 4, collapsed: true }],
     },
     { name: 'Empty', cells: [], columnWidths: [], rowHeights: [], hiddenRows: [], hiddenColumns: [], merges: [],
       frozenRows: 0, frozenColumns: 0, comments: [], conditionalFormatting: [] },

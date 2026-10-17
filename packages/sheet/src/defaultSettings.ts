@@ -2579,6 +2579,23 @@ DefaultSettings.prototype = {
   rowGroups: void 0,
 
   /**
+   * Column groups as an outline, as a spreadsheet's Group for columns: group any adjacent columns (the context menu's
+   * Group columns, or `getPlugin('columnOutline').groupColumns(from, to)`), up to 7 levels, and collapse a group to
+   * hide its columns with the −/+ button above the column headers; the corner's level buttons show the outline down to
+   * a level. `getDocument()` and Excel files keep the groups, saved as `{ groups: [{ from, to, collapsed }] }`.
+   * (Header groups over columns are made with `columns`.)
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * columnOutline: true,
+   * ```
+   */
+  columnOutline: void 0,
+
+  /**
    * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
    * palette that shows a color on the selected cells while the pointer is on it), borders, alignment, number format,
    * the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from

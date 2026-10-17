@@ -118,6 +118,13 @@ export const TOPICS = [
     settings: ['rowGroups'],
   },
   {
+    name: 'Column outline',
+    description: 'An outline of columns: groups in levels that collapse, as Excel\'s Group for columns.',
+    methods: [],
+    events: [],
+    settings: ['columnOutline'],
+  },
+  {
     name: 'Conditional formatting',
     description: 'Cells that format themselves from their values: highlights, color scales, data bars, icons.',
     methods: [],

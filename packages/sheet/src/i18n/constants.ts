@@ -244,4 +244,7 @@ export const ROW_GROUPS_UNGROUP = 'RowGroups:ungroup';
 export const ROW_GROUPS_EXPAND = 'RowGroups:expand';
 export const ROW_GROUPS_COLLAPSE = 'RowGroups:collapse';
 export const ROW_GROUPS_LEVEL = 'RowGroups:level';
+export const COLUMN_OUTLINE_GROUP = 'ColumnOutline:group';
+export const COLUMN_OUTLINE_UNGROUP = 'ColumnOutline:ungroup';
+export const COLUMN_OUTLINE_LEVEL = 'ColumnOutline:level';
 export const LOADING = 'Loading:text';

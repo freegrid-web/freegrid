@@ -147,6 +147,9 @@ const dictionary: LanguageDictionary = {
   [C.NESTED_ROWS_OUTDENT]: 'Outdent',
 
   [C.LOADING]: 'Loading…',
+  [C.COLUMN_OUTLINE_GROUP]: 'Group columns',
+  [C.COLUMN_OUTLINE_UNGROUP]: 'Ungroup columns',
+  [C.COLUMN_OUTLINE_LEVEL]: 'Show column level {level}',
   [C.STATUS_BAR_AVERAGE]: 'Average',
   [C.STATUS_BAR_COUNT]: 'Count',
   [C.STATUS_BAR_NUMERICAL_COUNT]: 'Numerical count',

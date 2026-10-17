@@ -50,6 +50,10 @@
   `getPlugin('rowGroups').groupRows(from, to)`) in up to 7 levels; a −/+ button in the row headers collapses a group,
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
+- Column groups as an outline (`columnOutline: true`), as Excel's Group for columns: brackets and −/+ buttons in a
+  gutter above the column headers, level buttons in the corner, Group columns and Ungroup columns in the context menu,
+  `getPlugin('columnOutline').groupColumns(from, to)`. `getDocument()` and Excel files keep them. Row groups and
+  column groups share one outline model.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
