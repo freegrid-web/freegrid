@@ -267,8 +267,6 @@ class Filters extends BasePlugin {
    * offers), in order, each once.
    *
    * @param column Visual column index.
-   *
-   * @private
    */
   getColumnValues(column: number): string[] {
     const physical = this.hot.toPhysicalColumn(column);

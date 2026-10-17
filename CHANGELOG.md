@@ -78,8 +78,21 @@
   column groups share one outline model.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
+- Docs:
+  - the guide is grouped by topic (Data, Rows and columns, Editing, Look, Menus and panels, Extending), with new
+    pages Formatting, Sorting, Comments and merged cells, and Selection and keyboard;
+  - live examples in the guide pages: each code block that makes a grid shows it working;
+  - every example has **Copy code** and **Open in playground** (LiveCodes, with the package from npm);
+  - each guide page ends with the API of its topic: settings, methods, events and plugin methods with their signature
+    and a one-line description;
+  - the API reference lists every plugin (row groups, column outline, data validation, hyperlinks, change history,
+    find and replace, status bar, formatting bar and others were missing) and the settings and events of filters, the
+    column menu, hidden rows and columns, nested rows and nested headers.
+
 ### Fixed
 
+- Types: `setCellStyle` and the `style` setting take every style property (`fontFamily`, `fontSize` and the borders
+  of each side); `CellStyle` is a type of its own.
 - The cell editor no longer takes the focus back a moment after a cell is selected while the grid does not have the
   keyboard (a box outside the grid, such as find and replace, keeps it).
 - A command in a submenu inside a submenu (Conditional formatting ▸ Data Bars ▸ a color) did nothing when clicked, and

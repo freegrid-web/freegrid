@@ -2817,9 +2817,10 @@ class Core {
   }
 
   /**
-   * Sets the style of cells (the selected ones by default): `style` (`fontWeight`, `fontStyle`, `textDecoration`,
-   * `color`, `background`, `border`) is merged into each cell's `style` meta, where a `null` property removes that
-   * property; a `null` style removes the whole style. Undo can take it back.
+   * Sets the style of cells (the selected ones by default): `style` (`fontFamily`, `fontSize`, `fontWeight`,
+   * `fontStyle`, `textDecoration`, `color`, `background`, `border`, `borderTop`, `borderRight`, `borderBottom`,
+   * `borderLeft`) is merged into each cell's `style` meta, where a `null` property removes that property; a `null`
+   * style removes the whole style. Undo can take it back.
    *
    * @memberof Core#
    * @function setCellStyle

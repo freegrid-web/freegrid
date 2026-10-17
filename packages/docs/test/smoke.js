@@ -2,7 +2,7 @@
 // Usage: pnpm build (FreeSheet) && pnpm --filter @freegrid/docs build && node test/smoke.js
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -59,6 +59,11 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 if (!existsSync(dist)) {
   console.error('Docs are not built: run `pnpm --filter @freegrid/docs build` first.');
   process.exit(1);
+}
+
+// Every other guide page too: its live examples (```js live blocks) must render.
+for (const file of readdirSync(join(dist, 'guide')).filter(name => name.endsWith('.html'))) {
+  if (!PAGES.some(page => page.path === `guide/${file}`)) PAGES.push({ path: `guide/${file}`, grids: 0 });
 }
 
 // Serves the built site under BASE, like GitHub Pages (including `/x` → `/x.html`).
