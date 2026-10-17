@@ -32,8 +32,8 @@ declare namespace _FreeSheet {
     getSheets(): Array<{ id: string; name: string }>;
     getActiveSheet(): Core;
     activateSheet(id: string): void;
-    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | string, options?: object): void;
-    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'changes' | string, options?: object): void;
+    openPanel(name: 'comments' | 'conditionalFormatting' | 'conditionalFormattingRule' | 'dataValidation' | 'changes' |
+      string, options?: object): void;
     closePanel(): void;
     getOpenPanel(): string | null;
     setLoading(state: boolean | string): void;
@@ -1487,11 +1487,10 @@ declare namespace FreeSheet {
     changeHistory?: boolean | { user?: string; limit?: number };
     findAndReplace?: boolean;
     rowGroups?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
-    formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
-      'strikethrough' | 'fill_color' |
     columnOutline?: boolean | { groups?: Array<{ from: number; to: number; collapsed?: boolean }> };
-    formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
-      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
+    formattingBar?: boolean | { items?: Array<'font_family' | 'font_size' | 'bold' | 'italic' | 'underline' |
+      'strikethrough' | 'fill_color' | 'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' |
+      'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {
         item?: 'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum';

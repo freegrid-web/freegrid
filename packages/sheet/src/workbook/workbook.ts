@@ -55,8 +55,7 @@ export type SavedDocument = { version: 1; activeSheet: string; sheets: SheetDocu
 
 /** Cell settings a saved document keeps (what users change in the grid: comments, formats, read-only cells). */
 const SAVED_CELL_SETTINGS = ['comment', 'className', 'readOnly', 'type', 'numericFormat', 'dateFormat', 'timeFormat',
-  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style', 'validation'];
-  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style', 'link'];
+  'source', 'checkedTemplate', 'uncheckedTemplate', 'placeholder', 'wordWrap', 'style', 'validation', 'link'];
 
 const sparse = <T>(values: (T | undefined)[]): (T | null)[] | undefined => {
   if (!values.some(value => value !== void 0 && value !== null)) {

@@ -97,6 +97,7 @@ const bookCell = (source: unknown, shown: unknown, meta: Meta): BookCell | null 
   }
   if (meta.validation && typeof meta.validation === 'object') {
     cell.validation = meta.validation as BookCell['validation'];
+  }
   if (typeof meta.link === 'string' && meta.link) {
     cell.link = meta.link;
   }
@@ -289,6 +290,7 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
           }
           if (cell.validation) {
             meta.validation = cell.validation;
+          }
           if (cell.link) {
             meta.link = cell.link;
           }

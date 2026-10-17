@@ -30,6 +30,11 @@ contextMenu: ['undo', 'redo', '---------', 'row_above', 'row_below', '---------'
 | `alignment` | Alignment (a submenu) |
 | `formatting` | Format: bold, italic, colors… ([styling](./styling)) |
 | `freeze` | Freeze panes ([guide](./status-bar-and-freezing)) |
+| `copy`, `cut` | Copy and cut (Ctrl+C, Ctrl+X) |
+| `paste`, `paste_special` | Paste and Paste special ([guide](./fill-and-paste)) |
+| `link` | Insert or edit a link (Ctrl+K, [guide](./hyperlinks)) |
+| `show_changes` | The Changes panel ([guide](./change-history)) |
+| `data_validation` | The Data validation panel ([guide](./data-validation)) |
 | `commentsAddEdit`, `commentsRemove` | Comments (with `comments`) |
 
 Plugins add their own entries to the default menu, for example copy and cut, conditional formatting and row groups.

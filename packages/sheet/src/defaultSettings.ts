@@ -2547,40 +2547,6 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
-   * Data validation: a cell's (or a column's) `validation` allows only some values — a list of items (a dropdown), a
-   * number, a whole number, a date or a text length that compares with `value` (and `value2`). Values that are not
-   * valid are refused, or with `strict: false` kept and marked; `message` and `inputMessage` explain the rule. The
-   * side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on the selected cells. On unless
-   * `false`.
-   * Hyperlinks in cells: a cell's `link` setting (a web or mail address) makes its text a link. Selecting the cell
-   * shows the address (it opens in a new tab), Ctrl+click opens it, and Ctrl+K (or the context menu's Insert link)
-   * edits the text and the link. On unless `false`.
-   *
-   * @type {Boolean}
-   * The change history ("Show Changes"): records every edit of the cells (the old and the new value) and the rows and
-   * columns added and removed, with the time and `user`. The side panel `'changes'` (`openPanel('changes')`, or the
-   * context menu entry `'show_changes'`) lists them; the plugin's `getChanges()` gives them. `limit` keeps the last
-   * changes (1000 by default).
-   *
-   * @type {Boolean|Object}
-   * @default undefined
-   *
-   * @example
-   * ```js
-   * columns: [{}, { validation: { type: 'list', source: ['Open', 'Done'] } }],
-   * ```
-   */
-  dataValidation: void 0,
-   * cell: [{ row: 0, col: 0, link: 'https://example.com' }],
-   * ```
-   */
-  hyperlinks: void 0,
-   * changeHistory: { user: 'Ada' },
-   * ```
-   */
-  changeHistory: void 0,
-
-  /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,
    * <kbd>Ctrl</kbd>+<kbd>H</kbd> the same box with a replace field. Matches are highlighted; <kbd>Enter</kbd> goes to
    * the next one. Options: match case, entire cell, search in formulas. Replace all is one undo step; read-only cells
@@ -2613,12 +2579,6 @@ DefaultSettings.prototype = {
   rowGroups: void 0,
 
   /**
-   * Shows a formatting bar above the context menu, as in Excel: the font and its size, bold, italic, underline, fill
-   * and text colors (a palette that shows a color on the selected cells while the pointer is on it), borders,
-   * alignment, number format, the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
-   * `'font_family'`, `'font_size'`, `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`,
-   * `'text_color'`, `'borders'`, `'alignment'`, `'number_format'`, `'format_painter'` and `'clear'`. Needs
-   * `contextMenu`.
    * Column groups as an outline, as a spreadsheet's Group for columns: group any adjacent columns (the context menu's
    * Group columns, or `getPlugin('columnOutline').groupColumns(from, to)`), up to 7 levels, and collapse a group to
    * hide its columns with the −/+ button above the column headers; the corner's level buttons show the outline down to
@@ -2636,11 +2596,12 @@ DefaultSettings.prototype = {
   columnOutline: void 0,
 
   /**
-   * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
-   * palette that shows a color on the selected cells while the pointer is on it), borders, alignment, number format,
-   * the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
-   * `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`, `'text_color'`, `'borders'`,
-   * `'alignment'`, `'number_format'`, `'format_painter'` and `'clear'`. Needs `contextMenu`.
+   * Shows a formatting bar above the context menu, as in Excel: the font and its size, bold, italic, underline, fill
+   * and text colors (a palette that shows a color on the selected cells while the pointer is on it), borders,
+   * alignment, number format, the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
+   * `'font_family'`, `'font_size'`, `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`,
+   * `'text_color'`, `'borders'`, `'alignment'`, `'number_format'`, `'format_painter'` and `'clear'`. Needs
+   * `contextMenu`.
    *
    * @type {Boolean|Object}
    * @default undefined
@@ -2670,6 +2631,54 @@ DefaultSettings.prototype = {
    * ```
    */
   statusBar: void 0,
+
+  /**
+   * Data validation: a cell's (or a column's) `validation` allows only some values — a list of items (a dropdown), a
+   * number, a whole number, a date or a text length that compares with `value` (and `value2`). Values that are not
+   * valid are refused, or with `strict: false` kept and marked; `message` and `inputMessage` explain the rule. The
+   * side panel `'dataValidation'` (context menu key `'data_validation'`) sets rules on the selected cells. On unless
+   * `false`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * columns: [{}, { validation: { type: 'list', source: ['Open', 'Done'] } }],
+   * ```
+   */
+  dataValidation: void 0,
+
+  /**
+   * Hyperlinks in cells: a cell's `link` setting (a web or mail address) makes its text a link. Selecting the cell
+   * shows the address (it opens in a new tab), Ctrl+click opens it, and Ctrl+K (or the context menu's Insert link)
+   * edits the text and the link. On unless `false`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * cell: [{ row: 0, col: 0, link: 'https://example.com' }],
+   * ```
+   */
+  hyperlinks: void 0,
+
+  /**
+   * The change history ("Show Changes"): records every edit of the cells (the old and the new value) and the rows and
+   * columns added and removed, with the time and `user`. The side panel `'changes'` (`openPanel('changes')`, or the
+   * context menu entry `'show_changes'`) lists them; the plugin's `getChanges()` gives them. `limit` keeps the last
+   * changes (1000 by default).
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * changeHistory: { user: 'Ada' },
+   * ```
+   */
+  changeHistory: void 0,
 
   /**
    * The id of this grid's sheet in its document (see `addSheet`). The grid created with `new FreeSheet` is

@@ -493,12 +493,9 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="${NS}" xmlns:r="${REL_NS}"><dimension ref="${dimension}"/><sheetViews><sheetView${active ?
     ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${
-    outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${validationsXml(sheet)}${hasComments ?
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hyperlinks}${hasComments ?
     outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}${outlineLevelCol ? ` outlineLevelCol="${
-    outlineLevelCol}"` : ''}/>${
-    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hasComments ?
+    outlineLevelCol}"` : ''}/>${cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${
+    formatting}${validationsXml(sheet)}${hyperlinks}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
 
