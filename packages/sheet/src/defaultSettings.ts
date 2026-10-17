@@ -2553,6 +2553,16 @@ DefaultSettings.prototype = {
    * stay. The plugin also has `find(query, options)` and `replace(query, replacement, options)`.
    *
    * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * findAndReplace: true,
+   * ```
+   */
+  findAndReplace: void 0,
+
+  /**
    * Row groups, as a spreadsheet's outline: group any adjacent rows (the context menu's Group rows, Alt+Shift+→, or
    * `getPlugin('rowGroups').groupRows(from, to)`), up to 7 levels, and collapse a group to hide its rows with the −/+
    * button in the row headers; the corner's level buttons show the outline down to a level. `getDocument()` and Excel
@@ -2563,10 +2573,6 @@ DefaultSettings.prototype = {
    *
    * @example
    * ```js
-   * findAndReplace: true,
-   * ```
-   */
-  findAndReplace: void 0,
    * rowGroups: true,
    * ```
    */
