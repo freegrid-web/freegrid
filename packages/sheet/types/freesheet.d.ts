@@ -1474,7 +1474,7 @@ declare namespace FreeSheet {
     contextMenu?: boolean | any[] | contextMenu.Settings;
     findAndReplace?: boolean;
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
-      'text_color' | 'alignment' | 'clear'> };
+      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {
         item?: 'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum';
@@ -1486,7 +1486,6 @@ declare namespace FreeSheet {
       }>;
       format?: StatusBarFormat;
     };
-      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;
