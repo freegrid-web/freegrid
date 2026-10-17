@@ -65,6 +65,9 @@
   a new tab), Edit and Remove; Ctrl+click opens it; Ctrl+K (or Insert link in the context menu, key `'link'`) edits
   text and link in one undo step. Only web and mail links are kept. `getDocument()` and Excel files keep them. Plugin
   `hyperlinks` (on unless `false`). New guide page.
+- Font and font size: `fontFamily` and `fontSize` (points, `'14pt'`) in the `style` setting; the formatting bar starts
+  with a font list (each font shown in itself) and a size field with a list. Rows grow to fit their biggest font.
+  Excel files keep the font and its size.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

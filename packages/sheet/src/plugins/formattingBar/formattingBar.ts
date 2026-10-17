@@ -10,13 +10,22 @@ import { classNameIncludes } from './../../helpers/classNames';
 import * as C from './../../i18n/constants';
 
 /** The buttons of the bar, in order. */
-export const FORMATTING_BAR_ITEMS = ['bold', 'italic', 'underline', 'strikethrough', 'fill_color', 'text_color',
+export const FORMATTING_BAR_ITEMS = ['font_family', 'font_size', 'bold', 'italic', 'underline', 'strikethrough',
+  'fill_color', 'text_color',
   'borders', 'alignment', 'number_format', 'format_painter', 'clear'] as const;
 
 export type FormattingBarItem = typeof FORMATTING_BAR_ITEMS[number];
 
-const DEFAULT_ITEMS: FormattingBarItem[] = ['bold', 'italic', 'underline', 'fill_color', 'text_color', 'borders',
+const DEFAULT_ITEMS: FormattingBarItem[] = ['font_family', 'font_size', 'bold', 'italic', 'underline', 'fill_color',
+  'text_color', 'borders',
   'alignment', 'number_format', 'format_painter', 'clear'];
+
+/** The fonts of the font list (each shown in itself); `''` is the grid's own font. */
+export const FONT_FAMILIES = ['', 'Arial', 'Calibri', 'Cambria', 'Courier New', 'Georgia', 'Roboto', 'Segoe UI',
+  'Tahoma', 'Times New Roman', 'Verdana'];
+
+/** The sizes of the font size list, in points. */
+export const FONT_SIZES = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72];
 
 /** The commands of the Borders list. */
 const BORDER_KINDS: [BorderKind, string][] = [['bottom', C.FORMAT_BORDER_BOTTOM], ['top', C.FORMAT_BORDER_TOP],
@@ -62,6 +71,8 @@ const LABELS: Record<string, string> = {
   right: C.CONTEXTMENU_ITEMS_ALIGNMENT_RIGHT,
   clear: C.CONTEXTMENU_ITEMS_FORMAT_CLEAR,
   borders: C.FORMAT_BORDERS,
+  font_family: C.FORMAT_FONT,
+  font_size: C.FORMAT_FONT_SIZE,
   number_format: C.FORMAT_NUMBER,
   format_painter: C.FORMAT_PAINTER,
 };
@@ -204,6 +215,20 @@ class FormattingBar extends BasePlugin {
         button.setAttribute('aria-pressed', String(pressed));
       }
     });
+    const style = (this.hot.getCellMeta(row, col).style || {}) as { fontFamily?: string; fontSize?: string };
+    const label = this.element?.querySelector<HTMLElement>('[data-font-label]');
+    const size = this.element?.querySelector<HTMLInputElement>('[data-font-size]');
+
+    if (label) {
+      label.textContent = style.fontFamily || String(this.hot.getTranslatedPhrase(C.FORMAT_FONT_DEFAULT));
+    }
+    if (size && document.activeElement !== size) {
+      const cell = this.hot.getCell(row, col, true) as HTMLElement | null;
+      const pixels = cell ? parseFloat(getComputedStyle(cell).fontSize) : NaN;
+
+      size.value = /pt$/.test(style.fontSize || '') ? String(parseFloat(style.fontSize!)) :
+        Number.isFinite(pixels) ? String(Math.round(pixels * 0.75 * 2) / 2) : '';
+    }
     this.element?.querySelectorAll<HTMLElement>('[data-color-of]').forEach((line) => {
       line.style.background = this.#colors[line.dataset.colorOf as 'fill_color' | 'text_color'];
     });
@@ -226,6 +251,17 @@ class FormattingBar extends BasePlugin {
           `<button type="button" class="fs-formatting-bar__arrow" data-palette="${item}" aria-haspopup="true" ` +
           `aria-label="${phrase(LABELS[item])}…"></button></span>`;
       }
+      if (item === 'font_family') {
+        return `<span class="fs-formatting-bar__group"><button type="button" class="fs-formatting-bar__button ` +
+          `fs-formatting-bar__dropdown fs-formatting-bar__font" data-palette="font_family" aria-haspopup="true" ` +
+          `title="${phrase(LABELS[item])}" aria-label="${phrase(LABELS[item])}"><span data-font-label></span></button>`;
+      }
+      if (item === 'font_size') {
+        return `<span class="fs-formatting-bar__size"><input type="text" inputmode="decimal" data-font-size ` +
+          `aria-label="${phrase(LABELS[item])}" title="${phrase(LABELS[item])}"><button type="button" ` +
+          `class="fs-formatting-bar__arrow" data-palette="font_size" aria-haspopup="true" aria-label="${
+            phrase(LABELS[item])}…"></button></span>`;
+      }
       if (item === 'borders') {
         return `<span class="fs-formatting-bar__split">${button(item)}<button type="button" ` +
           `class="fs-formatting-bar__arrow" data-palette="borders" aria-haspopup="true" ` +
@@ -245,12 +281,16 @@ class FormattingBar extends BasePlugin {
 
     // Mouse down, so the menu (which closes on mouse down outside it) and the grid's selection stay.
     bar.addEventListener('mousedown', (event) => {
-      event.preventDefault();
       event.stopPropagation();
+      // The size field takes the focus and the caret; nothing else does.
+      if ((event.target as HTMLElement).matches('input')) {
+        return;
+      }
+      event.preventDefault();
       const target = (event.target as HTMLElement).closest<HTMLElement>('[data-action], [data-palette]');
 
-      if (target?.dataset.palette === 'borders' || target?.dataset.palette === 'number_format') {
-        this.toggleList(target.dataset.palette, target);
+      if (['borders', 'number_format', 'font_family', 'font_size'].includes(target?.dataset.palette || '')) {
+        this.toggleList(target!.dataset.palette as Parameters<FormattingBar['toggleList']>[0], target!);
       } else if (target?.dataset.palette) {
         this.togglePalette(target.dataset.palette as 'fill_color' | 'text_color', target);
       } else if (target?.dataset.action) {
@@ -259,7 +299,33 @@ class FormattingBar extends BasePlugin {
       }
     });
 
+    const size = bar.querySelector<HTMLInputElement>('[data-font-size]');
+
+    size?.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        this.setFontSize(size.value);
+      } else if (event.key === 'Escape') {
+        this.refresh();
+        size.blur();
+      }
+    });
+    size?.addEventListener('focus', () => this.hot.unlisten());
+
     return bar;
+  }
+
+  /** Gives the selected cells a font size in points (an empty field: the grid's own size). */
+  setFontSize(text: string): void {
+    const points = Number(String(text).replace(',', '.'));
+
+    if (String(text).trim() === '') {
+      setCellStyle(this.hot as unknown as FormattingGrid, { fontSize: null });
+    } else if (Number.isFinite(points) && points >= 1 && points <= 409) {
+      setCellStyle(this.hot as unknown as FormattingGrid, { fontSize: `${points}pt` });
+    }
+    this.refresh();
   }
 
   /** Runs a button's command on the selected cells. */
@@ -335,7 +401,7 @@ class FormattingBar extends BasePlugin {
   }
 
   /** Opens (or closes) the list of the Borders arrow or of the Number format button. */
-  toggleList(item: 'borders' | 'number_format', anchor: HTMLElement): void {
+  toggleList(item: 'borders' | 'number_format' | 'font_family' | 'font_size', anchor: HTMLElement): void {
     const wasOpen = this.#palette?.dataset.item === item;
 
     this.closePalette();
@@ -344,8 +410,17 @@ class FormattingBar extends BasePlugin {
     }
     const list = document.createElement('div');
     const phrase = (key: string) => this.hot.getTranslatedPhrase(key) as string;
-    const entries: [string, string][] = item === 'borders' ? BORDER_KINDS :
-      Object.keys(NUMBER_FORMATS).map(name => [name, NUMBER_FORMAT_LABELS[name]]);
+    let entries: [string, string][];
+
+    if (item === 'borders') {
+      entries = BORDER_KINDS;
+    } else if (item === 'number_format') {
+      entries = Object.keys(NUMBER_FORMATS).map(name => [name, NUMBER_FORMAT_LABELS[name]]);
+    } else if (item === 'font_family') {
+      entries = FONT_FAMILIES.map(font => [font, font || C.FORMAT_FONT_DEFAULT]);
+    } else {
+      entries = FONT_SIZES.map(points => [String(points), String(points)]);
+    }
 
     list.className = 'fs-formatting-bar__palette fs-formatting-bar__list';
     list.dataset.item = item;
@@ -356,7 +431,11 @@ class FormattingBar extends BasePlugin {
       entry.type = 'button';
       entry.setAttribute('role', 'menuitem');
       entry.dataset.value = value;
-      entry.textContent = phrase(label);
+      entry.textContent = item === 'font_size' || (item === 'font_family' && value) ? label : phrase(label);
+      // Each font is shown in itself.
+      if (item === 'font_family' && value) {
+        entry.style.fontFamily = value;
+      }
       list.appendChild(entry);
     });
     list.addEventListener('mousedown', (event) => {
@@ -364,10 +443,16 @@ class FormattingBar extends BasePlugin {
       event.stopPropagation();
       const value = (event.target as HTMLElement).closest<HTMLElement>('[data-value]')?.dataset.value;
 
-      if (!value) {
+      // '' is a value (the grid's own font).
+
+      if (value === void 0) {
         return;
       }
-      if (item === 'borders') {
+      if (item === 'font_family') {
+        setCellStyle(this.hot as unknown as FormattingGrid, { fontFamily: value || null });
+      } else if (item === 'font_size') {
+        this.setFontSize(value);
+      } else if (item === 'borders') {
         this.#border = value as BorderKind;
         setCellBorders(this.hot as unknown as FormattingGrid, this.#border);
       } else {

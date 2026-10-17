@@ -2603,11 +2603,12 @@ DefaultSettings.prototype = {
   rowGroups: void 0,
 
   /**
-   * Shows a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and text colors (a
-   * palette that shows a color on the selected cells while the pointer is on it), borders, alignment, number format,
-   * the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
-   * `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`, `'text_color'`, `'borders'`,
-   * `'alignment'`, `'number_format'`, `'format_painter'` and `'clear'`. Needs `contextMenu`.
+   * Shows a formatting bar above the context menu, as in Excel: the font and its size, bold, italic, underline, fill
+   * and text colors (a palette that shows a color on the selected cells while the pointer is on it), borders,
+   * alignment, number format, the format painter and clear formatting. `true` shows the default buttons; `{ items }` chooses them from
+   * `'font_family'`, `'font_size'`, `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`,
+   * `'text_color'`, `'borders'`, `'alignment'`, `'number_format'`, `'format_painter'` and `'clear'`. Needs
+   * `contextMenu`.
    *
    * @type {Boolean|Object}
    * @default undefined

@@ -55,6 +55,7 @@ import { findSidePanel, getSidePanel } from './sidePanel/sidePanel';
 import { exportFile, downloadFile, importFile } from './files';
 import { setLoading, isLoading } from './loading/loading';
 import { setCellStyle } from './formatting/formatting';
+import './formatting/fontRows';
 import type { FileFormat, FileOptions } from './files';
 
 /** A data change: `[row, prop, oldValue, newValue]` (`null` once a validator or hook cancelled it). */
