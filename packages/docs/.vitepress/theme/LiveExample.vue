@@ -20,6 +20,18 @@ const sources = import.meta.glob('../../examples/*.js', { query: '?raw', import:
 const container = ref(null);
 const error = ref('');
 const copied = ref(false);
+// What the example logs (console.log), shown under the grid: the last lines.
+const output = ref([]);
+const show = value => (typeof value === 'string' ? value : (() => {
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    return String(value);
+  }
+})());
+const log = (values) => {
+  output.value = [...output.value, values.map(show).join(' ')].slice(-12);
+};
 let instance = null;
 let create = null;
 
@@ -37,7 +49,7 @@ onMounted(async() => {
 
     create = module.default;
     await nextTick();
-    instance = await create(container.value);
+    instance = await create(container.value, log);
   } catch (e) {
     error.value = e.message;
     throw e;
@@ -49,7 +61,8 @@ watch(gridStyle, async() => {
   await nextTick();
   if (create && container.value) {
     instance?.destroy();
-    instance = await create(container.value);
+    output.value = [];
+    instance = await create(container.value, log);
   }
 });
 
@@ -100,6 +113,8 @@ onBeforeUnmount(() => {
     :data-fs-style="mounted ? gridStyle : null">
     <div ref="container" class="live-example__grid" :style="height ? { height, overflow: 'hidden' } : null" />
     <p v-if="error" class="live-example__error">{{ error }}</p>
+    <pre v-if="output.length" class="live-example__output" aria-label="Console output" aria-live="polite">{{
+      output.join('\n') }}</pre>
     <div class="live-example__actions">
       <button type="button" @click="copy">{{ copied ? 'Copied' : 'Copy code' }}</button>
       <button type="button" @click="openPlayground">Open in playground ↗</button>

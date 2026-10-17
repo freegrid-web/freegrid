@@ -89,3 +89,17 @@
   border-color: var(--vp-c-brand-1);
   color: var(--vp-c-brand-1);
 }
+
+/* What an example logs, under its grid. */
+.live-example__output {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

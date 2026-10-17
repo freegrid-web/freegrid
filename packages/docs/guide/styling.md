@@ -21,14 +21,22 @@ Add classes to cells, columns or the whole grid with `className`. Several helper
 | `fs-invalid` | Added automatically to invalid cells |
 | `fs-search-result` | Added by the search plugin to matching cells |
 
-```js
-columns: [{ className: 'fs-center' }, { className: 'my-highlight' }]
-```
+```js live
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
-```css
-.freesheet td.my-highlight {
-  background: #fff3b0;
-}
+// In your stylesheet: .freesheet td.my-highlight { background: #fff3b0; color: #1f2937; }
+const style = document.createElement('style');
+
+style.textContent = '.freesheet td.my-highlight { background: #fff3b0; color: #1f2937; }';
+document.head.append(style);
+
+const grid = new FreeSheet(document.getElementById('grid'), {
+  data: [['Centered', 'Highlighted'], ['A', 'B']],
+  colHeaders: true,
+  colWidths: 140,
+  columns: [{ className: 'fs-center' }, { className: 'my-highlight' }],
+});
 ```
 
 The `cells` setting and custom renderers can set classes per cell, based on the value.

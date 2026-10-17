@@ -91,6 +91,11 @@
 
 ### Fixed
 
+- Conditional formatting: in a narrow column, an icon set's icon and its number stay on one line instead of the
+  number moving under the icon and making the row twice as tall.
+- Links in cells and the text of read-only cells are readable on the cell background (WCAG AA contrast): links have
+  their own color, `--fs-color-link` (`#0563c1`, and `#6cb6ff` in the dark theme), instead of the accent color, and
+  read-only text is `#6e6e6e` instead of `#777`.
 - Types: `setCellStyle` and the `style` setting take every style property (`fontFamily`, `fontSize` and the borders
   of each side); `CellStyle` is a type of its own.
 - The cell editor no longer takes the focus back a moment after a cell is selected while the grid does not have the

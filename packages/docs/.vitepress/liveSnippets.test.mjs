@@ -12,7 +12,7 @@ test('a live block becomes a module that makes its grid in the given container',
   const module = liveModule(block);
 
   assert.match(module, /^import FreeSheet from '@freegrid\/sheet';/);
-  assert.match(module, /export default async function create\(container\) \{\n {2}const grid = new FreeSheet\(container,/);
+  assert.match(module, /export default async function create\(container, log = \(\) => \{\}\) \{\n {2}const grid = new FreeSheet\(container,/);
   assert.match(module, /return grid;\n\}/);
   assert.equal(new Function(`${module.match(/export const source = (.*);/)[1]}`.replace(/^/, 'return '))(), block);
 });
@@ -39,4 +39,14 @@ test('an API summary is the first sentence, without links', async() => {
   assert.equal(summary('Groups rows (see [rows](./x)). More text.'), 'Groups rows (see rows).');
   assert.equal(summary('Sets `a.b` to 1.\nThen more.'), 'Sets `a.b` to 1.');
   assert.equal(summary(''), '');
+});
+
+test('a live block\'s console.log goes to the page too', async() => {
+  const module = liveModule(`const grid = { destroy() {} };\nconsole.log('hello', 1);\n`);
+  const logged = [];
+  const { default: create } = await import(`data:text/javascript,${encodeURIComponent(module)}`);
+
+  await create(null, values => logged.push(values));
+  assert.deepEqual(logged, [['hello', 1]]);
+  assert.doesNotMatch(liveModule('const grid = 1;\n'), /const console/);
 });

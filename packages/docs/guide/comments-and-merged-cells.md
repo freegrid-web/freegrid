@@ -77,7 +77,7 @@ const grid = new FreeSheet(document.getElementById('grid'), {
   rowHeaders: true,
   contextMenu: true,
   mergeCells: [{ row: 0, col: 0, rowspan: 1, colspan: 4 }],
-  cell: [{ row: 0, col: 0, className: 'htCenter', style: { fontWeight: 'bold' } }],
+  cell: [{ row: 0, col: 0, className: 'fs-center', style: { fontWeight: 'bold' } }],
 });
 ```
 

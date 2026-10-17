@@ -148,7 +148,10 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
     if (Math.abs(cell.getBoundingClientRect().height - rowHeight) > 1) {
       problems.push(`row height is ${cell.getBoundingClientRect().height}px, --fs-row-height is ${rowHeight}px`);
     }
-    if (holder.getBoundingClientRect().height < 80) problems.push(`grid viewport is ${holder.getBoundingClientRect().height}px tall`);
+    // A small grid may be short, but never shorter than its rows (or 80px).
+    const needed = Math.min(80, table.getBoundingClientRect().height);
+
+    if (holder.getBoundingClientRect().height < needed - 1) problems.push(`grid viewport is ${holder.getBoundingClientRect().height}px tall`);
     // Text must stay readable on the cell background in the light and the dark theme (WCAG AA: 4.5:1).
     const luminance = (color) => {
       const [r, g, b] = color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number)

@@ -5,7 +5,9 @@
 //
 //   <the block's imports>
 //   export const source = '<the block>';
-//   export default async function create(container) { <the rest, with #grid as `container`>; return grid; }
+//   export default async function create(container, log) { <the rest, with #grid as `container`>; return grid; }
+//
+// `log` gets what the block passes to console.log, which LiveExample.vue shows under the grid.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +38,12 @@ export const liveModule = (code) => {
     '',
     `export const source = ${JSON.stringify(code)};`,
     '',
-    'export default async function create(container) {',
+    'export default async function create(container, log = () => {}) {',
+    // The block's console.log also shows under its grid.
+    ...(/\bconsole\.log\(/.test(body) ? [
+      '  const console = { ...globalThis.console, log: (...values) => { globalThis.console.log(...values); log(values); } };',
+      '',
+    ] : []),
     body.split('\n').map(line => (line ? `  ${line}` : line)).join('\n'),
     '',
     '  return grid;',

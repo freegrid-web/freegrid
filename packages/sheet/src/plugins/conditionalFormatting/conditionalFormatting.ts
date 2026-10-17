@@ -703,10 +703,12 @@ class ConditionalFormatting extends BasePlugin {
       mix(colors[1], colors[2], middle < 1 ? (share - middle) / (1 - middle) : 1);
   }
 
-  paint(TD: HTMLTableCellElement, style: Record<string, string>, classes: string[], icon: string | null): void {
+  paint(TD: HTMLTableCellElement, style: Record<string, string>, ruleClasses: string[], icon: string | null): void {
     const properties = Object.keys(style);
+    // With an icon, the icon and the number stay on one line, as in a spreadsheet.
+    const classes = icon ? [...ruleClasses, 'fs-cf-has-icon'] : ruleClasses;
 
-    if (!properties.length && !classes.length && !icon) {
+    if (!properties.length && !classes.length) {
       return;
     }
     properties.forEach((property) => {
