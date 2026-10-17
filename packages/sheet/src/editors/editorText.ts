@@ -146,7 +146,12 @@ class EditorText extends EditorBase {
       const restoreFocus = !fragmentSelection;
 
       if (restoreFocus && !isMobileBrowser()) {
-        this.instance._registerImmediate(() => this.focus());
+        // Only while the grid has the keyboard: a box outside it (find, the formula bar) may have taken the focus.
+        this.instance._registerImmediate(() => {
+          if (this.instance.isListening()) {
+            this.focus();
+          }
+        });
       }
     }
   }

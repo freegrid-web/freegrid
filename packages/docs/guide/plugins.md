@@ -15,6 +15,7 @@ Most features are plugins that you switch on with a setting. Each can be reached
 | `comments` | Cell comments shown on hover: `cell: [{ row, col, comment: { value } }]` |
 | `customBorders` | Borders around cells or ranges |
 | `search` | `getPlugin('search').query(text)` highlights and returns matches |
+| `findAndReplace` | Ctrl+F and Ctrl+H open a find and replace box ([guide](./find-and-replace)) |
 | `manualColumnResize`, `manualRowResize` | Resize by dragging header borders |
 | `manualColumnMove`, `manualRowMove` | Reorder by dragging headers |
 | `manualColumnFreeze` | Freeze columns from the context menu |

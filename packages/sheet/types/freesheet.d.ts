@@ -1471,6 +1471,7 @@ declare namespace FreeSheet {
     commentedCellClassName?: string;
     comments?: boolean | CommentObject[];
     contextMenu?: boolean | any[] | contextMenu.Settings;
+    findAndReplace?: boolean;
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
       'text_color' | 'alignment' | 'clear'> };
     statusBar?: boolean | {

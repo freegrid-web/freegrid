@@ -27,6 +27,8 @@ export default function createGrid(container) {
     rowHeaders: true,
     stretchH: 'all',
     search: true,
+    // Ctrl+F finds, Ctrl+H finds and replaces.
+    findAndReplace: true,
     contextMenu: true,
   });
 

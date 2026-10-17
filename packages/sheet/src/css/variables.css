@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar, .fs-status-bar) {
+  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar, .fs-status-bar, .fs-find) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */
@@ -147,6 +147,11 @@
   --fs-menu-background: var(--fs-color-background); /* Menu background. */
   --fs-menu-border-color: var(--fs-color-border, var(--fs-style-color-border)); /* Menu border. */
   --fs-menu-disabled-text: var(--fs-color-muted-text); /* Disabled items. */
+  --fs-find-radius: 4px; /* Corners of the find and replace box. */
+  --fs-find-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* Its shadow. */
+  --fs-find-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */
+  --fs-find-result-background: rgb(255 200 0 / 30%); /* Cells that match. */
+  --fs-find-current-background: rgb(255 150 0 / 55%); /* The current match. */
   --fs-formatting-bar-radius: 4px; /* Corners of the formatting bar and its palettes. */
   --fs-formatting-bar-shadow: 0 2px 8px rgb(0 0 0 / 18%); /* Their shadow. */
   --fs-formatting-bar-hover-background: var(--fs-menu-hover-background, var(--fs-style-menu-hover-background)); /* Hovered button. */

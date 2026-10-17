@@ -31,10 +31,16 @@
   New guide page.
 - Freezing from the context menu: the `'freeze'` entry (not in the default menu) freezes panes at the selected cell,
   the top row or the first column, or unfreezes.
+- Find and replace (`findAndReplace: true`): Ctrl+F opens a find box at the top right of the grid that highlights
+  the matches and goes through them ("2 of 5"); Ctrl+H adds Replace and Replace all (one undo step). Options: match
+  case, entire cell, search in formulas. Read-only cells stay. The plugin's `find` and `replace` work from code. New
+  guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed
 
+- The cell editor no longer takes the focus back a moment after a cell is selected while the grid does not have the
+  keyboard (a box outside the grid, such as find and replace, keeps it).
 - A command in a submenu inside a submenu (Conditional formatting ▸ Data Bars ▸ a color) did nothing when clicked, and
   left the first menu open.
 - `updateSettings` on a sheet with formulas no longer makes the formula engine's model again when `formulas` did not
