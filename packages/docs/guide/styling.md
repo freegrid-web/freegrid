@@ -50,6 +50,11 @@ Users format cells as in a spreadsheet ([example](../examples/formatting)):
   or off when all of them have it).
 - The context menu's **Format** entry has bold, italic, underline, strikethrough, text and fill colors, and
   **Clear formatting**. Add its key `'formatting'` to your menu: `contextMenu: [..., 'alignment', 'formatting']`.
+- `formattingBar: true` opens a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and
+  text colors, alignment and clear formatting. `formattingBar: { items: ['bold', 'fill_color'] }` chooses the buttons
+  (`'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`, `'text_color'`, `'alignment'`, `'clear'`).
+- The color palettes (in the bar and in the menu) show a color on the selected cells while the pointer is on it; a
+  click keeps it, and closing the palette without a choice leaves the cells as they were.
 
 In code, `setCellStyle(style, ranges?)` merges `style` into the selected cells (or the given ranges); a `null`
 property removes that property, and a `null` style removes the whole style. Undo takes any of these back, and the

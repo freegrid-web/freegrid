@@ -162,3 +162,4 @@ hot.setLoading('Reading…');
 const loading: boolean = hot.isLoading();
 hot.setCellStyle({ fontWeight: 'bold', color: null });
 hot.setCellStyle(null, hot.getSelectedRange());
+hot.updateSettings({ formattingBar: { items: ['bold', 'fill_color'] } }, false);

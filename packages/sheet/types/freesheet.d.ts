@@ -1467,6 +1467,8 @@ declare namespace FreeSheet {
     commentedCellClassName?: string;
     comments?: boolean | CommentObject[];
     contextMenu?: boolean | any[] | contextMenu.Settings;
+    formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
+      'text_color' | 'alignment' | 'clear'> };
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;

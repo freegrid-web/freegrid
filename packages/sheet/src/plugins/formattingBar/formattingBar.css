@@ -1,0 +1,152 @@
+/* The formatting bar above the context menu, and its palettes. */
+.fs-formatting-bar {
+  position: absolute;
+  z-index: 1061; /* above the context menu */
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--fs-menu-background);
+  color: var(--fs-cell-text);
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-formatting-bar-radius);
+  box-shadow: var(--fs-formatting-bar-shadow);
+  font: 13px/1 sans-serif;
+}
+
+.fs-formatting-bar__split,
+.fs-formatting-bar__group {
+  display: inline-flex;
+}
+
+.fs-formatting-bar__group,
+.fs-formatting-bar__split {
+  padding-left: 2px;
+  border-left: 1px solid var(--fs-menu-separator-color);
+}
+
+.fs-formatting-bar__button,
+.fs-formatting-bar__arrow {
+  position: relative;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fs-formatting-bar__arrow {
+  min-width: 14px;
+  padding: 0 2px;
+}
+
+.fs-formatting-bar__arrow::after {
+  content: '';
+  display: inline-block;
+  border: 4px solid transparent;
+  border-top-color: currentColor;
+  border-bottom-width: 0;
+  vertical-align: middle;
+}
+
+.fs-formatting-bar__button:hover,
+.fs-formatting-bar__arrow:hover,
+.fs-formatting-bar__arrow[aria-expanded='true'] {
+  background: var(--fs-formatting-bar-hover-background);
+}
+
+.fs-formatting-bar__button[aria-pressed='true'] {
+  background: var(--fs-formatting-bar-pressed-background);
+}
+
+.fs-formatting-bar svg {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+/* The color a fill or text color button sets. */
+.fs-formatting-bar__color {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 3px;
+  height: 3px;
+}
+
+.fs-palette {
+  padding: 8px;
+  color: var(--fs-cell-text);
+  font: 12px/1.2 sans-serif;
+  white-space: normal;
+  cursor: default;
+}
+
+.fs-formatting-bar__palette {
+  position: absolute;
+  top: 100%;
+  margin-top: 4px;
+  background: var(--fs-menu-background);
+  border: 1px solid var(--fs-menu-border-color);
+  border-radius: var(--fs-formatting-bar-radius);
+  box-shadow: var(--fs-formatting-bar-shadow);
+}
+
+.fs-palette__heading {
+  margin: 2px 0 6px;
+  font-weight: bold;
+}
+
+.fs-palette__row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.fs-palette__row:nth-child(2),
+.fs-palette__row:nth-child(9) {
+  margin-bottom: 8px;
+}
+
+.fs-palette__swatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--fs-palette-swatch-border);
+  cursor: pointer;
+}
+
+.fs-palette__swatch:hover {
+  outline: 2px solid var(--fs-selection-border-color);
+  outline-offset: 1px;
+}
+
+.fs-palette__button {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 5px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fs-palette__button:hover {
+  background: var(--fs-formatting-bar-hover-background);
+}
+
+.fs-palette__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}

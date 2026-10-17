@@ -1,4 +1,6 @@
-import { PALETTE, selectionHasToggle, setCellStyle, toggleCellStyle, type StyleToggle } from './../../../formatting/formatting';
+import { previewCellStyle, selectionHasToggle, setCellStyle, toggleCellStyle, type StyleToggle }
+  from './../../../formatting/formatting';
+import { createPalette } from './../../../formatting/palette';
 import { markLabelAsSelected } from './../utils';
 import { KEY as SEPARATOR } from './separator';
 import * as C from './../../../i18n/constants';
@@ -22,31 +24,39 @@ const toggleOption = (toggle: StyleToggle, label: string): MenuItem => ({
   },
 });
 
-/** The color entries of "Text color" (`color`) or "Fill color" (`background`), and one that removes the color. */
+/** The palette of a grid, for `color` or `background`: pointing previews, clicking sets and closes the menu. */
+export const paletteFor = (grid: PluginHost, property: 'color' | 'background', done: () => void): HTMLElement =>
+  createPalette({
+    labels: {
+      theme: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_THEME_COLORS) as string,
+      standard: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_STANDARD_COLORS) as string,
+      none: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_NO_COLOR) as string,
+      more: grid.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_MORE_COLORS) as string,
+    },
+    preview: color => previewCellStyle(grid as FormattingGrid, color === void 0 ? void 0 : { [property]: color }),
+    pick: (color) => {
+      setCellStyle(grid as FormattingGrid, { [property]: color });
+      done();
+    },
+  });
+
+/** "Text color" (`color`) or "Fill color" (`background`): a submenu with a palette. */
 const colorMenu = (name: string, label: string, property: 'color' | 'background'): MenuItem => ({
   key: `${KEY}:${name}`,
   name(this: PluginHost) {
     return this.getTranslatedPhrase(label);
   },
   submenu: {
-    items: [
-      ...PALETTE.map((color, index) => ({
-        key: `${KEY}:${name}:${name}_${index}`,
-        name: () => `<span class="fs-swatch" style="background:${color}"></span>${color}`,
-        callback(this: PluginHost) {
-          setCellStyle(this as FormattingGrid, { [property]: color });
-        },
-      })),
-      {
-        key: `${KEY}:${name}:${name}_none`,
-        name(this: PluginHost) {
-          return this.getTranslatedPhrase(C.CONTEXTMENU_ITEMS_FORMAT_NO_COLOR);
-        },
-        callback(this: PluginHost) {
-          setCellStyle(this as FormattingGrid, { [property]: null });
-        },
+    items: [{
+      key: `${KEY}:${name}:palette`,
+      name: '',
+      isCommand: false,
+      disableSelection: true,
+      // `this` is the grid the menu belongs to (the first argument is the menu's own table).
+      renderer(this: PluginHost) {
+        return paletteFor(this, property, () => this.getPlugin('contextMenu').close());
       },
-    ] as MenuItem[],
+    }] as MenuItem[],
   },
 });
 

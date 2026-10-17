@@ -23,6 +23,7 @@ import {
 } from './predefinedItems';
 
 import type { ItemsPattern } from './itemsFactory';
+import { previewCellStyle } from './../../formatting/formatting';
 
 import './contextMenu.css';
 
@@ -351,6 +352,8 @@ class ContextMenu extends BasePlugin {
    * @private
    */
   onMenuAfterClose(): void {
+    // A palette may be showing a color on the cells.
+    previewCellStyle(this.hot as unknown as Parameters<typeof previewCellStyle>[0], void 0);
     this.hot.listen();
     this.hot.runHooks('afterContextMenuHide', this);
   }

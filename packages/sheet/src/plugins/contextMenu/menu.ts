@@ -534,7 +534,7 @@ class Menu {
 
     } else if (typeof item.renderer === 'function') {
       addClass(TD, 'fs-custom-menu-renderer');
-      TD.appendChild(item.renderer(hot, wrapper, row, col, prop, itemValue));
+      TD.appendChild(item.renderer.call(this.hot, hot, wrapper, row, col, prop, itemValue));
 
     } else {
       fastInnerHTML(wrapper, itemValue as string);

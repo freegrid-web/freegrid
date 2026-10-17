@@ -38,6 +38,10 @@ const dictionary: LanguageDictionary = {
   [C.CONTEXTMENU_ITEMS_FORMAT_FILL_COLOR]: 'Fill color',
   [C.CONTEXTMENU_ITEMS_FORMAT_NO_COLOR]: 'No color',
   [C.CONTEXTMENU_ITEMS_FORMAT_CLEAR]: 'Clear formatting',
+  [C.CONTEXTMENU_ITEMS_FORMAT_THEME_COLORS]: 'Theme colors',
+  [C.CONTEXTMENU_ITEMS_FORMAT_STANDARD_COLORS]: 'Standard colors',
+  [C.CONTEXTMENU_ITEMS_FORMAT_MORE_COLORS]: 'More colors…',
+  [C.FORMATTING_BAR]: 'Formatting',
 
   [C.CONTEXTMENU_ITEMS_FREEZE_COLUMN]: 'Freeze column',
   [C.CONTEXTMENU_ITEMS_UNFREEZE_COLUMN]: 'Unfreeze column',

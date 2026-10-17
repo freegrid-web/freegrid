@@ -12,6 +12,7 @@ import CustomBorders from './customBorders/customBorders';
 import DragToScroll from './dragToScroll/dragToScroll';
 import DropdownMenu from './dropdownMenu/dropdownMenu';
 import Filters from './filters/filters';
+import FormattingBar from './formattingBar/formattingBar';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
 import HiddenColumns from './hiddenColumns/hiddenColumns';
@@ -45,6 +46,7 @@ export {
   DragToScroll,
   DropdownMenu,
   Filters,
+  FormattingBar,
   FormulaBar,
   Formulas,
   HiddenColumns,

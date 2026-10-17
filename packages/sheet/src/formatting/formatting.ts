@@ -58,9 +58,47 @@ const compact = (style: Record<string, unknown>): CellStyle | undefined => {
   return Object.keys(result).length ? result as CellStyle : void 0;
 };
 
+/** The styles the selected cells had before a preview, by grid. */
+const previews = new WeakMap<FormattingHost, [number, number, CellStyle | undefined][]>();
+
+/** Puts back the styles a preview changed (without rendering). */
+const endPreview = (grid: FormattingHost): boolean => {
+  const before = previews.get(grid);
+
+  previews.delete(grid);
+  before?.forEach(([row, col, style]) => grid.setCellMeta(row, col, 'style', style));
+
+  return !!before;
+};
+
+/**
+ * Shows a style on the selected cells without setting it (as a palette does while the pointer is on a color);
+ * `undefined` shows the cells as they are again. Setting a style ends the preview.
+ */
+export const previewCellStyle = (grid: FormattingHost, style: Partial<Record<keyof CellStyle, string | null>> |
+  undefined): void => {
+  const ended = endPreview(grid);
+
+  if (style !== void 0) {
+    const before: [number, number, CellStyle | undefined][] = [];
+
+    eachCell(grid, grid.getSelectedRange() || [], (row, col) => {
+      const current = grid.getCellMeta(row, col).style;
+
+      before.push([row, col, current]);
+      grid.setCellMeta(row, col, 'style', compact({ ...current, ...style }));
+    });
+    previews.set(grid, before);
+  }
+  if (ended || style !== void 0) {
+    grid.render();
+  }
+};
+
 /** Gives each cell of the ranges the style `restyle` makes of its style; runs `afterSetCellStyle` and renders. */
 const restyleCells = (grid: FormattingHost, ranges: CellRange[] | undefined,
   restyle: (style: CellStyle | undefined) => CellStyle | undefined): void => {
+  endPreview(grid);
   if (!ranges || !ranges.length) {
     return;
   }
