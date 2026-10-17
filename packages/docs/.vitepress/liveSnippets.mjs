@@ -119,7 +119,8 @@ export const livePlugin = () => ({
     writeLiveModules();
   },
   handleHotUpdate({ file }) {
-    if (file.endsWith('.md')) {
+    // Pages only: not the built site's copies or the packages' Markdown.
+    if (file.endsWith('.md') && file.startsWith(ROOT) && !/[\\/](\.vitepress|node_modules)[\\/]/.test(file)) {
       writePage(file);
     }
   },
