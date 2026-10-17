@@ -134,6 +134,50 @@ describe('Core formatting', () => {
     expect(hot.isUndoAvailable()).toBe(false);
   });
 
+  describe('text on a fill', () => {
+    const contrast = (cell) => {
+      const luminance = color => color.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number)
+        .map(c => c / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+        .reduce((sum, c, index) => sum + c * [0.2126, 0.7152, 0.0722][index], 0);
+      const [lighter, darker] = [luminance(getComputedStyle(cell).color), luminance(getComputedStyle(cell).backgroundColor)]
+        .sort((a, b) => b - a);
+
+      return (lighter + 0.05) / (darker + 0.05);
+    };
+
+    it('is readable on a light fill in the dark theme and on a dark fill in the light theme', () => {
+      spec().$container.addClass('fs-theme-dark');
+      handsontable({
+        data: [['light fill', 'dark fill', 'own color']],
+        cell: [
+          { row: 0, col: 0, style: { background: '#ffeb84' } },
+          { row: 0, col: 1, style: { background: 'rgb(31, 78, 121)' } },
+          { row: 0, col: 2, style: { background: '#ffeb84', color: '#c00000' } },
+        ],
+      });
+
+      expect(contrast(getCell(0, 0))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(getCell(0, 1))).toBeGreaterThanOrEqual(4.5);
+      expect(getComputedStyle(getCell(0, 2)).color).toBe('rgb(192, 0, 0)'); // a cell's own color stays
+
+      spec().$container.removeClass('fs-theme-dark');
+      render();
+
+      expect(contrast(getCell(0, 0))).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(getCell(0, 1))).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('is readable on a conditional formatting fill in the dark theme', () => {
+      spec().$container.addClass('fs-theme-dark');
+      handsontable({
+        data: [[1], [2], [3]],
+        conditionalFormatting: [{ range: 'A1:A3', colorScale: ['#f8696b', '#ffeb84', '#63be7b'] }],
+      });
+
+      [0, 1, 2].forEach(row => expect(contrast(getCell(row, 0))).toBeGreaterThanOrEqual(4.5));
+    });
+  });
+
   describe('formatting bar', () => {
     afterEach(() => {
       $('.fs-formatting-bar').remove();

@@ -78,8 +78,31 @@
   column groups share one outline model.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
+- Docs:
+  - the guide is grouped by topic (Data, Rows and columns, Editing, Look, Menus and panels, Extending), with new
+    pages Formatting, Sorting, Comments and merged cells, and Selection and keyboard;
+  - live examples in the guide pages: each code block that makes a grid shows it working;
+  - every example has **Copy code** and **Open in playground** (LiveCodes, with the package from npm);
+  - each guide page ends with the API of its topic: settings, methods, events and plugin methods with their signature
+    and a one-line description;
+  - the API reference lists every plugin (row groups, column outline, data validation, hyperlinks, change history,
+    find and replace, status bar, formatting bar and others were missing) and the settings and events of filters, the
+    column menu, hidden rows and columns, nested rows and nested headers.
+
 ### Fixed
 
+- Text on a fill is readable in every theme: a cell style or a conditional formatting rule with a background and no
+  text color gets dark text on a light fill and white text on a dark one (`--fs-text-on-light-fill`,
+  `--fs-text-on-dark-fill`). Before, a light fill in the dark theme had light text.
+- In a document of several sheets, new settings for a sheet that is not shown no longer show its formula bar.
+- A sheet with `minSpareRows` (or `minSpareCols`) in a document with formulas no longer fails while it is created.
+- Conditional formatting: in a narrow column, an icon set's icon and its number stay on one line instead of the
+  number moving under the icon and making the row twice as tall.
+- Links in cells and the text of read-only cells are readable on the cell background (WCAG AA contrast): links have
+  their own color, `--fs-color-link` (`#0563c1`, and `#6cb6ff` in the dark theme), instead of the accent color, and
+  read-only text is `#6e6e6e` instead of `#777`.
+- Types: `setCellStyle` and the `style` setting take every style property (`fontFamily`, `fontSize` and the borders
+  of each side); `CellStyle` is a type of its own.
 - The cell editor no longer takes the focus back a moment after a cell is selected while the grid does not have the
   keyboard (a box outside the grid, such as find and replace, keeps it).
 - A command in a submenu inside a submenu (Conditional formatting ▸ Data Bars ▸ a color) did nothing when clicked, and
