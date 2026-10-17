@@ -8,8 +8,7 @@ const PLUGINS_622 = ['AutoColumnSize', 'AutoRowSize', 'AutoFill', 'CollapsibleCo
   'ConditionalFormatting', 'ContextMenu', 'CopyPaste', 'CustomBorders', 'DragToScroll', 'DropdownMenu', 'Filters', 'FindAndReplace',
   'FormattingBar', 'FormulaBar', 'Formulas', 'HiddenColumns', 'HiddenRows', 'ManualColumnFreeze', 'ManualColumnMove',
   'ManualColumnResize', 'ManualRowMove', 'ManualRowResize', 'MergeCells', 'MultipleSelectionHandles', 'NestedHeaders',
-  'NestedRows', 'ObserveChanges', 'PersistentState', 'Search', 'StatusBar', 'TouchScroll', 'UndoRedo'];
-  'NestedRows', 'ObserveChanges', 'PersistentState', 'RowGroups', 'Search', 'TouchScroll', 'UndoRedo'];
+  'NestedRows', 'ObserveChanges', 'PersistentState', 'RowGroups', 'Search', 'StatusBar', 'TouchScroll', 'UndoRedo'];
 
 function windowWith(...scripts) {
   const { window } = new JSDOM('<!doctype html><div id="root"></div>', { runScripts: 'outside-only', pretendToBeVisual: true });
