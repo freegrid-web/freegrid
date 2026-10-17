@@ -15,10 +15,13 @@ export default async function createGrid(container) {
     ],
     rowHeaders: true,
     colHeaders: true,
-    contextMenu: true,
+    // The default menu, then freezing rows and columns.
+    contextMenu: ['row_above', 'row_below', 'remove_row', '---------', 'undo', 'redo', '---------', 'freeze'],
     stretchH: 'all', // the grid fills the width, so do the formula bar and the tabs
     formulas: { engine: Model },
     formulaBar: true,
+    // Select amounts: the bar at the bottom shows their average, count and sum.
+    statusBar: true,
     sheets: [
       { id: 'costs', name: 'Costs', data: [['Item', 'Amount'], ['Rent', 1800], ['Food', 950], ['Transport', 240]] },
       {

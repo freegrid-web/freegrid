@@ -2564,6 +2564,24 @@ DefaultSettings.prototype = {
   formattingBar: void 0,
 
   /**
+   * Shows a status bar below the grid (and below the sheet tabs), as in Excel: the average, count and sum of the
+   * selected cells (formula results; average and sum of the numbers among them) when more than one cell is selected.
+   * `{ items }` chooses the figures from `'average'`, `'count'`, `'numericalCount'`, `'min'`, `'max'` and `'sum'`. In
+   * a document with sheets it shows the active sheet's selection.
+   *
+   * @type {Boolean|Object}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * statusBar: true,
+   * // or
+   * statusBar: { items: ['sum', 'min', 'max'] },
+   * ```
+   */
+  statusBar: void 0,
+
+  /**
    * The id of this grid's sheet in its document (see `addSheet`). The grid created with `new FreeSheet` is
    * `sheet1` by default.
    *

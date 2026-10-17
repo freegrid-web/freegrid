@@ -24,6 +24,13 @@
   in the menu's Text color and Fill color) show a color on the selected cells while the pointer is on it; a click keeps
   it. "More colors…" opens a color area with a hex field: the cells show the color while you choose, OK keeps it, and
   Cancel, Escape or a click elsewhere leaves the cells as they were. New example page.
+- Status bar (`statusBar: true`, or `{ items }`): a bar below the grid and its sheet tabs, as in Excel, with the
+  average, count and sum (or `numericalCount`, `min`, `max`) of the selected cells; in a document it follows the
+  active sheet. Items of your own (`{ label, value }`, at the left with `align: 'left'`), renamed or formatted
+  built-in items, and `format` as `Intl.NumberFormat` options or a function, for the bar or one item; `refresh()`.
+  New guide page.
+- Freezing from the context menu: the `'freeze'` entry (not in the default menu) freezes panes at the selected cell,
+  the top row or the first column, or unfreezes.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

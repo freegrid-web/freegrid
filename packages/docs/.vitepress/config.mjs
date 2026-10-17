@@ -45,6 +45,7 @@ export default defineConfigWithTheme({
             { text: 'Column groups', link: '/guide/column-groups' },
             { text: 'Conditional formatting', link: '/guide/conditional-formatting' },
             { text: 'Side panel', link: '/guide/side-panel' },
+            { text: 'Status bar and frozen panes', link: '/guide/status-bar-and-freezing' },
             { text: 'Excel and CSV files', link: '/guide/files' },
             { text: 'Data and events', link: '/guide/data-and-events' },
             { text: 'Plugins', link: '/guide/plugins' },

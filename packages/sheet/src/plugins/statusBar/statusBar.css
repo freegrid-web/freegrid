@@ -1,0 +1,36 @@
+/*
+ * The status bar (the statusBar setting): a strip below the grid and its sheet tabs, in the headers' colors, with the
+ * figures of the selected cells at the right: [                 Average: 3   Count: 4   Sum: 12 ]
+ */
+.fs-status-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  box-sizing: border-box;
+  min-height: 26px;
+  padding: 4px 10px;
+  border: 1px solid var(--fs-cell-border-color);
+  border-top: 0;
+  background: var(--fs-header-background);
+  color: var(--fs-header-text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.fs-document > .fs-status-bar {
+  flex: 0 0 auto;
+}
+
+.fs-status-bar__left,
+.fs-status-bar__right {
+  display: flex;
+  gap: 20px;
+  min-width: 0;
+}
+
+.fs-status-bar__right {
+  margin-left: auto;
+}

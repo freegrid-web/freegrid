@@ -125,6 +125,13 @@ export const TOPICS = [
     settings: ['formattingBar'],
   },
   {
+    name: 'Status bar',
+    description: 'The average, count and sum of the selected cells, below the grid.',
+    methods: [],
+    events: [],
+    settings: ['statusBar'],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],

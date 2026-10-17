@@ -163,3 +163,7 @@ const loading: boolean = hot.isLoading();
 hot.setCellStyle({ fontWeight: 'bold', color: null });
 hot.setCellStyle(null, hot.getSelectedRange());
 hot.updateSettings({ formattingBar: { items: ['bold', 'fill_color'] } }, false);
+hot.updateSettings({ statusBar: { items: ['sum', 'max'] } }, false);
+hot.updateSettings({ statusBar: { items: [{ item: 'sum', label: 'Total', format: { maximumFractionDigits: 2 } },
+  { label: 'Median', value: ({ numbers }) => numbers[0] ?? null }, { align: 'left', value: () => 'Ready' }],
+format: (value, { item }) => `${item}: ${String(value)}` } }, false);

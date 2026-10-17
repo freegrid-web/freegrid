@@ -108,7 +108,7 @@
 
 /* == Components that follow a base variable (declared on the grid and on the parts FreeSheet appends to <body>) == */
 :where(.freesheet, .fs-context-menu, .fs-comments-container, .fs-datepicker-holder, .fs-formula-bar, .fs-sheet-tabs,
-  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar) {
+  .fs-sheet-menu, .fs-dropdown-menu, .fs-side-panel, .fs-panel-host, .fs-formatting-bar, .fs-status-bar) {
   /* == Cells == */
   --fs-cell-background: var(--fs-color-background); /* Cell background. */
   --fs-cell-text: var(--fs-color-text, var(--fs-style-color-text)); /* Cell text (the page's text color by default). */

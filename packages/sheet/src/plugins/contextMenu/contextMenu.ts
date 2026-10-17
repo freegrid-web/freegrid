@@ -60,6 +60,8 @@ Hooks.getSingleton().register('afterContextMenuExecute');
  * * `'alignment'`
  * * `'formatting'` (bold, italic, underline, strikethrough, text and fill colors, clear formatting; not in the default
  *   menu)
+ * * `'freeze'` (freeze panes at the selected cell, the top row or the first column, or unfreeze; not in the default
+ *   menu)
  * * `'---------'` (menu item separator)
  * * `'borders'` (with {@link Options#customBorders} turned on)
  * * `'commentsAddEdit'` (with {@link Options#comments} turned on)
@@ -287,6 +289,7 @@ class ContextMenu extends BasePlugin {
    *  * `'formatting:bold'`, `'formatting:italic'`, `'formatting:underline'`, `'formatting:strikethrough'` - Toggle
    *  * `'formatting:text_color:text_color_<n>'`, `'formatting:fill_color:fill_color_<n>'` - A color (`_none` removes it)
    *  * `'formatting:clear'` - Clear formatting
+   *  * `'freeze:panes'`, `'freeze:top_row'`, `'freeze:first_column'`, `'freeze:unfreeze'` - Freeze rows and columns
    *
    * Or you can execute command registered in settings where `key` is your command name.
    *

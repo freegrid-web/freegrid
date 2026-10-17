@@ -36,6 +36,7 @@ const PAGES = [
   { path: 'examples/files.html', grids: 1 },
   { path: 'examples/formatting.html', grids: 1 },
   { path: 'guide/files.html', grids: 0 },
+  { path: 'guide/status-bar-and-freezing.html', grids: 0 },
   { path: 'guide/theming.html', grids: 1 },
   { path: 'guide/data-and-events.html', grids: 0 },
   { path: 'api/methods.html', grids: 0 },
