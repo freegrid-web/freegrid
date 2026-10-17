@@ -95,6 +95,9 @@ const bookCell = (source: unknown, shown: unknown, meta: Meta): BookCell | null 
   if (meta.style && typeof meta.style === 'object' && Object.keys(meta.style).length) {
     cell.style = { ...(meta.style as object) };
   }
+  if (typeof meta.link === 'string' && meta.link) {
+    cell.link = meta.link;
+  }
   const align: Record<string, string> = {};
 
   String(meta.className || '').split(/\s+/).forEach((name) => {
@@ -274,6 +277,9 @@ export const bookToDocument = (book: Book, options: FileOptions = {}): Record<st
           }
           if (cell.style) {
             meta.style = cell.style;
+          }
+          if (cell.link) {
+            meta.link = cell.link;
           }
           const classes = [cell.align?.horizontal && `fs-${cell.align.horizontal}`,
             cell.align?.vertical && `fs-${cell.align.vertical}`].filter(Boolean);

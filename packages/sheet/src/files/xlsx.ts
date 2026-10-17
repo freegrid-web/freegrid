@@ -19,6 +19,8 @@ export type BookCell = {
   numFmt?: string;
   style?: CellStyle;
   align?: { horizontal?: string; vertical?: string; wrap?: boolean };
+  /** A hyperlink (`https://…`, `mailto:…`). */
+  link?: string;
 };
 export type BookComment = { row: number; column: number; text: string; author?: string };
 export type BookSheet = {
@@ -343,6 +345,11 @@ const cellXml = (cell: BookCell, ref: string, styles: StyleSheet): string => {
   return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${escapeXml(value)}</t></is></c>`;
 };
 
+/** The cells of a sheet that have a hyperlink, in reading order (their relationships are `rIdLink1`, `rIdLink2`, …). */
+const linksOf = (sheet: BookSheet): { row: number; column: number; link: string }[] => sheet.cells.flatMap((cells, row) =>
+  (cells || []).map((cell, column) => (cell && cell.link ? { row, column, link: cell.link } : null))
+    .filter((link): link is { row: number; column: number; link: string } => !!link));
+
 const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: StyleSheet, hasComments: boolean): string => {
   const rows = sheet.cells.length;
   const columns = Math.max(0, ...sheet.cells.map(row => (row ? row.length : 0)), sheet.columnWidths.length);
@@ -393,6 +400,9 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
 
     return `<conditionalFormatting sqref="${escapeXml(ranges.join(' '))}">${xml}</conditionalFormatting>`;
   }).join('');
+  const links = linksOf(sheet);
+  const hyperlinks = links.length ? `<hyperlinks>${links.map((link, i) => `<hyperlink ref="${
+    cellRef(link.row, link.column)}" r:id="rIdLink${i + 1}"/>`).join('')}</hyperlinks>` : '';
   const dimension = rows && columns ? formatRange({ r1: 0, c1: 0, r2: Math.max(0, rows - 1), c2: Math.max(0, columns - 1) }) :
     'A1';
 
@@ -401,6 +411,8 @@ const sheetXml = (sheet: BookSheet, index: number, active: boolean, styles: Styl
     ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"${
     outlineLevel ? ` outlineLevelRow="${outlineLevel}"` : ''}/>${
     cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hasComments ?
+    ' tabSelected="1"' : ''} workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${
+    cols ? `<cols>${cols}</cols>` : ''}<sheetData>${sheetData}</sheetData>${merges}${formatting}${hyperlinks}${hasComments ?
     `<legacyDrawing r:id="rIdVml${index}"/>` : ''}</worksheet>`;
 };
 
@@ -442,13 +454,20 @@ export const writeXlsx = async(book: Book): Promise<Uint8Array> => {
 
     files.push({ name: `xl/worksheets/sheet${number}.xml`, content: xml });
     overrides.push(`<Override PartName="/xl/worksheets/sheet${number}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`);
+    const relationshipsXml: string[] = linksOf(sheet).map((link, i) => `<Relationship Id="rIdLink${i + 1}" Type="${
+      REL_TYPE}/hyperlink" Target="${escapeXml(link.link)}" TargetMode="External"/>`);
+
     if (hasComments) {
       files.push({ name: `xl/comments${number}.xml`, content: commentsXml(sheet.comments) });
       files.push({ name: `xl/drawings/vmlDrawing${number}.vml`, content: vmlXml(sheet.comments) });
-      files.push({ name: `xl/worksheets/_rels/sheet${number}.xml.rels`, content: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="${PKG_REL_NS}"><Relationship Id="rIdComments${number}" Type="${REL_TYPE}/comments" Target="../comments${number}.xml"/>`
-        + `<Relationship Id="rIdVml${number}" Type="${REL_TYPE}/vmlDrawing" Target="../drawings/vmlDrawing${number}.vml"/></Relationships>` });
+      relationshipsXml.push(`<Relationship Id="rIdComments${number}" Type="${REL_TYPE}/comments" Target="../comments${
+        number}.xml"/>`, `<Relationship Id="rIdVml${number}" Type="${REL_TYPE}/vmlDrawing" Target="../drawings/vmlDrawing${
+        number}.vml"/>`);
       overrides.push(`<Override PartName="/xl/comments${number}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml"/>`);
+    }
+    if (relationshipsXml.length) {
+      files.push({ name: `xl/worksheets/_rels/sheet${number}.xml.rels`, content: `<?xml version="1.0" encoding="UTF-8" ${
+        ''}standalone="yes"?>\n<Relationships xmlns="${PKG_REL_NS}">${relationshipsXml.join('')}</Relationships>` });
     }
 
     return `<sheet name="${escapeXml(sheet.name)}" sheetId="${number}" r:id="rIdSheet${number}"/>`;
@@ -512,15 +531,18 @@ const resolve = (from: string, target: string): string => {
   return parts.join('/');
 };
 
-const relationships = (files: Map<string, Uint8Array>, part: string): Map<string, { type: string; target: string }> => {
+const relationships = (files: Map<string, Uint8Array>, part: string):
+  Map<string, { type: string; target: string; external: boolean; href: string }> => {
   const folder = part.split('/').slice(0, -1).join('/');
   const name = part.split('/').pop();
   const xml = parseXml(files.get(`${folder ? `${folder}/` : ''}_rels/${name}.rels`));
-  const map = new Map<string, { type: string; target: string }>();
+  const map = new Map<string, { type: string; target: string; external: boolean; href: string }>();
 
   all(xml, 'Relationship').forEach((relationship) => {
-    map.set(attr(relationship, 'Id') || '', { type: attr(relationship, 'Type') || '',
-      target: resolve(part, attr(relationship, 'Target') || '') });
+    const href = attr(relationship, 'Target') || '';
+
+    map.set(attr(relationship, 'Id') || '', { type: attr(relationship, 'Type') || '', target: resolve(part, href),
+      external: attr(relationship, 'TargetMode') === 'External', href });
   });
 
   return map;
@@ -897,8 +919,22 @@ export const readXlsx = async(bytes: Uint8Array): Promise<Book> => {
     });
     sheet.conditionalFormatting = rules.sort((a, b) => a.priority - b.priority).map(({ rule }) => rule);
 
-    // Notes: the comments part of the sheet.
     const sheetRels = relationships(files, path);
+
+    // Hyperlinks to web pages and mail addresses (links inside the workbook are left out).
+    all(xml, 'hyperlink').forEach((hyperlink) => {
+      const ref = parseRange(attr(hyperlink, 'ref') || '');
+      const id = hyperlink.getAttributeNS(REL_NS, 'id') || attr(hyperlink, 'r:id') || '';
+      const target = sheetRels.get(id);
+
+      if (ref && target?.external && /^(https?:|mailto:)/i.test(target.href)) {
+        const cells = (sheet.cells[ref.r1] = sheet.cells[ref.r1] || []);
+
+        cells[ref.c1] = { ...cells[ref.c1], link: target.href };
+      }
+    });
+
+    // Notes: the comments part of the sheet.
     const commentsPath = Array.from(sheetRels.values()).find(relationship => /\/comments$/.test(relationship.type))
       ?.target;
     const comments = parseXml(files.get(commentsPath || ''));

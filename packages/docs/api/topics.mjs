@@ -146,6 +146,13 @@ export const TOPICS = [
     settings: ['findAndReplace'],
   },
   {
+    name: 'Hyperlinks',
+    description: 'Links in cells: the card under a selected link, Ctrl+K to edit, Ctrl+click to open.',
+    methods: [],
+    events: [],
+    settings: ['hyperlinks'],
+  },
+  {
     name: 'Files',
     description: 'Excel (.xlsx) and CSV files: export, download and import.',
     methods: ['exportFile', 'downloadFile', 'importFile', 'setLoading', 'isLoading'],

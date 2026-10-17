@@ -17,6 +17,7 @@ import FormattingBar from './formattingBar/formattingBar';
 import FormulaBar from './formulaBar/formulaBar';
 import Formulas from './formulas/formulas';
 import HiddenColumns from './hiddenColumns/hiddenColumns';
+import Hyperlinks from './hyperlinks/hyperlinks';
 import HiddenRows from './hiddenRows/hiddenRows';
 import ManualColumnFreeze from './manualColumnFreeze/manualColumnFreeze';
 import ManualColumnMove from './manualColumnMove/manualColumnMove';
@@ -55,6 +56,7 @@ export {
   Formulas,
   HiddenColumns,
   HiddenRows,
+  Hyperlinks,
   ManualColumnFreeze,
   ManualColumnMove,
   ManualColumnResize,

@@ -84,6 +84,12 @@ const dictionary: LanguageDictionary = {
   [C.CONTEXTMENU_ITEMS_UNMERGE_CELLS]: 'Unmerge cells',
 
   [C.CONTEXTMENU_ITEMS_COPY]: 'Copy',
+  [C.CONTEXTMENU_ITEMS_PASTE]: 'Paste',
+  [C.CONTEXTMENU_ITEMS_PASTE_SPECIAL]: 'Paste special',
+  [C.CONTEXTMENU_ITEMS_PASTE_VALUES]: 'Values only',
+  [C.CONTEXTMENU_ITEMS_PASTE_FORMULAS]: 'Formulas only',
+  [C.CONTEXTMENU_ITEMS_PASTE_FORMATS]: 'Formatting only',
+  [C.CONTEXTMENU_ITEMS_PASTE_TRANSPOSE]: 'Transposed',
   [C.CONTEXTMENU_ITEMS_CUT]: 'Cut',
 
   [C.CONTEXTMENU_ITEMS_NESTED_ROWS_INSERT_CHILD]: 'Insert child row',
@@ -147,6 +153,14 @@ const dictionary: LanguageDictionary = {
   [C.NESTED_ROWS_OUTDENT]: 'Outdent',
 
   [C.LOADING]: 'Loading…',
+  [C.LINK_INSERT]: 'Insert link',
+  [C.LINK_EDIT]: 'Edit link',
+  [C.LINK_EDIT_BUTTON]: 'Edit',
+  [C.LINK_REMOVE]: 'Remove',
+  [C.LINK_TEXT]: 'Text',
+  [C.LINK_ADDRESS]: 'Link',
+  [C.LINK_APPLY]: 'Apply',
+  [C.LINK_CANCEL]: 'Cancel',
   [C.STATUS_BAR_AVERAGE]: 'Average',
   [C.STATUS_BAR_COUNT]: 'Count',
   [C.STATUS_BAR_NUMERICAL_COUNT]: 'Numerical count',

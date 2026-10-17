@@ -38,3 +38,25 @@ Turn it off to paste values only:
 ```js
 copyPaste: { formats: false }
 ```
+
+## Paste and Paste Special
+
+The context menu has **Paste** (Ctrl+V) and **Paste special**:
+
+| Entry | Pastes |
+| --- | --- |
+| Values only | The formula results, without formatting |
+| Formulas only | The values and formulas, without formatting |
+| Formatting only | Only the formatting; the values stay |
+| Transposed | Rows become columns, with the formatting |
+
+- **Formulas move with the paste:** `=A1` copied from B1 and pasted into D3 becomes `=C3`, as in a spreadsheet.
+- **One undo step** takes back a paste with its formatting.
+- **What is pasted:** the menu entries paste what the grid copied last. A browser does not let a page read the
+  clipboard from a menu without asking. When the user has already allowed it and the clipboard holds something else,
+  that text is pasted (values only).
+
+```js
+await grid.getPlugin('copyPaste').pasteSpecial('values'); // 'all', 'values', 'formulas', 'formats', 'transpose'
+```
+

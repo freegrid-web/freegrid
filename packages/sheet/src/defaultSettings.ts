@@ -2547,6 +2547,21 @@ DefaultSettings.prototype = {
   formulaBar: void 0,
 
   /**
+   * Hyperlinks in cells: a cell's `link` setting (a web or mail address) makes its text a link. Selecting the cell
+   * shows the address (it opens in a new tab), Ctrl+click opens it, and Ctrl+K (or the context menu's Insert link)
+   * edits the text and the link. On unless `false`.
+   *
+   * @type {Boolean}
+   * @default undefined
+   *
+   * @example
+   * ```js
+   * cell: [{ row: 0, col: 0, link: 'https://example.com' }],
+   * ```
+   */
+  hyperlinks: void 0,
+
+  /**
    * Find and replace, as in a spreadsheet: <kbd>Ctrl</kbd>+<kbd>F</kbd> opens a find box at the top right of the grid,
    * <kbd>Ctrl</kbd>+<kbd>H</kbd> the same box with a replace field. Matches are highlighted; <kbd>Enter</kbd> goes to
    * the next one. Options: match case, entire cell, search in formulas. Replace all is one undo step; read-only cells
