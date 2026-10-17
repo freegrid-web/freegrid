@@ -9,7 +9,7 @@ import PasteEvent from './pasteEvent';
 import type { MenuItem } from './../contextMenu/menuItem';
 import { createElement, destroyElement } from './focusableElement';
 import type { FocusableWrapper } from './focusableElement';
-import { arrayToTable, tableToArray } from './utils';
+import { arrayToTable, parseTable, tableToArray } from './utils';
 import { tableToFormats, type CellFormat } from './formats';
 import { setCellFormats } from './../../formatting/formatting';
 import type { CellStyle } from './../../utils/cellStyle';
@@ -437,11 +437,11 @@ class CopyPaste extends BasePlugin {
 
     if (event?.clipboardData) {
       const textHTML = event.clipboardData.getData('text/html');
-      const isTable = textHTML && /(<table)|(<TABLE)/.test(textHTML);
+      const table = textHTML && /(<table)|(<TABLE)/.test(textHTML) ? parseTable(textHTML) : null;
 
       // An HTML table is pasted cell by cell, with its formatting.
-      pastedData = isTable ? tableToArray(textHTML) : event.clipboardData.getData('text/plain');
-      formats = isTable && this.formats ? tableToFormats(textHTML) : null;
+      pastedData = table ? tableToArray(table) : event.clipboardData.getData('text/plain');
+      formats = table && this.formats ? tableToFormats(table) : null;
     }
 
     const inputArray: unknown[][] = typeof pastedData === 'string' ? SheetClip.parse(pastedData) : pastedData ?? [];

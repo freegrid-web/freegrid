@@ -12,17 +12,17 @@ const declarations = (text: string): Record<string, string> => Object.fromEntrie
   .map(([property, ...value]) => [property.trim().toLowerCase(), value.join(':').trim().replace(/!important$/, '')
     .trim()]));
 
-/** The class rules of a pasted document's `<style>` (Excel puts the formatting there: `.xl65 { … }`). */
+/**
+ * The class rules of a pasted document's `<style>` (Excel puts the formatting there: `.xl65 { … }`). A selector's
+ * last part is the class; what comes before it (`td`, comment marks around the rules) does not matter.
+ */
 const classRules = (doc: Document): Map<string, Record<string, string>> => {
   const rules = new Map<string, Record<string, string>>();
 
   doc.querySelectorAll('style').forEach((style) => {
-    // Comments around the rules (`<!-- … -->`, `/* … */`) are not part of them.
-    const text = (style.textContent || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--|-->/g, '');
-
-    for (const match of text.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
-      match[1].split(',').map(selector => selector.trim()).forEach((selector) => {
-        const name = /^(?:td)?\.([\w-]+)$/i.exec(selector)?.[1];
+    for (const match of (style.textContent || '').matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+      match[1].split(',').forEach((selector) => {
+        const name = /\.([\w-]+)\s*$/.exec(selector)?.[1];
 
         if (name) {
           rules.set(name, { ...rules.get(name), ...declarations(match[2]) });
@@ -107,17 +107,11 @@ const formatOf = (cell: HTMLTableCellElement, rules: Map<string, Record<string, 
 };
 
 /**
- * The formatting of the cells of a pasted HTML table, by rows (as `tableToArray` reads their values), or `null` when
- * no cell has any (the paste then keeps the cells' own formatting).
+ * The formatting of the cells of a pasted HTML table (as `parseTable` reads it), by rows (as `tableToArray` reads
+ * their values), or `null` when no cell has any (the paste then keeps the cells' own formatting).
  */
-export const tableToFormats = (html: string): CellFormat[][] | null => {
-  const doc = new DOMParser().parseFromString(html.replace(/\n/g, ''), 'text/html');
-  const table = doc.querySelector('table');
-
-  if (!table) {
-    return null;
-  }
-  const rules = classRules(doc);
+export const tableToFormats = (table: HTMLTableElement): CellFormat[][] | null => {
+  const rules = classRules(table.ownerDocument);
   const formats = Array.from(table.rows, row => Array.from(row.cells, cell => formatOf(cell, rules)));
 
   return formats.some(row => row.some(format => format.style || format.align)) ? formats : null;

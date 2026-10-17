@@ -83,19 +83,23 @@ const cellText = (cell: HTMLTableCellElement): string => {
 };
 
 /**
+ * The first `<table>` of pasted HTML. A parsed document is inert: pasted HTML runs no code and loads nothing
+ * (`innerHTML` of an element would, e.g. an image's `onerror`); its text and styles are only read.
+ */
+export const parseTable = (html: string): HTMLTableElement | null => {
+  const table = new DOMParser().parseFromString(html.replace(/\n/g, ''), 'text/html').querySelector('table');
+
+  return isHTMLTable(table) ? table : null;
+};
+
+/**
  * Converts HTMLTable or string into array.
  *
  * @param element Node element or string, which should contain `<table>...</table>`.
  * @returns The cells' text, by rows (a `<br>` is a new line).
  */
 export const tableToArray = (element: Element | string | null): string[][] => {
-  let checkElement: Element | null = element as Element | null;
-
-  if (typeof element === 'string') {
-    // A parsed document is inert: pasted HTML runs no code and loads nothing (`innerHTML` of an element would, e.g.
-    // an image's `onerror`).
-    checkElement = new DOMParser().parseFromString(element.replace(/\n/g, ''), 'text/html').querySelector('table');
-  }
+  const checkElement: Element | null = typeof element === 'string' ? parseTable(element) : element;
 
   if (!isHTMLTable(checkElement)) {
     return [];
