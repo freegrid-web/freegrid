@@ -4,7 +4,9 @@ import { registerPlugin } from './../../plugins';
 import { applyTheme } from './../../helpers/dom/theme';
 import { formatCells } from './../../formatting/formatting';
 import * as C from './../../i18n/constants';
+import { addItem } from './../contextMenu/predefinedItems';
 import type { MenuItem } from './../contextMenu/menuItem';
+import type { PluginHost } from './../_base';
 
 /**
  * A link as it is kept: `http(s)://…` and `mailto:…` as they are, `example.com/page` as `https://example.com/page`.
@@ -55,7 +57,9 @@ class Hyperlinks extends BasePlugin {
     if (this.enabled) {
       return;
     }
-    this.addHook('afterRenderer', (TD: HTMLTableCellElement, row: number, col: number) => this.markCell(TD, row, col));
+    // The cell's settings come with the hook: no getCellMeta per drawn cell.
+    this.addHook('afterRenderer', (TD: HTMLTableCellElement, _row: number, _col: number, _prop: unknown, _value: unknown,
+      cellProperties: { link?: unknown }) => this.markCell(TD, normalizeLink(cellProperties?.link)));
     this.addHook('afterSelectionEnd', () => this.showCard());
     this.addHook('afterDeselect', () => this.close());
     this.addHook('afterBeginEditing', () => this.close());
@@ -64,7 +68,6 @@ class Hyperlinks extends BasePlugin {
     this.addHook('beforeKeyDown', (event: KeyboardEvent) => this.onBeforeKeyDown(event));
     this.addHook('beforeOnCellMouseDown', (event: MouseEvent, coords: { row: number; col: number }) =>
       this.onCellMouseDown(event, coords));
-    this.addHook('afterContextMenuDefaultOptions', (options: { items: MenuItem[] }) => this.addMenuItem(options));
     super.enablePlugin();
   }
 
@@ -118,9 +121,7 @@ class Hyperlinks extends BasePlugin {
     this.setLink(row, col, null);
   }
 
-  markCell(TD: HTMLTableCellElement, row: number, col: number): void {
-    const link = this.getLink(row, col);
-
+  markCell(TD: HTMLTableCellElement, link: string | null): void {
     TD.classList.toggle('fs-link', !!link);
     if (link) {
       TD.title = link;
@@ -146,16 +147,6 @@ class Hyperlinks extends BasePlugin {
       (event as KeyboardEvent & { stopImmediatePropagation(): void }).stopImmediatePropagation();
       this.edit();
     }
-  }
-
-  addMenuItem(options: { items: MenuItem[] }): void {
-    options.items.push({
-      key: 'link',
-      name: () => String(this.hot.getTranslatedPhrase(this.selectedLink() ? C.LINK_EDIT : C.LINK_INSERT)),
-      shortcut: 'Ctrl+K',
-      callback: () => this.edit(),
-      disabled: () => !this.hot.getSelectedLast(),
-    } as MenuItem);
   }
 
   /** The selected cell (the active one): `[row, col]`. */
@@ -307,6 +298,23 @@ class Hyperlinks extends BasePlugin {
     this.element = null;
   }
 }
+
+// Not in the default menu: add the key 'link' to `contextMenu`.
+addItem('link', (): MenuItem => ({
+  key: 'link',
+  name(this: PluginHost) {
+    const plugin = this.getPlugin('hyperlinks') as unknown as Hyperlinks | undefined;
+
+    return String(this.getTranslatedPhrase(plugin?.selectedLink() ? C.LINK_EDIT : C.LINK_INSERT));
+  },
+  shortcut: 'Ctrl+K',
+  callback(this: PluginHost) {
+    (this.getPlugin('hyperlinks') as unknown as Hyperlinks | undefined)?.edit();
+  },
+  disabled(this: PluginHost) {
+    return !this.getSelectedLast() || !this.getPlugin('hyperlinks')?.enabled;
+  },
+}));
 
 registerPlugin('hyperlinks', Hyperlinks);
 

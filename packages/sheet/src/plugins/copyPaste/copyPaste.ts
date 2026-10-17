@@ -5,7 +5,7 @@ import { getSelectionText } from './../../helpers/dom/element';
 import { registerPlugin } from './../../plugins';
 import copyItem from './contextMenuItem/copy';
 import cutItem from './contextMenuItem/cut';
-import { pasteItem, pasteSpecialItem } from './contextMenuItem/paste';
+import './contextMenuItem/paste';
 import PasteEvent from './pasteEvent';
 import type { MenuItem } from './../contextMenu/menuItem';
 import { createElement, destroyElement } from './focusableElement';
@@ -572,7 +572,7 @@ class CopyPaste extends BasePlugin {
    * @param options Contains default added options of the Context Menu.
    */
   onAfterContextMenuDefaultOptions(options: { items: MenuItem[] }): void {
-    options.items.push({ name: '---------' }, copyItem(this), cutItem(this), pasteItem(this), pasteSpecialItem(this));
+    options.items.push({ name: '---------' }, copyItem(this), cutItem(this));
   }
 
   /**

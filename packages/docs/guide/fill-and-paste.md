@@ -41,7 +41,12 @@ copyPaste: { formats: false }
 
 ## Paste and Paste Special
 
-The context menu has **Paste** (Ctrl+V) and **Paste special**:
+Add **Paste** (Ctrl+V) and **Paste special** to the context menu with the keys `'paste'` and `'paste_special'`:
+
+```js
+contextMenu: ['copy', 'cut', 'paste', 'paste_special']
+```
+
 
 | Entry | Pastes |
 | --- | --- |

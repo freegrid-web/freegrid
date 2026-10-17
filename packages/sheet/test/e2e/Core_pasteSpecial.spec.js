@@ -26,7 +26,7 @@ describe('Core paste special', () => {
     const hot = handsontable({
       data: [[1, '=A1*10', null, null], [2, 'x', null, null], [null, null, null, null], [null, null, null, null]],
       formulas: { engine: engine.Model },
-      contextMenu: true,
+      contextMenu: ['copy', 'paste', 'paste_special'],
       cell: [{ row: 0, col: 0, style: { fontWeight: 'bold' } }],
     });
     const plugin = hot.getPlugin('copyPaste');
@@ -74,7 +74,7 @@ describe('Core paste special', () => {
     expect(hot.getData(2, 2, 3, 3)).toEqual([[1, 2], [10, 'x']]);
   });
 
-  it('is in the context menu, next to Paste', async() => {
+  it('is in the context menu with the keys paste and paste_special', async() => {
     await copied();
     contextMenu();
     const text = $('.fs-context-menu td').map((i, td) => $(td).text()).get();

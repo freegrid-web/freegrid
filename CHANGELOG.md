@@ -51,9 +51,10 @@
   and the corner's level buttons show the outline down to a level. Groups follow added and removed rows;
   `getDocument()` and Excel files (`outlineLevel`) keep them. New guide page.
 - Paste and Paste Special in the context menu: values only, formulas only, formatting only, transposed; formulas
+- Paste and Paste Special in the context menu (keys `'paste'` and `'paste_special'`): values only, formulas only, formatting only, transposed; formulas
   move with the paste (`=A1` becomes `=C3`); one undo step. `getPlugin('copyPaste').pasteSpecial(mode)`.
 - Hyperlinks: a cell's `link` setting makes its text a link; a card under the selected link shows the address (opens
-  in a new tab), Edit and Remove; Ctrl+click opens it; Ctrl+K (or Insert link in the context menu) edits text and
+  in a new tab), Edit and Remove; Ctrl+click opens it; Ctrl+K (or Insert link in the context menu, key `'link'`) edits text and
   link in one undo step. Only web and mail links are kept. `getDocument()` and Excel files keep them. Plugin
   `hyperlinks` (on unless `false`). New guide page.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).

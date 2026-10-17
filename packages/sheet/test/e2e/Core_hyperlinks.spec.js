@@ -56,7 +56,7 @@ describe('Core hyperlinks', () => {
   });
 
   it('removes a link from its card, and has an entry in the context menu', () => {
-    const hot = handsontable({ data: [['a']], contextMenu: true, cell: [{ row: 0, col: 0, link: 'mailto:a@b.c' }] });
+    const hot = handsontable({ data: [['a']], contextMenu: ['link'], cell: [{ row: 0, col: 0, link: 'mailto:a@b.c' }] });
 
     selectCell(0, 0);
     contextMenu();

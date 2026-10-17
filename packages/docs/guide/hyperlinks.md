@@ -18,7 +18,7 @@ new FreeSheet(container, {
 
 - **Selecting** a cell with a link shows a card under it: the address (it opens in a new tab), **Edit** and **Remove**.
 - **Ctrl+click** (⌘+click on a Mac) opens the link.
-- **Ctrl+K**, or the context menu's **Insert link**, edits the selected cell's text and link. Enter applies, Escape
+- **Ctrl+K**, or the context menu's **Insert link** (add its key `'link'` to `contextMenu`), edits the selected cell's text and link. Enter applies, Escape
   cancels, and one undo step takes back both.
 - **Addresses:** only web (`http`, `https`) and mail (`mailto`) links are kept. `example.com/page` becomes
   `https://example.com/page`; anything else, such as `javascript:`, is refused.
