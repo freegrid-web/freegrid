@@ -77,8 +77,8 @@ hot.loadDocument(JSON.parse(localStorage.getItem('book')));
 
 ## Fitting in your element
 
-With `formulaBar`, `sheets` or `sheetTabs` set when the grid is created, the element you give FreeSheet holds
-everything: the formula bar, every sheet and the tab bar. When the element has a height, the bars take what they
+With `formulaBar`, `statusBar`, `sheets` or `sheetTabs` set when the grid is created, the element you give
+FreeSheet holds everything: the formula bar, every sheet, the tab bar and the status bar. When the element has a height, the bars take what they
 need and the sheet fills the rest and scrolls inside; without a height, everything is as tall as its content. Make
 the element as big as you want the whole component to be. (`rootElement` is then the sheet's own element inside it.)
 Turned on later (`updateSettings`, or `addSheet` on a grid created without these settings), the bars and the sheets

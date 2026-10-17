@@ -288,10 +288,10 @@ class Core {
 
     this.isDestroyed = false;
 
-    // With a formula bar or sheets, the given element is the frame: the bars and every sheet go inside it, and the
+    // With a formula bar, a status bar or sheets, the given element is the frame: the bars and every sheet go inside it, and the
     // grid takes the height that is left (when the element has a height; otherwise all are as tall as their content).
     // A sheet that addSheet creates is already inside a frame.
-    if ((userSettings.formulaBar || userSettings.sheetTabs || userSettings.sidePanel ||
+    if ((userSettings.formulaBar || userSettings.sheetTabs || userSettings.sidePanel || userSettings.statusBar ||
       (Array.isArray(userSettings.sheets) && userSettings.sheets.length)) &&
       !rootElement.classList.contains('fs-document__sheet')) {
       const gridElement = document.createElement('div');

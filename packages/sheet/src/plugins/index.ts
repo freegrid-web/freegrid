@@ -28,6 +28,7 @@ import NestedRows from './nestedRows/nestedRows';
 import MultipleSelectionHandles from './multipleSelectionHandles/multipleSelectionHandles';
 import ObserveChanges from './observeChanges/observeChanges';
 import Search from './search/search';
+import StatusBar from './statusBar/statusBar';
 import TouchScroll from './touchScroll/touchScroll';
 import UndoRedo from './undoRedo/undoRedo';
 import Base from './_base';
@@ -63,6 +64,7 @@ export {
   ObserveChanges,
   PersistentState,
   Search,
+  StatusBar,
   TouchScroll,
   UndoRedo,
   Base,

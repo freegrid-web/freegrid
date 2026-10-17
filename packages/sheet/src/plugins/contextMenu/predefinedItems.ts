@@ -1,6 +1,7 @@
 import type { MenuItem } from './menuItem';
 import alignmentItem, { KEY as ALIGNMENT } from './predefinedItems/alignment';
 import formattingItem, { KEY as FORMATTING } from './predefinedItems/formatting';
+import freezeItem, { KEY as FREEZE } from './predefinedItems/freeze';
 import clearColumnItem, { KEY as CLEAR_COLUMN } from './predefinedItems/clearColumn';
 import columnLeftItem, { KEY as COLUMN_LEFT } from './predefinedItems/columnLeft';
 import columnRightItem, { KEY as COLUMN_RIGHT } from './predefinedItems/columnRight';
@@ -15,6 +16,7 @@ import undoItem, { KEY as UNDO } from './predefinedItems/undo';
 
 export { KEY as ALIGNMENT } from './predefinedItems/alignment';
 export { KEY as FORMATTING } from './predefinedItems/formatting';
+export { KEY as FREEZE } from './predefinedItems/freeze';
 export { KEY as CLEAR_COLUMN } from './predefinedItems/clearColumn';
 export { KEY as COLUMN_LEFT } from './predefinedItems/columnLeft';
 export { KEY as COLUMN_RIGHT } from './predefinedItems/columnRight';
@@ -29,7 +31,7 @@ export { KEY as UNDO } from './predefinedItems/undo';
 
 export const ITEMS = [
   ROW_ABOVE, ROW_BELOW, COLUMN_LEFT, COLUMN_RIGHT, CLEAR_COLUMN, REMOVE_ROW, REMOVE_COLUMN, UNDO, REDO, READ_ONLY,
-  ALIGNMENT, FORMATTING, SEPARATOR,
+  ALIGNMENT, FORMATTING, FREEZE, SEPARATOR,
 ];
 
 /** Makes a menu item (a new object each time). */
@@ -49,6 +51,7 @@ const _predefinedItems: Record<string, ItemFactory> = {
   [READ_ONLY]: readOnlyItem,
   [ALIGNMENT]: alignmentItem,
   [FORMATTING]: formattingItem,
+  [FREEZE]: freezeItem,
 };
 
 /**

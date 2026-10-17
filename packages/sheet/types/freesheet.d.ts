@@ -1469,6 +1469,7 @@ declare namespace FreeSheet {
     contextMenu?: boolean | any[] | contextMenu.Settings;
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
       'text_color' | 'alignment' | 'clear'> };
+    statusBar?: boolean | { items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum'> };
     contextMenuCopyPaste?: object;
     copyable?: boolean;
     copyColsLimit?: number;
