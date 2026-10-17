@@ -1,5 +1,6 @@
 import { defineConfigWithTheme } from 'vitepress';
 import baseConfig from 'vitepress-carbon/config';
+import { liveBlocks, livePlugin } from './liveSnippets.mjs';
 
 export default defineConfigWithTheme({
   // GitHub-style theme: https://carbon.breno.tech
@@ -7,7 +8,11 @@ export default defineConfigWithTheme({
   title: 'FreeSheet',
   description: 'A free, MIT-licensed, spreadsheet-like data grid for the web.',
   base: '/sheet/',
+  markdown: {
+    config: liveBlocks,
+  },
   vite: {
+    plugins: [livePlugin()],
     // Pre-bundling would move IronCalc's wasm.js away from wasm_bg.wasm, which it loads by a relative URL.
     optimizeDeps: { exclude: ['@ironcalc/wasm'] },
   },

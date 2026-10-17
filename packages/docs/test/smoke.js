@@ -104,8 +104,14 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
   page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
   await page.goto(`${origin}${BASE}${path}`);
-  if (grids > 0) {
-    await page.waitForSelector('.live-example .handsontable .htCore', { timeout: 10000 }).catch(() => {});
+  // Every live example of the page renders (the pages' ```js live blocks too), at least `grids`.
+  await page.waitForLoadState('load');
+  const frames = await page.locator('.live-example').count();
+  const expected = Math.max(grids, frames);
+
+  if (expected > 0) {
+    await page.waitForFunction(count => [...document.querySelectorAll('.live-example, .theme-playground')]
+      .filter(el => el.querySelector('.htCore')).length >= count, expected, { timeout: 10000 }).catch(() => {});
   }
   const rendered = await page.locator('.live-example, .theme-playground').evaluateAll(els => els.filter(el => el.querySelector('.htCore')).length);
   // The formulas example loads IronCalc: Apples' total (=B2*C2) shows its result.
@@ -218,7 +224,11 @@ for (const style of ['modern', 'classic']) for (const appearance of ['dark', 'li
 
     if (coveredNav) failures.push(`${path || '/'}: a live example covers the top bar (${coveredNav})`);
   }
-  if (rendered < grids) failures.push(`${path || '/'}: expected ${grids} live grid(s), found ${rendered}`);
+  if (rendered < expected) failures.push(`${path || '/'}: expected ${expected} live grid(s), found ${rendered}`);
+  // Each example has its Copy and Open in playground buttons.
+  const actions = await page.locator('.live-example .live-example__actions button').count();
+
+  if (actions !== frames * 2) failures.push(`${path || '/'}: ${actions} example buttons for ${frames} example(s)`);
   layoutProblems.forEach(p => failures.push(`${path || '/'}: ${p}`));
   errors.forEach(e => failures.push(`${path || '/'}: ${e}`));
   console.log(`${failures.length ? '…' : '✓'} ${path || '/'} [${style}, ${appearance}] (${rendered} grid(s))`);

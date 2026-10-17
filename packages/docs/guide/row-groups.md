@@ -8,10 +8,26 @@ Row groups are a spreadsheet's outline, like Excel's **Data ▸ Group**. Group a
 groups, and collapse a group to hide its rows. The data stays flat. For data that is a tree, with parent rows that
 hold their children, see [nested rows](./nested-rows).
 
-```js
-const grid = new FreeSheet(container, { data, rowHeaders: true, colHeaders: true, contextMenu: true, rowGroups: true });
+```js live
+import FreeSheet from '@freegrid/sheet';
+import '@freegrid/sheet/dist/freesheet.full.css';
 
-grid.getPlugin('rowGroups').groupRows(1, 4); // rows 2 to 5
+const grid = new FreeSheet(document.getElementById('grid'), {
+  data: [
+    ['Costs', 'Q1', 'Q2'],
+    ['Rent', 1200, 1200],
+    ['Power', 300, 260],
+    ['Internet', 50, 50],
+    ['Office total', 1550, 1510],
+    ['Travel', 800, 450],
+  ],
+  rowHeaders: true,
+  colHeaders: true,
+  contextMenu: true,
+  rowGroups: true,
+});
+
+grid.getPlugin('rowGroups').groupRows(1, 3); // rows 2 to 4
 ```
 
 ## Using groups
