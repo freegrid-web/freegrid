@@ -1802,6 +1802,15 @@ const REGISTERED_HOOKS: string[] = [
   'afterSetCellStyle',
 
   /**
+   * Fired after cells' settings changed together (the format painter, a number format, borders).
+   *
+   * @event Hooks#afterSetCellFormat
+   * @param {Array[]} changes `[row, col, before, after]` for each changed cell (visual indexes); `before` and
+   * `after` map the changed settings to their values (`undefined`: not the cell's own).
+   */
+  'afterSetCellFormat',
+
+  /**
    * Fired after the editor is opened and rendered.
    *
    * @event Hooks#afterBeginEditing

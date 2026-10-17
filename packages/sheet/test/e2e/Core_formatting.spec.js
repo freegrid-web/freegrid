@@ -153,7 +153,9 @@ describe('Core formatting', () => {
       expect(bar.attr('role')).toBe('toolbar');
       expect(bar.get(0).getBoundingClientRect().bottom).toBeLessThanOrEqual(menu.top);
       expect(bar.find('[data-action]').map((i, b) => b.dataset.action).get())
-        .toEqual(['bold', 'italic', 'underline', 'fill_color', 'text_color', 'left', 'center', 'right', 'clear']);
+        .toEqual(['bold', 'italic', 'underline', 'fill_color', 'text_color', 'borders', 'left', 'center', 'right',
+          'format_painter', 'clear']);
+      expect(bar.find('[data-palette="number_format"]').length).toBe(1);
 
       $('body').simulate('mousedown');
       expect($('.fs-formatting-bar').length).toBe(0);
@@ -291,6 +293,117 @@ describe('Core formatting', () => {
 
       expect($('.fs-formatting-bar [data-action]').map((i, b) => b.dataset.action).get())
         .toEqual(['italic', 'strikethrough']);
+    });
+  });
+
+  describe('borders, number formats and the format painter', () => {
+    afterEach(() => {
+      $('.fs-formatting-bar').remove();
+    });
+
+    const openBar = async() => {
+      contextMenu();
+      await sleep(0);
+    };
+    const pick = (list, value) => {
+      $(`.fs-formatting-bar [data-palette="${list}"]`).simulate('mousedown');
+      $(`.fs-formatting-bar__list [data-value="${value}"]`).simulate('mousedown');
+    };
+
+    it('draws borders around, on every side, on one side, or none, as shadows that keep the cell size', async() => {
+      const hot = handsontable({ data: createSpreadsheetData(3, 3), contextMenu: true, formattingBar: true });
+      const height = getCell(0, 0).offsetHeight;
+
+      selectCell(0, 0, 1, 1);
+      await openBar();
+      pick('borders', 'outside');
+
+      expect(hot.getCellMeta(0, 0).style).toEqual({ borderTop: '1px solid #000000', borderLeft: '1px solid #000000' });
+      expect(hot.getCellMeta(1, 1).style).toEqual({ borderBottom: '1px solid #000000',
+        borderRight: '1px solid #000000' });
+      expect(hot.getCellMeta(0, 1).style).toEqual({ borderTop: '1px solid #000000', borderRight: '1px solid #000000' });
+      expect(getCell(0, 0).style.boxShadow).toContain('inset');
+      expect(getCell(0, 0).offsetHeight).toBe(height);
+
+      // The Borders button draws the last chosen border again.
+      $('.fs-formatting-bar [data-action="borders"]').simulate('mousedown');
+      pick('borders', 'none');
+      expect(hot.getCellMeta(0, 0).style).toBeUndefined();
+      expect(getCell(0, 0).style.boxShadow).toBe('');
+
+      pick('borders', 'all');
+      expect(hot.getCellMeta(1, 0).style.borderTop).toBe('1px solid #000000');
+      pick('borders', 'bottom');
+      hot.undo();
+      expect(hot.getCellMeta(1, 0).style.borderBottom).toBe('1px solid #000000');
+      hot.undo();
+      expect(hot.getCellMeta(1, 0).style).toBeUndefined();
+    });
+
+    it('gives the selected cells a number format, and General back', async() => {
+      const hot = handsontable({ data: [[1234.5, 0.25]], contextMenu: true, formattingBar: true });
+
+      selectCell(0, 0);
+      await openBar();
+      pick('number_format', 'currency');
+      expect(getCell(0, 0).textContent).toBe('$1,234.50');
+      expect(hot.getCellMeta(0, 0).type).toBe('numeric');
+
+      selectCell(0, 1);
+      pick('number_format', 'percent');
+      expect(getCell(0, 1).textContent).toBe('25.00%');
+
+      selectCell(0, 0);
+      pick('number_format', 'general');
+      expect(getCell(0, 0).textContent).toBe('1234.5');
+
+      hot.undo();
+      expect(getCell(0, 0).textContent).toBe('$1,234.50');
+    });
+
+    it('copies formats with the format painter to the next selected cells, in one undo step', async() => {
+      const hot = handsontable({
+        data: [[1234.5, 2], [3, 4]],
+        contextMenu: true,
+        formattingBar: true,
+        cell: [{ row: 0, col: 0, style: { fontWeight: 'bold', background: '#ffff00' }, className: 'fs-center',
+          type: 'numeric', numericFormat: { pattern: '0,0.0' } }],
+      });
+
+      selectCell(0, 0);
+      await openBar();
+      $('.fs-formatting-bar [data-action="format_painter"]').simulate('mousedown');
+
+      expect($('.fs-context-menu:visible').length).toBe(0);
+      expect(hot.rootElement.classList.contains('fs-format-painting')).toBe(true);
+      expect(hot.getCellMeta(0, 0).style).toEqual({ fontWeight: 'bold', background: '#ffff00' });
+
+      selectCell(1, 0, 1, 1);
+      expect(hot.getCellMeta(1, 1).style).toEqual({ fontWeight: 'bold', background: '#ffff00' });
+      expect(hot.getCellMeta(1, 1).className).toContain('fs-center');
+      expect(getCell(1, 0).textContent).toBe('3.0');
+      expect(hot.rootElement.classList.contains('fs-format-painting')).toBe(false);
+
+      // Once: the next selection keeps its format.
+      selectCell(0, 1);
+      expect(hot.getCellMeta(0, 1).style).toBeUndefined();
+
+      hot.undo();
+      expect(hot.getCellMeta(1, 1).style).toBeUndefined();
+      expect(getCell(1, 0).textContent).toBe('3');
+    });
+
+    it('puts the format painter away with Escape', async() => {
+      const hot = handsontable({ data: [[1, 2]], contextMenu: true, formattingBar: true,
+        cell: [{ row: 0, col: 0, style: { fontWeight: 'bold' } }] });
+
+      selectCell(0, 0);
+      await openBar();
+      $('.fs-formatting-bar [data-action="format_painter"]').simulate('mousedown');
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      selectCell(0, 1);
+
+      expect(hot.getCellMeta(0, 1).style).toBeUndefined();
     });
   });
 });

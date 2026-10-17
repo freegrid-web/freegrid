@@ -41,6 +41,11 @@
 - Copy and paste keep formatting: a copy writes bold, italic, underline, strikethrough, colors and alignment into the
   clipboard's HTML, and a paste of a table from FreeSheet, Excel or Google Sheets gives the cells that formatting
   (one undo step with the values). `copyPaste: { formats: false }` pastes values only.
+- Formatting bar: **Borders** (bottom, top, left, right, all, outside, thick outside, none), **Number format**
+  (General, Number, Currency, Percent) and the **Format painter** (copies style, alignment and number format to the
+  next selected cells; Escape cancels). Each is one undo step; event `afterSetCellFormat`.
+- Cell borders per side: `borderTop`, `borderRight`, `borderBottom` and `borderLeft` in the `style` setting, drawn
+  inside the cell (so its size never changes; `border` too), and kept side by side in Excel files.
 - `getDocument()` and `loadDocument()` keep frozen rows and columns (`fixedRowsTop`, `fixedColumnsLeft`).
 
 ### Fixed

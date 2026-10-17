@@ -42,7 +42,12 @@ files keep it:
 cell: [{ row: 0, col: 0, style: { fontWeight: 'bold', color: '#c00000', background: '#fff3b0' } }]
 ```
 
-The properties are `fontWeight`, `fontStyle`, `textDecoration`, `color`, `background` and `border`.
+The properties are `fontWeight`, `fontStyle`, `textDecoration`, `color`, `background`, and the borders:
+
+- `border` draws a line on every side.
+- `borderTop`, `borderRight`, `borderBottom` and `borderLeft` draw one side each, for example `'2px solid #c00000'`.
+
+Borders are drawn inside the cell, so they never change its size. Excel files keep each side.
 
 Users format cells as in a spreadsheet ([example](../examples/formatting)):
 
@@ -50,9 +55,19 @@ Users format cells as in a spreadsheet ([example](../examples/formatting)):
   or off when all of them have it).
 - The context menu's **Format** entry has bold, italic, underline, strikethrough, text and fill colors, and
   **Clear formatting**. Add its key `'formatting'` to your menu: `contextMenu: [..., 'alignment', 'formatting']`.
-- `formattingBar: true` opens a formatting bar above the context menu, as in Excel: bold, italic, underline, fill and
-  text colors, alignment and clear formatting. `formattingBar: { items: ['bold', 'fill_color'] }` chooses the buttons
-  (`'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'fill_color'`, `'text_color'`, `'alignment'`, `'clear'`).
+- `formattingBar: true` opens a formatting bar above the context menu, as in Excel:
+  - bold, italic and underline;
+  - fill and text colors;
+  - **Borders**: bottom, top, left, right, all, outside, thick outside, or none. The button draws the last one chosen.
+  - alignment;
+  - **Number format**: General, Number `0,0.00`, Currency `$0,0.00`, Percent `0.00%`;
+  - **Format painter**: copies the selected cells' style, alignment and number format to the next cells you select.
+    Escape cancels it.
+  - clear formatting.
+
+  `formattingBar: { items: ['bold', 'fill_color'] }` chooses the buttons from `'bold'`, `'italic'`, `'underline'`,
+  `'strikethrough'`, `'fill_color'`, `'text_color'`, `'borders'`, `'alignment'`, `'number_format'`,
+  `'format_painter'` and `'clear'`.
 - The color palettes (in the bar and in the menu) show a color on the selected cells while the pointer is on it; a
   click keeps it, and closing the palette without a choice leaves the cells as they were.
 

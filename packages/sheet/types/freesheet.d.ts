@@ -1474,7 +1474,7 @@ declare namespace FreeSheet {
     contextMenu?: boolean | any[] | contextMenu.Settings;
     findAndReplace?: boolean;
     formattingBar?: boolean | { items?: Array<'bold' | 'italic' | 'underline' | 'strikethrough' | 'fill_color' |
-      'text_color' | 'alignment' | 'clear'> };
+      'text_color' | 'borders' | 'alignment' | 'number_format' | 'format_painter' | 'clear'> };
     statusBar?: boolean | {
       items?: Array<'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum' | {
         item?: 'average' | 'count' | 'numericalCount' | 'min' | 'max' | 'sum';
@@ -1602,6 +1602,7 @@ declare namespace FreeSheet {
     afterImportFile?: (format: 'xlsx' | 'csv') => void;
     afterExportFile?: (format: 'xlsx' | 'csv', file: Blob) => void;
     afterSetCellStyle?: (changes: Array<[number, number, object | undefined, object | undefined]>) => void;
+    afterSetCellFormat?: (changes: Array<[number, number, object, object]>) => void;
     afterRowCollapse?: (row: number) => void;
     afterColumnCollapse?: (level: number, column: number) => void;
     afterColumnExpand?: (level: number, column: number) => void;

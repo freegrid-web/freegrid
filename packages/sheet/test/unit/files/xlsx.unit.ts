@@ -12,7 +12,9 @@ const book = (): Book => ({
           { value: 'Q1' }, { value: 'Total' }],
         [{ value: 'North' }, { value: 1200.5, numFmt: '#,##0.00' },
           { value: 1200.5, formula: '=B2*1', style: { color: '#c00000', border: '1px solid #000000' } }],
-        [{ value: 'Due' }, { value: 46037, numFmt: 'yyyy-mm-dd' }, { value: true }],
+        [{ value: 'Due' }, { value: 46037, numFmt: 'yyyy-mm-dd' },
+          // Sides of their own: a thick bottom line and a thin top one.
+          { value: true, style: { borderTop: '1px solid #000000', borderBottom: '3px solid #c00000' } }],
         [{ value: '<b>&"quotes"</b>' }, { error: '#DIV/0!', formula: '=1/0' }],
       ],
       columnWidths: [120, undefined, 80],

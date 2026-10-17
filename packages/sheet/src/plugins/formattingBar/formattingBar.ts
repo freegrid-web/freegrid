@@ -2,8 +2,8 @@ import './formattingBar.css';
 import BasePlugin from './../_base';
 import { registerPlugin } from './../../plugins';
 import { applyTheme } from './../../helpers/dom/theme';
-import { selectionHasToggle, setCellStyle, toggleCellStyle, previewCellStyle,
-  type StyleToggle } from './../../formatting/formatting';
+import { selectionHasToggle, setCellStyle, toggleCellStyle, previewCellStyle, setCellBorders, setNumberFormat,
+  copyCellFormats, pasteCellFormats, NUMBER_FORMATS, type StyleToggle, type BorderKind } from './../../formatting/formatting';
 import { paletteFor } from './../contextMenu/predefinedItems/formatting';
 import { align, getAlignmentClasses } from './../contextMenu/utils';
 import { classNameIncludes } from './../../helpers/classNames';
@@ -11,12 +11,21 @@ import * as C from './../../i18n/constants';
 
 /** The buttons of the bar, in order. */
 export const FORMATTING_BAR_ITEMS = ['bold', 'italic', 'underline', 'strikethrough', 'fill_color', 'text_color',
-  'alignment', 'clear'] as const;
+  'borders', 'alignment', 'number_format', 'format_painter', 'clear'] as const;
 
 export type FormattingBarItem = typeof FORMATTING_BAR_ITEMS[number];
 
-const DEFAULT_ITEMS: FormattingBarItem[] = ['bold', 'italic', 'underline', 'fill_color', 'text_color', 'alignment',
-  'clear'];
+const DEFAULT_ITEMS: FormattingBarItem[] = ['bold', 'italic', 'underline', 'fill_color', 'text_color', 'borders',
+  'alignment', 'number_format', 'format_painter', 'clear'];
+
+/** The commands of the Borders list. */
+const BORDER_KINDS: [BorderKind, string][] = [['bottom', C.FORMAT_BORDER_BOTTOM], ['top', C.FORMAT_BORDER_TOP],
+  ['left', C.FORMAT_BORDER_LEFT], ['right', C.FORMAT_BORDER_RIGHT], ['all', C.FORMAT_BORDER_ALL],
+  ['outside', C.FORMAT_BORDER_OUTSIDE], ['thick_outside', C.FORMAT_BORDER_THICK_OUTSIDE], ['none', C.FORMAT_BORDER_NONE]];
+
+/** The number formats of the Number format list. */
+const NUMBER_FORMAT_LABELS: Record<string, string> = { general: C.FORMAT_NUMBER_GENERAL,
+  number: C.FORMAT_NUMBER_NUMBER, currency: C.FORMAT_NUMBER_CURRENCY, percent: C.FORMAT_NUMBER_PERCENT };
 
 const ICONS: Record<string, string> = {
   bold: '<b>B</b>',
@@ -33,6 +42,12 @@ const ICONS: Record<string, string> = {
   right: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6 7h8M2 10h12M6 13h8" stroke="currentColor"/></svg>',
   clear: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 13h8M3.5 9.5 9 4l3.5 3.5L7 13H5z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.3"/></svg>',
+  borders: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5h11v11h-11zM8 2.5v11M2.5 8h11" fill="none" ' +
+    'stroke="currentColor" stroke-dasharray="1.5 1.5"/><path d="M2 13.5h12" stroke="currentColor" stroke-width="1.6"/>' +
+    '</svg>',
+  number_format: '<span class="fs-formatting-bar__text">123</span>',
+  format_painter: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h9v3.5H3zM12 4h1.5v3.5H8v2M7 9.5h2v5H7z" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
 };
 
 const LABELS: Record<string, string> = {
@@ -46,6 +61,9 @@ const LABELS: Record<string, string> = {
   center: C.CONTEXTMENU_ITEMS_ALIGNMENT_CENTER,
   right: C.CONTEXTMENU_ITEMS_ALIGNMENT_RIGHT,
   clear: C.CONTEXTMENU_ITEMS_FORMAT_CLEAR,
+  borders: C.FORMAT_BORDERS,
+  number_format: C.FORMAT_NUMBER,
+  format_painter: C.FORMAT_PAINTER,
 };
 
 type FormattingGrid = Parameters<typeof setCellStyle>[0];
@@ -66,13 +84,23 @@ class FormattingBar extends BasePlugin {
   element: HTMLDivElement | null = null;
   /** The color the fill and text color buttons set (the last one chosen). */
   #colors = { fill_color: '#ffff00', text_color: '#ff0000' };
+  /** The border the Borders button draws (the last one chosen). */
+  #border: BorderKind = 'bottom';
   #palette: HTMLElement | null = null;
+  /** The formats the format painter copied, until it gives them to the next selection. */
+  painterFormats: Record<string, unknown>[][] | null = null;
   /** Escape closes the palette, then the menu. */
   #onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.#palette) {
       event.stopPropagation();
       event.preventDefault();
       this.closePalette();
+    }
+  };
+  /** Escape puts the format painter away. */
+  #onPainterKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.painterFormats) {
+      this.stopPainter();
     }
   };
 
@@ -87,11 +115,19 @@ class FormattingBar extends BasePlugin {
     // The menu takes its place after it opens.
     this.addHook('afterContextMenuShow', () => Promise.resolve().then(() => this.open()));
     this.addHook('afterContextMenuHide', () => this.close());
+    // The format painter gives its formats to the next cells the user selects.
+    this.addHook('afterSelectionEnd', () => {
+      if (this.painterFormats && !this.element) {
+        pasteCellFormats(this.hot as unknown as Parameters<typeof pasteCellFormats>[0], this.painterFormats);
+        this.stopPainter();
+      }
+    });
     super.enablePlugin();
   }
 
   disablePlugin(): void {
     this.close();
+    this.stopPainter();
     super.disablePlugin();
   }
 
@@ -161,6 +197,8 @@ class FormattingBar extends BasePlugin {
         pressed = selectionHasToggle(grid, action as StyleToggle);
       } else if (['left', 'center', 'right'].includes(action)) {
         pressed = classNameIncludes(className, `fs-${action}`);
+      } else if (action === 'format_painter') {
+        pressed = !!this.painterFormats;
       }
       if (pressed !== null) {
         button.setAttribute('aria-pressed', String(pressed));
@@ -188,6 +226,16 @@ class FormattingBar extends BasePlugin {
           `<button type="button" class="fs-formatting-bar__arrow" data-palette="${item}" aria-haspopup="true" ` +
           `aria-label="${phrase(LABELS[item])}…"></button></span>`;
       }
+      if (item === 'borders') {
+        return `<span class="fs-formatting-bar__split">${button(item)}<button type="button" ` +
+          `class="fs-formatting-bar__arrow" data-palette="borders" aria-haspopup="true" ` +
+          `aria-label="${phrase(LABELS[item])}…"></button></span>`;
+      }
+      if (item === 'number_format') {
+        return `<span class="fs-formatting-bar__group"><button type="button" class="fs-formatting-bar__button ` +
+          `fs-formatting-bar__dropdown" data-palette="number_format" aria-haspopup="true" title="${
+            phrase(LABELS[item])}" aria-label="${phrase(LABELS[item])}">${ICONS[item]}</button></span>`;
+      }
       if (item === 'alignment') {
         return `<span class="fs-formatting-bar__group">${['left', 'center', 'right'].map(a => button(a)).join('')}</span>`;
       }
@@ -201,7 +249,9 @@ class FormattingBar extends BasePlugin {
       event.stopPropagation();
       const target = (event.target as HTMLElement).closest<HTMLElement>('[data-action], [data-palette]');
 
-      if (target?.dataset.palette) {
+      if (target?.dataset.palette === 'borders' || target?.dataset.palette === 'number_format') {
+        this.toggleList(target.dataset.palette, target);
+      } else if (target?.dataset.palette) {
         this.togglePalette(target.dataset.palette as 'fill_color' | 'text_color', target);
       } else if (target?.dataset.action) {
         this.closePalette();
@@ -224,6 +274,10 @@ class FormattingBar extends BasePlugin {
       setCellStyle(grid, { color: this.#colors.text_color });
     } else if (action === 'clear') {
       setCellStyle(grid, null);
+    } else if (action === 'borders') {
+      setCellBorders(grid, this.#border);
+    } else if (action === 'format_painter') {
+      this.startPainter();
     } else if (['left', 'center', 'right'].includes(action)) {
       const ranges = this.hot.getSelectedRange();
 
@@ -264,15 +318,85 @@ class FormattingBar extends BasePlugin {
     }, true);
     palette.dataset.item = item;
     palette.classList.add('fs-formatting-bar__palette');
-    palette.style.left = `${anchor.offsetLeft - 24}px`;
     this.element.appendChild(palette);
-    const overflow = palette.getBoundingClientRect().right - document.documentElement.clientWidth + 4;
-
-    if (overflow > 0) {
-      palette.style.left = `${anchor.offsetLeft - 24 - overflow}px`;
-    }
+    this.placePopup(palette, anchor.offsetLeft - 24);
     anchor.setAttribute('aria-expanded', 'true');
     this.#palette = palette;
+  }
+
+  /** Places a palette or a list under its button, inside the window. */
+  placePopup(popup: HTMLElement, left: number): void {
+    popup.style.left = `${left}px`;
+    const overflow = popup.getBoundingClientRect().right - document.documentElement.clientWidth + 4;
+
+    if (overflow > 0) {
+      popup.style.left = `${left - overflow}px`;
+    }
+  }
+
+  /** Opens (or closes) the list of the Borders arrow or of the Number format button. */
+  toggleList(item: 'borders' | 'number_format', anchor: HTMLElement): void {
+    const wasOpen = this.#palette?.dataset.item === item;
+
+    this.closePalette();
+    if (wasOpen || !this.element) {
+      return;
+    }
+    const list = document.createElement('div');
+    const phrase = (key: string) => this.hot.getTranslatedPhrase(key) as string;
+    const entries: [string, string][] = item === 'borders' ? BORDER_KINDS :
+      Object.keys(NUMBER_FORMATS).map(name => [name, NUMBER_FORMAT_LABELS[name]]);
+
+    list.className = 'fs-formatting-bar__palette fs-formatting-bar__list';
+    list.dataset.item = item;
+    list.setAttribute('role', 'menu');
+    entries.forEach(([value, label]) => {
+      const entry = document.createElement('button');
+
+      entry.type = 'button';
+      entry.setAttribute('role', 'menuitem');
+      entry.dataset.value = value;
+      entry.textContent = phrase(label);
+      list.appendChild(entry);
+    });
+    list.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const value = (event.target as HTMLElement).closest<HTMLElement>('[data-value]')?.dataset.value;
+
+      if (!value) {
+        return;
+      }
+      if (item === 'borders') {
+        this.#border = value as BorderKind;
+        setCellBorders(this.hot as unknown as FormattingGrid, this.#border);
+      } else {
+        setNumberFormat(this.hot as unknown as Parameters<typeof setNumberFormat>[0], NUMBER_FORMATS[value]);
+      }
+      this.closePalette();
+      this.refresh();
+    });
+    this.element.appendChild(list);
+    this.placePopup(list, anchor.offsetLeft);
+    anchor.setAttribute('aria-expanded', 'true');
+    this.#palette = list;
+  }
+
+  /**
+   * The format painter: copies the formats of the selected cells (style, alignment, number format), closes the menu,
+   * and gives them to the next cells the user selects. Escape puts it away.
+   */
+  startPainter(): void {
+    this.painterFormats = copyCellFormats(this.hot as unknown as FormattingGrid);
+    this.hot.rootElement.classList.add('fs-format-painting');
+    document.addEventListener('keydown', this.#onPainterKeyDown, true);
+    this.hot.getPlugin('contextMenu')?.close();
+  }
+
+  stopPainter(): void {
+    this.painterFormats = null;
+    this.hot.rootElement?.classList.remove('fs-format-painting');
+    document.removeEventListener('keydown', this.#onPainterKeyDown, true);
   }
 
   closePalette(): void {

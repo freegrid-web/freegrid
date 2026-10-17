@@ -121,7 +121,7 @@ export const TOPICS = [
     name: 'Formatting',
     description: 'Cell styles: bold, italic, underline, colors; the Format menu and Ctrl+B, Ctrl+I, Ctrl+U.',
     methods: ['setCellStyle'],
-    events: ['afterSetCellStyle'],
+    events: ['afterSetCellStyle', 'afterSetCellFormat'],
     settings: ['formattingBar'],
   },
   {

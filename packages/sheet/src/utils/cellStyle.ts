@@ -5,11 +5,48 @@ export type CellStyle = {
   textDecoration?: string;
   color?: string;
   background?: string;
+  /** A line on every side (`1px solid #000000`); a side's own setting wins. */
   border?: string;
+  borderTop?: string;
+  borderRight?: string;
+  borderBottom?: string;
+  borderLeft?: string;
 };
 
 export const CELL_STYLE_PROPERTIES: (keyof CellStyle)[] = ['fontWeight', 'fontStyle', 'textDecoration', 'color',
-  'background', 'border'];
+  'background', 'border', 'borderTop', 'borderRight', 'borderBottom', 'borderLeft'];
+
+/** The properties a cell's own element style takes as they are (the borders are drawn as shadows). */
+const DIRECT_PROPERTIES: (keyof CellStyle)[] = ['fontWeight', 'fontStyle', 'textDecoration', 'color', 'background'];
+
+const SIDES = [['borderTop', '0 {w}'], ['borderRight', '-{w} 0'], ['borderBottom', '0 -{w}'],
+  ['borderLeft', '{w} 0']] as const;
+
+/** A side's line (`2px solid #c00000`, `thin`) as its width and color, or `null` for no line. */
+export const lineOf = (value: string | undefined): { width: number; color: string } | null => {
+  if (!value || /^(none|0(px)?)(\s|$)/i.test(value.trim())) {
+    return null;
+  }
+  const width = /(\d+(\.\d+)?)px/.exec(value)?.[1];
+  const named = /\b(thin|medium|thick)\b/.exec(value)?.[1];
+  // What is left without the width and the line style is the color.
+  const color = value.replace(/\d+(\.\d+)?px|\b(solid|dashed|dotted|double|thin|medium|thick)\b/gi, '').trim();
+
+  return {
+    width: width ? Number(width) : { thin: 1, medium: 2, thick: 3 }[named || 'thin'] || 1,
+    color: color || '#000000',
+  };
+};
+
+/**
+ * The borders of a style as inset shadows: they draw inside the cell, over its own grid lines, and do not change its
+ * size (a CSS border would move the cell's content and the rows).
+ */
+export const bordersToShadow = (style: CellStyle): string => SIDES.map(([side, offset]) => {
+  const line = lineOf(style[side] ?? style.border);
+
+  return line ? `inset ${offset.replace('{w}', `${line.width}px`)} 0 0 ${line.color}` : '';
+}).filter(Boolean).join(', ');
 
 /**
  * Draws a cell's `style` meta on its cell, after removing the style the cell had for another cell (cells are reused
@@ -27,11 +64,18 @@ export const applyCellStyle = (TD: HTMLTableCellElement, style: CellStyle | unde
   if (!style || typeof style !== 'object') {
     return;
   }
-  const applied = CELL_STYLE_PROPERTIES.filter(property => typeof style[property] === 'string' && style[property]);
+  const applied: string[] = DIRECT_PROPERTIES.filter(property => typeof style[property] === 'string' &&
+    style[property]);
 
   applied.forEach((property) => {
-    (TD.style as unknown as Record<string, string>)[property] = style[property]!;
+    (TD.style as unknown as Record<string, string>)[property] = style[property as keyof CellStyle]!;
   });
+  const shadow = bordersToShadow(style);
+
+  if (shadow) {
+    TD.style.boxShadow = shadow;
+    applied.push('boxShadow');
+  }
   if (applied.length) {
     TD.dataset.fsStyle = applied.join(',');
   }

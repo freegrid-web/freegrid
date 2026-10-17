@@ -369,6 +369,39 @@ class GroupAction extends Action {
   }
 }
 
+/** A change of cells' settings (format painter, number formats, borders): `[row, col, before, after]`. */
+class CellFormatAction extends Action {
+  changes: [number, number, Record<string, unknown>, Record<string, unknown>][];
+
+  constructor(changes: [number, number, Record<string, unknown>, Record<string, unknown>][]) {
+    super();
+    this.changes = changes;
+    this.actionType = 'format';
+  }
+
+  #apply(instance: PluginHost, done: Done, index: 2 | 3): void {
+    this.changes.forEach((change) => {
+      Object.entries(change[index]).forEach(([key, value]) => {
+        if (value === void 0) {
+          instance.removeCellMeta(change[0], change[1], key);
+        } else {
+          instance.setCellMeta(change[0], change[1], key, value);
+        }
+      });
+    });
+    instance.addHookOnce('afterRender', done);
+    instance.render();
+  }
+
+  undo(instance: PluginHost, undoneCallback: Done): void {
+    this.#apply(instance, undoneCallback, 2);
+  }
+
+  redo(instance: PluginHost, redoneCallback: Done): void {
+    this.#apply(instance, redoneCallback, 3);
+  }
+}
+
 /** Filtering (for a filters plugin). */
 class FiltersAction extends Action {
   conditionsStack: unknown[];
@@ -654,6 +687,11 @@ class UndoRedo {
     instance.addHook('afterSetCellStyle', (changes: unknown[][]) => {
       this.done(new CellStyleAction(changes));
     });
+
+    instance.addHook('afterSetCellFormat',
+      (changes: [number, number, Record<string, unknown>, Record<string, unknown>][]) => {
+        this.done(new CellFormatAction(changes));
+      });
 
     instance.addHook('beforeFilter', (conditionsStack: unknown[]) => {
       this.done(new FiltersAction(conditionsStack));
